@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 
 type Appearance = 'light' | 'dark' | 'system';
 type Language   = 'ja' | 'en';
 type Tab        = 'settings' | 'notifications';
+
+const APPEARANCE_KEY = 'portal-appearance';
+const LANGUAGE_KEY   = 'portal-language';
 
 function formatMemberSince(creationTime: string | undefined): string {
   if (!creationTime) return '';
@@ -13,6 +16,18 @@ function formatMemberSince(creationTime: string | undefined): string {
   const day = d.getDate();
   const suffix = day === 1 ? 'st' : day === 2 ? 'nd' : day === 3 ? 'rd' : 'th';
   return `${months[d.getMonth()]} ${day}${suffix}, ${d.getFullYear()}`;
+}
+
+function applyAppearance(value: Appearance) {
+  const root = document.documentElement;
+  root.classList.remove('light', 'dark');
+  if (value === 'system') {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    root.classList.add(prefersDark ? 'dark' : 'light');
+  } else {
+    root.classList.add(value);
+  }
+  localStorage.setItem(APPEARANCE_KEY, value);
 }
 
 function AppearanceCard({ value, label, selected, onClick }: {
@@ -124,14 +139,39 @@ function SettingRow({ title, badge, description, children }: {
 
 export function ProfileSettings() {
   const { user } = useAuth();
+
   const [tab,               setTab]               = useState<Tab>('settings');
-  const [language,          setLanguage]           = useState<Language>('ja');
-  const [appearance,        setAppearance]         = useState<Appearance>('dark');
+  const [language,          setLanguage]           = useState<Language>(
+    () => (localStorage.getItem(LANGUAGE_KEY) as Language | null) ?? 'ja'
+  );
+  const [appearance,        setAppearance]         = useState<Appearance>(
+    () => (localStorage.getItem(APPEARANCE_KEY) as Appearance | null) ?? 'dark'
+  );
   const [showDeleteConfirm, setShowDeleteConfirm]  = useState(false);
+  const [toast,             setToast]              = useState<{ msg: string; ok: boolean } | null>(null);
 
   const isGoogleUser = user?.providerData.some(p => p.providerId === 'google.com') ?? false;
   const memberSince  = formatMemberSince(user?.metadata.creationTime);
   const email        = user?.email ?? '';
+
+  useEffect(() => {
+    localStorage.setItem(LANGUAGE_KEY, language);
+  }, [language]);
+
+  function handleAppearanceChange(val: Appearance) {
+    try {
+      setAppearance(val);
+      applyAppearance(val);
+      showAppearanceToast('外観が更新されました', true);
+    } catch {
+      showAppearanceToast('外観の更新に失敗しました', false);
+    }
+  }
+
+  function showAppearanceToast(msg: string, ok: boolean) {
+    setToast({ msg, ok });
+    setTimeout(() => setToast(null), 3000);
+  }
 
   return (
     <div className="flex flex-col min-h-full">
@@ -191,50 +231,27 @@ export function ProfileSettings() {
               </div>
             </SettingRow>
 
-            {/* 言語 */}
+            {/* 言語（即時反映・自動保存） */}
             <SettingRow title="言語" description="UIの表示言語を選択してください。">
-              <div className="flex gap-2">
-                <select
-                  value={language}
-                  onChange={e => setLanguage(e.target.value as Language)}
-                  className="w-36 px-3 py-1.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-zinc-200 focus:outline-none focus:border-blue-500"
-                >
-                  <option value="ja">日本語</option>
-                  <option value="en">English</option>
-                </select>
-                <button className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors">
-                  保存
-                </button>
-              </div>
-            </SettingRow>
-
-            {/* 表示 */}
-            <div className="py-5 border-b border-zinc-800">
-              <h3 className="text-sm font-medium text-zinc-200 mb-3">表示</h3>
-              <div className="grid grid-cols-3 gap-3">
-                <AppearanceCard value="light"  label="ライト"           selected={appearance === 'light'}  onClick={() => setAppearance('light')}  />
-                <AppearanceCard value="dark"   label="ダーク"           selected={appearance === 'dark'}   onClick={() => setAppearance('dark')}   />
-                <AppearanceCard value="system" label="システム設定を使用" selected={appearance === 'system'} onClick={() => setAppearance('system')} />
-              </div>
-            </div>
-
-            {/* タイムゾーン */}
-            <SettingRow title="タイムゾーン">
-              <select className="w-48 px-3 py-1.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-zinc-200 focus:outline-none focus:border-blue-500">
-                <option value="Asia/Tokyo">GMT+9 (東京)</option>
-                <option value="UTC">GMT+0 (UTC)</option>
+              <select
+                value={language}
+                onChange={e => setLanguage(e.target.value as Language)}
+                className="w-36 px-3 py-1.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-zinc-200 focus:outline-none focus:border-blue-500"
+              >
+                <option value="ja">日本語</option>
+                <option value="en">English</option>
               </select>
             </SettingRow>
 
-            {/* キーボードショートカット */}
-            <SettingRow
-              title="キーボードショートカット"
-              description="アプリ内のキーボードショートカットを有効にします。"
-            >
-              <button className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 text-sm rounded-lg transition-colors">
-                ショートカットを表示
-              </button>
-            </SettingRow>
+            {/* 外観（即時反映・トースト通知） */}
+            <div className="py-5 border-b border-zinc-800">
+              <h3 className="text-sm font-medium text-zinc-200 mb-3">外観</h3>
+              <div className="grid grid-cols-3 gap-3">
+                <AppearanceCard value="light"  label="ライト"           selected={appearance === 'light'}  onClick={() => handleAppearanceChange('light')}  />
+                <AppearanceCard value="dark"   label="ダーク"           selected={appearance === 'dark'}   onClick={() => handleAppearanceChange('dark')}   />
+                <AppearanceCard value="system" label="システム設定を使用" selected={appearance === 'system'} onClick={() => handleAppearanceChange('system')} />
+              </div>
+            </div>
 
             {/* プロフィールを削除 */}
             <div className="py-5">
@@ -292,6 +309,32 @@ export function ProfileSettings() {
           <span className="text-xs text-zinc-600">© 2026</span>
         </div>
       </footer>
+
+      {/* 外観変更トースト */}
+      {toast && (
+        <div
+          className={`fixed bottom-6 right-6 flex items-center gap-2.5 px-4 py-3 rounded-xl shadow-lg text-sm font-medium border transition-all animate-in fade-in slide-in-from-bottom-2 ${
+            toast.ok
+              ? 'bg-zinc-800 border-zinc-700 text-zinc-100'
+              : 'bg-red-950/90 border-red-800 text-red-300'
+          }`}
+        >
+          {toast.ok ? (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+              className="text-green-400 shrink-0">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          ) : (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+              className="text-red-400 shrink-0">
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          )}
+          {toast.msg}
+        </div>
+      )}
     </div>
   );
 }

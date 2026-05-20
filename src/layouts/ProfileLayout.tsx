@@ -1,4 +1,4 @@
-import { NavLink, Outlet, Link } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const profileNav = [
@@ -8,27 +8,38 @@ const profileNav = [
 ];
 
 export function ProfileLayout() {
-  const { user } = useAuth();
-  const uuid = user?.uid ?? '';
+  const { user }  = useAuth();
+  const navigate  = useNavigate();
+  const uuid = user?.uid ?? (import.meta.env.DEV ? 'dev' : '');
 
   return (
     <div className="flex min-h-screen bg-zinc-950">
-      {/* プロフィール用サイドバー */}
       <aside className="w-56 shrink-0 bg-zinc-900 border-r border-zinc-800 flex flex-col min-h-screen">
-        <div className="px-4 py-4 border-b border-zinc-800">
-          <Link
-            to={`/${uuid}/home/overview`}
-            className="inline-flex items-center gap-1.5 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
+
+        {/* ロゴ（メインサイドバーと同じ） */}
+        <div className="px-5 py-5 border-b border-zinc-800">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center shrink-0">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
+                <path d="M3 3h8v8H3V3zm0 10h8v8H3v-8zm10-10h8v8h-8V3zm0 10h8v8h-8v-8z"/>
+              </svg>
+            </div>
+            <span className="text-zinc-100 font-semibold text-sm">Portal CMS</span>
+          </div>
+        </div>
+
+        {/* ← マイ プロフィール */}
+        <div className="px-4 py-4 border-b border-zinc-800 flex items-center gap-2">
+          <button
+            onClick={() => navigate(`/${uuid}/home/overview`)}
+            className="text-zinc-400 hover:text-zinc-200 transition-colors shrink-0"
+            aria-label="ホームに戻る"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="15 18 9 12 15 6" />
             </svg>
-            ダッシュボードに戻る
-          </Link>
-        </div>
-
-        <div className="px-5 py-4 border-b border-zinc-800">
+          </button>
           <p className="text-sm font-semibold text-zinc-100">マイ プロフィール</p>
         </div>
 
