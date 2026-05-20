@@ -2,7 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey:            'AIzaSyCPyLBMiApOUs3L2K3SVPeF_Z9KLh5jp94',
+  apiKey:            'AIzaSyCPyLBMiApOUs3L2K3SVPeF_Z9Klh5jp94',
   authDomain:        'portal-cms-emk.firebaseapp.com',
   projectId:         'portal-cms-emk',
   storageBucket:     'portal-cms-emk.firebasestorage.app',
