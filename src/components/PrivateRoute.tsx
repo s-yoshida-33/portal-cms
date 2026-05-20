@@ -4,6 +4,8 @@ import { useAuth } from '../contexts/AuthContext';
 export function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
 
+  if (import.meta.env.DEV) return <>{children}</>;
+
   if (loading) {
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
