@@ -188,7 +188,7 @@ export function ProfileSettings() {
           <h1 className="text-white text-3xl font-semibold">プロフィール</h1>
           <div className="hidden md:block">
             <p className="text-[#999999] text-base">
-              {email} {memberSince && `· メンバー登録日 ${memberSince}`}
+              {email} {memberSince && `· アカウント登録日 ${memberSince}`}
             </p>
           </div>
         </div>
