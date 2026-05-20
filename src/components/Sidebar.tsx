@@ -18,7 +18,7 @@ export function Sidebar() {
 
   const base = uuid ? `/${uuid}` : '';
   const navItems = [
-    { to: `${base}/home/overview`, label: 'ダッシュボード' },
+    { to: `${base}/home/overview`, label: 'ホーム' },
     { to: `${base}/facilities`,    label: '施設管理' },
     { to: `${base}/logs`,          label: 'ログ' },
     { to: `${base}/settings`,      label: '設定' },
