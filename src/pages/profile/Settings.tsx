@@ -30,8 +30,8 @@ function applyAppearance(value: Appearance) {
   localStorage.setItem(APPEARANCE_KEY, value);
 }
 
-function AppearanceCard({ value, label, selected, onClick }: {
-  value: Appearance; label: string; selected: boolean; onClick: () => void;
+function AppearanceCard({ value, label, selected, onClick, disabled }: {
+  value: Appearance; label: string; selected: boolean; onClick: () => void; disabled?: boolean;
 }) {
   const previews: Record<Appearance, React.ReactNode> = {
     light: (
@@ -91,24 +91,32 @@ function AppearanceCard({ value, label, selected, onClick }: {
 
   return (
     <button
-      onClick={onClick}
-      className={`flex flex-col gap-2 p-2 rounded-xl border transition-all ${
-        selected
-          ? 'border-blue-500 bg-blue-950/20'
-          : 'border-zinc-700 hover:border-zinc-600 bg-zinc-800/40'
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
+      className={`relative flex flex-col gap-2 p-2 rounded-xl border transition-all ${
+        disabled
+          ? 'border-zinc-800 bg-zinc-800/20 opacity-50 cursor-not-allowed'
+          : selected
+            ? 'border-blue-500 bg-blue-950/20'
+            : 'border-zinc-700 hover:border-zinc-600 bg-zinc-800/40'
       }`}
     >
       {previews[value]}
       <div className="flex items-center gap-1.5 px-1">
         <span className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center shrink-0 ${
-          selected ? 'border-blue-500 bg-blue-500' : 'border-zinc-600'
+          disabled ? 'border-zinc-700' : selected ? 'border-blue-500 bg-blue-500' : 'border-zinc-600'
         }`}>
-          {selected && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+          {selected && !disabled && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
         </span>
-        <span className={`text-xs font-medium ${selected ? 'text-blue-400' : 'text-zinc-400'}`}>
+        <span className={`text-xs font-medium ${disabled ? 'text-zinc-600' : selected ? 'text-blue-400' : 'text-zinc-400'}`}>
           {label}
         </span>
       </div>
+      {disabled && (
+        <span className="absolute top-1.5 right-1.5 px-1 py-0.5 rounded text-[10px] font-medium bg-zinc-800 text-zinc-500 border border-zinc-700">
+          準備中
+        </span>
+      )}
     </button>
   );
 }
@@ -247,9 +255,9 @@ export function ProfileSettings() {
             <div className="py-5 border-b border-zinc-800">
               <h3 className="text-sm font-medium text-zinc-200 mb-3">外観</h3>
               <div className="grid grid-cols-3 gap-3">
-                <AppearanceCard value="light"  label="ライト"           selected={appearance === 'light'}  onClick={() => handleAppearanceChange('light')}  />
+                <AppearanceCard value="light"  label="ライト"           selected={appearance === 'light'}  onClick={() => handleAppearanceChange('light')}  disabled />
                 <AppearanceCard value="dark"   label="ダーク"           selected={appearance === 'dark'}   onClick={() => handleAppearanceChange('dark')}   />
-                <AppearanceCard value="system" label="システム設定を使用" selected={appearance === 'system'} onClick={() => handleAppearanceChange('system')} />
+                <AppearanceCard value="system" label="システム設定を使用" selected={appearance === 'system'} onClick={() => handleAppearanceChange('system')} disabled />
               </div>
             </div>
 
