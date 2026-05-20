@@ -79,7 +79,7 @@ export function Sidebar() {
           <svg
             width="14" height="14" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-            className={`text-zinc-500 shrink-0 transition-transform duration-200 ${userOpen ? 'rotate-180' : ''}`}
+            className={`text-zinc-500 shrink-0 transition-transform duration-200 ${userOpen ? '' : '-rotate-90'}`}
           >
             <polyline points="6 9 12 15 18 9" />
           </svg>
