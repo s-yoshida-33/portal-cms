@@ -12,9 +12,9 @@ const navItems = [
 ];
 
 const userMenuItems = [
-  { label: 'プロフィール', to: '/profile' },
-  { label: '外観',         to: '/appearance' },
-  { label: '言語',         to: '/language' },
+  { label: 'プロフィール', to: '/profile/settings' },
+  { label: '外観',         to: '/profile/settings' },
+  { label: '言語',         to: '/profile/settings' },
 ];
 
 export function Sidebar() {
