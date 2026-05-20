@@ -1,17 +1,23 @@
-import { Link, NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 const profileNav = [
   { to: '/profile/settings', label: '設定' },
+  { to: '/profile/access',   label: 'アクセス管理' },
+  { to: '/profile/tokens',   label: 'API トークン' },
 ];
 
 export function ProfileLayout() {
+  const { user } = useAuth();
+  const uuid = user?.uid ?? '';
+
   return (
     <div className="flex min-h-screen bg-zinc-950">
       {/* プロフィール用サイドバー */}
       <aside className="w-56 shrink-0 bg-zinc-900 border-r border-zinc-800 flex flex-col min-h-screen">
         <div className="px-4 py-4 border-b border-zinc-800">
           <Link
-            to="/"
+            to={`/${uuid}/home/overview`}
             className="inline-flex items-center gap-1.5 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
