@@ -31,7 +31,16 @@ export function Login() {
       await signInWithPopup(auth, googleProvider);
       navigate('/');
     } catch (e: unknown) {
-      setError('Googleログインに失敗しました。');
+      const code = (e as { code?: string }).code ?? 'unknown';
+      if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+        // ユーザーがポップアップを閉じた場合は何もしない
+      } else if (code === 'auth/popup-blocked') {
+        setError('ポップアップがブロックされました。ブラウザのポップアップ許可設定を確認してください。');
+      } else if (code === 'auth/unauthorized-domain') {
+        setError(`このドメインはFirebaseで承認されていません。(${code})`);
+      } else {
+        setError(`Googleログインに失敗しました。(${code})`);
+      }
     } finally {
       setLoading(false);
     }
