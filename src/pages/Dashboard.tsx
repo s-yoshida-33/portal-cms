@@ -15,7 +15,7 @@ export function Dashboard() {
 
   return (
     <div className="p-8">
-      <h1 className="text-xl font-semibold text-zinc-100 mb-0.5">ダッシュボード</h1>
+      <h1 className="text-xl font-semibold text-zinc-100 mb-0.5">ホーム</h1>
       <p className="text-sm text-zinc-500 mb-8">全施設のデバイス稼働状況</p>
 
       {/* サマリー */}
