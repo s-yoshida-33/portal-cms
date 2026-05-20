@@ -1,15 +1,8 @@
 import { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useParams } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
-
-const navItems = [
-  { to: '/',           label: 'ダッシュボード' },
-  { to: '/facilities', label: '施設管理' },
-  { to: '/logs',       label: 'ログ' },
-  { to: '/settings',   label: '設定' },
-];
 
 const userMenuItems = [
   { label: 'プロフィール', to: '/profile/settings' },
@@ -20,7 +13,16 @@ const userMenuItems = [
 export function Sidebar() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { uuid } = useParams<{ uuid: string }>();
   const [userOpen, setUserOpen] = useState(false);
+
+  const base = uuid ? `/${uuid}` : '';
+  const navItems = [
+    { to: `${base}/home/overview`, label: 'ダッシュボード' },
+    { to: `${base}/facilities`,    label: '施設管理' },
+    { to: `${base}/logs`,          label: 'ログ' },
+    { to: `${base}/settings`,      label: '設定' },
+  ];
 
   async function handleSignOut() {
     await signOut(auth);

@@ -29,8 +29,8 @@ export function Signup() {
     setError('');
     setLoading(true);
     try {
-      await signInWithPopup(auth, googleProvider);
-      navigate('/');
+      const result = await signInWithPopup(auth, googleProvider);
+      navigate(`/${result.user.uid}/home/overview`);
     } catch {
       setError('Googleログインに失敗しました。');
     } finally {
@@ -51,8 +51,8 @@ export function Signup() {
     }
     setLoading(true);
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      navigate('/');
+      const result = await createUserWithEmailAndPassword(auth, email, password);
+      navigate(`/${result.user.uid}/home/overview`);
     } catch (e: unknown) {
       const code = (e as { code?: string }).code;
       if (code === 'auth/email-already-in-use') {
