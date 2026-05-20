@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 
 type Appearance = 'light' | 'dark' | 'system';
@@ -30,109 +30,100 @@ function applyAppearance(value: Appearance) {
   localStorage.setItem(APPEARANCE_KEY, value);
 }
 
-function AppearanceCard({ value, label, selected, onClick }: {
-  value: Appearance; label: string; selected: boolean; onClick: () => void;
-}) {
-  const previews: Record<Appearance, React.ReactNode> = {
-    light: (
-      <div className="w-full h-16 rounded bg-gray-100 border border-gray-200 overflow-hidden flex flex-col">
-        <div className="h-3 bg-white border-b border-gray-200 flex items-center px-1.5 gap-1">
-          <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
-          <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
-          <span className="flex-1 h-1 rounded bg-gray-200 ml-0.5" />
-        </div>
-        <div className="flex flex-1">
-          <div className="w-6 bg-gray-200" />
-          <div className="flex-1 p-1 space-y-0.5">
-            <div className="h-1 w-3/4 rounded bg-gray-300" />
-            <div className="h-1 w-1/2 rounded bg-gray-200" />
-          </div>
-        </div>
-      </div>
-    ),
-    dark: (
-      <div className="w-full h-16 rounded bg-zinc-900 border border-zinc-700 overflow-hidden flex flex-col">
-        <div className="h-3 bg-zinc-800 border-b border-zinc-700 flex items-center px-1.5 gap-1">
-          <span className="w-1.5 h-1.5 rounded-full bg-zinc-600" />
-          <span className="w-1.5 h-1.5 rounded-full bg-zinc-600" />
-          <span className="flex-1 h-1 rounded bg-zinc-700 ml-0.5" />
-        </div>
-        <div className="flex flex-1">
-          <div className="w-6 bg-zinc-800" />
-          <div className="flex-1 p-1 space-y-0.5">
-            <div className="h-1 w-3/4 rounded bg-zinc-600" />
-            <div className="h-1 w-1/2 rounded bg-zinc-700" />
-          </div>
-        </div>
-      </div>
-    ),
-    system: (
-      <div className="w-full h-16 rounded overflow-hidden border border-zinc-700 flex flex-col">
-        <div className="h-3 flex items-center px-1.5 gap-1"
-          style={{ background: 'linear-gradient(90deg, #fff 50%, #18181b 50%)' }}>
-          <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
-          <span className="w-1.5 h-1.5 rounded-full bg-zinc-600" />
-          <span className="flex-1 h-1 rounded ml-0.5"
-            style={{ background: 'linear-gradient(90deg, #e5e7eb 50%, #3f3f46 50%)' }} />
-        </div>
-        <div className="flex flex-1">
-          <div className="w-6" style={{ background: 'linear-gradient(90deg, #e5e7eb 50%, #27272a 50%)' }} />
-          <div className="flex-1 p-1 space-y-0.5"
-            style={{ background: 'linear-gradient(90deg, #f9fafb 50%, #18181b 50%)' }}>
-            <div className="h-1 w-3/4 rounded"
-              style={{ background: 'linear-gradient(90deg, #d1d5db 50%, #52525b 50%)' }} />
-            <div className="h-1 w-1/2 rounded"
-              style={{ background: 'linear-gradient(90deg, #e5e7eb 50%, #3f3f46 50%)' }} />
-          </div>
-        </div>
-      </div>
-    ),
-  };
-
-  return (
-    <button
-      onClick={onClick}
-      className={`flex flex-col gap-2 p-2 rounded-xl border transition-all ${
-        selected
-          ? 'border-blue-500 bg-blue-950/20'
-          : 'border-zinc-700 hover:border-zinc-600 bg-zinc-800/40'
-      }`}
-    >
-      {previews[value]}
-      <div className="flex items-center gap-1.5 px-1">
-        <span className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center shrink-0 ${
-          selected ? 'border-blue-500 bg-blue-500' : 'border-zinc-600'
-        }`}>
-          {selected && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
-        </span>
-        <span className={`text-xs font-medium ${selected ? 'text-blue-400' : 'text-zinc-400'}`}>
-          {label}
-        </span>
-      </div>
-    </button>
-  );
+// --- 完全再現用のカスタムセレクトコンポーネント ---
+interface SelectOption<T> {
+  value: T;
+  label: string;
 }
 
-function SettingRow({ title, badge, description, children }: {
-  title: string;
-  badge?: string;
-  description?: string;
-  children?: React.ReactNode;
-}) {
+interface CustomSelectProps<T> {
+  value: T;
+  onChange: (val: T) => void;
+  options: SelectOption<T>[];
+}
+
+function CustomSelect<T extends string>({ value, onChange, options }: CustomSelectProps<T>) {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // 選択中のアイテムが何番目にあるかを取得
+  const selectedIndex = options.findIndex(opt => opt.value === value);
+  const currentLabel = options[selectedIndex]?.label ?? '';
+
+  // クリック時にメニューの外側を押したら閉じる制御
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  /* 【位置の動的調整ロジック】
+    選択中のアイテムがボタンの真上に重なるように、メニューの Y 軸位置を動的にずらします。
+    - アイテム1つの高さ: 36px (h-9)
+    - メニューの上の内側余白(パディング): 6px (py-1.5)
+  */
+  const itemHeight = 36;
+  const menuPaddingTop = 6;
+  const dynamicTop = isOpen ? -(selectedIndex * itemHeight + menuPaddingTop) : 0;
+
   return (
-    <div className="flex items-start justify-between gap-8 py-5 border-b border-zinc-800">
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <h3 className="text-sm font-medium text-zinc-200">{title}</h3>
-          {badge && (
-            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-950/50 text-green-400 border border-green-900/50">
-              {badge}
-            </span>
-          )}
+    <div ref={containerRef} className="relative min-w-[200px] w-full sm:w-max">
+      {/* トリガーボタン (profile-settings.html のコンボボックススタイル) */}
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="group flex w-full sm:w-max shrink-0 items-center select-none border-0 shadow-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4693ff] cursor-pointer bg-[#111111] text-white ring-1 hover:bg-[#222222] ring-[#3d3d3d] h-9 rounded-lg pl-3 pr-10 text-base font-normal min-w-[200px] justify-between text-left transition-colors"
+      >
+        <span className="truncate">{currentLabel}</span>
+        <span className="absolute right-3 flex shrink-0 items-center text-[#999999] pointer-events-none">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
+            <path d="M181.66,170.34a8,8,0,0,1,0,11.32l-48,48a8,8,0,0,1-11.32,0l-48-48a8,8,0,0,1,11.32-11.32L128,212.69l42.34-42.35A8,8,0,0,1,181.66,170.34Zm-96-84.68L128,43.31l42.34 Lam42.35a8,8,0,0,0,11.32-11.32l-48-48a8,8,0,0,0-11.32,0l-48,48A8,8,0,0,0,85.66,85.66Z"></path>
+          </svg>
+        </span>
+      </button>
+
+      {/* 展開されるメニューリスト (profile-settings.html のポータル内リストボックスUIを完全再現) */}
+      {isOpen && (
+        <div
+          style={{ top: `${dynamicTop}px` }}
+          className="absolute left-0 z-50 flex flex-col bg-[#111111] text-white rounded-lg shadow-lg ring-1 ring-[#3d3d3d] min-w-[calc(100%+3px)] py-1.5 transition-all duration-150 animate-fade-slide-in origin-top"
+        >
+          <div role="listbox" className="overflow-y-auto overscroll-none max-h-[300px]">
+            {options.map((opt) => {
+              const isSelected = opt.value === value;
+              return (
+                <div
+                  key={opt.value}
+                  role="option"
+                  aria-selected={isSelected}
+                  onClick={() => {
+                    onChange(opt.value);
+                    setIsOpen(false);
+                  }}
+                  className={`group mx-1.5 flex h-9 cursor-pointer items-center justify-between gap-2 rounded px-2 text-base identity-none focus-visible:ring-2 focus-visible:ring-[#4693ff] ${
+                    isSelected 
+                      ? 'bg-[#222222] text-white font-medium shadow-sm ring-1 ring-[#3d3d3d]' 
+                      : 'hover:bg-[#222222]/60 text-white'
+                  }`}
+                >
+                  <div className="truncate">{opt.label}</div>
+                  {isSelected && (
+                    <span aria-hidden="true" className="text-[#4693ff]">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
+                        <path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"></path>
+                      </svg>
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
-        {description && <p className="text-xs text-zinc-500 mt-0.5">{description}</p>}
-      </div>
-      {children && <div className="shrink-0">{children}</div>}
+      )}
     </div>
   );
 }
@@ -140,15 +131,15 @@ function SettingRow({ title, badge, description, children }: {
 export function ProfileSettings() {
   const { user } = useAuth();
 
-  const [tab,               setTab]               = useState<Tab>('settings');
-  const [language,          setLanguage]           = useState<Language>(
+  const [tab, setTab] = useState<Tab>('settings');
+  const [language, setLanguage] = useState<Language>(
     () => (localStorage.getItem(LANGUAGE_KEY) as Language | null) ?? 'ja'
   );
-  const [appearance,        setAppearance]         = useState<Appearance>(
+  const [appearance, setAppearance] = useState<Appearance>(
     () => (localStorage.getItem(APPEARANCE_KEY) as Appearance | null) ?? 'dark'
   );
-  const [showDeleteConfirm, setShowDeleteConfirm]  = useState(false);
-  const [toast,             setToast]              = useState<{ msg: string; ok: boolean } | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
 
   const isGoogleUser = user?.providerData.some(p => p.providerId === 'google.com') ?? false;
   const memberSince  = formatMemberSince(user?.metadata.creationTime);
@@ -173,162 +164,239 @@ export function ProfileSettings() {
     setTimeout(() => setToast(null), 3000);
   }
 
+  const btnClasses = "group flex w-max shrink-0 items-center font-medium select-none border-0 shadow-xs focus:outline-none focus:ring-[#4693ff]/50 focus-visible:ring-2 focus-visible:ring-[#4693ff] cursor-pointer disabled:cursor-not-allowed disabled:text-[#797979] bg-[#111111] text-white ring-1 hover:bg-[#222222] ring-[#3d3d3d] h-9 gap-1.5 rounded-lg px-3 text-base transition-colors";
+  const btnDangerClasses = "group flex w-max shrink-0 items-center font-medium select-none border-0 shadow-xs focus:outline-none focus:ring-[#fc574a]/50 focus-visible:ring-2 focus-visible:ring-[#fc574a] cursor-pointer bg-[#e81403] text-white hover:bg-[#b20f03] ring-1 ring-[#e81403] h-9 gap-1.5 rounded-lg px-3 text-base transition-colors";
+
+  // オプションデータの定義
+  const languageOptions: SelectOption<Language>[] = [
+    { value: 'ja', label: '日本語' },
+    { value: 'en', label: 'English' }
+  ];
+
+  const appearanceOptions: SelectOption<Appearance>[] = [
+    { value: 'light', label: 'ライト' },
+    { value: 'dark', label: 'ダーク' },
+    { value: 'system', label: 'システム設定を使用' }
+  ];
+
   return (
-    <div className="flex flex-col min-h-full">
-      <div className="flex-1 max-w-2xl w-full mx-auto px-8 py-8">
-
-        {/* ヘッダー */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-zinc-100">プロフィール</h1>
-          <p className="text-sm text-zinc-500 mt-1">
-            {email}
-            {memberSince && (
-              <>
-                <span className="mx-2 text-zinc-700">·</span>
-                メンバー登録日 {memberSince}
-              </>
-            )}
-          </p>
-        </div>
-
-        {/* タブ */}
-        <div className="flex border-b border-zinc-800 mb-0">
-          {(['settings', 'notifications'] as Tab[]).map(t => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${
-                tab === t
-                  ? 'border-zinc-100 text-zinc-100'
-                  : 'border-transparent text-zinc-500 hover:text-zinc-300'
-              }`}
-            >
-              {t === 'settings' ? '設定' : '通知'}
-            </button>
-          ))}
-        </div>
-
-        {tab === 'settings' ? (
-          <div>
-            {/* メール */}
-            <SettingRow
-              title="メール"
-              badge={!isGoogleUser ? '確認済み' : undefined}
-              description={isGoogleUser ? 'Googleアカウントで認証されているため変更できません。' : undefined}
-            >
-              <div className="flex gap-2">
-                <input
-                  type="email"
-                  readOnly
-                  value={email}
-                  className="w-52 px-3 py-1.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-zinc-400 cursor-not-allowed"
-                />
-                {!isGoogleUser && (
-                  <button className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 text-sm rounded-lg transition-colors">
-                    メールを更新
-                  </button>
-                )}
-              </div>
-            </SettingRow>
-
-            {/* 言語（即時反映・自動保存） */}
-            <SettingRow title="言語" description="UIの表示言語を選択してください。">
-              <select
-                value={language}
-                onChange={e => setLanguage(e.target.value as Language)}
-                className="w-36 px-3 py-1.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-zinc-200 focus:outline-none focus:border-blue-500"
-              >
-                <option value="ja">日本語</option>
-                <option value="en">English</option>
-              </select>
-            </SettingRow>
-
-            {/* 外観（即時反映・トースト通知） */}
-            <div className="py-5 border-b border-zinc-800">
-              <h3 className="text-sm font-medium text-zinc-200 mb-3">外観</h3>
-              <div className="grid grid-cols-3 gap-3">
-                <AppearanceCard value="light"  label="ライト"           selected={appearance === 'light'}  onClick={() => handleAppearanceChange('light')}  />
-                <AppearanceCard value="dark"   label="ダーク"           selected={appearance === 'dark'}   onClick={() => handleAppearanceChange('dark')}   />
-                <AppearanceCard value="system" label="システム設定を使用" selected={appearance === 'system'} onClick={() => handleAppearanceChange('system')} />
-              </div>
-            </div>
-
-            {/* プロフィールを削除 */}
-            <div className="py-5">
-              <h3 className="text-sm font-medium text-zinc-200 mb-1">プロフィールを削除</h3>
-              <p className="text-xs text-zinc-500 mb-4">
-                ユーザー {email} を完全に削除します。この操作は取り消せません。
-              </p>
-              {!showDeleteConfirm ? (
-                <button
-                  onClick={() => setShowDeleteConfirm(true)}
-                  className="px-3 py-1.5 border border-red-800 text-red-400 hover:bg-red-950/40 text-sm font-medium rounded-lg transition-colors"
-                >
-                  ユーザーを削除
-                </button>
-              ) : (
-                <div className="p-4 border border-red-800 rounded-xl bg-red-950/20 space-y-3">
-                  <p className="text-sm text-red-300 font-medium">本当に削除しますか？</p>
-                  <p className="text-xs text-red-400/70">
-                    すべてのデータが完全に削除されます。この操作は取り消せません。
-                  </p>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setShowDeleteConfirm(false)}
-                      className="px-4 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm rounded-lg transition-colors"
-                    >
-                      キャンセル
-                    </button>
-                    <button className="px-4 py-1.5 bg-red-600 hover:bg-red-500 text-white text-sm font-medium rounded-lg transition-colors">
-                      削除する
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
+    <div className="min-h-[calc(100vh-56px)] flex flex-col min-w-0 bg-black text-white font-sans">
+      
+      {/* Header */}
+      <div className="flex items-center justify-between gap-4 py-6 px-4 sm:px-6 border-b border-[#3d3d3d] bg-black">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-white text-3xl font-semibold">プロフィール</h1>
+          <div className="hidden md:block">
+            <p className="text-[#999999] text-base">
+              {email} {memberSince && `· メンバー登録日 ${memberSince}`}
+            </p>
           </div>
-        ) : (
-          <div className="py-16 text-center text-zinc-500 text-sm">
-            通知設定は準備中です。
-          </div>
-        )}
+        </div>
       </div>
 
-      {/* フッター */}
-      <footer className="border-t border-zinc-800 px-8 py-4">
-        <div className="max-w-2xl mx-auto flex flex-wrap items-center gap-x-4 gap-y-1">
-          {[
-            'サポート', 'システム ステータス', 'キャリア', '利用規約',
-            'セキュリティ問題を報告する', 'プライバシー ポリシー',
-          ].map(item => (
-            <a key={item} href="#"
-              className="text-xs text-zinc-500 hover:text-zinc-400 transition-colors">
-              {item}
-            </a>
-          ))}
-          <span className="text-xs text-zinc-600">© 2026</span>
+      {/* Tabs */}
+      <header className="flex items-center justify-between h-[58px] gap-3 px-4 border-b border-[#3d3d3d] sticky z-20 bg-black top-0">
+        <div className="relative isolate min-w-0 font-medium">
+          <div className="absolute inset-x-0 top-1/2 z-0 -translate-y-1/2 rounded-lg bg-[#222222] h-9"></div>
+          <div role="tablist" className="relative flex min-w-0 shrink items-stretch overflow-x-auto rounded-lg bg-[#222222] px-0.5 ring-1 ring-[#3d3d3d] h-9">
+            <button
+              onClick={() => setTab('settings')}
+              className={`no-underline relative z-2 flex items-center whitespace-nowrap focus:outline-none focus:ring-[#4693ff]/50 focus-visible:ring-2 focus-visible:ring-[#4693ff] cursor-pointer text-base my-0.5 rounded-md px-2.5 transition-colors ${
+                tab === 'settings'
+                  ? 'bg-[#111111] text-white shadow-sm ring-1 ring-[#3d3d3d]'
+                  : 'bg-transparent text-[#999999] hover:text-white'
+              }`}
+            >
+              設定
+            </button>
+            <button
+              onClick={() => setTab('notifications')}
+              className={`no-underline relative z-2 flex items-center whitespace-nowrap focus:outline-none focus:ring-[#4693ff]/50 focus-visible:ring-2 focus-visible:ring-[#4693ff] cursor-pointer text-base my-0.5 rounded-md px-2.5 transition-colors ${
+                tab === 'notifications'
+                  ? 'bg-[#111111] text-white shadow-sm ring-1 ring-[#3d3d3d]'
+                  : 'bg-transparent text-[#999999] hover:text-white'
+              }`}
+            >
+              通知
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="w-full h-full grow flex flex-col gap-0">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_min(100%,56rem)_1fr] p-4 sm:p-6 gap-y-5">
+          <div className="md:col-start-2">
+            
+            {tab === 'settings' ? (
+              <div className="flex flex-col gap-y-5">
+                
+                {/* Email Section */}
+                <div className="bg-[#111111] shadow-xs ring-1 ring-[#3d3d3d] overflow-visible rounded-lg p-6">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-2">
+                      <div className="flex flex-wrap items-start justify-between gap-2">
+                        <h3 className="text-white text-lg font-semibold flex items-center gap-2">
+                          <span>メール</span>
+                          {!isGoogleUser && (
+                            <span className="inline-flex w-fit flex-none shrink-0 items-center justify-self-start rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap bg-white text-black">
+                              <span>確認済み</span>
+                            </span>
+                          )}
+                        </h3>
+                      </div>
+                      {isGoogleUser && (
+                        <span className="text-[#999999] text-base">Googleアカウントで認証されているため変更できません。</span>
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-3">
+                      <div className="min-w-0 flex-1">
+                        <input
+                          readOnly
+                          value={email}
+                          className="border-0 bg-[#313131] text-white ring-1 ring-[#3d3d3d] outline-none focus:outline-none placeholder:text-[#767676] disabled:text-[#797979] h-9 gap-1.5 rounded-lg px-3 text-base focus:ring-[#4693ff]/50 focus:ring-[1.5px] pointer-events-none w-full"
+                        />
+                      </div>
+                      {!isGoogleUser && (
+                        <div className="shrink-0">
+                          <button className={btnClasses}>
+                            <span>メールを更新</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Language Section (CustomSelect を適用) */}
+                <div className="bg-[#111111] shadow-xs ring-1 ring-[#3d3d3d] overflow-visible rounded-lg p-6">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="flex flex-col gap-2">
+                        <div className="flex flex-wrap items-start justify-between gap-2">
+                          <h3 className="text-white text-lg font-semibold">言語</h3>
+                        </div>
+                        <span className="text-[#999999] text-base">UIの表示言語を選択してください。</span>
+                      </div>
+                      <div className="shrink-0">
+                        <CustomSelect
+                          value={language}
+                          onChange={(val) => setLanguage(val)}
+                          options={languageOptions}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Appearance Section (CustomSelect を適用) */}
+                <div className="bg-[#111111] shadow-xs ring-1 ring-[#3d3d3d] overflow-visible rounded-lg p-6">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="flex flex-col gap-2">
+                        <div className="flex flex-wrap items-start justify-between gap-2">
+                          <h3 className="text-white text-lg font-semibold">表示</h3>
+                        </div>
+                        <span className="text-[#999999] text-base">ダッシュボードのカラーテーマを選択してください。</span>
+                      </div>
+                      <div className="shrink-0">
+                        <CustomSelect
+                          value={appearance}
+                          onChange={(val) => handleAppearanceChange(val)}
+                          options={appearanceOptions}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Delete Profile Section */}
+                <div className="bg-[#111111] shadow-xs ring-1 ring-[#3d3d3d] overflow-visible rounded-lg p-6">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="flex flex-col gap-2">
+                        <div className="flex flex-wrap items-start justify-between gap-2">
+                          <h3 className="text-white text-lg font-semibold">プロフィールを削除</h3>
+                        </div>
+                        <span className="text-[#999999] text-base">ユーザー {email} を完全に削除</span>
+                      </div>
+                      <div className="shrink-0">
+                        {!showDeleteConfirm ? (
+                          <button
+                            onClick={() => setShowDeleteConfirm(true)}
+                            className="group flex w-max shrink-0 items-center font-medium select-none border-0 shadow-xs focus:outline-none focus:ring-[#fc574a]/50 focus-visible:ring-2 focus-visible:ring-[#fc574a] cursor-pointer disabled:cursor-not-allowed bg-[#111111] text-[#fc574a] ring-1 ring-[#fc574a] hover:bg-[#fc574a]/10 h-9 gap-1.5 rounded-lg px-3 text-base transition-colors"
+                          >
+                            <span>ユーザーを削除</span>
+                          </button>
+                        ) : (
+                          <div className="p-4 border rounded-lg bg-[#3c0501]/50 border-[#970d02]/50 space-y-3 mt-4 sm:mt-0">
+                            <p className="text-sm text-[#fc574a] font-semibold">本当に削除しますか？</p>
+                            <p className="text-sm text-[#fc574a]/80">
+                              すべてのデータが完全に削除されます。この操作は取り消せません。
+                            </p>
+                            <div className="flex gap-2 mt-4">
+                              <button
+                                onClick={() => setShowDeleteConfirm(false)}
+                                className={btnClasses}
+                              >
+                                キャンセル
+                              </button>
+                              <button className={btnDangerClasses}>
+                                削除する
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            ) : (
+              <div className="py-16 text-center text-[#999999] text-base">
+                通知設定は準備中です。
+              </div>
+            )}
+
+          </div>
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-[#0a0a0a] border-t border-[#3d3d3d] mt-auto px-4 md:px-3 py-2.5 min-h-12">
+        <div className="flex justify-center flex-row">
+          <ul className="m-0 flex items-center justify-center flex-wrap gap-4 [&>li]:list-none [&>li>a]:text-sm [&>li>a]:border-l [&>li>a]:border-[#3d3d3d] [&>li>a]:pl-4 [&>li:first-child>a]:border-l-0">
+            <li><a className="text-[#999999] no-underline transition-colors hover:text-white" href="#">サポート</a></li>
+            <li><a className="text-[#999999] no-underline transition-colors hover:text-white" href="#"><span className="capitalize">システム ステータス</span></a></li>
+            <li><a className="text-[#999999] no-underline transition-colors hover:text-white" href="#">キャリア</a></li>
+            <li><a className="text-[#999999] no-underline transition-colors hover:text-white" href="#">利用規約</a></li>
+            <li><a className="text-[#999999] no-underline transition-colors hover:text-white" href="#">セキュリティ問題を報告する</a></li>
+            <li><a className="text-[#999999] no-underline transition-colors hover:text-white" href="#">プライバシー ポリシー</a></li>
+            <li><span className="text-sm text-[#797979]">&copy; 2026 Toei Techno International Inc.</span></li>
+          </ul>
         </div>
       </footer>
 
-      {/* 外観変更トースト */}
+      {/* Toast */}
       {toast && (
         <div
-          className={`fixed bottom-6 right-6 flex items-center gap-2.5 px-4 py-3 rounded-xl shadow-lg text-sm font-medium border transition-all animate-in fade-in slide-in-from-bottom-2 ${
+          className={`fixed bottom-6 right-6 flex items-center gap-2.5 px-4 py-3 rounded-lg shadow-lg text-sm font-medium border transition-all animate-fade-slide-in z-50 ${
             toast.ok
-              ? 'bg-zinc-800 border-zinc-700 text-zinc-100'
-              : 'bg-red-950/90 border-red-800 text-red-300'
+              ? 'bg-[#111111] border-[#3d3d3d] text-white'
+              : 'bg-[#3c0501] border-[#970d02] text-[#fc574a]'
           }`}
         >
           {toast.ok ? (
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-              className="text-green-400 shrink-0">
+              className="text-[#2db35e] shrink-0">
               <polyline points="20 6 9 17 4 12" />
             </svg>
           ) : (
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-              className="text-red-400 shrink-0">
+              className="text-[#fc574a] shrink-0">
               <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           )}
