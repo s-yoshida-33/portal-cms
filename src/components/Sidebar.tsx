@@ -1,26 +1,28 @@
 import { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useParams } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
 
-const navItems = [
-  { to: '/',           label: 'ダッシュボード' },
-  { to: '/facilities', label: '施設管理' },
-  { to: '/logs',       label: 'ログ' },
-  { to: '/settings',   label: '設定' },
-];
-
 const userMenuItems = [
-  { label: 'プロフィール', to: '/profile' },
-  { label: '外観',         to: '/appearance' },
-  { label: '言語',         to: '/language' },
+  { label: 'プロフィール', to: '/profile/settings' },
+  { label: '外観',         to: '/profile/settings' },
+  { label: '言語',         to: '/profile/settings' },
 ];
 
 export function Sidebar() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { uuid } = useParams<{ uuid: string }>();
   const [userOpen, setUserOpen] = useState(false);
+
+  const base = uuid ? `/${uuid}` : '';
+  const navItems = [
+    { to: `${base}/home/overview`, label: 'ダッシュボード' },
+    { to: `${base}/facilities`,    label: '施設管理' },
+    { to: `${base}/logs`,          label: 'ログ' },
+    { to: `${base}/settings`,      label: '設定' },
+  ];
 
   async function handleSignOut() {
     await signOut(auth);
@@ -79,7 +81,7 @@ export function Sidebar() {
           <svg
             width="14" height="14" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-            className={`text-zinc-500 shrink-0 transition-transform duration-200 ${userOpen ? 'rotate-180' : ''}`}
+            className={`text-zinc-500 shrink-0 transition-transform duration-200 ${userOpen ? '' : '-rotate-90'}`}
           >
             <polyline points="6 9 12 15 18 9" />
           </svg>

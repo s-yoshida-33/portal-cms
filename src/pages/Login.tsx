@@ -28,8 +28,8 @@ export function Login() {
     setError('');
     setLoading(true);
     try {
-      await signInWithPopup(auth, googleProvider);
-      navigate('/');
+      const result = await signInWithPopup(auth, googleProvider);
+      navigate(`/${result.user.uid}/home/overview`);
     } catch (e: unknown) {
       const code = (e as { code?: string }).code ?? 'unknown';
       if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
@@ -51,8 +51,8 @@ export function Login() {
     setError('');
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      navigate('/');
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      navigate(`/${result.user.uid}/home/overview`);
     } catch {
       setError('メールアドレスまたはパスワードが正しくありません。');
     } finally {
