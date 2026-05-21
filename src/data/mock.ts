@@ -1,6 +1,6 @@
-import type { Facility } from '../types';
+import type { Project } from '../types';
 
-export const facilities: Facility[] = [
+export const facilities: Project[] = [
   {
     id:         'sendaikamisugi',
     name:       '仙台上杉ショッピングセンター',

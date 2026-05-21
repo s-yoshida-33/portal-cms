@@ -1,7 +1,7 @@
 export type DeviceStatus        = 'online' | 'offline' | 'warning';
 export type AppName             = 'Gido' | 'Gido-Touch' | 'Gido-Touch-Mini' | 'Grain-Link';
 export type UserRole            = 'owner' | 'admin' | 'user';
-export type DeletionTargetType  = 'facility' | 'device' | 'apiToken';
+export type DeletionTargetType  = 'project' | 'device' | 'apiToken';
 export type DeletionStatus      = 'pending' | 'approved' | 'rejected';
 export type ApiTokenType        = 'registration' | 'device';
 
@@ -28,8 +28,8 @@ export interface Device {
   updatedAt:  string;
 }
 
-// Firestore /facilities/{facilityId}
-export interface FacilityDoc {
+// Firestore /projects/{projectId}
+export interface ProjectDoc {
   id:         string;
   name:       string;
   prefecture: string;
@@ -39,7 +39,7 @@ export interface FacilityDoc {
 }
 
 // mock データ・移行前ページ用（devices 込み）
-export interface Facility extends FacilityDoc {
+export interface Project extends ProjectDoc {
   devices: Device[];
 }
 

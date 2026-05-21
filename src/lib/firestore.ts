@@ -19,7 +19,7 @@ import {
 } from 'firebase/firestore';
 import { db } from './firebase';
 import type {
-  FacilityDoc,
+  ProjectDoc,
   Device,
   UserRole,
   UserRoleRecord,
@@ -51,7 +51,7 @@ function fromDoc<T>(snap: DocumentSnapshot): T {
 // ---------- collections ----------
 
 const col = {
-  facilities:       () => collection(db, 'facilities'),
+  projects:         () => collection(db, 'projects'),
   devices:          () => collection(db, 'devices'),
   pendingDevices:   () => collection(db, 'pendingDevices'),
   userRoles:        () => collection(db, 'userRoles'),
@@ -61,22 +61,22 @@ const col = {
 };
 
 // ================================================================
-// Facilities
+// Projects
 // ================================================================
 
-export function subscribeFacilities(
-  onUpdate: (facilities: FacilityDoc[]) => void
+export function subscribeProjects(
+  onUpdate: (projects: ProjectDoc[]) => void
 ): Unsubscribe {
   return onSnapshot(
-    query(col.facilities(), orderBy('name')),
-    snap => onUpdate(snap.docs.map(d => fromDoc<FacilityDoc>(d)))
+    query(col.projects(), orderBy('name')),
+    snap => onUpdate(snap.docs.map(d => fromDoc<ProjectDoc>(d)))
   );
 }
 
-export async function addFacility(
-  data: Pick<FacilityDoc, 'name' | 'prefecture' | 'address'>
+export async function addProject(
+  data: Pick<ProjectDoc, 'name' | 'prefecture' | 'address'>
 ): Promise<string> {
-  const ref = await addDoc(col.facilities(), {
+  const ref = await addDoc(col.projects(), {
     ...data,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
@@ -84,11 +84,11 @@ export async function addFacility(
   return ref.id;
 }
 
-export async function updateFacility(
+export async function updateProject(
   id: string,
-  data: Partial<Pick<FacilityDoc, 'name' | 'prefecture' | 'address'>>
+  data: Partial<Pick<ProjectDoc, 'name' | 'prefecture' | 'address'>>
 ): Promise<void> {
-  await updateDoc(doc(col.facilities(), id), {
+  await updateDoc(doc(col.projects(), id), {
     ...data,
     updatedAt: serverTimestamp(),
   });
@@ -280,13 +280,13 @@ export async function approveDeletion(
     reviewedAt: serverTimestamp(),
   });
 
-  if (request.type === 'facility') {
-    // 施設に紐づくデバイスを先に削除
+  if (request.type === 'project') {
+    // プロジェクトに紐づくデバイスを先に削除
     const devSnap = await getDocs(
       query(col.devices(), where('facilityId', '==', request.targetId))
     );
     devSnap.docs.forEach(d => batch.delete(d.ref));
-    batch.delete(doc(col.facilities(), request.targetId));
+    batch.delete(doc(col.projects(), request.targetId));
   } else if (request.type === 'device') {
     batch.delete(doc(col.devices(), request.targetId));
   } else if (request.type === 'apiToken') {

@@ -6,13 +6,13 @@ import type { DeletionRequest, DeletionTargetType } from '../types';
 // ── helpers ──────────────────────────────────────────────────────
 
 const typeLabel: Record<DeletionTargetType, string> = {
-  facility: '施設',
+  project:  'プロジェクト',
   device:   'デバイス',
   apiToken: 'APIトークン',
 };
 
 const typeBadge: Record<DeletionTargetType, string> = {
-  facility: 'text-orange-400 bg-orange-950/40 ring-1 ring-orange-900/50',
+  project:  'text-orange-400 bg-orange-950/40 ring-1 ring-orange-900/50',
   device:   'text-blue-400 bg-blue-950/40 ring-1 ring-blue-900/50',
   apiToken: 'text-purple-400 bg-purple-950/40 ring-1 ring-purple-900/50',
 };
