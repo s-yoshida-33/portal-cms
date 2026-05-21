@@ -10,6 +10,7 @@ import { Home } from './pages/Home';
 import { ProjectDetail } from './pages/ProjectDetail';
 import { Projects } from './pages/Projects';
 import { DeletionRequests } from './pages/DeletionRequests';
+import { UserManagement } from './pages/UserManagement';
 import { Placeholder } from './pages/Placeholder';
 import { ProfileSettings } from './pages/profile/Settings';
 
@@ -43,6 +44,7 @@ export default function App() {
                 <Route path=":id" element={<ProjectDetail />} />
               </Route>
               <Route path="deletion-requests" element={<DeletionRequests />} />
+              <Route path="users"            element={<UserManagement />} />
               <Route path="logs"     element={<Placeholder title="ログ" />} />
               <Route path="settings" element={<Placeholder title="設定" />} />
             </Route>

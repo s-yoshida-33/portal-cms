@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import type { User } from 'firebase/auth';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../lib/firebase';
-import { getUserRole } from '../lib/firestore';
+import { getUserRole, setUserRole } from '../lib/firestore';
 import type { UserRole } from '../types';
 
 interface AuthContextValue {
@@ -23,7 +23,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(u);
       if (u) {
         const r = await getUserRole(u.uid);
-        setRole(r ?? 'user');
+        if (r === null) {
+          await setUserRole(u.uid, {
+            role:        'user',
+            displayName: u.displayName ?? u.email?.split('@')[0] ?? 'ユーザー',
+            email:       u.email ?? '',
+            assignedAt:  new Date().toISOString(),
+          });
+          setRole('user');
+        } else {
+          setRole(r);
+        }
       } else {
         setRole(null);
       }
