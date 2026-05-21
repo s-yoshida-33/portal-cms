@@ -46,11 +46,9 @@ function CustomSelect<T extends string>({ value, onChange, options }: CustomSele
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // 選択中のアイテムが何番目にあるかを取得
   const selectedIndex = options.findIndex(opt => opt.value === value);
   const currentLabel = options[selectedIndex]?.label ?? '';
 
-  // クリック時にメニューの外側を押したら閉じる制御
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
@@ -61,22 +59,25 @@ function CustomSelect<T extends string>({ value, onChange, options }: CustomSele
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  /* 【位置の動的調整ロジック】
-    選択中のアイテムがボタンの真上に重なるように、メニューの Y 軸位置を動的にずらします。
-    - アイテム1つの高さ: 36px (h-9)
-    - メニューの上の内側余白(パディング): 6px (py-1.5)
+  /* 【サイズ同期とスムーズなアニメーションロジック】
+    - itemHeight: ボタンと同じ36px
+    - menuPaddingY: メニュー上下の余白(6px)
+    - topOffset: 選択中のアイテムがボタンにピタリと重なるように計算
+    - originY: 開閉アニメーションの起点を「ボタンの垂直方向の中心」に設定し、自然なズームを実現
   */
   const itemHeight = 36;
-  const menuPaddingTop = 6;
-  const dynamicTop = isOpen ? -(selectedIndex * itemHeight + menuPaddingTop) : 0;
+  const menuPaddingY = 6;
+  const topOffset = -(selectedIndex * itemHeight + menuPaddingY);
+  const originY = menuPaddingY + selectedIndex * itemHeight + (itemHeight / 2);
 
   return (
     <div ref={containerRef} className="relative min-w-[200px] w-full sm:w-max">
-      {/* トリガーボタン (profile-settings.html のコンボボックススタイル) */}
+      {/* トリガーボタン */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="group flex w-full sm:w-max shrink-0 items-center select-none border-0 shadow-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4693ff] cursor-pointer bg-[#111111] text-white ring-1 hover:bg-[#222222] ring-[#3d3d3d] h-9 rounded-lg pl-3 pr-10 text-base font-normal min-w-[200px] justify-between text-left transition-colors"
+        style={{ cursor: 'pointer' }}
+        className="group flex w-full sm:w-max shrink-0 items-center select-none border-0 shadow-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4693ff] bg-[#111111] text-white ring-1 hover:bg-[#222222] ring-[#3d3d3d] h-9 rounded-lg pl-3 pr-10 text-base font-normal min-w-[200px] justify-between text-left transition-colors"
       >
         <span className="truncate">{currentLabel}</span>
         <span className="absolute right-3 flex shrink-0 items-center text-[#999999] pointer-events-none">
@@ -86,44 +87,55 @@ function CustomSelect<T extends string>({ value, onChange, options }: CustomSele
         </span>
       </button>
 
-      {/* 展開されるメニューリスト (profile-settings.html のポータル内リストボックスUIを完全再現) */}
-      {isOpen && (
-        <div
-          style={{ top: `${dynamicTop}px` }}
-          className="absolute left-0 z-50 flex flex-col bg-[#111111] text-white rounded-lg shadow-lg ring-1 ring-[#3d3d3d] min-w-[calc(100%+3px)] py-1.5 transition-all duration-150 animate-fade-slide-in origin-top"
-        >
-          <div role="listbox" className="overflow-y-auto overscroll-none max-h-[300px]">
-            {options.map((opt) => {
-              const isSelected = opt.value === value;
-              return (
-                <div
-                  key={opt.value}
-                  role="option"
-                  aria-selected={isSelected}
-                  onClick={() => {
-                    onChange(opt.value);
-                    setIsOpen(false);
-                  }}
-                  className={`group mx-1.5 flex h-9 cursor-pointer items-center justify-between gap-2 rounded px-2 text-base identity-none focus-visible:ring-2 focus-visible:ring-[#4693ff] ${
-                    isSelected 
-                      ? 'bg-[#222222] text-white font-medium shadow-sm ring-1 ring-[#3d3d3d]' 
-                      : 'hover:bg-[#222222]/60 text-white'
-                  }`}
-                >
-                  <div className="truncate">{opt.label}</div>
-                  {isSelected && (
-                    <span aria-hidden="true" className="text-[#4693ff]">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
-                        <path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"></path>
-                      </svg>
-                    </span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+      {/* 展開されるメニューリスト (常にDOMに配置し、見切れと点滅を解消) */}
+      <div
+        style={{ 
+          top: `${topOffset}px`, 
+          left: '-8px', 
+          minWidth: 'calc(100% + 16px)', // ボタンの幅＋余白を最低限確保
+          width: 'max-content', // テキストが長い場合は自動で広がるように修正（見切れ解消）
+          transformOrigin: `50% ${originY}px`,
+          visibility: isOpen ? 'visible' : 'hidden', // 完全に出し入れせず隠す（点滅解消）
+          transition: 'opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+        }}
+        className={`absolute z-50 flex flex-col bg-[#111111] text-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.5)] ring-1 ring-[#3d3d3d] py-1.5 px-2 ${
+          isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-[0.96] pointer-events-none'
+        }`}
+      >
+        <div role="listbox" className="overflow-y-auto overscroll-none max-h-[300px] flex flex-col no-scrollbar">
+          {options.map((opt) => {
+            const isSelected = opt.value === value;
+            return (
+              <div
+                key={opt.value}
+                role="option"
+                aria-selected={isSelected}
+                onClick={() => {
+                  onChange(opt.value);
+                  setIsOpen(false);
+                }}
+                style={{ cursor: 'pointer' }}
+                // アイテムの右側に十分な余白(pr-4)とギャップ(gap-6)を確保
+                // 選択中の固定スタイル（背景・枠線）を削除し、ホバー時のみ共通の背景色を適用
+                className={`group flex w-full h-9 shrink-0 items-center justify-between gap-6 rounded-md pl-3 pr-4 text-base outline-none focus-visible:ring-2 focus-visible:ring-[#4693ff] transition-colors hover:bg-[#222222]/60 hover:text-white ${
+                  isSelected 
+                    ? 'text-white' 
+                    : 'text-[#d9d9d9]'
+                }`}
+              >
+                <div className="whitespace-nowrap">{opt.label}</div>
+                {isSelected && (
+                  <span aria-hidden="true" className="text-[#4693ff] shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
+                      <path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"></path>
+                    </svg>
+                  </span>
+                )}
+              </div>
+            );
+          })}
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -167,7 +179,6 @@ export function ProfileSettings() {
   const btnClasses = "group flex w-max shrink-0 items-center font-medium select-none border-0 shadow-xs focus:outline-none focus:ring-[#4693ff]/50 focus-visible:ring-2 focus-visible:ring-[#4693ff] cursor-pointer disabled:cursor-not-allowed disabled:text-[#797979] bg-[#111111] text-white ring-1 hover:bg-[#222222] ring-[#3d3d3d] h-9 gap-1.5 rounded-lg px-3 text-base transition-colors";
   const btnDangerClasses = "group flex w-max shrink-0 items-center font-medium select-none border-0 shadow-xs focus:outline-none focus:ring-[#fc574a]/50 focus-visible:ring-2 focus-visible:ring-[#fc574a] cursor-pointer bg-[#e81403] text-white hover:bg-[#b20f03] ring-1 ring-[#e81403] h-9 gap-1.5 rounded-lg px-3 text-base transition-colors";
 
-  // オプションデータの定義
   const languageOptions: SelectOption<Language>[] = [
     { value: 'ja', label: '日本語' },
     { value: 'en', label: 'English' }
@@ -180,8 +191,13 @@ export function ProfileSettings() {
   ];
 
   return (
-    <div className="min-h-[calc(100vh-56px)] flex flex-col min-w-0 bg-black text-white font-sans">
-      
+    <div className="flex flex-col min-w-0 bg-black text-white font-sans min-h-screen">
+
+      {/* ロゴエリアと高さを揃えるスペーサー */}
+      <div className="py-3 border-b border-[#3d3d3d] bg-black">
+        <div className="h-7" />
+      </div>
+
       {/* Header */}
       <div className="flex items-center justify-between gap-4 py-6 px-4 sm:px-6 border-b border-[#3d3d3d] bg-black">
         <div className="flex flex-col gap-2">
@@ -201,7 +217,8 @@ export function ProfileSettings() {
           <div role="tablist" className="relative flex min-w-0 shrink items-stretch overflow-x-auto rounded-lg bg-[#222222] px-0.5 ring-1 ring-[#3d3d3d] h-9">
             <button
               onClick={() => setTab('settings')}
-              className={`no-underline relative z-2 flex items-center whitespace-nowrap focus:outline-none focus:ring-[#4693ff]/50 focus-visible:ring-2 focus-visible:ring-[#4693ff] cursor-pointer text-base my-0.5 rounded-md px-2.5 transition-colors ${
+              style={{ cursor: 'pointer' }}
+              className={`no-underline relative z-2 flex items-center whitespace-nowrap focus:outline-none focus:ring-[#4693ff]/50 focus-visible:ring-2 focus-visible:ring-[#4693ff] text-base my-0.5 rounded-md px-2.5 transition-colors ${
                 tab === 'settings'
                   ? 'bg-[#111111] text-white shadow-sm ring-1 ring-[#3d3d3d]'
                   : 'bg-transparent text-[#999999] hover:text-white'
@@ -211,7 +228,8 @@ export function ProfileSettings() {
             </button>
             <button
               onClick={() => setTab('notifications')}
-              className={`no-underline relative z-2 flex items-center whitespace-nowrap focus:outline-none focus:ring-[#4693ff]/50 focus-visible:ring-2 focus-visible:ring-[#4693ff] cursor-pointer text-base my-0.5 rounded-md px-2.5 transition-colors ${
+              style={{ cursor: 'pointer' }}
+              className={`no-underline relative z-2 flex items-center whitespace-nowrap focus:outline-none focus:ring-[#4693ff]/50 focus-visible:ring-2 focus-visible:ring-[#4693ff] text-base my-0.5 rounded-md px-2.5 transition-colors ${
                 tab === 'notifications'
                   ? 'bg-[#111111] text-white shadow-sm ring-1 ring-[#3d3d3d]'
                   : 'bg-transparent text-[#999999] hover:text-white'
@@ -259,7 +277,10 @@ export function ProfileSettings() {
                       </div>
                       {!isGoogleUser && (
                         <div className="shrink-0">
-                          <button className={btnClasses}>
+                          <button 
+                            style={{ cursor: 'pointer' }}
+                            className={btnClasses}
+                          >
                             <span>メールを更新</span>
                           </button>
                         </div>
@@ -268,7 +289,7 @@ export function ProfileSettings() {
                   </div>
                 </div>
 
-                {/* Language Section (CustomSelect を適用) */}
+                {/* Language Section */}
                 <div className="bg-[#111111] shadow-xs ring-1 ring-[#3d3d3d] overflow-visible rounded-lg p-6">
                   <div className="flex flex-col gap-4">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -289,7 +310,7 @@ export function ProfileSettings() {
                   </div>
                 </div>
 
-                {/* Appearance Section (CustomSelect を適用) */}
+                {/* Appearance Section */}
                 <div className="bg-[#111111] shadow-xs ring-1 ring-[#3d3d3d] overflow-visible rounded-lg p-6">
                   <div className="flex flex-col gap-4">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -318,12 +339,13 @@ export function ProfileSettings() {
                         <div className="flex flex-wrap items-start justify-between gap-2">
                           <h3 className="text-white text-lg font-semibold">プロフィールを削除</h3>
                         </div>
-                        <span className="text-[#999999] text-base">ユーザー {email} を完全に削除</span>
+                        <span className="text-[#999999] text-base">ユーザー {email} を削除します。</span>
                       </div>
                       <div className="shrink-0">
                         {!showDeleteConfirm ? (
                           <button
                             onClick={() => setShowDeleteConfirm(true)}
+                            style={{ cursor: 'pointer' }}
                             className="group flex w-max shrink-0 items-center font-medium select-none border-0 shadow-xs focus:outline-none focus:ring-[#fc574a]/50 focus-visible:ring-2 focus-visible:ring-[#fc574a] cursor-pointer disabled:cursor-not-allowed bg-[#111111] text-[#fc574a] ring-1 ring-[#fc574a] hover:bg-[#fc574a]/10 h-9 gap-1.5 rounded-lg px-3 text-base transition-colors"
                           >
                             <span>ユーザーを削除</span>
@@ -337,11 +359,15 @@ export function ProfileSettings() {
                             <div className="flex gap-2 mt-4">
                               <button
                                 onClick={() => setShowDeleteConfirm(false)}
-                                className={btnClasses}
+                                style={{ cursor: 'pointer' }}
+                                className="group flex w-max shrink-0 items-center font-medium select-none border-0 shadow-xs focus:outline-none focus:ring-[#4693ff]/50 focus-visible:ring-2 focus-visible:ring-[#4693ff] bg-[#111111] text-white ring-1 hover:bg-[#222222] ring-[#3d3d3d] h-9 gap-1.5 rounded-lg px-3 text-base transition-colors"
                               >
                                 キャンセル
                               </button>
-                              <button className={btnDangerClasses}>
+                              <button 
+                                style={{ cursor: 'pointer' }}
+                                className={btnDangerClasses}
+                              >
                                 削除する
                               </button>
                             </div>
@@ -362,21 +388,6 @@ export function ProfileSettings() {
           </div>
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="bg-[#0a0a0a] border-t border-[#3d3d3d] mt-auto px-4 md:px-3 py-2.5 min-h-12">
-        <div className="flex justify-center flex-row">
-          <ul className="m-0 flex items-center justify-center flex-wrap gap-4 [&>li]:list-none [&>li>a]:text-sm [&>li>a]:border-l [&>li>a]:border-[#3d3d3d] [&>li>a]:pl-4 [&>li:first-child>a]:border-l-0">
-            <li><a className="text-[#999999] no-underline transition-colors hover:text-white" href="#">サポート</a></li>
-            <li><a className="text-[#999999] no-underline transition-colors hover:text-white" href="#"><span className="capitalize">システム ステータス</span></a></li>
-            <li><a className="text-[#999999] no-underline transition-colors hover:text-white" href="#">キャリア</a></li>
-            <li><a className="text-[#999999] no-underline transition-colors hover:text-white" href="#">利用規約</a></li>
-            <li><a className="text-[#999999] no-underline transition-colors hover:text-white" href="#">セキュリティ問題を報告する</a></li>
-            <li><a className="text-[#999999] no-underline transition-colors hover:text-white" href="#">プライバシー ポリシー</a></li>
-            <li><span className="text-sm text-[#797979]">&copy; 2026 Toei Techno International Inc.</span></li>
-          </ul>
-        </div>
-      </footer>
 
       {/* Toast */}
       {toast && (
