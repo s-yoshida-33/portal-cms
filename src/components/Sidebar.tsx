@@ -33,7 +33,7 @@ export function Sidebar() {
   const email = user?.email ?? '';
 
   return (
-    <aside className="w-56 shrink-0 bg-zinc-900 border-r border-zinc-800 flex flex-col min-h-screen">
+    <aside className="w-56 shrink-0 bg-black border-r border-zinc-800 flex flex-col min-h-screen">
       {/* ロゴ */}
       <div className="px-5 py-5 border-b border-zinc-800">
         <div className="flex items-center gap-2.5">
