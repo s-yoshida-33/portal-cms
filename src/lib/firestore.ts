@@ -255,11 +255,17 @@ export async function requestDeletion(
 }
 
 export function subscribeDeletionRequests(
-  onUpdate: (requests: DeletionRequest[]) => void
+  onUpdate: (requests: DeletionRequest[]) => void,
+  onError?: (e: Error) => void,
 ): Unsubscribe {
   return onSnapshot(
-    query(col.deletionRequests(), where('status', '==', 'pending'), orderBy('requestedAt', 'desc')),
-    snap => onUpdate(snap.docs.map(d => fromDoc<DeletionRequest>(d)))
+    query(col.deletionRequests(), where('status', '==', 'pending')),
+    snap => {
+      const reqs = snap.docs.map(d => fromDoc<DeletionRequest>(d));
+      reqs.sort((a, b) => b.requestedAt.localeCompare(a.requestedAt));
+      onUpdate(reqs);
+    },
+    onError,
   );
 }
 

@@ -128,10 +128,10 @@ export function DeletionRequests() {
   const [rejectTarget,  setRejectTarget]  = useState<DeletionRequest | null>(null);
 
   useEffect(() => {
-    const unsub = subscribeDeletionRequests(reqs => {
-      setRequests(reqs);
-      setLoading(false);
-    });
+    const unsub = subscribeDeletionRequests(
+      reqs => { setRequests(reqs); setLoading(false); },
+      ()   => setLoading(false),
+    );
     return unsub;
   }, []);
 
