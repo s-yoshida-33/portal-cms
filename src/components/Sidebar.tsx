@@ -40,7 +40,6 @@ export function Sidebar() {
   }
 
   const displayName = user?.displayName ?? user?.email?.split('@')[0] ?? 'ユーザー';
-  const email = user?.email ?? '';
 
   return (
     <aside className="w-56 shrink-0 bg-black border-r border-zinc-800 flex flex-col h-full overflow-y-auto">
@@ -104,10 +103,6 @@ export function Sidebar() {
           </div>
         </div>
 
-        {/* メール表示 */}
-        {!userOpen && (
-          <p className="px-3 mt-0.5 text-xs text-zinc-600 truncate">{email}</p>
-        )}
       </div>
 
       {/* ナビゲーション */}
