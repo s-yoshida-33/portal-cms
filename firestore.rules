@@ -1,0 +1,70 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    function getRole() {
+      let roleDoc = get(/databases/$(database)/documents/userRoles/$(request.auth.uid));
+      return roleDoc.exists ? roleDoc.data.role : 'user';
+    }
+
+    function isOwner() {
+      return isAuth() && getRole() == 'owner';
+    }
+
+    function isAdmin() {
+      return isAuth() && (getRole() == 'admin' || getRole() == 'owner');
+    }
+
+    // ── 施設 ──────────────────────────────────────────────
+    match /facilities/{facilityId} {
+      allow read:          if isAuth();
+      allow create, update: if isAdmin();
+      allow delete:        if isOwner(); // 削除依頼承認時のみ（オーナー限定）
+    }
+
+    // ── デバイス ──────────────────────────────────────────
+    match /devices/{deviceId} {
+      allow read:          if isAuth();
+      allow create, update: if isAdmin();
+      allow delete:        if isOwner();
+    }
+
+    // ── 承認待ちデバイス ──────────────────────────────────
+    match /pendingDevices/{deviceId} {
+      allow read:          if isAdmin();
+      allow create:        if false;           // Cloud Functions のみ作成可
+      allow update, delete: if isAdmin();
+    }
+
+    // ── ユーザーロール ────────────────────────────────────
+    match /userRoles/{uid} {
+      allow read:  if isAuth();
+      allow write: if isOwner();
+    }
+
+    // ── API トークン ──────────────────────────────────────
+    match /apiTokens/{tokenId} {
+      allow read:          if isAdmin();
+      allow create:        if isAdmin();
+      allow update:        if isAdmin();   // 失効はオーナー以上
+      allow delete:        if false;
+    }
+
+    // ── 削除依頼 ──────────────────────────────────────────
+    match /deletionRequests/{requestId} {
+      allow read:   if isAuth();
+      allow create: if isAdmin();
+      allow update: if isOwner(); // 承認・却下はオーナーのみ
+      allow delete: if false;
+    }
+
+    // ── 通知 ──────────────────────────────────────────────
+    match /notifications/{notificationId} {
+      allow read, write: if isOwner();
+    }
+  }
+}
