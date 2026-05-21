@@ -18,7 +18,7 @@ export function Sidebar() {
 
   const base = uuid ? `/${uuid}` : '';
   const navItems = [
-    { to: `${base}/home/overview`, label: 'ダッシュボード' },
+    { to: `${base}/home/overview`, label: 'ホーム' },
     { to: `${base}/facilities`,    label: '施設管理' },
     { to: `${base}/logs`,          label: 'ログ' },
     { to: `${base}/settings`,      label: '設定' },
@@ -33,15 +33,11 @@ export function Sidebar() {
   const email = user?.email ?? '';
 
   return (
-    <aside className="w-56 shrink-0 bg-zinc-900 border-r border-zinc-800 flex flex-col min-h-screen">
+    <aside className="w-56 shrink-0 bg-black border-r border-zinc-800 flex flex-col min-h-screen">
       {/* ロゴ */}
       <div className="px-5 py-5 border-b border-zinc-800">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center shrink-0">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
-              <path d="M3 3h8v8H3V3zm0 10h8v8H3v-8zm10-10h8v8h-8V3zm0 10h8v8h-8v-8z"/>
-            </svg>
-          </div>
+          <img src="/logo.svg" alt="" className="w-7 h-7 shrink-0" />
           <span className="text-zinc-100 font-semibold text-sm">Portal CMS</span>
         </div>
       </div>

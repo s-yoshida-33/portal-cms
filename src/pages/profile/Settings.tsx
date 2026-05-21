@@ -188,7 +188,7 @@ export function ProfileSettings() {
           <h1 className="text-white text-3xl font-semibold">プロフィール</h1>
           <div className="hidden md:block">
             <p className="text-[#999999] text-base">
-              {email} {memberSince && `· メンバー登録日 ${memberSince}`}
+              {email} {memberSince && `· アカウント登録日 ${memberSince}`}
             </p>
           </div>
         </div>
@@ -295,7 +295,7 @@ export function ProfileSettings() {
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                       <div className="flex flex-col gap-2">
                         <div className="flex flex-wrap items-start justify-between gap-2">
-                          <h3 className="text-white text-lg font-semibold">表示</h3>
+                          <h3 className="text-white text-lg font-semibold">外観</h3>
                         </div>
                         <span className="text-[#999999] text-base">ダッシュボードのカラーテーマを選択してください。</span>
                       </div>
