@@ -15,31 +15,52 @@ export function ProfileLayout() {
 
   return (
     <div className="flex min-h-screen bg-black">
-      <aside className="w-56 shrink-0 bg-black border-r border-zinc-800 flex flex-col min-h-screen">
+      <aside className="w-56 shrink-0 bg-black border-r border-[#3d3d3d] flex flex-col min-h-screen">
 
         {/* ロゴ（メインサイドバーと同じ） */}
-        <div className="px-5 py-3 border-b border-zinc-800">
+        <div className="px-5 py-3 border-b border-[#3d3d3d]">
           <div className="flex items-center gap-2.5">
             <img src="/logo.svg" alt="" className="w-7 h-7 shrink-0" />
-            <span className="text-zinc-100 font-semibold text-sm">Portal CMS</span>
+            <span className="text-white font-semibold text-sm">Portal CMS</span>
           </div>
         </div>
 
-        {/* ← マイ プロフィール */}
-        <div className="px-4 py-4 border-b border-zinc-800 flex items-center gap-2">
-          <button
-            onClick={() => navigate(`/${uuid}/home/overview`)}
-            className="text-zinc-400 hover:text-zinc-200 transition-colors shrink-0"
-            aria-label="ホームに戻る"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
-          </button>
-          <p className="text-sm font-semibold text-zinc-100">マイ プロフィール</p>
-        </div>
+        {/* ← マイ プロフィール (トレース対象UI) */}
+        <header className="w-full h-[60px] flex items-center z-1 shrink-0 border-b border-[#3d3d3d]">
+          <div className="flex items-center relative w-full h-[42px]">
+            {/* 矢印コンテナ（クリック可能） */}
+            <div className="h-full flex items-center justify-center shrink-0" style={{ width: '55px' }}>
+              <button
+                onClick={() => navigate(`/${uuid}/home/overview`)}
+                style={{ cursor: 'pointer' }}
+                className="h-full flex items-center justify-center w-full text-[#4693ff] hover:text-[#3860be] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[#4693ff] rounded-sm"
+                aria-label="戻る"
+              >
+                <svg 
+                  aria-label="戻る" 
+                  role="img" 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  viewBox="0 0 16 16" 
+                  width="20"
+                  height="20"
+                  fill="currentColor"
+                  stroke="currentColor"
+                  strokeWidth="0.5"
+                >
+                  <path d="M14 7.5H3.439l4.29-4.387-.714-.699L1.55 8l5.465 5.586.714-.7L3.44 8.5h10.56v-1z"></path>
+                </svg>
+              </button>
+            </div>
+            {/* タイトルテキスト（クリック不可） */}
+            <span className="flex-1 flex items-center justify-between relative">
+              <p className="w-full text-white max-w-[167px] whitespace-nowrap overflow-hidden text-ellipsis font-semibold text-sm cursor-default select-none m-0">
+                <span>マイ プロフィール</span>
+              </p>
+            </span>
+          </div>
+        </header>
 
+        {/* ナビゲーションメニュー */}
         <nav className="flex-1 px-2 py-3 space-y-0.5">
           {profileNav.map(({ to, label }) => (
             <NavLink
@@ -48,8 +69,8 @@ export function ProfileLayout() {
               className={({ isActive }) =>
                 `flex items-center px-3 py-2 rounded-lg text-sm transition-colors ${
                   isActive
-                    ? 'bg-zinc-800 text-zinc-100 font-medium'
-                    : 'text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200'
+                    ? 'bg-[#222222] text-white font-medium'
+                    : 'text-[#999999] hover:bg-[#222222]/60 hover:text-white'
                 }`
               }
             >
