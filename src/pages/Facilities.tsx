@@ -35,8 +35,10 @@ function FacilityModal({ initial, onClose, onSave }: ModalProps) {
     try {
       await onSave({ name: name.trim(), prefecture: prefecture.trim(), address: address.trim() });
       onClose();
-    } catch {
-      setError('保存に失敗しました。');
+    } catch (e) {
+      console.error('[addFacility]', e);
+      const msg = e instanceof Error ? e.message : String(e);
+      setError(`保存に失敗しました: ${msg}`);
       setSaving(false);
     }
   }
