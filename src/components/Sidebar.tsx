@@ -42,28 +42,8 @@ export function Sidebar() {
         </div>
       </div>
 
-      {/* ナビゲーション */}
-      <nav className="flex-1 px-2 py-3 space-y-0.5">
-        {navItems.map(({ to, label }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={to === '/'}
-            className={({ isActive }) =>
-              `flex items-center px-3 py-2 rounded-lg text-sm transition-colors ${
-                isActive
-                  ? 'bg-zinc-800 text-zinc-100 font-medium'
-                  : 'text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200'
-              }`
-            }
-          >
-            {label}
-          </NavLink>
-        ))}
-      </nav>
-
       {/* ユーザーメニュー */}
-      <div className="px-2 py-3 border-t border-zinc-800">
+      <div className="px-2 py-3 border-b border-zinc-800">
         <button
           onClick={() => setUserOpen(o => !o)}
           className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-zinc-800/60 transition-colors group"
@@ -119,6 +99,26 @@ export function Sidebar() {
           <p className="px-3 mt-0.5 text-xs text-zinc-600 truncate">{email}</p>
         )}
       </div>
+
+      {/* ナビゲーション */}
+      <nav className="flex-1 px-2 py-3 space-y-0.5">
+        {navItems.map(({ to, label }) => (
+          <NavLink
+            key={to}
+            to={to}
+            end={to === '/'}
+            className={({ isActive }) =>
+              `flex items-center px-3 py-2 rounded-lg text-sm transition-colors ${
+                isActive
+                  ? 'bg-zinc-800 text-zinc-100 font-medium'
+                  : 'text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200'
+              }`
+            }
+          >
+            {label}
+          </NavLink>
+        ))}
+      </nav>
     </aside>
   );
 }
