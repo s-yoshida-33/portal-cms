@@ -2,23 +2,23 @@ import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
-  subscribeFacilities,
+  subscribeProjects,
   subscribeDevices,
-  addFacility,
-  updateFacility,
+  addProject,
+  updateProject,
   requestDeletion,
 } from '../lib/firestore';
-import type { FacilityDoc, Device } from '../types';
+import type { ProjectDoc, Device } from '../types';
 
-// ── 施設追加・編集モーダル ─────────────────────────────────────────
+// ── プロジェクト追加・編集モーダル ────────────────────────────────
 
 interface ModalProps {
-  initial: FacilityDoc | null;
+  initial: ProjectDoc | null;
   onClose: () => void;
-  onSave:  (data: Pick<FacilityDoc, 'name' | 'prefecture' | 'address'>) => Promise<void>;
+  onSave:  (data: Pick<ProjectDoc, 'name' | 'prefecture' | 'address'>) => Promise<void>;
 }
 
-function FacilityModal({ initial, onClose, onSave }: ModalProps) {
+function ProjectModal({ initial, onClose, onSave }: ModalProps) {
   const [name,       setName]       = useState(initial?.name       ?? '');
   const [prefecture, setPrefecture] = useState(initial?.prefecture ?? '');
   const [address,    setAddress]    = useState(initial?.address    ?? '');
@@ -36,7 +36,6 @@ function FacilityModal({ initial, onClose, onSave }: ModalProps) {
       await onSave({ name: name.trim(), prefecture: prefecture.trim(), address: address.trim() });
       onClose();
     } catch (e) {
-      console.error('[addFacility]', e);
       const msg = e instanceof Error ? e.message : String(e);
       setError(`保存に失敗しました: ${msg}`);
       setSaving(false);
@@ -53,11 +52,11 @@ function FacilityModal({ initial, onClose, onSave }: ModalProps) {
         onClick={e => e.stopPropagation()}
       >
         <h2 className="text-white text-lg font-semibold mb-5">
-          {initial ? '施設を編集' : '施設を追加'}
+          {initial ? 'プロジェクトを編集' : 'プロジェクトを追加'}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm text-zinc-400 mb-1.5">施設名</label>
+            <label className="block text-sm text-zinc-400 mb-1.5">プロジェクト名</label>
             <input value={name} onChange={e => setName(e.target.value)}
               placeholder="〇〇ショッピングセンター" className={inputClass} />
           </div>
@@ -91,12 +90,12 @@ function FacilityModal({ initial, onClose, onSave }: ModalProps) {
 // ── 削除依頼確認モーダル ───────────────────────────────────────────
 
 interface DeleteConfirmProps {
-  facility:  FacilityDoc;
+  project:   ProjectDoc;
   onClose:   () => void;
   onConfirm: () => Promise<void>;
 }
 
-function DeleteConfirm({ facility, onClose, onConfirm }: DeleteConfirmProps) {
+function DeleteConfirm({ project, onClose, onConfirm }: DeleteConfirmProps) {
   const [sending, setSending] = useState(false);
 
   async function handleConfirm() {
@@ -117,7 +116,7 @@ function DeleteConfirm({ facility, onClose, onConfirm }: DeleteConfirmProps) {
       >
         <h2 className="text-white text-lg font-semibold mb-2">削除依頼を送信</h2>
         <p className="text-zinc-400 text-sm mb-5">
-          「{facility.name}」の削除依頼をオーナーに送信します。<br />
+          「{project.name}」の削除依頼をオーナーに送信します。<br />
           オーナーが承認するまで削除は実行されません。
         </p>
         <div className="flex justify-end gap-2">
@@ -137,21 +136,21 @@ function DeleteConfirm({ facility, onClose, onConfirm }: DeleteConfirmProps) {
 
 // ── メインページ ──────────────────────────────────────────────────
 
-export function Facilities() {
+export function Projects() {
   const { user, role } = useAuth();
   const { uuid } = useParams<{ uuid: string }>();
 
-  const [facilities,   setFacilities]   = useState<FacilityDoc[]>([]);
+  const [projects,     setProjects]     = useState<ProjectDoc[]>([]);
   const [devices,      setDevices]      = useState<Device[]>([]);
   const [loading,      setLoading]      = useState(true);
   const [modalOpen,    setModalOpen]    = useState(false);
-  const [editTarget,   setEditTarget]   = useState<FacilityDoc | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<FacilityDoc | null>(null);
+  const [editTarget,   setEditTarget]   = useState<ProjectDoc | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ProjectDoc | null>(null);
 
   useEffect(() => {
     let first = true;
-    const u1 = subscribeFacilities(fs => {
-      setFacilities(fs);
+    const u1 = subscribeProjects(ps => {
+      setProjects(ps);
       if (first) { setLoading(false); first = false; }
     });
     const u2 = subscribeDevices(setDevices);
@@ -160,20 +159,20 @@ export function Facilities() {
 
   const canEdit = role === 'admin' || role === 'owner';
 
-  const deviceCount = (facilityId: string) =>
-    devices.filter(d => d.facilityId === facilityId).length;
+  const deviceCount = (projectId: string) =>
+    devices.filter(d => d.facilityId === projectId).length;
 
-  async function handleSave(data: Pick<FacilityDoc, 'name' | 'prefecture' | 'address'>) {
+  async function handleSave(data: Pick<ProjectDoc, 'name' | 'prefecture' | 'address'>) {
     if (editTarget) {
-      await updateFacility(editTarget.id, data);
+      await updateProject(editTarget.id, data);
     } else {
-      await addFacility(data);
+      await addProject(data);
     }
   }
 
   async function handleDeleteRequest() {
     if (!deleteTarget || !user) return;
-    await requestDeletion('facility', deleteTarget.id, deleteTarget.name, user.uid, user.email ?? '');
+    await requestDeletion('project', deleteTarget.id, deleteTarget.name, user.uid, user.email ?? '');
   }
 
   return (
@@ -186,8 +185,8 @@ export function Facilities() {
       {/* ページヘッダー */}
       <div className="flex items-center justify-between gap-4 py-6 px-4 sm:px-6">
         <div className="flex flex-col gap-2">
-          <h1 className="text-white text-3xl font-semibold">施設管理</h1>
-          <p className="text-[#999999] text-base">登録施設の確認・追加・編集</p>
+          <h1 className="text-white text-3xl font-semibold">プロジェクト管理</h1>
+          <p className="text-[#999999] text-base">登録プロジェクトの確認・追加・編集</p>
         </div>
         {canEdit && (
           <button
@@ -198,7 +197,7 @@ export function Facilities() {
               stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
             </svg>
-            施設を追加
+            プロジェクトを追加
           </button>
         )}
       </div>
@@ -209,15 +208,15 @@ export function Facilities() {
           <div className="overflow-hidden rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-12 text-center">
             <p className="text-zinc-500 text-sm">読み込み中...</p>
           </div>
-        ) : facilities.length === 0 ? (
+        ) : projects.length === 0 ? (
           <div className="overflow-hidden rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-12 text-center">
-            <p className="text-zinc-500 text-sm">施設が登録されていません。</p>
+            <p className="text-zinc-500 text-sm">プロジェクトが登録されていません。</p>
             {canEdit && (
               <button
                 onClick={() => { setEditTarget(null); setModalOpen(true); }}
                 className="mt-4 text-[#4693ff] text-sm hover:underline cursor-pointer"
               >
-                最初の施設を追加する
+                最初のプロジェクトを追加する
               </button>
             )}
           </div>
@@ -225,7 +224,7 @@ export function Facilities() {
           <div className="overflow-hidden rounded-lg ring-1 ring-[#3d3d3d]">
             {/* テーブルヘッダー */}
             <div className="grid grid-cols-[1fr_110px_1.2fr_72px_160px] gap-4 px-4 py-3 bg-black border-b border-[#3d3d3d] text-xs font-medium text-zinc-500 uppercase tracking-wider">
-              <span>施設名</span>
+              <span>プロジェクト名</span>
               <span>都道府県</span>
               <span>住所</span>
               <span>台数</span>
@@ -233,34 +232,34 @@ export function Facilities() {
             </div>
 
             {/* テーブル行 */}
-            {facilities.map((f, i) => (
+            {projects.map((p, i) => (
               <div
-                key={f.id}
+                key={p.id}
                 className={`grid grid-cols-[1fr_110px_1.2fr_72px_160px] gap-4 px-4 py-4 items-center bg-[#111111] hover:bg-[#161616] transition-colors ${
-                  i < facilities.length - 1 ? 'border-b border-[#3d3d3d]' : ''
+                  i < projects.length - 1 ? 'border-b border-[#3d3d3d]' : ''
                 }`}
               >
                 <Link
-                  to={`/${uuid}/facilities/${f.id}`}
+                  to={`/${uuid}/projects/${p.id}`}
                   className="text-white text-sm font-medium hover:text-[#4693ff] transition-colors truncate"
                 >
-                  {f.name}
+                  {p.name}
                 </Link>
-                <span className="text-zinc-400 text-sm">{f.prefecture}</span>
-                <span className="text-zinc-400 text-sm truncate">{f.address}</span>
+                <span className="text-zinc-400 text-sm">{p.prefecture}</span>
+                <span className="text-zinc-400 text-sm truncate">{p.address}</span>
                 <span className="text-zinc-300 text-sm font-medium tabular-nums">
-                  {deviceCount(f.id)}
+                  {deviceCount(p.id)}
                 </span>
                 {canEdit ? (
                   <div className="flex items-center gap-2 justify-end">
                     <button
-                      onClick={() => { setEditTarget(f); setModalOpen(true); }}
+                      onClick={() => { setEditTarget(p); setModalOpen(true); }}
                       className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
                     >
                       編集
                     </button>
                     <button
-                      onClick={() => setDeleteTarget(f)}
+                      onClick={() => setDeleteTarget(p)}
                       className="h-7 px-3 rounded-md text-xs text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-1 ring-red-900/50 transition-colors cursor-pointer"
                     >
                       削除依頼
@@ -277,7 +276,7 @@ export function Facilities() {
 
       {/* モーダル */}
       {modalOpen && (
-        <FacilityModal
+        <ProjectModal
           initial={editTarget}
           onClose={() => setModalOpen(false)}
           onSave={handleSave}
@@ -285,7 +284,7 @@ export function Facilities() {
       )}
       {deleteTarget && (
         <DeleteConfirm
-          facility={deleteTarget}
+          project={deleteTarget}
           onClose={() => setDeleteTarget(null)}
           onConfirm={handleDeleteRequest}
         />

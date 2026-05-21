@@ -7,8 +7,8 @@ import { ProfileLayout } from './layouts/ProfileLayout';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { Home } from './pages/Home';
-import { FacilityDetail } from './pages/FacilityDetail';
-import { Facilities } from './pages/Facilities';
+import { ProjectDetail } from './pages/ProjectDetail';
+import { Projects } from './pages/Projects';
 import { DeletionRequests } from './pages/DeletionRequests';
 import { Placeholder } from './pages/Placeholder';
 import { ProfileSettings } from './pages/profile/Settings';
@@ -38,9 +38,9 @@ export default function App() {
             <Route index element={<IndexRedirect />} />
             <Route path=":uuid">
               <Route path="home/overview" element={<Home />} />
-              <Route path="facilities">
-                <Route index element={<Facilities />} />
-                <Route path=":id" element={<FacilityDetail />} />
+              <Route path="projects">
+                <Route index element={<Projects />} />
+                <Route path=":id" element={<ProjectDetail />} />
               </Route>
               <Route path="deletion-requests" element={<DeletionRequests />} />
               <Route path="logs"     element={<Placeholder title="ログ" />} />

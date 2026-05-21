@@ -20,24 +20,24 @@ service cloud.firestore {
       return isAuth() && (r == 'admin' || r == 'owner');
     }
 
-    // ── 施設 ──────────────────────────────────────────────
-    match /facilities/{facilityId} {
-      allow read:          if isAuth();
+    // ── プロジェクト ──────────────────────────────────────
+    match /projects/{projectId} {
+      allow read:           if isAuth();
       allow create, update: if isAdmin();
-      allow delete:        if isOwner(); // 削除依頼承認時のみ（オーナー限定）
+      allow delete:         if isOwner();
     }
 
     // ── デバイス ──────────────────────────────────────────
     match /devices/{deviceId} {
-      allow read:          if isAuth();
+      allow read:           if isAuth();
       allow create, update: if isAdmin();
-      allow delete:        if isOwner();
+      allow delete:         if isOwner();
     }
 
     // ── 承認待ちデバイス ──────────────────────────────────
     match /pendingDevices/{deviceId} {
-      allow read:          if isAdmin();
-      allow create:        if false;           // Cloud Functions のみ作成可
+      allow read:           if isAdmin();
+      allow create:         if false;
       allow update, delete: if isAdmin();
     }
 
@@ -51,7 +51,7 @@ service cloud.firestore {
     match /apiTokens/{tokenId} {
       allow read:          if isAdmin();
       allow create:        if isAdmin();
-      allow update:        if isAdmin();   // 失効はオーナー以上
+      allow update:        if isAdmin();
       allow delete:        if false;
     }
 
@@ -59,7 +59,7 @@ service cloud.firestore {
     match /deletionRequests/{requestId} {
       allow read:   if isAuth();
       allow create: if isAdmin();
-      allow update: if isOwner(); // 承認・却下はオーナーのみ
+      allow update: if isOwner();
       allow delete: if false;
     }
 

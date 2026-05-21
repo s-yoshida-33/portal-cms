@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { facilities } from '../data/mock';
 import { StatusBadge } from '../components/StatusBadge';
-import type { DeviceStatus } from '../types';
+import type { DeviceStatus, Device } from '../types';
 
 function countByStatus(devices: { status: DeviceStatus }[], status: DeviceStatus) {
   return devices.filter(d => d.status === status).length;
@@ -101,12 +101,12 @@ export function Home() {
             </div>
           </div>
 
-          {/* 施設一覧セクション */}
+          {/* プロジェクト一覧セクション */}
           <div>
             <div className="flex items-center justify-between gap-2 mb-4">
               <div className="flex min-w-0 flex-wrap items-center gap-3">
                 <h5 className="text-lg font-semibold text-white">
-                  <span className="text-balance">施設一覧</span>
+                  <span className="text-balance">プロジェクト一覧</span>
                 </h5>
               </div>
             </div>
@@ -167,7 +167,7 @@ export function Home() {
 
                         {/* ステータスバッジのリスト */}
                         <div className="px-4 py-3 border-t border-[#3d3d3d] flex flex-wrap gap-1.5">
-                          {facility.devices.map(d => (
+                          {facility.devices.map((d: Device) => (
                             <StatusBadge key={d.id} status={d.status} />
                           ))}
                         </div>

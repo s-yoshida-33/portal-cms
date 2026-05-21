@@ -2,14 +2,14 @@ import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
-  subscribeFacilities,
+  subscribeProjects,
   subscribeDevicesByFacility,
   addDevice,
   updateDevice,
   requestDeletion,
 } from '../lib/firestore';
 import { StatusBadge } from '../components/StatusBadge';
-import type { FacilityDoc, Device, AppName } from '../types';
+import type { ProjectDoc, Device, AppName } from '../types';
 
 // ── helpers ──────────────────────────────────────────────────────
 
@@ -182,11 +182,11 @@ function DeleteConfirm({ device, onClose, onConfirm }: DeleteConfirmProps) {
 
 // ── メインページ ──────────────────────────────────────────────────
 
-export function FacilityDetail() {
+export function ProjectDetail() {
   const { user, role } = useAuth();
   const { uuid, id } = useParams<{ uuid: string; id: string }>();
 
-  const [facility,     setFacility]     = useState<FacilityDoc | null>(null);
+  const [project,      setProject]      = useState<ProjectDoc | null>(null);
   const [devices,      setDevices]      = useState<Device[]>([]);
   const [loading,      setLoading]      = useState(true);
   const [modalOpen,    setModalOpen]    = useState(false);
@@ -195,10 +195,8 @@ export function FacilityDetail() {
 
   useEffect(() => {
     if (!id) return;
-    let facilityResolved = false;
-    const u1 = subscribeFacilities(fs => {
-      setFacility(fs.find(f => f.id === id) ?? null);
-      if (!facilityResolved) { facilityResolved = true; }
+    const u1 = subscribeProjects(ps => {
+      setProject(ps.find(p => p.id === id) ?? null);
     });
     const u2 = subscribeDevicesByFacility(
       id,
@@ -241,15 +239,15 @@ export function FacilityDetail() {
     );
   }
 
-  if (!facility) {
+  if (!project) {
     return (
       <div className="flex flex-col min-h-full">
         <div className="py-3 border-b border-zinc-800"><div className="h-7" /></div>
         <div className="p-8">
-          <p className="text-zinc-400 mb-2">施設が見つかりません。</p>
-          <Link to={`/${uuid}/facilities`}
+          <p className="text-zinc-400 mb-2">プロジェクトが見つかりません。</p>
+          <Link to={`/${uuid}/projects`}
             className="text-sm text-[#4693ff] hover:underline">
-            ← 施設一覧に戻る
+            ← プロジェクト一覧に戻る
           </Link>
         </div>
       </div>
@@ -266,12 +264,12 @@ export function FacilityDetail() {
       {/* ページヘッダー */}
       <div className="flex items-start justify-between gap-4 py-6 px-4 sm:px-6">
         <div className="flex flex-col gap-1">
-          <Link to={`/${uuid}/facilities`}
+          <Link to={`/${uuid}/projects`}
             className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors mb-1 inline-block">
-            ← 施設一覧に戻る
+            ← プロジェクト一覧に戻る
           </Link>
-          <h1 className="text-white text-3xl font-semibold">{facility.name}</h1>
-          <p className="text-[#999999] text-base">{facility.address}</p>
+          <h1 className="text-white text-3xl font-semibold">{project.name}</h1>
+          <p className="text-[#999999] text-base">{project.address}</p>
         </div>
         {canEdit && (
           <button

@@ -27,8 +27,8 @@ export function Sidebar() {
   }, [role]);
 
   const navItems = [
-    { to: `${base}/home/overview`,    label: 'ホーム',    badge: 0 },
-    { to: `${base}/facilities`,       label: '施設管理',  badge: 0 },
+    { to: `${base}/home/overview`,    label: 'ホーム',            badge: 0 },
+    { to: `${base}/projects`,         label: 'プロジェクト管理',  badge: 0 },
     ...(role === 'owner' ? [{ to: `${base}/deletion-requests`, label: '削除依頼', badge: pendingCount }] : []),
     { to: `${base}/logs`,             label: 'ログ',      badge: 0 },
     { to: `${base}/settings`,         label: '設定',      badge: 0 },
