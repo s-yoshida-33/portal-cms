@@ -16,7 +16,8 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return isAuth() && (getRole() == 'admin' || getRole() == 'owner');
+      let r = getRole();
+      return isAuth() && (r == 'admin' || r == 'owner');
     }
 
     // ── 施設 ──────────────────────────────────────────────
