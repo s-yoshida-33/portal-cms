@@ -1,5 +1,6 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { Footer } from '../components/Footer';
 
 const profileNav = [
   { to: '/profile/settings', label: '設定' },
@@ -14,7 +15,7 @@ export function ProfileLayout() {
 
   return (
     <div className="flex min-h-screen bg-black">
-      <aside className="w-56 shrink-0 bg-black border-r border-zinc-800 flex flex-col min-h-screen">
+      <aside className="w-56 shrink-0 bg-black border-r border-zinc-800 flex flex-col min-h-screen pb-12">
 
         {/* ロゴ（メインサイドバーと同じ） */}
         <div className="px-5 py-3 border-b border-zinc-800">
@@ -58,9 +59,10 @@ export function ProfileLayout() {
         </nav>
       </aside>
 
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto pb-12">
         <Outlet />
       </main>
+      <Footer />
     </div>
   );
 }
