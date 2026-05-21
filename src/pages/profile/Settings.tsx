@@ -183,7 +183,7 @@ export function ProfileSettings() {
     <div className="min-h-[calc(100vh-56px)] flex flex-col min-w-0 bg-black text-white font-sans">
 
       {/* ロゴエリアと高さを揃えるスペーサー */}
-      <div className="h-[53px]" />
+      <div className="h-[53px] border-b border-[#3d3d3d]" />
 
       {/* Header */}
       <div className="flex items-center justify-between gap-4 py-6 px-4 sm:px-6 border-b border-[#3d3d3d] bg-black">

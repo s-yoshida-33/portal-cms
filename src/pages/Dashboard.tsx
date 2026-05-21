@@ -21,7 +21,7 @@ export function Dashboard() {
     <div className="flex flex-col min-h-full">
 
       {/* ロゴエリアと高さを揃えるスペーサー */}
-      <div className="h-[53px]" />
+      <div className="h-[53px] border-b border-[#3d3d3d]" />
 
       {/* ページヘッダー */}
       <div className="flex items-center gap-4 py-6 px-4 sm:px-6">
