@@ -14,8 +14,8 @@ export function ProfileLayout() {
   const uuid = user?.uid ?? (import.meta.env.DEV ? 'dev' : '');
 
   return (
-    <div className="flex min-h-screen bg-black">
-      <aside className="w-56 shrink-0 bg-black border-r border-[#3d3d3d] flex flex-col min-h-screen">
+    <div className="flex h-screen bg-black">
+      <aside className="w-56 shrink-0 bg-black border-r border-[#3d3d3d] flex flex-col h-full overflow-y-auto">
 
         {/* ロゴ（メインサイドバーと同じ） */}
         <div className="px-5 py-3 border-b border-[#3d3d3d]">
@@ -67,7 +67,7 @@ export function ProfileLayout() {
               key={to}
               to={to}
               className={({ isActive }) =>
-                `flex items-center px-3 py-2 rounded-lg text-sm transition-colors ${
+                `flex items-center px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
                   isActive
                     ? 'bg-[#222222] text-white font-medium'
                     : 'text-[#999999] hover:bg-[#222222]/60 hover:text-white'

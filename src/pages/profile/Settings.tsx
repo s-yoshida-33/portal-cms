@@ -49,6 +49,10 @@ function CustomSelect<T extends string>({ value, onChange, options }: CustomSele
   const selectedIndex = options.findIndex(opt => opt.value === value);
   const currentLabel = options[selectedIndex]?.label ?? '';
 
+  // メニュー開閉アニメーション中に位置が跳ぶのを防ぐため、
+  // 開いた瞬間のインデックスをロックし閉じるまで保持する
+  const [lockedIndex, setLockedIndex] = useState(selectedIndex);
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
@@ -59,23 +63,20 @@ function CustomSelect<T extends string>({ value, onChange, options }: CustomSele
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  /* 【サイズ同期とスムーズなアニメーションロジック】
-    - itemHeight: ボタンと同じ36px
-    - menuPaddingY: メニュー上下の余白(6px)
-    - topOffset: 選択中のアイテムがボタンにピタリと重なるように計算
-    - originY: 開閉アニメーションの起点を「ボタンの垂直方向の中心」に設定し、自然なズームを実現
-  */
   const itemHeight = 36;
   const menuPaddingY = 6;
-  const topOffset = -(selectedIndex * itemHeight + menuPaddingY);
-  const originY = menuPaddingY + selectedIndex * itemHeight + (itemHeight / 2);
+  const topOffset = -(lockedIndex * itemHeight + menuPaddingY);
+  const originY = menuPaddingY + lockedIndex * itemHeight + (itemHeight / 2);
 
   return (
     <div ref={containerRef} className="relative min-w-[200px] w-full sm:w-max">
       {/* トリガーボタン */}
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          if (!isOpen) setLockedIndex(selectedIndex);
+          setIsOpen(o => !o);
+        }}
         style={{ cursor: 'pointer' }}
         className="group flex w-full sm:w-max shrink-0 items-center select-none border-0 shadow-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4693ff] bg-[#111111] text-white ring-1 hover:bg-[#222222] ring-[#3d3d3d] h-9 rounded-lg pl-3 pr-10 text-base font-normal min-w-[200px] justify-between text-left transition-colors"
       >
