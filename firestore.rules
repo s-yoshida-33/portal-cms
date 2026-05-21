@@ -8,7 +8,7 @@ service cloud.firestore {
 
     function getRole() {
       let roleDoc = get(/databases/$(database)/documents/userRoles/$(request.auth.uid));
-      return roleDoc.exists ? roleDoc.data.role : 'user';
+      return roleDoc != null ? roleDoc.data.role : 'user';
     }
 
     function isOwner() {

@@ -200,10 +200,11 @@ export function FacilityDetail() {
       setFacility(fs.find(f => f.id === id) ?? null);
       if (!facilityResolved) { facilityResolved = true; }
     });
-    const u2 = subscribeDevicesByFacility(id, devs => {
-      setDevices(devs);
-      setLoading(false);
-    });
+    const u2 = subscribeDevicesByFacility(
+      id,
+      devs => { setDevices(devs); setLoading(false); },
+      () => setLoading(false),
+    );
     return () => { u1(); u2(); };
   }, [id]);
 

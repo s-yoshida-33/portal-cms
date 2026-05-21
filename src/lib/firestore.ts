@@ -109,11 +109,17 @@ export function subscribeDevices(
 
 export function subscribeDevicesByFacility(
   facilityId: string,
-  onUpdate: (devices: Device[]) => void
+  onUpdate: (devices: Device[]) => void,
+  onError?: (e: Error) => void,
 ): Unsubscribe {
   return onSnapshot(
-    query(col.devices(), where('facilityId', '==', facilityId), orderBy('name')),
-    snap => onUpdate(snap.docs.map(d => fromDoc<Device>(d)))
+    query(col.devices(), where('facilityId', '==', facilityId)),
+    snap => {
+      const devs = snap.docs.map(d => fromDoc<Device>(d));
+      devs.sort((a, b) => a.name.localeCompare(b.name, 'ja'));
+      onUpdate(devs);
+    },
+    onError,
   );
 }
 
