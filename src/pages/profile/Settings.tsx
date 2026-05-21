@@ -182,11 +182,13 @@ export function ProfileSettings() {
   return (
     <div className="min-h-[calc(100vh-56px)] flex flex-col min-w-0 bg-black text-white font-sans">
 
-      {/* ロゴエリアと高さを揃えるスペーサー */}
-      <div className="h-[53px] border-b border-zinc-800" />
+      {/* ロゴエリアと高さを揃えるスペーサー（サイドバーと同じ py-3 + h-7 で高さを一致） */}
+      <div className="py-3 border-b border-zinc-800">
+        <div className="h-7" />
+      </div>
 
       {/* Header */}
-      <div className="flex items-center justify-between gap-4 py-6 px-4 sm:px-6 border-b border-[#3d3d3d] bg-black">
+      <div className="flex items-center justify-between gap-4 py-6 px-4 sm:px-6 border-b border-zinc-800 bg-black">
         <div className="flex flex-col gap-2">
           <h1 className="text-white text-3xl font-semibold">プロフィール</h1>
           <div className="hidden md:block">
@@ -198,7 +200,7 @@ export function ProfileSettings() {
       </div>
 
       {/* Tabs */}
-      <header className="flex items-center justify-between h-[58px] gap-3 px-4 border-b border-[#3d3d3d] sticky z-20 bg-black top-0">
+      <header className="flex items-center justify-between h-[58px] gap-3 px-4 border-b border-zinc-800 sticky z-20 bg-black top-0">
         <div className="relative isolate min-w-0 font-medium">
           <div className="absolute inset-x-0 top-1/2 z-0 -translate-y-1/2 rounded-lg bg-[#222222] h-9"></div>
           <div role="tablist" className="relative flex min-w-0 shrink items-stretch overflow-x-auto rounded-lg bg-[#222222] px-0.5 ring-1 ring-[#3d3d3d] h-9">
