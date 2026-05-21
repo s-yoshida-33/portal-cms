@@ -180,7 +180,7 @@ export function ProfileSettings() {
   ];
 
   return (
-    <div className="min-h-[calc(100vh-56px)] flex flex-col min-w-0 bg-black text-white font-sans">
+    <div className="flex flex-col min-w-0 bg-black text-white font-sans">
 
       {/* ロゴエリアと高さを揃えるスペーサー（サイドバーと同じ py-3 + h-7 で高さを一致） */}
       <div className="py-3 border-b border-zinc-800">

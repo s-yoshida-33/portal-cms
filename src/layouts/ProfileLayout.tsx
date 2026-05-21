@@ -15,7 +15,7 @@ export function ProfileLayout() {
 
   return (
     <div className="flex min-h-screen bg-black">
-      <aside className="w-56 shrink-0 bg-black border-r border-zinc-800 flex flex-col min-h-screen pb-12">
+      <aside className="w-56 shrink-0 bg-black border-r border-zinc-800 flex flex-col min-h-screen">
 
         {/* ロゴ（メインサイドバーと同じ） */}
         <div className="px-5 py-3 border-b border-zinc-800">
@@ -59,10 +59,12 @@ export function ProfileLayout() {
         </nav>
       </aside>
 
-      <main className="flex-1 overflow-auto pb-12">
-        <Outlet />
+      <main className="flex-1 flex flex-col overflow-auto">
+        <div className="flex-1">
+          <Outlet />
+        </div>
+        <Footer />
       </main>
-      <Footer />
     </div>
   );
 }
