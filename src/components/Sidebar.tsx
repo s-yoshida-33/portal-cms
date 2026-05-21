@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useParams } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
+import { subscribeDeletionRequests } from '../lib/firestore';
 
 const userMenuItems = [
   { label: 'プロフィール', to: '/profile/settings' },
@@ -11,17 +12,26 @@ const userMenuItems = [
 ];
 
 export function Sidebar() {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const navigate = useNavigate();
   const { uuid } = useParams<{ uuid: string }>();
-  const [userOpen, setUserOpen] = useState(false);
+  const [userOpen,        setUserOpen]        = useState(false);
+  const [pendingCount,    setPendingCount]    = useState(0);
 
   const base = uuid ? `/${uuid}` : '';
+
+  useEffect(() => {
+    if (role !== 'owner') return;
+    const unsub = subscribeDeletionRequests(reqs => setPendingCount(reqs.length));
+    return unsub;
+  }, [role]);
+
   const navItems = [
-    { to: `${base}/home/overview`, label: 'ホーム' },
-    { to: `${base}/facilities`,    label: '施設管理' },
-    { to: `${base}/logs`,          label: 'ログ' },
-    { to: `${base}/settings`,      label: '設定' },
+    { to: `${base}/home/overview`,    label: 'ホーム',    badge: 0 },
+    { to: `${base}/facilities`,       label: '施設管理',  badge: 0 },
+    ...(role === 'owner' ? [{ to: `${base}/deletion-requests`, label: '削除依頼', badge: pendingCount }] : []),
+    { to: `${base}/logs`,             label: 'ログ',      badge: 0 },
+    { to: `${base}/settings`,         label: '設定',      badge: 0 },
   ];
 
   async function handleSignOut() {
@@ -102,13 +112,13 @@ export function Sidebar() {
 
       {/* ナビゲーション */}
       <nav className="flex-1 px-2 py-3 space-y-0.5">
-        {navItems.map(({ to, label }) => (
+        {navItems.map(({ to, label, badge }) => (
           <NavLink
             key={to}
             to={to}
             end={to === '/'}
             className={({ isActive }) =>
-              `flex items-center px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
+              `flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
                 isActive
                   ? 'bg-zinc-800 text-zinc-100 font-medium'
                   : 'text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200'
@@ -116,6 +126,11 @@ export function Sidebar() {
             }
           >
             {label}
+            {badge > 0 && (
+              <span className="flex items-center justify-center h-4 min-w-4 px-1 rounded-full bg-red-600 text-white text-[10px] font-semibold">
+                {badge}
+              </span>
+            )}
           </NavLink>
         ))}
       </nav>
