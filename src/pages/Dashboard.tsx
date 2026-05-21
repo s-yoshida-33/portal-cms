@@ -20,8 +20,11 @@ export function Dashboard() {
   return (
     <div className="flex flex-col min-h-full">
 
+      {/* ロゴエリアと高さを揃えるスペーサー */}
+      <div className="h-[53px]" />
+
       {/* ページヘッダー */}
-      <div className="flex items-center gap-4 py-6 px-4 sm:px-6 border-b border-[#3d3d3d]">
+      <div className="flex items-center gap-4 py-6 px-4 sm:px-6">
         <div className="flex flex-col gap-2">
           <h1 className="text-white text-3xl font-semibold">ホーム</h1>
           <p className="text-[#999999] text-base">{email}</p>

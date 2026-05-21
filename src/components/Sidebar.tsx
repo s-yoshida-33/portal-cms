@@ -35,7 +35,7 @@ export function Sidebar() {
   return (
     <aside className="w-56 shrink-0 bg-black border-r border-zinc-800 flex flex-col min-h-screen">
       {/* ロゴ */}
-      <div className="px-5 py-5 border-b border-zinc-800">
+      <div className="px-5 py-3 border-b border-zinc-800">
         <div className="flex items-center gap-2.5">
           <img src="/logo.svg" alt="" className="w-7 h-7 shrink-0" />
           <span className="text-zinc-100 font-semibold text-sm">Portal CMS</span>

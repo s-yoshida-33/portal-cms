@@ -13,11 +13,11 @@ export function ProfileLayout() {
   const uuid = user?.uid ?? (import.meta.env.DEV ? 'dev' : '');
 
   return (
-    <div className="flex min-h-screen bg-zinc-950">
-      <aside className="w-56 shrink-0 bg-zinc-900 border-r border-zinc-800 flex flex-col min-h-screen">
+    <div className="flex min-h-screen bg-black">
+      <aside className="w-56 shrink-0 bg-black border-r border-zinc-800 flex flex-col min-h-screen">
 
         {/* ロゴ（メインサイドバーと同じ） */}
-        <div className="px-5 py-5 border-b border-zinc-800">
+        <div className="px-5 py-3 border-b border-zinc-800">
           <div className="flex items-center gap-2.5">
             <img src="/logo.svg" alt="" className="w-7 h-7 shrink-0" />
             <span className="text-zinc-100 font-semibold text-sm">Portal CMS</span>
