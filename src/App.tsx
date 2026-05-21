@@ -9,6 +9,7 @@ import { Signup } from './pages/Signup';
 import { Home } from './pages/Home';
 import { FacilityDetail } from './pages/FacilityDetail';
 import { Facilities } from './pages/Facilities';
+import { DeletionRequests } from './pages/DeletionRequests';
 import { Placeholder } from './pages/Placeholder';
 import { ProfileSettings } from './pages/profile/Settings';
 
@@ -41,6 +42,7 @@ export default function App() {
                 <Route index element={<Facilities />} />
                 <Route path=":id" element={<FacilityDetail />} />
               </Route>
+              <Route path="deletion-requests" element={<DeletionRequests />} />
               <Route path="logs"     element={<Placeholder title="ログ" />} />
               <Route path="settings" element={<Placeholder title="設定" />} />
             </Route>
