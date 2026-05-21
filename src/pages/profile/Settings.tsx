@@ -186,9 +186,9 @@ export function ProfileSettings() {
   ];
 
   const appearanceOptions: SelectOption<Appearance>[] = [
-    { value: 'light',  label: 'ライト（準備中）' },
+    { value: 'light',  label: 'ライト' },
     { value: 'dark',   label: 'ダーク' },
-    { value: 'system', label: 'システム設定を使用（準備中）' },
+    { value: 'system', label: 'システム設定を使用' },
   ];
 
   return (
