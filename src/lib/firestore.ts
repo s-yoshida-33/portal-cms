@@ -170,6 +170,10 @@ export async function setUserRole(
   await setDoc(doc(col.userRoles(), uid), { uid, ...data }, { merge: true });
 }
 
+export async function removeUserRole(uid: string): Promise<void> {
+  await deleteDoc(doc(col.userRoles(), uid));
+}
+
 // ================================================================
 // API Tokens
 // ================================================================

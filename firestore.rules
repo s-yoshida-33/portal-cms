@@ -43,8 +43,10 @@ service cloud.firestore {
 
     // ── ユーザーロール ────────────────────────────────────
     match /userRoles/{uid} {
-      allow read:  if isAuth();
-      allow write: if isOwner();
+      allow read:          if isAuth();
+      allow create:        if isAuth() && request.auth.uid == uid
+                              && request.resource.data.role == 'user';
+      allow update, delete: if isOwner();
     }
 
     // ── API トークン ──────────────────────────────────────
