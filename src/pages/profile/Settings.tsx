@@ -378,7 +378,7 @@ export function ProfileSettings() {
             <li><a className="text-[#999999] no-underline transition-colors hover:text-white" href="#">利用規約</a></li>
             <li><a className="text-[#999999] no-underline transition-colors hover:text-white" href="#">セキュリティ問題を報告する</a></li>
             <li><a className="text-[#999999] no-underline transition-colors hover:text-white" href="#">プライバシー ポリシー</a></li>
-            <li><span className="text-sm text-[#797979]">&copy; 2026 Toei Techno International Inc.</span></li>
+            <li><span className="text-sm text-white">&copy; 2026 Toei Techno International Inc.</span></li>
           </ul>
         </div>
       </footer>
