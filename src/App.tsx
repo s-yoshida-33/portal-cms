@@ -6,7 +6,7 @@ import { Layout } from './components/Layout';
 import { ProfileLayout } from './layouts/ProfileLayout';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
-import { Dashboard } from './pages/Dashboard';
+import { Home } from './pages/Home';
 import { FacilityDetail } from './pages/FacilityDetail';
 import { Placeholder } from './pages/Placeholder';
 import { ProfileSettings } from './pages/profile/Settings';
@@ -35,7 +35,7 @@ export default function App() {
           >
             <Route index element={<IndexRedirect />} />
             <Route path=":uuid">
-              <Route path="home/overview" element={<Dashboard />} />
+              <Route path="home/overview" element={<Home />} />
               <Route path="facilities">
                 <Route index element={<Placeholder title="施設管理" />} />
                 <Route path=":id" element={<FacilityDetail />} />

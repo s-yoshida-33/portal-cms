@@ -8,7 +8,7 @@ function countByStatus(devices: { status: DeviceStatus }[], status: DeviceStatus
   return devices.filter(d => d.status === status).length;
 }
 
-export function Dashboard() {
+export function Home() {
   const { user } = useAuth();
   const email = user?.email ?? '';
 
@@ -120,7 +120,7 @@ export function Dashboard() {
 
                 return (
                   <div key={facility.id} className="overflow-hidden rounded-lg bg-[#111111] shadow-xs ring-1 ring-[#3d3d3d] w-full h-full flex flex-col transition-colors hover:ring-[#4693ff]">
-                    <Link to={`/facilities/${facility.id}`} className="flex-1 flex flex-col no-underline text-inherit group outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#4693ff]">
+                    <Link to={`/facilities/${facility.id}`} className="flex-1 flex flex-col no-underline text-inherit group outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#4693ff] cursor-pointer">
                       
                       {/* ホバー時の色も bg-[#111111] に調整 */}
                       <header className="justify-between py-0 flex items-center gap-2 bg-black group-hover:bg-[#111111] transition-colors border-b border-[#3d3d3d] h-14 px-4 text-base font-medium text-[#999999]">

@@ -33,7 +33,7 @@ export function Sidebar() {
   const email = user?.email ?? '';
 
   return (
-    <aside className="w-56 shrink-0 bg-black border-r border-zinc-800 flex flex-col min-h-screen">
+    <aside className="w-56 shrink-0 bg-black border-r border-zinc-800 flex flex-col h-full overflow-y-auto">
       {/* ロゴ */}
       <div className="px-5 py-3 border-b border-zinc-800">
         <div className="flex items-center gap-2.5">
@@ -46,7 +46,7 @@ export function Sidebar() {
       <div className="px-2 py-3 border-b border-zinc-800">
         <button
           onClick={() => setUserOpen(o => !o)}
-          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-zinc-800/60 transition-colors group"
+          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-zinc-800/60 transition-colors group cursor-pointer"
         >
           {/* アバター */}
           <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center shrink-0 text-white text-xs font-medium">
@@ -75,7 +75,7 @@ export function Sidebar() {
                 key={to}
                 to={to}
                 className={({ isActive }) =>
-                  `flex items-center pl-11 pr-3 py-2 rounded-lg text-sm transition-colors ${
+                  `flex items-center pl-11 pr-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
                     isActive
                       ? 'bg-zinc-800 text-zinc-100'
                       : 'text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200'
@@ -87,7 +87,7 @@ export function Sidebar() {
             ))}
             <button
               onClick={handleSignOut}
-              className="w-full flex items-center pl-11 pr-3 py-2 rounded-lg text-sm text-red-400 hover:bg-red-950/40 hover:text-red-300 transition-colors"
+              className="w-full flex items-center pl-11 pr-3 py-2 rounded-lg text-sm text-red-400 hover:bg-red-950/40 hover:text-red-300 transition-colors cursor-pointer"
             >
               ログアウト
             </button>
@@ -108,7 +108,7 @@ export function Sidebar() {
             to={to}
             end={to === '/'}
             className={({ isActive }) =>
-              `flex items-center px-3 py-2 rounded-lg text-sm transition-colors ${
+              `flex items-center px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
                 isActive
                   ? 'bg-zinc-800 text-zinc-100 font-medium'
                   : 'text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200'
