@@ -54,7 +54,7 @@ export function Home() {
               <div className="overflow-hidden rounded-lg bg-[#111111] shadow-xs ring-1 ring-[#3d3d3d] w-full flex flex-col">
                 <header className="justify-between py-0 flex items-center gap-2 bg-black border-b border-[#3d3d3d] h-14 px-4 text-base font-medium text-[#999999]">
                   <div className="flex min-w-0 items-center gap-2">
-                    <span className="truncate text-white">施設数</span>
+                    <span className="truncate text-white">プロジェクト数</span>
                   </div>
                 </header>
                 <div className="p-4 flex flex-col justify-center min-h-22">
