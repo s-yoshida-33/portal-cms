@@ -8,6 +8,7 @@ import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { Home } from './pages/Home';
 import { FacilityDetail } from './pages/FacilityDetail';
+import { Facilities } from './pages/Facilities';
 import { Placeholder } from './pages/Placeholder';
 import { ProfileSettings } from './pages/profile/Settings';
 
@@ -37,7 +38,7 @@ export default function App() {
             <Route path=":uuid">
               <Route path="home/overview" element={<Home />} />
               <Route path="facilities">
-                <Route index element={<Placeholder title="施設管理" />} />
+                <Route index element={<Facilities />} />
                 <Route path=":id" element={<FacilityDetail />} />
               </Route>
               <Route path="logs"     element={<Placeholder title="ログ" />} />
