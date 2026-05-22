@@ -29,8 +29,11 @@ export function Sidebar() {
   const navItems = [
     { to: `${base}/home/overview`,    label: 'ホーム',            badge: 0 },
     { to: `${base}/projects`,         label: 'プロジェクト管理',  badge: 0 },
+    ...(role === 'admin' || role === 'owner' ? [
+      { to: `${base}/api-tokens`, label: 'API トークン', badge: 0 },
+    ] : []),
     ...(role === 'owner' ? [
-      { to: `${base}/deletion-requests`, label: '削除依頼',   badge: pendingCount },
+      { to: `${base}/deletion-requests`, label: '削除依頼',    badge: pendingCount },
       { to: `${base}/users`,             label: 'ユーザー管理', badge: 0 },
     ] : []),
     { to: `${base}/logs`,             label: 'ログ',      badge: 0 },
