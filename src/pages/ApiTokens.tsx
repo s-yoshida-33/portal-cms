@@ -1,0 +1,310 @@
+import { useState, useEffect } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { subscribeApiTokens, createApiToken, revokeApiToken } from '../lib/firestore';
+import type { ApiToken, ApiTokenType } from '../types';
+
+// ── helpers ──────────────────────────────────────────────────────
+
+const typeLabel: Record<ApiTokenType, string> = {
+  registration: '登録用',
+  device:       'デバイス用',
+};
+
+const typeBadge: Record<ApiTokenType, string> = {
+  registration: 'text-green-400 bg-green-950/40 ring-1 ring-green-900/50',
+  device:       'text-blue-400 bg-blue-950/40 ring-1 ring-blue-900/50',
+};
+
+function formatDate(iso: string | null) {
+  if (!iso) return '-';
+  return new Date(iso).toLocaleString('ja-JP', {
+    year: 'numeric', month: 'numeric', day: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  });
+}
+
+// ── トークン発行モーダル ──────────────────────────────────────────
+
+interface CreateModalProps {
+  onClose:   () => void;
+  onCreated: (token: string) => void;
+}
+
+function CreateModal({ onClose, onCreated }: CreateModalProps) {
+  const [name,    setName]    = useState('');
+  const [type,    setType]    = useState<ApiTokenType>('registration');
+  const [saving,  setSaving]  = useState(false);
+  const [error,   setError]   = useState('');
+
+  const inputClass =
+    'w-full bg-[#1a1a1a] ring-1 ring-[#3d3d3d] text-white rounded-lg px-3 h-9 text-sm outline-none focus:ring-[#4693ff] focus:ring-2 placeholder:text-zinc-600 transition-all';
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!name.trim()) { setError('名前を入力してください。'); return; }
+    setSaving(true);
+    try {
+      const { token } = await createApiToken(name.trim(), type);
+      onCreated(token);
+    } catch {
+      setError('発行に失敗しました。');
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70" onClick={onClose}>
+      <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl"
+        onClick={e => e.stopPropagation()}>
+        <h2 className="text-white text-lg font-semibold mb-5">トークンを発行</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm text-zinc-400 mb-1.5">名前</label>
+            <input value={name} onChange={e => setName(e.target.value)}
+              placeholder="例: AM須坂 登録用" className={inputClass} />
+          </div>
+          <div>
+            <label className="block text-sm text-zinc-400 mb-1.5">種別</label>
+            <select value={type} onChange={e => setType(e.target.value as ApiTokenType)}
+              className={inputClass}>
+              <option value="registration">登録用（新規デバイス登録）</option>
+              <option value="device">デバイス用（ステータス送信）</option>
+            </select>
+          </div>
+          {error && <p className="text-red-400 text-sm">{error}</p>}
+          <div className="flex justify-end gap-2 pt-2">
+            <button type="button" onClick={onClose}
+              className="h-9 px-4 rounded-lg text-sm text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
+              キャンセル
+            </button>
+            <button type="submit" disabled={saving}
+              className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#4693ff] hover:bg-[#3a7fe0] disabled:opacity-50 transition-colors cursor-pointer">
+              {saving ? '発行中...' : '発行する'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ── トークン表示モーダル（発行直後の1回のみ） ────────────────────
+
+interface TokenRevealProps {
+  token:   string;
+  onClose: () => void;
+}
+
+function TokenReveal({ token, onClose }: TokenRevealProps) {
+  const [copied, setCopied] = useState(false);
+
+  async function handleCopy() {
+    await navigator.clipboard.writeText(token);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+      <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-lg p-6 shadow-2xl">
+        <h2 className="text-white text-lg font-semibold mb-2">トークンを保存してください</h2>
+        <p className="text-zinc-400 text-sm mb-4">
+          このトークンは今後二度と表示されません。必ずコピーして安全な場所に保管してください。
+        </p>
+        <div className="flex items-center gap-2 bg-[#0d0d0d] ring-1 ring-[#3d3d3d] rounded-lg px-3 py-2.5 mb-5">
+          <code className="flex-1 text-xs text-green-400 font-mono break-all">{token}</code>
+          <button onClick={handleCopy}
+            className="shrink-0 h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
+            {copied ? 'コピー済み' : 'コピー'}
+          </button>
+        </div>
+        <div className="flex justify-end">
+          <button onClick={onClose}
+            className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#4693ff] hover:bg-[#3a7fe0] transition-colors cursor-pointer">
+            保存しました
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── 失効確認モーダル ──────────────────────────────────────────────
+
+interface RevokeConfirmProps {
+  token:     ApiToken;
+  onClose:   () => void;
+  onConfirm: () => Promise<void>;
+}
+
+function RevokeConfirm({ token, onClose, onConfirm }: RevokeConfirmProps) {
+  const [running, setRunning] = useState(false);
+
+  async function handle() {
+    setRunning(true);
+    try { await onConfirm(); onClose(); }
+    finally { setRunning(false); }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70" onClick={onClose}>
+      <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl"
+        onClick={e => e.stopPropagation()}>
+        <h2 className="text-white text-lg font-semibold mb-2">トークンを失効</h2>
+        <p className="text-zinc-400 text-sm mb-5">
+          「{token.name}」を失効します。<br />
+          このトークンを使用しているデバイスは認証できなくなります。
+        </p>
+        <div className="flex justify-end gap-2">
+          <button onClick={onClose}
+            className="h-9 px-4 rounded-lg text-sm text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
+            キャンセル
+          </button>
+          <button onClick={handle} disabled={running}
+            className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#e81403] hover:bg-[#b20f03] disabled:opacity-50 transition-colors cursor-pointer">
+            {running ? '処理中...' : '失効する'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── メインページ ──────────────────────────────────────────────────
+
+export function ApiTokens() {
+  const { role } = useAuth();
+  const [tokens,        setTokens]        = useState<ApiToken[]>([]);
+  const [loading,       setLoading]       = useState(true);
+  const [createOpen,    setCreateOpen]    = useState(false);
+  const [revealToken,   setRevealToken]   = useState<string | null>(null);
+  const [revokeTarget,  setRevokeTarget]  = useState<ApiToken | null>(null);
+
+  useEffect(() => {
+    const unsub = subscribeApiTokens(ts => { setTokens(ts); setLoading(false); });
+    return unsub;
+  }, []);
+
+  const canEdit = role === 'admin' || role === 'owner';
+
+  if (!canEdit) {
+    return (
+      <div className="flex flex-col min-h-full">
+        <div className="py-3 border-b border-zinc-800"><div className="h-7" /></div>
+        <div className="p-8">
+          <p className="text-zinc-400 text-sm">このページは管理者以上のみアクセスできます。</p>
+        </div>
+      </div>
+    );
+  }
+
+  const active  = tokens.filter(t => !t.revokedAt);
+  const revoked = tokens.filter(t =>  t.revokedAt);
+
+  function TokenRow({ t }: { t: ApiToken }) {
+    const isRevoked = !!t.revokedAt;
+    return (
+      <div className="grid grid-cols-[1fr_90px_160px_160px_100px_80px] gap-4 px-4 py-3.5 items-center bg-[#111111] hover:bg-[#161616] transition-colors border-b border-[#3d3d3d] last:border-b-0">
+        <span className={`text-sm font-medium truncate ${isRevoked ? 'text-zinc-500 line-through' : 'text-white'}`}>
+          {t.name}
+        </span>
+        <span className={`inline-flex items-center justify-center h-5 px-2 rounded-full text-xs font-medium w-fit ${typeBadge[t.type]}`}>
+          {typeLabel[t.type]}
+        </span>
+        <span className="text-zinc-400 text-xs tabular-nums">{formatDate(t.createdAt)}</span>
+        <span className="text-zinc-400 text-xs tabular-nums">{formatDate(t.lastUsedAt)}</span>
+        <span className={`text-xs font-medium ${isRevoked ? 'text-zinc-600' : 'text-green-400'}`}>
+          {isRevoked ? '失効済み' : '有効'}
+        </span>
+        <div className="flex justify-end">
+          {!isRevoked && (
+            <button onClick={() => setRevokeTarget(t)}
+              className="h-7 px-3 rounded-md text-xs text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-1 ring-red-900/50 transition-colors cursor-pointer">
+              失効
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col min-h-full">
+      <div className="py-3 border-b border-zinc-800"><div className="h-7" /></div>
+
+      <div className="flex items-center justify-between gap-4 py-6 px-4 sm:px-6">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-white text-3xl font-semibold">API トークン</h1>
+          <p className="text-[#999999] text-base">デバイス認証用トークンの発行・管理</p>
+        </div>
+        <button
+          onClick={() => setCreateOpen(true)}
+          className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#4693ff] hover:bg-[#3a7fe0] transition-colors cursor-pointer"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          トークンを発行
+        </button>
+      </div>
+
+      <div className="px-4 sm:px-6 pb-8 space-y-6">
+        {loading ? (
+          <div className="rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-12 text-center">
+            <p className="text-zinc-500 text-sm">読み込み中...</p>
+          </div>
+        ) : (
+          <>
+            {/* 有効なトークン */}
+            <div>
+              <p className="text-sm font-medium text-zinc-400 mb-2">有効 <span className="text-zinc-600">({active.length})</span></p>
+              {active.length === 0 ? (
+                <div className="rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-8 text-center">
+                  <p className="text-zinc-500 text-sm">有効なトークンがありません。</p>
+                </div>
+              ) : (
+                <div className="overflow-hidden rounded-lg ring-1 ring-[#3d3d3d]">
+                  <div className="grid grid-cols-[1fr_90px_160px_160px_100px_80px] gap-4 px-4 py-3 bg-black border-b border-[#3d3d3d] text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                    <span>名前</span><span>種別</span><span>発行日時</span><span>最終使用</span><span>状態</span><span />
+                  </div>
+                  {active.map(t => <TokenRow key={t.id} t={t} />)}
+                </div>
+              )}
+            </div>
+
+            {/* 失効済みトークン */}
+            {revoked.length > 0 && (
+              <div>
+                <p className="text-sm font-medium text-zinc-400 mb-2">失効済み <span className="text-zinc-600">({revoked.length})</span></p>
+                <div className="overflow-hidden rounded-lg ring-1 ring-[#3d3d3d]">
+                  <div className="grid grid-cols-[1fr_90px_160px_160px_100px_80px] gap-4 px-4 py-3 bg-black border-b border-[#3d3d3d] text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                    <span>名前</span><span>種別</span><span>発行日時</span><span>最終使用</span><span>状態</span><span />
+                  </div>
+                  {revoked.map(t => <TokenRow key={t.id} t={t} />)}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {createOpen && (
+        <CreateModal
+          onClose={() => setCreateOpen(false)}
+          onCreated={token => { setCreateOpen(false); setRevealToken(token); }}
+        />
+      )}
+      {revealToken && (
+        <TokenReveal token={revealToken} onClose={() => setRevealToken(null)} />
+      )}
+      {revokeTarget && (
+        <RevokeConfirm
+          token={revokeTarget}
+          onClose={() => setRevokeTarget(null)}
+          onConfirm={() => revokeApiToken(revokeTarget.id)}
+        />
+      )}
+    </div>
+  );
+}
