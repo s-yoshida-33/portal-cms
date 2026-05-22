@@ -38,11 +38,6 @@ export interface ProjectDoc {
   updatedAt:  string;
 }
 
-// mock データ・移行前ページ用（devices 込み）
-export interface Project extends ProjectDoc {
-  devices: Device[];
-}
-
 // Firestore /userRoles/{uid}
 export interface UserRoleRecord {
   uid:         string;
