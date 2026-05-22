@@ -1,0 +1,10 @@
+name            = "portal-cms-api"
+main            = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+[vars]
+FIREBASE_PROJECT_ID = "portal-cms-emk"
+
+# Secrets (set via CLI — never put here):
+#   wrangler secret put GOOGLE_SERVICE_ACCOUNT_EMAIL
+#   wrangler secret put GOOGLE_PRIVATE_KEY
