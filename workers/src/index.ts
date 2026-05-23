@@ -35,7 +35,7 @@ async function getAccessToken(email: string, privateKeyPem: string): Promise<str
   const header  = base64url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
   const payload = base64url(JSON.stringify({
     iss:   email,
-    scope: 'https://www.googleapis.com/auth/datastore',
+    scope: 'https://www.googleapis.com/auth/cloud-platform',
     aud:   'https://oauth2.googleapis.com/token',
     exp:   now + 3600,
     iat:   now,
