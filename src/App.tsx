@@ -12,6 +12,7 @@ import { Projects } from './pages/Projects';
 import { DeletionRequests } from './pages/DeletionRequests';
 import { UserManagement } from './pages/UserManagement';
 import { ApiTokens } from './pages/ApiTokens';
+import { PendingDevices } from './pages/PendingDevices';
 import { Placeholder } from './pages/Placeholder';
 import { ProfileSettings } from './pages/profile/Settings';
 
@@ -46,7 +47,8 @@ export default function App() {
               </Route>
               <Route path="deletion-requests" element={<DeletionRequests />} />
               <Route path="users"            element={<UserManagement />} />
-              <Route path="api-tokens"       element={<ApiTokens />} />
+              <Route path="api-tokens"        element={<ApiTokens />} />
+              <Route path="pending-devices"  element={<PendingDevices />} />
               <Route path="logs"     element={<Placeholder title="ログ" />} />
               <Route path="settings" element={<Placeholder title="設定" />} />
             </Route>

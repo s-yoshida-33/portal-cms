@@ -3,7 +3,7 @@ import { NavLink, useNavigate, useParams } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
-import { subscribeDeletionRequests } from '../lib/firestore';
+import { subscribeDeletionRequests, subscribePendingDevices } from '../lib/firestore';
 
 const userMenuItems = [
   { label: 'プロフィール', to: '/profile/settings' },
@@ -15,8 +15,9 @@ export function Sidebar() {
   const { user, role } = useAuth();
   const navigate = useNavigate();
   const { uuid } = useParams<{ uuid: string }>();
-  const [userOpen,        setUserOpen]        = useState(false);
-  const [pendingCount,    setPendingCount]    = useState(0);
+  const [userOpen,             setUserOpen]             = useState(false);
+  const [pendingCount,         setPendingCount]         = useState(0);
+  const [pendingDevicesCount,  setPendingDevicesCount]  = useState(0);
 
   const base = uuid ? `/${uuid}` : '';
 
@@ -26,11 +27,18 @@ export function Sidebar() {
     return unsub;
   }, [role]);
 
+  useEffect(() => {
+    if (role !== 'admin' && role !== 'owner') return;
+    const unsub = subscribePendingDevices(devs => setPendingDevicesCount(devs.length));
+    return unsub;
+  }, [role]);
+
   const navItems = [
     { to: `${base}/home/overview`,    label: 'ホーム',            badge: 0 },
     { to: `${base}/projects`,         label: 'プロジェクト管理',  badge: 0 },
     ...(role === 'admin' || role === 'owner' ? [
-      { to: `${base}/api-tokens`, label: 'API トークン', badge: 0 },
+      { to: `${base}/api-tokens`,      label: 'API トークン',       badge: 0 },
+      { to: `${base}/pending-devices`, label: '承認待ちデバイス', badge: pendingDevicesCount },
     ] : []),
     ...(role === 'owner' ? [
       { to: `${base}/deletion-requests`, label: '削除依頼',    badge: pendingCount },
