@@ -42,6 +42,7 @@ async function getAccessToken(email: string, privateKeyPem: string): Promise<str
   }));
 
   const pemContent = privateKeyPem
+    .replace(/\\n/g, '\n')
     .replace(/-----BEGIN PRIVATE KEY-----/, '')
     .replace(/-----END PRIVATE KEY-----/, '')
     .replace(/\s+/g, '');
