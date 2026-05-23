@@ -6,4 +6,6 @@ compatibility_date = "2025-01-01"
 FIREBASE_PROJECT_ID = "portal-cms-emk"
 FIREBASE_API_KEY    = "AIzaSyCPyLBMiApOUs3L2K3SVPeF_Z9Klh5jp94"
 
-# GOOGLE_SERVICE_ACCOUNT_EMAIL / GOOGLE_PRIVATE_KEY は不要になりました
+# エンドポイント:
+#   https://portal-cms-api.tti-ninja.workers.dev/v1/register
+#   https://portal-cms-api.tti-ninja.workers.dev/v1/status
