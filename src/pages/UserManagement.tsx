@@ -135,9 +135,9 @@ export function UserManagement() {
             <p className="text-zinc-500 text-sm">ユーザーが登録されていません。</p>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-lg ring-1 ring-[#3d3d3d]">
+          <div className="rounded-lg ring-1 ring-[#3d3d3d]">
             {/* テーブルヘッダー */}
-            <div className="grid grid-cols-[1fr_1fr_100px_120px_120px] gap-4 px-4 py-3 bg-black border-b border-[#3d3d3d] text-xs font-medium text-zinc-500 uppercase tracking-wider">
+            <div className="grid grid-cols-[1fr_1fr_160px_120px_120px] gap-4 px-4 py-3 bg-black rounded-t-lg border-b border-[#3d3d3d] text-xs font-medium text-zinc-500 uppercase tracking-wider">
               <span>表示名</span>
               <span>メール</span>
               <span>ロール</span>
@@ -152,8 +152,8 @@ export function UserManagement() {
               return (
                 <div
                   key={u.uid}
-                  className={`grid grid-cols-[1fr_1fr_100px_120px_120px] gap-4 px-4 py-3.5 items-center bg-[#111111] hover:bg-[#161616] transition-colors ${
-                    i < users.length - 1 ? 'border-b border-[#3d3d3d]' : ''
+                  className={`grid grid-cols-[1fr_1fr_160px_120px_120px] gap-4 px-4 py-3.5 items-center bg-[#111111] hover:bg-[#161616] transition-colors ${
+                    i < users.length - 1 ? 'border-b border-[#3d3d3d]' : 'rounded-b-lg'
                   }`}
                 >
                   {/* 表示名 */}
