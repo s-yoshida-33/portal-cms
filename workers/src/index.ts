@@ -135,10 +135,12 @@ class Firestore {
       },
     };
 
-    const resp    = await fetch(`${this.base}:runQuery`, {
+    const resp = await fetch(`${this.base}:runQuery`, {
       method: 'POST', headers: this.authHeader, body: JSON.stringify(body),
     });
-    const results = await resp.json() as Array<{ document?: unknown }>;
+    const raw = await resp.json();
+    console.log('[query] status:', resp.status, 'body:', JSON.stringify(raw).slice(0, 400));
+    const results = (Array.isArray(raw) ? raw : []) as Array<{ document?: unknown }>;
     return results.filter(r => r.document) as ReturnType<Firestore['query']> extends Promise<infer T> ? T : never;
   }
 
