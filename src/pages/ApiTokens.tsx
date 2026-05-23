@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { subscribeApiTokens, createApiToken, revokeApiToken } from '../lib/firestore';
 import type { ApiToken, ApiTokenType } from '../types';
+import { CustomSelect } from '../components/CustomSelect';
 
 // ── helpers ──────────────────────────────────────────────────────
 
@@ -65,11 +66,15 @@ function CreateModal({ onClose, onCreated }: CreateModalProps) {
           </div>
           <div>
             <label className="block text-sm text-zinc-400 mb-1.5">種別</label>
-            <select value={type} onChange={e => setType(e.target.value as ApiTokenType)}
-              className={inputClass}>
-              <option value="registration">登録用（新規デバイス登録）</option>
-              <option value="device">デバイス用（ステータス送信）</option>
-            </select>
+            <CustomSelect
+              value={type}
+              onChange={val => setType(val as ApiTokenType)}
+              options={[
+                { value: 'registration', label: '登録用（新規デバイス登録）' },
+                { value: 'device',       label: 'デバイス用（ステータス送信）' },
+              ]}
+              className="w-full"
+            />
           </div>
           {error && <p className="text-red-400 text-sm">{error}</p>}
           <div className="flex justify-end gap-2 pt-2">

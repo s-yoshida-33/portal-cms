@@ -8,6 +8,7 @@ import {
   updateDevice,
   requestDeletion,
 } from '../lib/firestore';
+import { CustomSelect } from '../components/CustomSelect';
 import { StatusBadge } from '../components/StatusBadge';
 import type { ProjectDoc, Device, AppName } from '../types';
 
@@ -106,10 +107,12 @@ function DeviceModal({ initial, onClose, onSave }: DeviceModalProps) {
           </div>
           <div>
             <label className="block text-sm text-zinc-400 mb-1.5">アプリ</label>
-            <select value={app} onChange={e => setApp(e.target.value as AppName)}
-              className={inputClass}>
-              {APP_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
-            </select>
+            <CustomSelect
+              value={app}
+              onChange={val => setApp(val as AppName)}
+              options={APP_OPTIONS.map(o => ({ value: o, label: o }))}
+              className="w-full"
+            />
           </div>
           <div>
             <label className="block text-sm text-zinc-400 mb-1.5">バージョン</label>
