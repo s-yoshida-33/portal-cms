@@ -4,7 +4,6 @@ compatibility_date = "2025-01-01"
 
 [vars]
 FIREBASE_PROJECT_ID = "portal-cms-emk"
+FIREBASE_API_KEY    = "AIzaSyCPyLBMiApOUs3L2K3SVPeF_Z9Klh5jp94"
 
-# Secrets (set via CLI — never put here):
-#   wrangler secret put GOOGLE_SERVICE_ACCOUNT_EMAIL
-#   wrangler secret put GOOGLE_PRIVATE_KEY
+# GOOGLE_SERVICE_ACCOUNT_EMAIL / GOOGLE_PRIVATE_KEY は不要になりました

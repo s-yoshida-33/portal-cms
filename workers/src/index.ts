@@ -1,7 +1,6 @@
 export interface Env {
-  GOOGLE_SERVICE_ACCOUNT_EMAIL: string;
-  GOOGLE_PRIVATE_KEY:           string;
-  FIREBASE_PROJECT_ID:          string;
+  FIREBASE_API_KEY:    string;
+  FIREBASE_PROJECT_ID: string;
 }
 
 // ── CORS ──────────────────────────────────────────────────────────────────────
@@ -17,58 +16,6 @@ function jsonRes(data: unknown, status = 200): Response {
     status,
     headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
   });
-}
-
-// ── JWT / Google Auth ─────────────────────────────────────────────────────────
-
-function base64url(input: string | ArrayBuffer): string {
-  const bytes = typeof input === 'string'
-    ? new TextEncoder().encode(input)
-    : new Uint8Array(input);
-  let bin = '';
-  for (const b of bytes) bin += String.fromCharCode(b);
-  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}
-
-async function getAccessToken(email: string, privateKeyPem: string): Promise<string> {
-  const now     = Math.floor(Date.now() / 1000);
-  const header  = base64url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
-  const payload = base64url(JSON.stringify({
-    iss:   email,
-    scope: 'https://www.googleapis.com/auth/cloud-platform',
-    aud:   'https://oauth2.googleapis.com/token',
-    exp:   now + 3600,
-    iat:   now,
-  }));
-
-  const pemContent = privateKeyPem
-    .replace(/\\n/g, '\n')
-    .replace(/-----BEGIN PRIVATE KEY-----/, '')
-    .replace(/-----END PRIVATE KEY-----/, '')
-    .replace(/\s+/g, '');
-  const keyData = Uint8Array.from(atob(pemContent), c => c.charCodeAt(0));
-
-  const key = await crypto.subtle.importKey(
-    'pkcs8', keyData,
-    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
-    false, ['sign']
-  );
-
-  const sig = await crypto.subtle.sign(
-    'RSASSA-PKCS1-v1_5', key,
-    new TextEncoder().encode(`${header}.${payload}`)
-  );
-
-  const jwt = `${header}.${payload}.${base64url(sig)}`;
-
-  const resp = await fetch('https://oauth2.googleapis.com/token', {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body:    `grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${jwt}`,
-  });
-
-  const json = await resp.json() as { access_token: string };
-  return json.access_token;
 }
 
 // ── SHA-256 ───────────────────────────────────────────────────────────────────
@@ -101,19 +48,20 @@ function toFsValue(val: unknown): FsVal {
 
 class Firestore {
   private base: string;
-  private token: string;
+  private key:  string;
 
-  constructor(projectId: string, token: string) {
-    this.base  = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents`;
-    this.token = token;
+  constructor(projectId: string, apiKey: string) {
+    this.base = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents`;
+    this.key  = apiKey;
   }
 
-  private get authHeader() {
-    return { 'Authorization': `Bearer ${this.token}`, 'Content-Type': 'application/json' };
+  private url(path: string, extraParams?: string): string {
+    const qs = extraParams ? `${extraParams}&key=${this.key}` : `key=${this.key}`;
+    return `${this.base}/${path}?${qs}`;
   }
 
   async get(collection: string, docId: string): Promise<{ fields: Record<string, FsVal> } | null> {
-    const resp = await fetch(`${this.base}/${collection}/${docId}`, { headers: this.authHeader });
+    const resp = await fetch(this.url(`${collection}/${docId}`));
     if (!resp.ok) return null;
     return resp.json() as Promise<{ fields: Record<string, FsVal> }>;
   }
@@ -122,11 +70,13 @@ class Firestore {
     const body = {
       fields: Object.fromEntries(Object.entries(fields).map(([k, v]) => [k, toFsValue(v)])),
     };
-    const resp = await fetch(`${this.base}/${collection}`, {
-      method: 'POST', headers: this.authHeader, body: JSON.stringify(body),
+    const resp = await fetch(this.url(collection), {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(body),
     });
-    const doc  = await resp.json() as { name: string };
-    return doc.name.split('/').pop()!;
+    const created = await resp.json() as { name: string };
+    return created.name.split('/').pop()!;
   }
 
   async patch(collection: string, docId: string, fields: Record<string, unknown>): Promise<void> {
@@ -134,8 +84,10 @@ class Firestore {
     const body = {
       fields: Object.fromEntries(Object.entries(fields).map(([k, v]) => [k, toFsValue(v)])),
     };
-    await fetch(`${this.base}/${collection}/${docId}?${mask}`, {
-      method: 'PATCH', headers: this.authHeader, body: JSON.stringify(body),
+    await fetch(this.url(`${collection}/${docId}`, mask), {
+      method:  'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(body),
     });
   }
 }
@@ -153,7 +105,7 @@ async function verifyToken(
   if (!lookupDoc) return null;
 
   const fields    = lookupDoc.fields ?? {};
-  const typeField = (fields.type as { stringValue?: string } | undefined)?.stringValue;
+  const typeField = (fields.type     as { stringValue?: string } | undefined)?.stringValue;
   const revokedAt = fields.revokedAt as Record<string, unknown> | undefined;
 
   if (typeField !== type) return null;
@@ -181,10 +133,9 @@ export default {
     }
     const rawToken = authHeader.slice(7);
 
-    const accessToken = await getAccessToken(env.GOOGLE_SERVICE_ACCOUNT_EMAIL, env.GOOGLE_PRIVATE_KEY);
-    const fs          = new Firestore(env.FIREBASE_PROJECT_ID, accessToken);
+    const fs = new Firestore(env.FIREBASE_PROJECT_ID, env.FIREBASE_API_KEY);
 
-    // ── POST /v1/register ─────────────────────────────────────────
+    // ── POST /v1/register ─────────────────────────────────
     if (url.pathname === '/v1/register') {
       const tokenData = await verifyToken(fs, rawToken, 'registration');
       if (!tokenData) return jsonRes({ error: 'Invalid or revoked token' }, 401);
@@ -210,7 +161,7 @@ export default {
       return jsonRes({ success: true, pendingId }, 201);
     }
 
-    // ── POST /v1/status ───────────────────────────────────────────
+    // ── POST /v1/status ───────────────────────────────────
     if (url.pathname === '/v1/status') {
       const tokenData = await verifyToken(fs, rawToken, 'device');
       if (!tokenData) return jsonRes({ error: 'Invalid or revoked token' }, 401);
