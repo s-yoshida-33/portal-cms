@@ -204,8 +204,15 @@ export async function createApiToken(
     revokedAt:  null,
   };
   if (deviceId) payload.deviceId = deviceId;
-  const ref = await addDoc(col.apiTokens(), payload);
-  return { id: ref.id, token };
+
+  const tokenRef  = doc(col.apiTokens());
+  const lookupRef = doc(db, 'tokenLookup', tokenHash);
+  const batch     = writeBatch(db);
+  batch.set(tokenRef, payload);
+  batch.set(lookupRef, { type, revokedAt: null });
+  await batch.commit();
+
+  return { id: tokenRef.id, token };
 }
 
 export function subscribeApiTokens(
@@ -218,7 +225,14 @@ export function subscribeApiTokens(
 }
 
 export async function revokeApiToken(tokenId: string): Promise<void> {
-  await updateDoc(doc(col.apiTokens(), tokenId), { revokedAt: serverTimestamp() });
+  const snap = await getDoc(doc(col.apiTokens(), tokenId));
+  if (!snap.exists()) return;
+  const { tokenHash } = snap.data() as { tokenHash: string };
+
+  const batch = writeBatch(db);
+  batch.update(doc(col.apiTokens(), tokenId), { revokedAt: serverTimestamp() });
+  batch.update(doc(db, 'tokenLookup', tokenHash), { revokedAt: serverTimestamp() });
+  await batch.commit();
 }
 
 // ================================================================
@@ -294,7 +308,12 @@ export async function approveDeletion(
   } else if (request.type === 'device') {
     batch.delete(doc(col.devices(), request.targetId));
   } else if (request.type === 'apiToken') {
-    batch.update(doc(col.apiTokens(), request.targetId), { revokedAt: serverTimestamp() });
+    const tokenSnap = await getDoc(doc(col.apiTokens(), request.targetId));
+    if (tokenSnap.exists()) {
+      const { tokenHash } = tokenSnap.data() as { tokenHash: string };
+      batch.update(doc(col.apiTokens(), request.targetId), { revokedAt: serverTimestamp() });
+      batch.update(doc(db, 'tokenLookup', tokenHash), { revokedAt: serverTimestamp() });
+    }
   }
 
   await batch.commit();

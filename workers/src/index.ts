@@ -112,38 +112,6 @@ class Firestore {
     return { 'Authorization': `Bearer ${this.token}`, 'Content-Type': 'application/json' };
   }
 
-  async query(
-    collectionId: string,
-    filters: Array<{ field: string; value: string }>
-  ): Promise<Array<{ document: { name: string; fields: Record<string, FsVal> } }>> {
-    const body = {
-      structuredQuery: {
-        from:  [{ collectionId }],
-        where: {
-          compositeFilter: {
-            op:      'AND',
-            filters: filters.map(f => ({
-              fieldFilter: {
-                field: { fieldPath: f.field },
-                op:    'EQUAL',
-                value: { stringValue: f.value },
-              },
-            })),
-          },
-        },
-        limit: 1,
-      },
-    };
-
-    const resp = await fetch(`${this.base}:runQuery`, {
-      method: 'POST', headers: this.authHeader, body: JSON.stringify(body),
-    });
-    const raw = await resp.json();
-    console.log('[query] status:', resp.status, 'body:', JSON.stringify(raw).slice(0, 400));
-    const results = (Array.isArray(raw) ? raw : []) as Array<{ document?: unknown }>;
-    return results.filter(r => r.document) as ReturnType<Firestore['query']> extends Promise<infer T> ? T : never;
-  }
-
   async get(collection: string, docId: string): Promise<{ fields: Record<string, FsVal> } | null> {
     const resp = await fetch(`${this.base}/${collection}/${docId}`, { headers: this.authHeader });
     if (!resp.ok) return null;
@@ -179,20 +147,17 @@ async function verifyToken(
   raw: string,
   type: string
 ): Promise<Record<string, FsVal> | null> {
-  const hash    = await sha256Hex(raw);
-  const results = await fs.query('apiTokens', [
-    { field: 'tokenHash', value: hash },
-    { field: 'type',      value: type },
-  ]);
+  const hash      = await sha256Hex(raw);
+  const lookupDoc = await fs.get('tokenLookup', hash);
 
-  if (results.length === 0) return null;
+  if (!lookupDoc) return null;
 
-  const doc    = results[0].document;
-  const fields = doc.fields ?? {};
-  if (fields.revokedAt) return null;
+  const fields    = lookupDoc.fields ?? {};
+  const typeField = (fields.type as { stringValue?: string } | undefined)?.stringValue;
+  const revokedAt = fields.revokedAt as Record<string, unknown> | undefined;
 
-  const docId = doc.name.split('/').pop()!;
-  await fs.patch('apiTokens', docId, { lastUsedAt: new Date() });
+  if (typeField !== type) return null;
+  if (revokedAt && !('nullValue' in revokedAt)) return null;
 
   return fields;
 }
