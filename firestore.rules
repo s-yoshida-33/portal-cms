@@ -29,16 +29,26 @@ service cloud.firestore {
 
     // ── デバイス ──────────────────────────────────────────
     match /devices/{deviceId} {
-      allow read:           if isAuth();
-      allow create, update: if isAdmin();
-      allow delete:         if isOwner();
+      allow read:   if isAuth();
+      allow create: if isAdmin();
+      allow delete: if isOwner();
+      // Workers からのステータス更新（status/lastSeen/system/updatedAt のみ許可）
+      allow update: if isAdmin()
+        || request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['status', 'lastSeen', 'system', 'updatedAt']);
     }
 
     // ── 承認待ちデバイス ──────────────────────────────────
     match /pendingDevices/{deviceId} {
       allow read:           if isAdmin();
-      allow create:         if false;
+      allow create:         if true;   // Workers からの登録リクエストを許可
       allow update, delete: if isAdmin();
+    }
+
+    // ── トークン検証（Workers 用） ────────────────────────
+    match /tokenLookup/{hash} {
+      allow get:   if true;      // ハッシュを知っている場合のみ取得可能
+      allow write: if isAdmin();
     }
 
     // ── ユーザーロール ────────────────────────────────────
