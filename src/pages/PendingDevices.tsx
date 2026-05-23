@@ -7,6 +7,7 @@ import {
   subscribeProjects,
 } from '../lib/firestore';
 import type { PendingDevice, ProjectDoc, AppName } from '../types';
+import { CustomSelect } from '../components/CustomSelect';
 
 // ── helpers ──────────────────────────────────────────────────────
 
@@ -100,18 +101,16 @@ function ApproveModal({ pending, projects, onClose, onDone }: ApproveModalProps)
           {/* プロジェクト選択 */}
           <div className="space-y-1.5">
             <label className="text-zinc-400 text-xs font-medium">プロジェクト</label>
-            <select
-              value={projectId}
-              onChange={e => setProjectId(e.target.value)}
-              className={`${inputClass} cursor-pointer`}
-            >
-              {projects.length === 0 && (
-                <option value="">プロジェクトがありません</option>
-              )}
-              {projects.map(p => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
+            {projects.length === 0 ? (
+              <p className="text-zinc-500 text-sm">プロジェクトがありません</p>
+            ) : (
+              <CustomSelect
+                value={projectId}
+                onChange={setProjectId}
+                options={projects.map(p => ({ value: p.id, label: p.name }))}
+                className="w-full"
+              />
+            )}
           </div>
 
           {error && <p className="text-red-400 text-sm">{error}</p>}

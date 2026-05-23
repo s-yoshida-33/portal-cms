@@ -1,5 +1,7 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { CustomSelect } from '../../components/CustomSelect';
+import type { SelectOption } from '../../components/CustomSelect';
 
 type Appearance = 'light' | 'dark' | 'system';
 type Language   = 'ja' | 'en';
@@ -30,116 +32,6 @@ function applyAppearance(value: Appearance) {
   localStorage.setItem(APPEARANCE_KEY, value);
 }
 
-// --- 完全再現用のカスタムセレクトコンポーネント ---
-interface SelectOption<T> {
-  value: T;
-  label: string;
-}
-
-interface CustomSelectProps<T> {
-  value: T;
-  onChange: (val: T) => void;
-  options: SelectOption<T>[];
-}
-
-function CustomSelect<T extends string>({ value, onChange, options }: CustomSelectProps<T>) {
-  const [isOpen, setIsOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const selectedIndex = options.findIndex(opt => opt.value === value);
-  const currentLabel = options[selectedIndex]?.label ?? '';
-
-  // メニュー開閉アニメーション中に位置が跳ぶのを防ぐため、
-  // 開いた瞬間のインデックスをロックし閉じるまで保持する
-  const [lockedIndex, setLockedIndex] = useState(selectedIndex);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const itemHeight = 36;
-  const menuPaddingY = 6;
-  const topOffset = -(lockedIndex * itemHeight + menuPaddingY);
-  const originY = menuPaddingY + lockedIndex * itemHeight + (itemHeight / 2);
-
-  return (
-    <div ref={containerRef} className="relative min-w-[200px] w-full sm:w-max">
-      {/* トリガーボタン */}
-      <button
-        type="button"
-        onClick={() => {
-          if (!isOpen) setLockedIndex(selectedIndex);
-          setIsOpen(o => !o);
-        }}
-        style={{ cursor: 'pointer' }}
-        className="group flex w-full sm:w-max shrink-0 items-center select-none border-0 shadow-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4693ff] bg-[#111111] text-white ring-1 hover:bg-[#222222] ring-[#3d3d3d] h-9 rounded-lg pl-3 pr-10 text-base font-normal min-w-[200px] justify-between text-left transition-colors"
-      >
-        <span className="truncate">{currentLabel}</span>
-        <span className="absolute right-3 flex shrink-0 items-center text-[#999999] pointer-events-none">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
-            <path d="M181.66,170.34a8,8,0,0,1,0,11.32l-48,48a8,8,0,0,1-11.32,0l-48-48a8,8,0,0,1,11.32-11.32L128,212.69l42.34-42.35A8,8,0,0,1,181.66,170.34Zm-96-84.68L128,43.31l42.34,42.35a8,8,0,0,0,11.32-11.32l-48-48a8,8,0,0,0-11.32,0l-48,48A8,8,0,0,0,85.66,85.66Z"></path>
-          </svg>
-        </span>
-      </button>
-
-      {/* 展開されるメニューリスト (常にDOMに配置し、見切れと点滅を解消) */}
-      <div
-        style={{ 
-          top: `${topOffset}px`, 
-          left: '-8px', 
-          minWidth: 'calc(100% + 16px)', // ボタンの幅＋余白を最低限確保
-          width: 'max-content', // テキストが長い場合は自動で広がるように修正（見切れ解消）
-          transformOrigin: `50% ${originY}px`,
-          visibility: isOpen ? 'visible' : 'hidden', // 完全に出し入れせず隠す（点滅解消）
-          transition: 'opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
-        }}
-        className={`absolute z-50 flex flex-col bg-[#111111] text-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.5)] ring-1 ring-[#3d3d3d] py-1.5 px-2 ${
-          isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-[0.96] pointer-events-none'
-        }`}
-      >
-        <div role="listbox" className="overflow-y-auto overscroll-none max-h-[300px] flex flex-col no-scrollbar">
-          {options.map((opt) => {
-            const isSelected = opt.value === value;
-            return (
-              <div
-                key={opt.value}
-                role="option"
-                aria-selected={isSelected}
-                onClick={() => {
-                  onChange(opt.value);
-                  setIsOpen(false);
-                }}
-                style={{ cursor: 'pointer' }}
-                // アイテムの右側に十分な余白(pr-4)とギャップ(gap-6)を確保
-                // 選択中の固定スタイル（背景・枠線）を削除し、ホバー時のみ共通の背景色を適用
-                className={`group flex w-full h-9 shrink-0 items-center justify-between gap-6 rounded-md pl-3 pr-4 text-base outline-none focus-visible:ring-2 focus-visible:ring-[#4693ff] transition-colors hover:bg-[#222222]/60 hover:text-white ${
-                  isSelected 
-                    ? 'text-white' 
-                    : 'text-[#d9d9d9]'
-                }`}
-              >
-                <div className="whitespace-nowrap">{opt.label}</div>
-                {isSelected && (
-                  <span aria-hidden="true" className="text-[#4693ff] shrink-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
-                      <path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"></path>
-                    </svg>
-                  </span>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export function ProfileSettings() {
   const { user } = useAuth();

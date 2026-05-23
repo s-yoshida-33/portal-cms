@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { subscribeUserRoles, setUserRole, removeUserRole } from '../lib/firestore';
 import type { UserRoleRecord, UserRole } from '../types';
+import { CustomSelect } from '../components/CustomSelect';
 
 // ── helpers ──────────────────────────────────────────────────────
 
@@ -175,16 +176,17 @@ export function UserManagement() {
                       {roleLabel[u.role]}
                     </span>
                   ) : (
-                    <select
+                    <CustomSelect
                       value={u.role}
                       disabled={isUpdating}
-                      onChange={e => handleRoleChange(u, e.target.value as UserRole)}
-                      className="h-7 px-2 rounded-md text-xs bg-[#1a1a1a] ring-1 ring-[#3d3d3d] text-white outline-none focus:ring-[#4693ff] disabled:opacity-50 cursor-pointer"
-                    >
-                      <option value="owner">オーナー</option>
-                      <option value="admin">管理者</option>
-                      <option value="user">一般</option>
-                    </select>
+                      onChange={val => handleRoleChange(u, val as UserRole)}
+                      options={[
+                        { value: 'owner', label: 'オーナー' },
+                        { value: 'admin', label: '管理者' },
+                        { value: 'user',  label: '一般' },
+                      ]}
+                      className="w-36"
+                    />
                   )}
 
                   {/* 登録日 */}
