@@ -1,5 +1,5 @@
 export type DeviceStatus        = 'online' | 'offline' | 'warning';
-export type AppName             = 'Gido' | 'Gido-Touch' | 'Gido-Touch-Mini' | 'Grain-Link';
+export type AppName             = 'Gido' | 'Gido-Touch' | 'Gido-Touch-Mini' | 'Grain-Link' | 'Bridge-Ground';
 export type UserRole            = 'owner' | 'admin' | 'user';
 export type DeletionTargetType  = 'project' | 'device' | 'apiToken';
 export type DeletionStatus      = 'pending' | 'approved' | 'rejected';

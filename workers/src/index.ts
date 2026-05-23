@@ -146,7 +146,7 @@ export default {
         return jsonRes({ error: 'Missing required fields: appName, hostname, ip' }, 400);
       }
 
-      const allowed = ['Gido', 'Gido-Touch', 'Gido-Touch-Mini', 'Grain-Link'];
+      const allowed = ['Gido', 'Gido-Touch', 'Gido-Touch-Mini', 'Grain-Link', 'Bridge-Ground'];
       if (!allowed.includes(appName)) {
         return jsonRes({ error: `Invalid appName. Allowed: ${allowed.join(', ')}` }, 400);
       }

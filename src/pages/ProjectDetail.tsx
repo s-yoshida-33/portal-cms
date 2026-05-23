@@ -48,7 +48,7 @@ function formatLastSeen(iso: string) {
   });
 }
 
-const APP_OPTIONS: AppName[] = ['Gido', 'Gido-Touch', 'Gido-Touch-Mini', 'Grain-Link'];
+const APP_OPTIONS: AppName[] = ['Gido', 'Gido-Touch', 'Gido-Touch-Mini', 'Grain-Link', 'Bridge-Ground'];
 
 // ── デバイス追加・編集モーダル ────────────────────────────────────
 
