@@ -19,6 +19,7 @@ export interface Device {
   projectId: string;
   name:       string;
   ip:         string;
+  port?:      number;
   status:     DeviceStatus;
   lastSeen:   string;
   app:        AppName;

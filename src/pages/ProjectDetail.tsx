@@ -55,12 +55,13 @@ const APP_OPTIONS: AppName[] = ['Gido', 'Gido-Touch', 'Gido-Touch-Mini', 'Grain-
 interface DeviceModalProps {
   initial: Device | null;
   onClose: () => void;
-  onSave:  (data: Pick<Device, 'name' | 'ip' | 'app' | 'appVersion'>) => Promise<void>;
+  onSave:  (data: Pick<Device, 'name' | 'ip' | 'port' | 'app' | 'appVersion'>) => Promise<void>;
 }
 
 function DeviceModal({ initial, onClose, onSave }: DeviceModalProps) {
   const [name,       setName]       = useState(initial?.name       ?? '');
   const [ip,         setIp]         = useState(initial?.ip         ?? '');
+  const [port,       setPort]       = useState(initial?.port       ?? 8090);
   const [app,        setApp]        = useState<AppName>(initial?.app ?? 'Gido');
   const [appVersion, setAppVersion] = useState(initial?.appVersion ?? '');
   const [saving,     setSaving]     = useState(false);
@@ -74,7 +75,7 @@ function DeviceModal({ initial, onClose, onSave }: DeviceModalProps) {
     }
     setSaving(true);
     try {
-      await onSave({ name: name.trim(), ip: ip.trim(), app, appVersion: appVersion.trim() });
+      await onSave({ name: name.trim(), ip: ip.trim(), port, app, appVersion: appVersion.trim() });
       onClose();
     } catch {
       setError('保存に失敗しました。');
@@ -104,6 +105,16 @@ function DeviceModal({ initial, onClose, onSave }: DeviceModalProps) {
             <label className="block text-sm text-zinc-400 mb-1.5">IPアドレス</label>
             <input value={ip} onChange={e => setIp(e.target.value)}
               placeholder="192.168.1.100" className={inputClass} />
+          </div>
+          <div>
+            <label className="block text-sm text-zinc-400 mb-1.5">ポート (Bridge-Ground)</label>
+            <input
+              type="number"
+              value={port}
+              onChange={e => setPort(Number(e.target.value))}
+              placeholder="8090"
+              className={inputClass}
+            />
           </div>
           <div>
             <label className="block text-sm text-zinc-400 mb-1.5">アプリ</label>
@@ -211,7 +222,7 @@ export function ProjectDetail() {
 
   const canEdit = role === 'admin' || role === 'owner';
 
-  async function handleSave(data: Pick<Device, 'name' | 'ip' | 'app' | 'appVersion'>) {
+  async function handleSave(data: Pick<Device, 'name' | 'ip' | 'port' | 'app' | 'appVersion'>) {
     if (!id) return;
     if (editTarget) {
       await updateDevice(editTarget.id, data);
@@ -312,22 +323,30 @@ export function ProjectDetail() {
                   </p>
                   <p className="text-xs text-zinc-600 mt-0.5">最終確認: {formatLastSeen(device.lastSeen)}</p>
                 </div>
-                {canEdit && (
-                  <div className="flex items-center gap-2 ml-2">
-                    <button
-                      onClick={() => { setEditTarget(device); setModalOpen(true); }}
-                      className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
-                    >
-                      編集
-                    </button>
-                    <button
-                      onClick={() => setDeleteTarget(device)}
-                      className="h-7 px-3 rounded-md text-xs text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-1 ring-red-900/50 transition-colors cursor-pointer"
-                    >
-                      削除依頼
-                    </button>
-                  </div>
-                )}
+                <div className="flex items-center gap-2 ml-2">
+                  <Link
+                    to={`/${uuid}/projects/${id}/devices/${device.id}`}
+                    className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors flex items-center"
+                  >
+                    詳細
+                  </Link>
+                  {canEdit && (
+                    <>
+                      <button
+                        onClick={() => { setEditTarget(device); setModalOpen(true); }}
+                        className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
+                      >
+                        編集
+                      </button>
+                      <button
+                        onClick={() => setDeleteTarget(device)}
+                        className="h-7 px-3 rounded-md text-xs text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-1 ring-red-900/50 transition-colors cursor-pointer"
+                      >
+                        削除依頼
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
 
