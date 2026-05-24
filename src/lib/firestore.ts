@@ -415,20 +415,7 @@ export async function approveDevice(
     revokedAt: null,
   });
 
-  // 4. Store approval data under pendingId in tokenLookup so the Worker can
-  //    retrieve it via GET /v1/pending/{pendingId}.
-  //    tokenLookup already has "allow get: if true, write: if isAdmin" rules
-  //    deployed, so no additional Firestore rule deployment is needed.
-  //    type "approval" is distinct from "device"/"registration", so normal
-  //    verifyToken logic skips these entries safely.
-  batch.set(doc(db, 'tokenLookup', pendingDeviceId), {
-    type:        'approval',
-    deviceId,
-    deviceToken: rawToken,
-    revokedAt:   null,
-  });
-
-  // 5. Remove the pending entry.
+  // 4. Remove the pending entry.
   batch.delete(doc(col.pendingDevices(), pendingDeviceId));
 
   await batch.commit();

@@ -28,6 +28,11 @@ function formatDate(iso: string) {
 
 // ── 承認モーダル ──────────────────────────────────────────────────
 
+interface ApprovalResult {
+  deviceId:    string;
+  deviceToken: string;
+}
+
 interface ApproveModalProps {
   pending:  PendingDevice;
   projects: ProjectDoc[];
@@ -35,11 +40,41 @@ interface ApproveModalProps {
   onDone:   () => void;
 }
 
+function CopyField({ label, value }: { label: string; value: string }) {
+  const [copied, setCopied] = useState(false);
+  function copy() {
+    navigator.clipboard.writeText(value).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+  return (
+    <div className="space-y-1.5">
+      <label className="text-zinc-400 text-xs font-medium">{label}</label>
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={value}
+          readOnly
+          className="flex-1 h-9 bg-[#1a1a1a] ring-1 ring-[#3d3d3d] text-white rounded-lg px-3 text-sm font-mono outline-none"
+        />
+        <button
+          onClick={copy}
+          className="h-9 px-3 rounded-lg text-xs font-medium text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer shrink-0"
+        >
+          {copied ? 'コピー済み' : 'コピー'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function ApproveModal({ pending, projects, onClose, onDone }: ApproveModalProps) {
-  const [deviceName, setDeviceName] = useState(pending.hostname);
-  const [projectId,  setProjectId]  = useState(projects[0]?.id ?? '');
-  const [running,    setRunning]    = useState(false);
-  const [error,      setError]      = useState('');
+  const [deviceName,     setDeviceName]     = useState(pending.hostname);
+  const [projectId,      setProjectId]      = useState(projects[0]?.id ?? '');
+  const [running,        setRunning]        = useState(false);
+  const [error,          setError]          = useState('');
+  const [approvalResult, setApprovalResult] = useState<ApprovalResult | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -47,9 +82,9 @@ function ApproveModal({ pending, projects, onClose, onDone }: ApproveModalProps)
     if (!projectId)         { setError('プロジェクトを選択してください。'); return; }
     setRunning(true);
     try {
-      await approveDevice(pending.id, pending, projectId, deviceName.trim());
+      const result = await approveDevice(pending.id, pending, projectId, deviceName.trim());
       onDone();
-      onClose();
+      setApprovalResult(result);
     } catch {
       setError('承認に失敗しました。');
       setRunning(false);
@@ -58,6 +93,47 @@ function ApproveModal({ pending, projects, onClose, onDone }: ApproveModalProps)
 
   const inputClass =
     'w-full h-9 bg-[#1a1a1a] ring-1 ring-[#3d3d3d] text-white rounded-lg px-3 text-sm outline-none focus:ring-[#4693ff] focus:ring-2 placeholder:text-zinc-600 transition-all';
+
+  // 承認完了 → 認証情報表示画面
+  if (approvalResult) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+        <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl">
+          <div className="flex items-center gap-2 mb-1">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="#2db35e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            <h2 className="text-white text-lg font-semibold">承認完了</h2>
+          </div>
+          <p className="text-zinc-400 text-sm mb-5">
+            以下の認証情報を Bridge-Ground の設定画面に入力してください。
+          </p>
+
+          <div className="space-y-4">
+            <CopyField label="デバイス ID" value={approvalResult.deviceId} />
+            <CopyField label="デバイストークン" value={approvalResult.deviceToken} />
+          </div>
+
+          <p className="text-amber-400 text-xs mt-4 flex items-start gap-1.5">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 shrink-0">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            デバイストークンはこの画面を閉じると確認できなくなります。
+          </p>
+
+          <div className="flex justify-end pt-5">
+            <button onClick={onClose}
+              className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#1a6aff] hover:bg-[#1558d4] transition-colors cursor-pointer">
+              閉じる
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70" onClick={onClose}>
