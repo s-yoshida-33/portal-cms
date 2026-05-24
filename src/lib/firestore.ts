@@ -98,6 +98,16 @@ export async function updateProject(
 // Devices
 // ================================================================
 
+export function subscribeDevice(
+  deviceId: string,
+  onUpdate: (device: Device | null) => void
+): Unsubscribe {
+  return onSnapshot(
+    doc(col.devices(), deviceId),
+    snap => onUpdate(snap.exists() ? fromDoc<Device>(snap) : null)
+  );
+}
+
 export function subscribeDevices(
   onUpdate: (devices: Device[]) => void
 ): Unsubscribe {

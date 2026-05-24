@@ -8,6 +8,7 @@ import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { Home } from './pages/Home';
 import { ProjectDetail } from './pages/ProjectDetail';
+import { DeviceDetail } from './pages/DeviceDetail';
 import { Projects } from './pages/Projects';
 import { DeletionRequests } from './pages/DeletionRequests';
 import { UserManagement } from './pages/UserManagement';
@@ -44,6 +45,7 @@ export default function App() {
               <Route path="projects">
                 <Route index element={<Projects />} />
                 <Route path=":id" element={<ProjectDetail />} />
+                <Route path=":id/devices/:deviceId" element={<DeviceDetail />} />
               </Route>
               <Route path="deletion-requests" element={<DeletionRequests />} />
               <Route path="users"            element={<UserManagement />} />
