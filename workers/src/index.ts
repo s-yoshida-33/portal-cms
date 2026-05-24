@@ -180,9 +180,6 @@ export default {
         return jsonRes({ error: 'Missing required field: deviceId' }, 400);
       }
 
-      const deviceDoc = await fs.get('devices', body.deviceId);
-      if (!deviceDoc) return jsonRes({ error: 'Device not found' }, 404);
-
       const validStatuses = ['online', 'offline', 'warning'];
       const deviceStatus  = validStatuses.includes(body.status ?? '') ? body.status! : 'online';
 
