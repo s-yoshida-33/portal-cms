@@ -47,9 +47,9 @@ export function Home() {
   const devicesByProject = useMemo(() => {
     const map = new Map<string, Device[]>();
     for (const d of devices) {
-      const list = map.get(d.facilityId) ?? [];
+      const list = map.get(d.projectId) ?? [];
       list.push(d);
-      map.set(d.facilityId, list);
+      map.set(d.projectId, list);
     }
     return map;
   }, [devices]);
