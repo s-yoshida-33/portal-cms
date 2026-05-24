@@ -78,7 +78,7 @@ export const register = onRequest(
       return;
     }
 
-    const allowed = ['Gido', 'Gido-Touch', 'Gido-Touch-Mini', 'Grain-Link'];
+    const allowed = ['Gido', 'Gido-Touch', 'Gido-Touch-Mini', 'Grain-Link', 'Bridge-Ground'];
     if (!allowed.includes(appName)) {
       res.status(400).json({ error: `Invalid appName. Allowed: ${allowed.join(', ')}` });
       return;

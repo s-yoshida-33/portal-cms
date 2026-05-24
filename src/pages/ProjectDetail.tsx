@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
   subscribeProjects,
-  subscribeDevicesByFacility,
+  subscribeDevicesByProject,
   addDevice,
   updateDevice,
   requestDeletion,
@@ -201,7 +201,7 @@ export function ProjectDetail() {
     const u1 = subscribeProjects(ps => {
       setProject(ps.find(p => p.id === id) ?? null);
     });
-    const u2 = subscribeDevicesByFacility(
+    const u2 = subscribeDevicesByProject(
       id,
       devs => { setDevices(devs); setLoading(false); },
       () => setLoading(false),
@@ -218,7 +218,7 @@ export function ProjectDetail() {
     } else {
       await addDevice({
         ...data,
-        facilityId: id,
+        projectId: id,
         status:  'offline',
         lastSeen: new Date().toISOString(),
         system:  { cpu: 0, memory: 0, temperature: 0, storage: 0, uptime: 0 },

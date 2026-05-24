@@ -107,13 +107,13 @@ export function subscribeDevices(
   );
 }
 
-export function subscribeDevicesByFacility(
-  facilityId: string,
+export function subscribeDevicesByProject(
+  projectId: string,
   onUpdate: (devices: Device[]) => void,
   onError?: (e: Error) => void,
 ): Unsubscribe {
   return onSnapshot(
-    query(col.devices(), where('facilityId', '==', facilityId)),
+    query(col.devices(), where('projectId', '==', projectId)),
     snap => {
       const devs = snap.docs.map(d => fromDoc<Device>(d));
       devs.sort((a, b) => a.name.localeCompare(b.name, 'ja'));
@@ -301,7 +301,7 @@ export async function approveDeletion(
   if (request.type === 'project') {
     // プロジェクトに紐づくデバイスを先に削除
     const devSnap = await getDocs(
-      query(col.devices(), where('facilityId', '==', request.targetId))
+      query(col.devices(), where('projectId', '==', request.targetId))
     );
     devSnap.docs.forEach(d => batch.delete(d.ref));
     batch.delete(doc(col.projects(), request.targetId));
@@ -370,12 +370,12 @@ export function subscribePendingDevices(
 export async function approveDevice(
   pendingDeviceId: string,
   pending: PendingDevice,
-  facilityId: string,
+  projectId: string,
   deviceName: string
-): Promise<string> {
+): Promise<{ deviceId: string; deviceToken: string }> {
   const deviceId = await addDevice({
     name:       deviceName,
-    facilityId,
+    projectId,
     ip:         pending.ip,
     status:     'offline',
     lastSeen:   new Date().toISOString(),
@@ -383,8 +383,25 @@ export async function approveDevice(
     appVersion: '',
     system:     { cpu: 0, memory: 0, temperature: 0, storage: 0, uptime: 0 },
   });
-  await deleteDoc(doc(col.pendingDevices(), pendingDeviceId));
-  return deviceId;
+
+  // Issue a device API token and store it for BridgeGround polling pickup.
+  const { token: deviceToken } = await createApiToken(
+    `device-${deviceId}`,
+    'device',
+    deviceId,
+  );
+
+  const batch = writeBatch(db);
+  // Temporary approval record — Worker reads this via GET /v1/pending/{pendingId}.
+  batch.set(doc(db, 'deviceApprovals', pendingDeviceId), {
+    deviceId,
+    deviceToken,
+    approvedAt: serverTimestamp(),
+  });
+  batch.delete(doc(col.pendingDevices(), pendingDeviceId));
+  await batch.commit();
+
+  return { deviceId, deviceToken };
 }
 
 export async function rejectPendingDevice(pendingDeviceId: string): Promise<void> {
