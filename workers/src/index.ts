@@ -7,7 +7,7 @@ export interface Env {
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin':  '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
@@ -122,10 +122,6 @@ export default {
       return new Response(null, { status: 204, headers: CORS_HEADERS });
     }
 
-    if (req.method !== 'POST') {
-      return jsonRes({ error: 'Method not allowed' }, 405);
-    }
-
     const url        = new URL(req.url);
     const authHeader = req.headers.get('Authorization') ?? '';
     if (!authHeader.startsWith('Bearer ')) {
@@ -134,6 +130,41 @@ export default {
     const rawToken = authHeader.slice(7);
 
     const fs = new Firestore(env.FIREBASE_PROJECT_ID, env.FIREBASE_API_KEY);
+
+    // ── GET /v1/pending/{pendingId} ────────────────────────────────
+    // BridgeGround polls this endpoint after registration to detect CMS approval.
+    // Requires a valid registration token. Returns approved deviceId + deviceToken
+    // once the CMS admin has approved the device.
+    if (req.method === 'GET' && url.pathname.startsWith('/v1/pending/')) {
+      const tokenData = await verifyToken(fs, rawToken, 'registration');
+      if (!tokenData) return jsonRes({ error: 'Invalid or revoked token' }, 401);
+
+      const pendingId = url.pathname.slice('/v1/pending/'.length);
+      if (!pendingId) return jsonRes({ error: 'Missing pendingId' }, 400);
+
+      // Check if the CMS admin has approved this device.
+      const approvalDoc = await fs.get('deviceApprovals', pendingId);
+      if (approvalDoc) {
+        const f = approvalDoc.fields;
+        const deviceId    = (f.deviceId    as { stringValue?: string } | undefined)?.stringValue ?? '';
+        const deviceToken = (f.deviceToken as { stringValue?: string } | undefined)?.stringValue ?? '';
+        return jsonRes({ status: 'approved', deviceId, deviceToken });
+      }
+
+      // Still waiting for admin action.
+      const pendingDoc = await fs.get('pendingDevices', pendingId);
+      if (pendingDoc) {
+        return jsonRes({ status: 'pending' });
+      }
+
+      // Rejected or unknown.
+      return jsonRes({ status: 'rejected' }, 404);
+    }
+
+    // All other endpoints require POST.
+    if (req.method !== 'POST') {
+      return jsonRes({ error: 'Method not allowed' }, 405);
+    }
 
     // ── POST /v1/register ─────────────────────────────────
     if (url.pathname === '/v1/register') {

@@ -79,5 +79,14 @@ service cloud.firestore {
     match /notifications/{notificationId} {
       allow read, write: if isOwner();
     }
+
+    // ── デバイス承認トークン（Worker 用一時保管） ──────────
+    // CMS 管理者が承認時に deviceId + deviceToken を書き込む。
+    // Worker が GET /v1/pending/{pendingId} で読み取る（pendingId が秘密鍵相当）。
+    // クライアント SDK からの直接読み取りは禁止。
+    match /deviceApprovals/{pendingId} {
+      allow get:   if true;       // Worker は Firestore REST API で読み取る
+      allow write: if isAdmin();
+    }
   }
 }

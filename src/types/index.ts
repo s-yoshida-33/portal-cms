@@ -15,8 +15,8 @@ export interface SystemInfo {
 
 // Firestore /devices/{deviceId}
 export interface Device {
-  id:         string;
-  facilityId: string;
+  id:        string;
+  projectId: string;
   name:       string;
   ip:         string;
   status:     DeviceStatus;
