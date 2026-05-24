@@ -373,35 +373,67 @@ export async function approveDevice(
   projectId: string,
   deviceName: string
 ): Promise<{ deviceId: string; deviceToken: string }> {
-  const deviceId = await addDevice({
+  // Pre-generate all IDs and token so the entire operation is a single atomic batch.
+  // This prevents partial state (duplicate devices/tokens) if any step fails.
+  const deviceRef = doc(col.devices());
+  const tokenRef  = doc(col.apiTokens());
+  const deviceId  = deviceRef.id;
+  const rawToken  = generateToken();
+  const tokenHash = await hashToken(rawToken);
+  const now       = new Date().toISOString();
+
+  const batch = writeBatch(db);
+
+  // 1. Create device document.
+  batch.set(deviceRef, {
     name:       deviceName,
     projectId,
     ip:         pending.ip,
     status:     'offline',
-    lastSeen:   new Date().toISOString(),
+    lastSeen:   now,
     app:        pending.appName,
     appVersion: '',
     system:     { cpu: 0, memory: 0, temperature: 0, storage: 0, uptime: 0 },
+    createdAt:  serverTimestamp(),
+    updatedAt:  serverTimestamp(),
   });
 
-  // Issue a device API token and store it for BridgeGround polling pickup.
-  const { token: deviceToken } = await createApiToken(
-    `device-${deviceId}`,
-    'device',
+  // 2. Create apiTokens entry.
+  batch.set(tokenRef, {
+    name:      `device-${deviceId}`,
+    type:      'device',
+    tokenHash,
     deviceId,
-  );
-
-  const batch = writeBatch(db);
-  // Temporary approval record — Worker reads this via GET /v1/pending/{pendingId}.
-  batch.set(doc(db, 'deviceApprovals', pendingDeviceId), {
-    deviceId,
-    deviceToken,
-    approvedAt: serverTimestamp(),
+    createdAt:  serverTimestamp(),
+    lastUsedAt: null,
+    revokedAt:  null,
   });
+
+  // 3. Create tokenLookup entry for Worker token verification.
+  batch.set(doc(db, 'tokenLookup', tokenHash), {
+    type:      'device',
+    revokedAt: null,
+  });
+
+  // 4. Store approval data under pendingId in tokenLookup so the Worker can
+  //    retrieve it via GET /v1/pending/{pendingId}.
+  //    tokenLookup already has "allow get: if true, write: if isAdmin" rules
+  //    deployed, so no additional Firestore rule deployment is needed.
+  //    type "approval" is distinct from "device"/"registration", so normal
+  //    verifyToken logic skips these entries safely.
+  batch.set(doc(db, 'tokenLookup', pendingDeviceId), {
+    type:        'approval',
+    deviceId,
+    deviceToken: rawToken,
+    revokedAt:   null,
+  });
+
+  // 5. Remove the pending entry.
   batch.delete(doc(col.pendingDevices(), pendingDeviceId));
+
   await batch.commit();
 
-  return { deviceId, deviceToken };
+  return { deviceId, deviceToken: rawToken };
 }
 
 export async function rejectPendingDevice(pendingDeviceId: string): Promise<void> {
