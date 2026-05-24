@@ -142,13 +142,18 @@ export default {
       const pendingId = url.pathname.slice('/v1/pending/'.length);
       if (!pendingId) return jsonRes({ error: 'Missing pendingId' }, 400);
 
-      // Check if the CMS admin has approved this device.
-      const approvalDoc = await fs.get('deviceApprovals', pendingId);
-      if (approvalDoc) {
-        const f = approvalDoc.fields;
-        const deviceId    = (f.deviceId    as { stringValue?: string } | undefined)?.stringValue ?? '';
-        const deviceToken = (f.deviceToken as { stringValue?: string } | undefined)?.stringValue ?? '';
-        return jsonRes({ status: 'approved', deviceId, deviceToken });
+      // Approval data is written to tokenLookup/{pendingId} with type "approval"
+      // by approveDevice() in the CMS. tokenLookup already has "allow get: if true"
+      // in deployed Firestore rules, so no additional rule deployment is needed.
+      const lookupDoc = await fs.get('tokenLookup', pendingId);
+      if (lookupDoc) {
+        const f    = lookupDoc.fields;
+        const type = (f.type as { stringValue?: string } | undefined)?.stringValue;
+        if (type === 'approval') {
+          const deviceId    = (f.deviceId    as { stringValue?: string } | undefined)?.stringValue ?? '';
+          const deviceToken = (f.deviceToken as { stringValue?: string } | undefined)?.stringValue ?? '';
+          return jsonRes({ status: 'approved', deviceId, deviceToken });
+        }
       }
 
       // Still waiting for admin action.
