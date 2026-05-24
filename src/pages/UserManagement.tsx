@@ -209,11 +209,6 @@ export function UserManagement() {
             })}
           </div>
         )}
-
-        {/* 説明 */}
-        <p className="mt-4 text-xs text-zinc-600">
-          ユーザーは @toeitechno.com アカウントでログインした時点で自動登録されます（ロール: 一般）。
-        </p>
       </div>
 
       {/* モーダル */}
