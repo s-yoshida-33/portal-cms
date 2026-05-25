@@ -325,7 +325,7 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
   const [name,          setName]          = useState(initial?.name ?? '');
   const [parentGroupId, setParentGroupId] = useState<string | null>(initial?.parentGroupId ?? null);
   const [selectedIds,   setSelectedIds]   = useState<string[]>(
-    devices.filter(d => d.groupId === initial?.id).map(d => d.id)
+    initial ? devices.filter(d => d.groupId === initial.id).map(d => d.id) : []
   );
   const [saving, setSaving] = useState(false);
   const [error,  setError]  = useState('');

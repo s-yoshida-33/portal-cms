@@ -23,6 +23,29 @@ function StatCard({ label, value, color = 'text-white' }: {
   );
 }
 
+function SplitStatCard({ leftLabel, leftValue, leftColor, rightLabel, rightValue, rightColor }: {
+  leftLabel: string; leftValue: number | string; leftColor?: string;
+  rightLabel: string; rightValue: number | string; rightColor?: string;
+}) {
+  return (
+    <div className="overflow-hidden rounded-lg bg-[#111111] shadow-xs ring-1 ring-[#3d3d3d] w-full flex flex-col">
+      <header className="flex items-center gap-2 bg-black border-b border-[#3d3d3d] h-14 px-4">
+        <span className="truncate text-sm font-medium text-white">接続状況</span>
+      </header>
+      <div className="flex flex-1">
+        <div className="flex-1 px-4 py-4 flex flex-col justify-center min-h-22 border-r border-[#3d3d3d]">
+          <div className="text-xs font-medium text-[#999999] mb-1">{leftLabel}</div>
+          <span className={`text-2xl font-semibold tabular-nums ${leftColor ?? 'text-white'}`}>{leftValue}</span>
+        </div>
+        <div className="flex-1 px-4 py-4 flex flex-col justify-center min-h-22">
+          <div className="text-xs font-medium text-[#999999] mb-1">{rightLabel}</div>
+          <span className={`text-2xl font-semibold tabular-nums ${rightColor ?? 'text-white'}`}>{rightValue}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function Home() {
   const { user } = useAuth();
   const { uuid } = useParams<{ uuid: string }>();
@@ -72,11 +95,13 @@ export function Home() {
           {/* ステータスセクション */}
           <div>
             <h5 className="text-lg font-semibold text-white mb-4">ステータス</h5>
-            <div className="grid gap-4 md:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-              <StatCard label="プロジェクト数"    value={loading ? '…' : projects.length} />
-              <StatCard label="総デバイス数"       value={loading ? '…' : devices.length} />
-              <StatCard label="オンライン"         value={loading ? '…' : totalOnline}  color="text-[#2db35e]" />
-              <StatCard label="オフライン / 警告"  value={loading ? '…' : totalOffline + totalWarning} color="text-[#fc574a]" />
+            <div className="grid gap-4 md:gap-5 grid-cols-1 md:grid-cols-3">
+              <StatCard label="プロジェクト数" value={loading ? '…' : projects.length} />
+              <StatCard label="総デバイス数"   value={loading ? '…' : devices.length} />
+              <SplitStatCard
+                leftLabel="オンライン"        leftValue={loading ? '…' : totalOnline}               leftColor="text-[#2db35e]"
+                rightLabel="オフライン / 警告" rightValue={loading ? '…' : totalOffline + totalWarning} rightColor="text-[#fc574a]"
+              />
             </div>
           </div>
 
@@ -93,7 +118,7 @@ export function Home() {
                 <p className="text-zinc-500 text-sm">プロジェクトが登録されていません。</p>
               </div>
             ) : (
-              <div className="grid gap-4 md:gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 md:gap-5 grid-cols-1 md:grid-cols-3">
                 {projects.map(project => {
                   const devs    = devicesByProject.get(project.id) ?? [];
                   const online  = countByStatus(devs, 'online');
