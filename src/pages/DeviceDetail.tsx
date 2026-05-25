@@ -77,7 +77,7 @@ function formatLastSeen(iso: string) {
 // ── Main page ─────────────────────────────────────────────────────
 
 export function DeviceDetail() {
-  const { uuid, id: projectId, deviceId } = useParams<{ uuid: string; id: string; deviceId: string }>();
+  const { deviceId } = useParams<{ deviceId: string }>();
 
   const [device,       setDevice]       = useState<Device | null>(null);
   const [deviceLoading, setDeviceLoading] = useState(true);
