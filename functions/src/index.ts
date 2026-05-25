@@ -102,6 +102,7 @@ export const register = onRequest(
 //   {
 //     deviceId:    string,
 //     status:      'online' | 'offline' | 'warning',
+//     ip?:         string,   // 現在の IP アドレス（変化時に自動更新）
 //     cpu:         number,   // %
 //     memory:      number,   // %
 //     temperature: number,   // °C
@@ -136,13 +137,14 @@ export const status = onRequest(
 
     // バリデーション
     const body = req.body as {
-      deviceId:    string;
-      status?:     string;
-      cpu?:        number;
-      memory?:     number;
+      deviceId:     string;
+      status?:      string;
+      ip?:          string;
+      cpu?:         number;
+      memory?:      number;
       temperature?: number;
-      storage?:    number;
-      uptime?:     number;
+      storage?:     number;
+      uptime?:      number;
     };
 
     if (!body.deviceId) {
@@ -163,7 +165,7 @@ export const status = onRequest(
       ? body.status
       : 'online';
 
-    await deviceRef.update({
+    const updatePayload: Record<string, unknown> = {
       status:   deviceStatus,
       lastSeen: new Date().toISOString(),
       system: {
@@ -174,7 +176,11 @@ export const status = onRequest(
         uptime:      body.uptime      ?? 0,
       },
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
+    };
+
+    if (body.ip) updatePayload.ip = body.ip;
+
+    await deviceRef.update(updatePayload);
 
     res.status(200).json({ success: true });
   }
