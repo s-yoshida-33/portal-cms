@@ -169,6 +169,7 @@ export default {
       const body = await req.json() as {
         deviceId:     string;
         status?:      string;
+        ip?:          string;
         cpu?:         number;
         memory?:      number;
         temperature?: number;
@@ -183,7 +184,7 @@ export default {
       const validStatuses = ['online', 'offline', 'warning'];
       const deviceStatus  = validStatuses.includes(body.status ?? '') ? body.status! : 'online';
 
-      await fs.patch('devices', body.deviceId, {
+      const patch: Record<string, unknown> = {
         status:    deviceStatus,
         lastSeen:  new Date().toISOString(),
         updatedAt: new Date(),
@@ -194,7 +195,10 @@ export default {
           storage:     body.storage     ?? 0,
           uptime:      body.uptime      ?? 0,
         },
-      });
+      };
+      if (body.ip) patch.ip = body.ip;
+
+      await fs.patch('devices', body.deviceId, patch);
 
       return jsonRes({ success: true });
     }
