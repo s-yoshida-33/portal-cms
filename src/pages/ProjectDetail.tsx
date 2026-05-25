@@ -138,7 +138,12 @@ interface DeviceCardProps {
 
 function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: DeviceCardProps) {
   return (
-    <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-5">
+    <div className="relative bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-5 hover:ring-[#4693ff] transition-colors cursor-pointer">
+      <Link
+        to={`/${uuid}/projects/${projectId}/devices/${device.id}`}
+        className="absolute inset-0 rounded-xl"
+        aria-label={device.name}
+      />
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
           <div>
@@ -155,30 +160,22 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
             </p>
             <p className="text-xs text-zinc-600 mt-0.5">最終確認: {formatLastSeen(device.lastSeen)}</p>
           </div>
-          <div className="flex items-center gap-2 ml-2">
-            <Link
-              to={`/${uuid}/projects/${projectId}/devices/${device.id}`}
-              className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors flex items-center"
-            >
-              詳細
-            </Link>
-            {canEdit && (
-              <>
-                <button
-                  onClick={() => onEdit(device)}
-                  className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
-                >
-                  編集
-                </button>
-                <button
-                  onClick={() => onDelete(device)}
-                  className="h-7 px-3 rounded-md text-xs text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-1 ring-red-900/50 transition-colors cursor-pointer"
-                >
-                  削除依頼
-                </button>
-              </>
-            )}
-          </div>
+          {canEdit && (
+            <div className="relative z-10 flex items-center gap-2 ml-2">
+              <button
+                onClick={() => onEdit(device)}
+                className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
+              >
+                編集
+              </button>
+              <button
+                onClick={() => onDelete(device)}
+                className="h-7 px-3 rounded-md text-xs text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-1 ring-red-900/50 transition-colors cursor-pointer"
+              >
+                削除依頼
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
