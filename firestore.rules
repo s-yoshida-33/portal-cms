@@ -32,7 +32,7 @@ service cloud.firestore {
       allow delete: if isOwner();
       allow update: if isAdmin()
         || request.resource.data.diff(resource.data).affectedKeys()
-             .hasOnly(['status', 'lastSeen', 'system', 'updatedAt']);
+             .hasOnly(['status', 'lastSeen', 'system', 'updatedAt', 'ip']);
     }
 
     match /groups/{groupId} {
