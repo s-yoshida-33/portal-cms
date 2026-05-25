@@ -20,38 +20,38 @@ service cloud.firestore {
       return isAuth() && (r == 'admin' || r == 'owner');
     }
 
-    // ── プロジェクト ──────────────────────────────────────
     match /projects/{projectId} {
       allow read:           if isAuth();
       allow create, update: if isAdmin();
       allow delete:         if isOwner();
     }
 
-    // ── デバイス ──────────────────────────────────────────
     match /devices/{deviceId} {
       allow read:   if isAuth();
       allow create: if isAdmin();
       allow delete: if isOwner();
-      // Workers からのステータス更新（status/lastSeen/system/updatedAt のみ許可）
       allow update: if isAdmin()
         || request.resource.data.diff(resource.data).affectedKeys()
              .hasOnly(['status', 'lastSeen', 'system', 'updatedAt']);
     }
 
-    // ── 承認待ちデバイス ──────────────────────────────────
+    match /groups/{groupId} {
+      allow read:           if isAuth();
+      allow create, update: if isAdmin();
+      allow delete:         if isOwner();
+    }
+
     match /pendingDevices/{deviceId} {
       allow read:           if isAdmin();
-      allow create:         if true;   // Workers からの登録リクエストを許可
+      allow create:         if true;
       allow update, delete: if isAdmin();
     }
 
-    // ── トークン検証（Workers 用） ────────────────────────
     match /tokenLookup/{hash} {
-      allow get:   if true;      // ハッシュを知っている場合のみ取得可能
+      allow get:   if true;
       allow write: if isAdmin();
     }
 
-    // ── ユーザーロール ────────────────────────────────────
     match /userRoles/{uid} {
       allow read:          if isAuth();
       allow create:        if isAuth() && request.auth.uid == uid
@@ -59,7 +59,6 @@ service cloud.firestore {
       allow update, delete: if isOwner();
     }
 
-    // ── API トークン ──────────────────────────────────────
     match /apiTokens/{tokenId} {
       allow read:          if isAdmin();
       allow create:        if isAdmin();
@@ -67,7 +66,6 @@ service cloud.firestore {
       allow delete:        if false;
     }
 
-    // ── 削除依頼 ──────────────────────────────────────────
     match /deletionRequests/{requestId} {
       allow read:   if isAuth();
       allow create: if isAdmin();
@@ -75,7 +73,6 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    // ── 通知 ──────────────────────────────────────────────
     match /notifications/{notificationId} {
       allow read, write: if isOwner();
     }

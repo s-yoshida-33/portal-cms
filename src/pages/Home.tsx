@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { subscribeProjects, subscribeDevices } from '../lib/firestore';
-import { StatusBadge } from '../components/StatusBadge';
 import type { ProjectDoc, Device, DeviceStatus } from '../types';
 
 function countByStatus(devices: Device[], status: DeviceStatus) {
@@ -137,13 +136,6 @@ export function Home() {
                             </div>
                           </div>
 
-                          {devs.length > 0 && (
-                            <div className="px-4 py-3 border-t border-[#3d3d3d] flex flex-wrap gap-1.5">
-                              {devs.map(d => (
-                                <StatusBadge key={d.id} status={d.status} />
-                              ))}
-                            </div>
-                          )}
                         </div>
                       </Link>
                     </div>
