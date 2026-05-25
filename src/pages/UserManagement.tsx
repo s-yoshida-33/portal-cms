@@ -120,7 +120,7 @@ export function UserManagement() {
       </div>
 
       {/* コンテンツ */}
-      <div className="px-4 sm:px-6 pb-8">
+      <div className="px-4 sm:px-6 pt-8 pb-8">
         {loading ? (
           <div className="overflow-hidden rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-12 text-center">
             <p className="text-zinc-500 text-sm">読み込み中...</p>
