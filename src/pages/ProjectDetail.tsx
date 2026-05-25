@@ -272,7 +272,7 @@ function GroupCard({
 
       {/* Group content */}
       {!isCollapsed && (hasChildGroups || hasDevices) && (
-        <div className="px-4 pb-4 space-y-3 mx-4">
+        <div className="px-4 pb-4 space-y-4 md:space-y-5 mx-4">
           {node.children.map(child => (
             <GroupCard
               key={child.group.id}
@@ -759,7 +759,7 @@ export function ProjectDetail() {
       </div>
 
       {/* デバイス・グループ一覧 */}
-      <div className="px-4 sm:px-6 pt-8 pb-8 space-y-3">
+      <div className="px-4 sm:px-6 pt-8 pb-8 space-y-4 md:space-y-5">
         {devices.length === 0 && !hasGroups ? (
           <div className="overflow-hidden rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-12 text-center">
             <p className="text-zinc-500 text-sm">デバイスが登録されていません。</p>

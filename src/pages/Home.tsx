@@ -62,13 +62,16 @@ export function Home() {
     return () => { u1(); u2(); };
   }, []);
 
-  const totalOnline  = countByStatus(devices, 'online');
-  const totalOffline = countByStatus(devices, 'offline');
-  const totalWarning = countByStatus(devices, 'warning');
+  // Bridge-Ground の数 = 物理デバイス数（各端末に必ず1つ存在）
+  const physicalDevices = useMemo(() => devices.filter(d => d.app === 'Bridge-Ground'), [devices]);
+  const totalOnline  = countByStatus(physicalDevices, 'online');
+  const totalOffline = countByStatus(physicalDevices, 'offline');
+  const totalWarning = countByStatus(physicalDevices, 'warning');
 
   const devicesByProject = useMemo(() => {
     const map = new Map<string, Device[]>();
     for (const d of devices) {
+      if (d.app !== 'Bridge-Ground') continue;
       const list = map.get(d.projectId) ?? [];
       list.push(d);
       map.set(d.projectId, list);
@@ -94,7 +97,7 @@ export function Home() {
             <h5 className="text-lg font-semibold text-white mb-4">ステータス</h5>
             <div className="grid gap-4 md:gap-5 grid-cols-1 md:grid-cols-3">
               <StatCard label="プロジェクト数" value={loading ? '…' : projects.length} />
-              <StatCard label="総デバイス数"   value={loading ? '…' : devices.length} />
+              <StatCard label="総デバイス数"   value={loading ? '…' : physicalDevices.length} />
               <SplitStatCard
                 leftLabel="オンライン"        leftValue={loading ? '…' : totalOnline}               leftColor="text-[#2db35e]"
                 rightLabel="オフライン / 警告" rightValue={loading ? '…' : totalOffline + totalWarning} rightColor="text-[#fc574a]"
