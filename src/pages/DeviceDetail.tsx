@@ -48,11 +48,24 @@ function MetricBar({ label, value, unit, warn = 70, danger = 90 }: {
   );
 }
 
-function formatUptime(hours: number) {
-  if (hours === 0) return '-';
-  const d = Math.floor(hours / 24);
-  const h = hours % 24;
-  return d > 0 ? `${d}日 ${h}時間` : `${h}時間`;
+function UptimeClock({ uptimeSecs, lastSeen }: { uptimeSecs: number; lastSeen: string }) {
+  const calc = () => Math.max(0, uptimeSecs + Math.floor((Date.now() - new Date(lastSeen).getTime()) / 1000));
+  const [secs, setSecs] = useState(calc);
+  useEffect(() => {
+    setSecs(calc());
+    const id = setInterval(() => setSecs(calc()), 1000);
+    return () => clearInterval(id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uptimeSecs, lastSeen]);
+  if (secs <= 0) return <span className="font-mono">--:--:--</span>;
+  const h = Math.floor(secs / 3600);
+  const m = Math.floor((secs % 3600) / 60);
+  const s = secs % 60;
+  return (
+    <span className="font-mono">
+      {String(h).padStart(2, '0')}:{String(m).padStart(2, '0')}:{String(s).padStart(2, '0')}
+    </span>
+  );
 }
 
 function formatLastSeen(iso: string) {
@@ -246,7 +259,7 @@ export function DeviceDetail() {
             </div>
             <div className="flex flex-col justify-center pl-5 border-l border-zinc-800">
               <p className="text-xs text-zinc-500 mb-1">稼働時間</p>
-              <p className="text-lg font-semibold text-zinc-200">{formatUptime(device.system.uptime)}</p>
+              <p className="text-lg font-semibold text-zinc-200"><UptimeClock uptimeSecs={device.system.uptime} lastSeen={device.lastSeen} /></p>
             </div>
           </div>
         </div>
