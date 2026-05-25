@@ -119,9 +119,7 @@ export function DeviceDetail() {
   const [portalSsState,      setPortalSsState]      = useState<PortalSsState>('idle');
   const [portalSsBlobUrl,    setPortalSsBlobUrl]    = useState<string | null>(null);
   const [portalSsCapturedAt, setPortalSsCapturedAt] = useState<string | null>(null);
-  const portalBlobRef = useRef<string | null>(null);
-
-  const [logs,       setLogs]       = useState<DeviceLog[]>([]);
+  const portalBlobRef = useRef<string | null>(null);       setLogs]       = useState<DeviceLog[]>([]);
   const [logLevels,  setLogLevels]  = useState<Set<string>>(new Set(LOG_LEVELS));
   const [autoScroll, setAutoScroll] = useState(true);
   const logEndRef  = useRef<HTMLDivElement>(null);
@@ -230,6 +228,13 @@ export function DeviceDetail() {
       setPortalSsState('error');
     }
   }
+
+  // 3-minute timeout: if still pending, show error so the user can retry
+  useEffect(() => {
+    if (portalSsState !== 'pending') return;
+    const id = window.setTimeout(() => setPortalSsState('error'), 3 * 60 * 1000);
+    return () => window.clearTimeout(id);
+  }, [portalSsState]);
 
   // Revoke portal blob URL on unmount
   useEffect(() => {
@@ -489,13 +494,25 @@ export function DeviceDetail() {
                 </div>
               )}
               {portalSsState === 'pending' && (
-                <div className="flex items-center justify-center h-28">
+                <div className="flex flex-col items-center justify-center h-28 gap-3">
                   <p className="text-zinc-500 text-sm">Bridge-Ground からの応答を待っています...</p>
+                  <button
+                    onClick={() => setPortalSsState('idle')}
+                    className="h-6 px-3 rounded-md text-xs text-zinc-500 bg-zinc-800 hover:bg-zinc-700 ring-1 ring-zinc-700 transition-colors cursor-pointer"
+                  >
+                    キャンセル
+                  </button>
                 </div>
               )}
               {portalSsState === 'error' && (
-                <div className="flex items-center justify-center h-16 rounded-lg bg-[#0a0a0a] ring-1 ring-red-900/30">
-                  <p className="text-red-400 text-sm">取得に失敗しました。</p>
+                <div className="flex flex-col items-center justify-center h-20 gap-2 rounded-lg bg-[#0a0a0a] ring-1 ring-red-900/30">
+                  <p className="text-red-400 text-sm">取得に失敗しました（タイムアウトまたはエラー）。</p>
+                  <button
+                    onClick={handlePortalScreenshotRequest}
+                    className="h-6 px-3 rounded-md text-xs text-zinc-300 bg-zinc-800 hover:bg-zinc-700 ring-1 ring-zinc-700 transition-colors cursor-pointer"
+                  >
+                    再試行
+                  </button>
                 </div>
               )}
               {portalSsState === 'ready' && portalSsBlobUrl && (

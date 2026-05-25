@@ -550,5 +550,6 @@ export function subscribeScreenshotRequest(
   return onSnapshot(
     doc(db, 'screenshotRequests', deviceId),
     snap => onUpdate(snap.exists() ? (snap.data() as { status: string }) : null),
+    _err => onUpdate(null),
   );
 }
