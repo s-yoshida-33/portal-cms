@@ -9,14 +9,14 @@ interface Crumb {
 }
 
 const SECTION_LABELS: Record<string, string> = {
-  home:               'ホーム',
-  projects:           'プロジェクト管理',
+  home:                'ホーム',
+  projects:            'プロジェクト管理',
   'deletion-requests': '削除依頼',
-  users:              'ユーザー管理',
-  'api-tokens':       'API トークン',
-  'pending-devices':  '承認待ちデバイス',
-  logs:               'ログ',
-  settings:           '設定',
+  users:               'ユーザー管理',
+  'api-tokens':        'API トークン',
+  'pending-devices':   '承認待ちデバイス',
+  logs:                'ログ',
+  settings:            '設定',
 };
 
 export function Breadcrumbs() {
@@ -34,8 +34,9 @@ export function Breadcrumbs() {
       const base    = `/${uuid}`;
       const label   = SECTION_LABELS[section] ?? section;
 
+      // Single-level pages: no breadcrumb content
       if (section === 'home' || parts.length === 2) {
-        setCrumbs([{ label }]);
+        setCrumbs([]);
         return;
       }
 
@@ -66,31 +67,35 @@ export function Breadcrumbs() {
         return;
       }
 
-      setCrumbs([{ label }]);
+      setCrumbs([]);
     }
 
     build();
   }, [location.pathname]);
 
   return (
-    <div className="h-10 shrink-0 flex items-center px-6 border-b border-zinc-800 bg-black">
-      <nav aria-label="パンくずリスト" className="flex items-center gap-1.5 text-sm">
-        {crumbs.map((crumb, i) => {
-          const isLast = i === crumbs.length - 1;
-          return (
-            <span key={i} className="flex items-center gap-1.5">
-              {i > 0 && <span className="text-zinc-700">/</span>}
-              {crumb.to && !isLast ? (
-                <Link to={crumb.to} className="text-zinc-400 hover:text-zinc-200 transition-colors">
-                  {crumb.label}
-                </Link>
-              ) : (
-                <span className={isLast ? 'text-zinc-200' : 'text-zinc-400'}>{crumb.label}</span>
-              )}
-            </span>
-          );
-        })}
-      </nav>
+    <div className="shrink-0 border-b border-zinc-800 bg-black py-3 px-6">
+      <div className="h-7 flex items-center">
+        {crumbs.length >= 2 && (
+          <nav aria-label="パンくずリスト" className="flex items-center gap-1.5 text-sm">
+            {crumbs.map((crumb, i) => {
+              const isLast = i === crumbs.length - 1;
+              return (
+                <span key={i} className="flex items-center gap-1.5">
+                  {i > 0 && <span className="text-zinc-700">/</span>}
+                  {crumb.to && !isLast ? (
+                    <Link to={crumb.to} className="text-zinc-400 hover:text-zinc-200 transition-colors">
+                      {crumb.label}
+                    </Link>
+                  ) : (
+                    <span className={isLast ? 'text-zinc-200' : 'text-zinc-400'}>{crumb.label}</span>
+                  )}
+                </span>
+              );
+            })}
+          </nav>
+        )}
+      </div>
     </div>
   );
 }

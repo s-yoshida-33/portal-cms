@@ -85,7 +85,6 @@ export function UserManagement() {
   if (role !== 'owner') {
     return (
       <div className="flex flex-col min-h-full">
-        <div className="py-3 border-b border-zinc-800"><div className="h-7" /></div>
         <div className="p-8">
           <p className="text-zinc-400 text-sm">このページはオーナーのみアクセスできます。</p>
         </div>
@@ -108,10 +107,6 @@ export function UserManagement() {
 
   return (
     <div className="flex flex-col min-h-full">
-      {/* ヘッダースペーサー */}
-      <div className="py-3 border-b border-zinc-800">
-        <div className="h-7" />
-      </div>
 
       {/* ページヘッダー */}
       <div className="flex items-center justify-between gap-4 py-6 px-4 sm:px-6">
