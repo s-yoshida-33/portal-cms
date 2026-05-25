@@ -272,7 +272,7 @@ function GroupCard({
 
       {/* Group content */}
       {!isCollapsed && (hasChildGroups || hasDevices) && (
-        <div className="px-4 pb-4 space-y-3 ml-4 border-l-2 border-zinc-800 pl-3 mx-4 mb-0">
+        <div className="px-4 pb-4 space-y-3 mx-4">
           {node.children.map(child => (
             <GroupCard
               key={child.group.id}
