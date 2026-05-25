@@ -64,14 +64,28 @@ export function Home() {
 
   // Bridge-Ground の数 = 物理デバイス数（各端末に必ず1つ存在）
   const physicalDevices = useMemo(() => devices.filter(d => d.app === 'Bridge-Ground'), [devices]);
-  const totalOnline  = countByStatus(physicalDevices, 'online');
-  const totalOffline = countByStatus(physicalDevices, 'offline');
-  const totalWarning = countByStatus(physicalDevices, 'warning');
 
+  // 接続状況は全アプリを対象にカウント
+  const totalOnline  = countByStatus(devices, 'online');
+  const totalOffline = countByStatus(devices, 'offline');
+  const totalWarning = countByStatus(devices, 'warning');
+
+  // デバイス数カウント用（Bridge-Groundのみ = 物理台数）
   const devicesByProject = useMemo(() => {
     const map = new Map<string, Device[]>();
     for (const d of devices) {
       if (d.app !== 'Bridge-Ground') continue;
+      const list = map.get(d.projectId) ?? [];
+      list.push(d);
+      map.set(d.projectId, list);
+    }
+    return map;
+  }, [devices]);
+
+  // 接続状況カウント用（全アプリ対象）
+  const allDevicesByProject = useMemo(() => {
+    const map = new Map<string, Device[]>();
+    for (const d of devices) {
       const list = map.get(d.projectId) ?? [];
       list.push(d);
       map.set(d.projectId, list);
@@ -121,9 +135,10 @@ export function Home() {
               <div className="grid gap-4 md:gap-5 grid-cols-1 md:grid-cols-3">
                 {projects.map(project => {
                   const devs    = devicesByProject.get(project.id) ?? [];
-                  const online  = countByStatus(devs, 'online');
-                  const offline = countByStatus(devs, 'offline');
-                  const warning = countByStatus(devs, 'warning');
+                  const allDevs = allDevicesByProject.get(project.id) ?? [];
+                  const online  = countByStatus(allDevs, 'online');
+                  const offline = countByStatus(allDevs, 'offline');
+                  const warning = countByStatus(allDevs, 'warning');
 
                   return (
                     <div key={project.id} className="overflow-hidden rounded-lg bg-[#111111] shadow-xs ring-1 ring-[#3d3d3d] w-full h-full flex flex-col transition-colors hover:ring-[#4693ff]">
