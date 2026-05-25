@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { subscribeDevice } from '../lib/firestore';
+import { subscribeDevice, subscribeDeviceLogs, type DeviceLog } from '../lib/firestore';
 import { StatusBadge } from '../components/StatusBadge';
 import type { Device } from '../types';
 
@@ -74,6 +74,30 @@ function formatLastSeen(iso: string) {
   });
 }
 
+// ── Log helpers ──────────────────────────────────────────────────
+
+const LOG_LEVELS = ['INFO', 'WARN', 'ERROR', 'FATAL'] as const;
+
+function logLevelClass(level: string) {
+  switch (level) {
+    case 'ERROR':
+    case 'FATAL': return 'text-red-400';
+    case 'WARN':  return 'text-yellow-400';
+    case 'INFO':  return 'text-sky-400';
+    default:      return 'text-zinc-500';
+  }
+}
+
+function logLevelBadgeClass(level: string, active: boolean) {
+  if (!active) return 'text-zinc-600 bg-zinc-800 ring-zinc-700';
+  switch (level) {
+    case 'ERROR':
+    case 'FATAL': return 'text-red-400 bg-red-950/40 ring-red-800/50';
+    case 'WARN':  return 'text-yellow-400 bg-yellow-950/40 ring-yellow-800/50';
+    default:      return 'text-sky-400 bg-sky-950/40 ring-sky-800/50';
+  }
+}
+
 // ── Main page ─────────────────────────────────────────────────────
 
 export function DeviceDetail() {
@@ -88,6 +112,10 @@ export function DeviceDetail() {
 
   const [screenshots, setScreenshots] = useState<Record<string, ScreenshotEntry>>({});
 
+  const [logs,       setLogs]       = useState<DeviceLog[]>([]);
+  const [logLevels,  setLogLevels]  = useState<Set<string>>(new Set(LOG_LEVELS));
+  const [autoScroll, setAutoScroll] = useState(true);
+  const logEndRef  = useRef<HTMLDivElement>(null);
   const blobUrlsRef = useRef<string[]>([]);
 
   // Subscribe to Firestore device document
@@ -99,7 +127,33 @@ export function DeviceDetail() {
     });
   }, [deviceId]);
 
+  // Subscribe to device logs
+  useEffect(() => {
+    if (!deviceId) return;
+    return subscribeDeviceLogs(deviceId, setLogs);
+  }, [deviceId]);
+
+  // Auto-scroll log panel to bottom
+  useEffect(() => {
+    if (autoScroll && logEndRef.current) {
+      logEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [logs, autoScroll]);
+
   const baseUrl = device ? `http://${device.ip}:${device.port ?? 8090}` : null;
+
+  const filteredLogs = useMemo(
+    () => logs.filter(l => logLevels.has(l.level || 'INFO')),
+    [logs, logLevels]
+  );
+
+  function toggleLevel(level: string) {
+    setLogLevels(prev => {
+      const next = new Set(prev);
+      if (next.has(level)) { next.delete(level); } else { next.add(level); }
+      return next;
+    });
+  }
 
   // Fetch app list from Bridge-Ground
   const fetchApps = useCallback(async () => {
@@ -351,6 +405,60 @@ export function DeviceDetail() {
             </div>
           )}
         </div>
+
+        {/* ログセクション */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-white font-semibold text-base">ログ</h2>
+            <div className="flex items-center gap-2">
+              {LOG_LEVELS.map(level => (
+                <button
+                  key={level}
+                  onClick={() => toggleLevel(level)}
+                  className={`h-6 px-2.5 rounded-md text-xs font-medium ring-1 transition-colors cursor-pointer ${logLevelBadgeClass(level, logLevels.has(level))}`}
+                >
+                  {level}
+                </button>
+              ))}
+              <div className="w-px h-4 bg-zinc-700 mx-1" />
+              <button
+                onClick={() => setAutoScroll(v => !v)}
+                className={`h-6 px-2.5 rounded-md text-xs font-medium ring-1 transition-colors cursor-pointer ${
+                  autoScroll
+                    ? 'text-zinc-300 bg-zinc-700/50 ring-zinc-600'
+                    : 'text-zinc-600 bg-zinc-800 ring-zinc-700'
+                }`}
+              >
+                自動スクロール
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-[#0a0a0a] ring-1 ring-[#3d3d3d] rounded-xl overflow-hidden">
+            <div className="h-96 overflow-y-auto p-4 font-mono text-xs leading-5 space-y-0.5">
+              {filteredLogs.length === 0 ? (
+                <p className="text-zinc-600 text-center py-8">
+                  {logs.length === 0 ? 'ログがありません。Bridge-Ground からの送信をお待ちください。' : '表示対象のログがありません。'}
+                </p>
+              ) : (
+                filteredLogs.map(log => (
+                  <div key={log.id} className="flex gap-2 min-w-0">
+                    <span className="shrink-0 text-zinc-600">{log.timestamp || log.sentAt.slice(0, 23)}</span>
+                    <span className={`shrink-0 w-10 ${logLevelClass(log.level)}`}>{log.level || '----'}</span>
+                    {log.tag && <span className="shrink-0 text-zinc-500">[{log.tag}]</span>}
+                    <span className="text-zinc-300 break-all">{log.message}</span>
+                  </div>
+                ))
+              )}
+              <div ref={logEndRef} />
+            </div>
+            <div className="flex items-center justify-between px-4 py-2 bg-black border-t border-[#3d3d3d] text-xs text-zinc-600">
+              <span>{filteredLogs.length} 件表示（最大 500 件）</span>
+              <span>最終更新: {logs.length > 0 ? new Date(logs[logs.length - 1].sentAt).toLocaleString('ja-JP') : '—'}</span>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   );
