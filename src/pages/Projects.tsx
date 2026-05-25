@@ -177,10 +177,6 @@ export function Projects() {
 
   return (
     <div className="flex flex-col min-h-full">
-      {/* ヘッダースペーサー */}
-      <div className="py-3 border-b border-zinc-800">
-        <div className="h-7" />
-      </div>
 
       {/* ページヘッダー */}
       <div className="flex items-center justify-between gap-4 py-6 px-4 sm:px-6">

@@ -78,9 +78,6 @@ export function Home() {
 
   return (
     <div className="flex flex-col min-h-full">
-      <div className="py-3 border-b border-zinc-800">
-        <div className="h-7" />
-      </div>
 
       <div className="flex items-center gap-4 py-6 px-4 sm:px-6">
         <div className="flex flex-col gap-2">
