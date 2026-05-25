@@ -224,7 +224,7 @@ export function DeviceDetail() {
         </div>
       </div>
 
-      <div className="px-4 sm:px-6 pb-8 space-y-6">
+      <div className="px-4 sm:px-6 pt-8 pb-8 space-y-6">
 
         {/* システム情報カード */}
         <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-5">
