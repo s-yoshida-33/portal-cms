@@ -7,12 +7,68 @@ import {
   addDevice,
   updateDevice,
   requestDeletion,
+  subscribeGroupsByProject,
+  addGroup,
+  updateGroup,
+  setGroupDevices,
 } from '../lib/firestore';
 import { CustomSelect } from '../components/CustomSelect';
 import { StatusBadge } from '../components/StatusBadge';
-import type { ProjectDoc, Device, AppName } from '../types';
+import type { ProjectDoc, Device, AppName, DeviceGroup } from '../types';
 
 // ── helpers ──────────────────────────────────────────────────────
+
+interface GroupNode {
+  group: DeviceGroup;
+  children: GroupNode[];
+  devices: Device[];
+}
+
+function buildGroupTree(groups: DeviceGroup[], devices: Device[]): GroupNode[] {
+  const nodeMap = new Map<string, GroupNode>();
+  for (const g of groups) {
+    nodeMap.set(g.id, { group: g, children: [], devices: [] });
+  }
+  for (const d of devices) {
+    if (d.groupId) {
+      const node = nodeMap.get(d.groupId);
+      if (node) node.devices.push(d);
+    }
+  }
+  const roots: GroupNode[] = [];
+  for (const g of groups) {
+    const node = nodeMap.get(g.id)!;
+    if (g.parentGroupId && nodeMap.has(g.parentGroupId)) {
+      nodeMap.get(g.parentGroupId)!.children.push(node);
+    } else {
+      roots.push(node);
+    }
+  }
+  return roots;
+}
+
+function getDescendantIds(groupId: string, groups: DeviceGroup[]): string[] {
+  const children = groups.filter(g => g.parentGroupId === groupId);
+  const ids: string[] = [];
+  for (const c of children) {
+    ids.push(c.id);
+    ids.push(...getDescendantIds(c.id, groups));
+  }
+  return ids;
+}
+
+function countDevicesRecursive(node: GroupNode): number {
+  return node.devices.length + node.children.reduce((sum, c) => sum + countDevicesRecursive(c), 0);
+}
+
+function flattenGroups(roots: GroupNode[], depth = 0): Array<{ group: DeviceGroup; depth: number }> {
+  const result: Array<{ group: DeviceGroup; depth: number }> = [];
+  for (const node of roots) {
+    result.push({ group: node.group, depth });
+    result.push(...flattenGroups(node.children, depth + 1));
+  }
+  return result;
+}
 
 function MetricBar({ label, value, unit, warn = 70, danger = 90 }: {
   label: string; value: number; unit: string; warn?: number; danger?: number;
@@ -63,20 +119,343 @@ function formatLastSeen(iso: string) {
 
 const APP_OPTIONS: AppName[] = ['Gido', 'Gido-Touch', 'Gido-Touch-Mini', 'Grain-Link', 'Bridge-Ground'];
 
+const inputClass =
+  'w-full bg-[#1a1a1a] ring-1 ring-[#3d3d3d] text-white rounded-lg px-3 h-9 text-sm outline-none focus:ring-[#4693ff] focus:ring-2 placeholder:text-zinc-600 transition-all';
+
+const selectClass =
+  'w-full bg-[#1a1a1a] ring-1 ring-[#3d3d3d] text-white rounded-lg px-3 h-9 text-sm outline-none focus:ring-[#4693ff] focus:ring-2 transition-all';
+
+// ── DeviceCard ────────────────────────────────────────────────────
+
+interface DeviceCardProps {
+  device: Device;
+  uuid: string;
+  projectId: string;
+  canEdit: boolean;
+  onEdit: (device: Device) => void;
+  onDelete: (device: Device) => void;
+}
+
+function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: DeviceCardProps) {
+  return (
+    <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-5">
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-3">
+          <div>
+            <p className="font-medium text-zinc-100 text-sm">{device.name}</p>
+            <p className="text-xs text-zinc-500 font-mono mt-0.5">{device.ip}</p>
+          </div>
+          <StatusBadge status={device.status} />
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="text-right">
+            <p className="text-sm text-zinc-300">
+              {device.app}{' '}
+              <span className="text-zinc-500 text-xs">v{device.appVersion}</span>
+            </p>
+            <p className="text-xs text-zinc-600 mt-0.5">最終確認: {formatLastSeen(device.lastSeen)}</p>
+          </div>
+          <div className="flex items-center gap-2 ml-2">
+            <Link
+              to={`/${uuid}/projects/${projectId}/devices/${device.id}`}
+              className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors flex items-center"
+            >
+              詳細
+            </Link>
+            {canEdit && (
+              <>
+                <button
+                  onClick={() => onEdit(device)}
+                  className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
+                >
+                  編集
+                </button>
+                <button
+                  onClick={() => onDelete(device)}
+                  className="h-7 px-3 rounded-md text-xs text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-1 ring-red-900/50 transition-colors cursor-pointer"
+                >
+                  削除依頼
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-4 gap-6">
+        <div className="col-span-3 grid grid-cols-2 gap-x-8 gap-y-3">
+          <MetricBar label="CPU"        value={device.system.cpu}         unit="%" />
+          <MetricBar label="メモリ"     value={device.system.memory}      unit="%" />
+          <MetricBar label="温度"       value={device.system.temperature} unit="°C" warn={65} danger={80} />
+          <MetricBar label="ストレージ" value={device.system.storage}     unit="%" warn={80} danger={90} />
+        </div>
+        <div className="flex flex-col justify-center pl-5 border-l border-zinc-800">
+          <p className="text-xs text-zinc-500 mb-1">稼働時間</p>
+          <p className="text-lg font-semibold text-zinc-200">
+            <UptimeClock uptimeSecs={device.system.uptime} lastSeen={device.lastSeen} />
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── GroupCard ─────────────────────────────────────────────────────
+
+interface GroupCardProps {
+  node: GroupNode;
+  uuid: string;
+  projectId: string;
+  canEdit: boolean;
+  allGroups: DeviceGroup[];
+  collapsed: Set<string>;
+  onToggle: (id: string) => void;
+  onEditGroup: (group: DeviceGroup) => void;
+  onDeleteGroup: (group: DeviceGroup) => void;
+  onEditDevice: (device: Device) => void;
+  onDeleteDevice: (device: Device) => void;
+}
+
+function GroupCard({
+  node, uuid, projectId, canEdit, allGroups, collapsed,
+  onToggle, onEditGroup, onDeleteGroup, onEditDevice, onDeleteDevice,
+}: GroupCardProps) {
+  const isCollapsed = collapsed.has(node.group.id);
+  const totalCount  = countDevicesRecursive(node);
+  const hasChildGroups = node.children.length > 0;
+  const hasDevices     = node.devices.length > 0;
+  const canDelete      = totalCount === 0 && !hasChildGroups;
+
+  return (
+    <div className="bg-[#111111] ring-1 ring-zinc-700 rounded-xl overflow-hidden">
+      {/* Group header */}
+      <div
+        className="flex items-center justify-between px-5 py-3 cursor-pointer select-none hover:bg-[#161616] transition-colors"
+        onClick={() => onToggle(node.group.id)}
+      >
+        <div className="flex items-center gap-3">
+          <svg
+            width="12" height="12" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+            className={`text-zinc-500 transition-transform ${isCollapsed ? '-rotate-90' : ''}`}
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+          <span className="text-white font-medium text-sm">{node.group.name}</span>
+          <span className="inline-flex items-center justify-center h-5 min-w-5 px-1.5 rounded-full bg-zinc-800 text-zinc-400 text-xs font-medium">
+            {totalCount}
+          </span>
+        </div>
+        {canEdit && (
+          <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
+            <button
+              onClick={() => onEditGroup(node.group)}
+              className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
+            >
+              編集
+            </button>
+            <button
+              disabled={!canDelete}
+              onClick={() => canDelete && onDeleteGroup(node.group)}
+              className={`h-7 px-3 rounded-md text-xs ring-1 transition-colors ${
+                canDelete
+                  ? 'text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-red-900/50 cursor-pointer'
+                  : 'text-zinc-600 bg-zinc-900/30 ring-zinc-800 cursor-not-allowed'
+              }`}
+              title={!canDelete ? 'デバイスまたは子グループが存在する場合は削除依頼できません' : undefined}
+            >
+              削除依頼
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Group content */}
+      {!isCollapsed && (hasChildGroups || hasDevices) && (
+        <div className="px-4 pb-4 space-y-3 ml-4 border-l-2 border-zinc-800 pl-3 mx-4 mb-0">
+          {node.children.map(child => (
+            <GroupCard
+              key={child.group.id}
+              node={child}
+              uuid={uuid}
+              projectId={projectId}
+              canEdit={canEdit}
+              allGroups={allGroups}
+              collapsed={collapsed}
+              onToggle={onToggle}
+              onEditGroup={onEditGroup}
+              onDeleteGroup={onDeleteGroup}
+              onEditDevice={onEditDevice}
+              onDeleteDevice={onDeleteDevice}
+            />
+          ))}
+          {node.devices.map(device => (
+            <DeviceCard
+              key={device.id}
+              device={device}
+              uuid={uuid}
+              projectId={projectId}
+              canEdit={canEdit}
+              onEdit={onEditDevice}
+              onDelete={onDeleteDevice}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── グループモーダル ───────────────────────────────────────────────
+
+interface GroupModalProps {
+  initial:    DeviceGroup | null;
+  projectId:  string;
+  groups:     DeviceGroup[];
+  devices:    Device[];
+  onClose:    () => void;
+  onSave:     (
+    data: Pick<DeviceGroup, 'name' | 'parentGroupId'>,
+    selectedDeviceIds: string[],
+    previousDeviceIds: string[],
+  ) => Promise<void>;
+}
+
+function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, onSave }: GroupModalProps) {
+  const [name,          setName]          = useState(initial?.name ?? '');
+  const [parentGroupId, setParentGroupId] = useState<string | null>(initial?.parentGroupId ?? null);
+  const [selectedIds,   setSelectedIds]   = useState<string[]>(
+    devices.filter(d => d.groupId === initial?.id).map(d => d.id)
+  );
+  const [saving, setSaving] = useState(false);
+  const [error,  setError]  = useState('');
+
+  // Devices currently in this group (for tracking previous state)
+  const previousIds = devices.filter(d => d.groupId === initial?.id).map(d => d.id);
+
+  // Groups available for parent (exclude self and descendants)
+  const excludeIds = initial ? [initial.id, ...getDescendantIds(initial.id, groups)] : [];
+  const availableParents = groups.filter(g => !excludeIds.includes(g.id));
+
+  // Build roots for flattenGroups (only from available parents)
+  const availableRoots = buildGroupTree(availableParents, []);
+
+  function toggleDevice(id: string) {
+    setSelectedIds(prev =>
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    );
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!name.trim()) { setError('グループ名を入力してください。'); return; }
+    setSaving(true);
+    try {
+      await onSave({ name: name.trim(), parentGroupId }, selectedIds, previousIds);
+      onClose();
+    } catch {
+      setError('保存に失敗しました。');
+      setSaving(false);
+    }
+  }
+
+  // Map groupId -> group name for display
+  const groupNameMap = new Map(groups.map(g => [g.id, g.name]));
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70" onClick={onClose}>
+      <div
+        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-lg p-6 shadow-2xl max-h-[90vh] overflow-y-auto"
+        onClick={e => e.stopPropagation()}
+      >
+        <h2 className="text-white text-lg font-semibold mb-5">
+          {initial ? 'グループを編集' : 'グループを作成'}
+        </h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm text-zinc-400 mb-1.5">グループ名</label>
+            <input
+              value={name}
+              onChange={e => setName(e.target.value)}
+              placeholder="グループ名を入力"
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-zinc-400 mb-1.5">親グループ</label>
+            <select
+              value={parentGroupId ?? ''}
+              onChange={e => setParentGroupId(e.target.value || null)}
+              className={selectClass}
+            >
+              <option value="">ー（ルートグループ）</option>
+              {flattenGroups(availableRoots).map(({ group, depth }) => (
+                <option key={group.id} value={group.id}>
+                  {'　'.repeat(depth)}{group.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm text-zinc-400 mb-1.5">デバイス</label>
+            <div className="bg-[#1a1a1a] ring-1 ring-[#3d3d3d] rounded-lg divide-y divide-[#2a2a2a] max-h-48 overflow-y-auto">
+              {devices.length === 0 ? (
+                <p className="px-3 py-2 text-sm text-zinc-600">デバイスがありません</p>
+              ) : devices.map(device => {
+                const isSelected = selectedIds.includes(device.id);
+                const otherGroupId = device.groupId && device.groupId !== initial?.id ? device.groupId : null;
+                const otherGroupName = otherGroupId ? (groupNameMap.get(otherGroupId) ?? otherGroupId) : null;
+                return (
+                  <label key={device.id} className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-[#222222] transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => toggleDevice(device.id)}
+                      className="w-4 h-4 accent-[#4693ff]"
+                    />
+                    <span className="text-sm text-zinc-200 flex-1">{device.name}</span>
+                    {otherGroupName && (
+                      <span className="text-xs text-yellow-400">現在: {otherGroupName}</span>
+                    )}
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+          {error && <p className="text-red-400 text-sm">{error}</p>}
+          <div className="flex justify-end gap-2 pt-2">
+            <button type="button" onClick={onClose}
+              className="h-9 px-4 rounded-lg text-sm text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
+              キャンセル
+            </button>
+            <button type="submit" disabled={saving}
+              className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#4693ff] hover:bg-[#3a7fe0] disabled:opacity-50 transition-colors cursor-pointer">
+              {saving ? '保存中...' : '保存'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 // ── デバイス追加・編集モーダル ────────────────────────────────────
 
 interface DeviceModalProps {
-  initial: Device | null;
-  onClose: () => void;
-  onSave:  (data: Pick<Device, 'name' | 'ip' | 'port' | 'app' | 'appVersion'>) => Promise<void>;
+  initial:   Device | null;
+  groups:    DeviceGroup[];
+  groupTree: GroupNode[];
+  onClose:   () => void;
+  onSave:    (data: Pick<Device, 'name' | 'ip' | 'port' | 'app' | 'appVersion'> & { groupId?: string | null }) => Promise<void>;
 }
 
-function DeviceModal({ initial, onClose, onSave }: DeviceModalProps) {
+function DeviceModal({ initial, groups, groupTree, onClose, onSave }: DeviceModalProps) {
   const [name,       setName]       = useState(initial?.name       ?? '');
   const [ip,         setIp]         = useState(initial?.ip         ?? '');
   const [port,       setPort]       = useState(initial?.port       ?? 8090);
   const [app,        setApp]        = useState<AppName>(initial?.app ?? 'Gido');
   const [appVersion, setAppVersion] = useState(initial?.appVersion ?? '');
+  const [groupId,    setGroupId]    = useState<string | null>(initial?.groupId ?? null);
   const [saving,     setSaving]     = useState(false);
   const [error,      setError]      = useState('');
 
@@ -88,16 +467,13 @@ function DeviceModal({ initial, onClose, onSave }: DeviceModalProps) {
     }
     setSaving(true);
     try {
-      await onSave({ name: name.trim(), ip: ip.trim(), port, app, appVersion: appVersion.trim() });
+      await onSave({ name: name.trim(), ip: ip.trim(), port, app, appVersion: appVersion.trim(), groupId });
       onClose();
     } catch {
       setError('保存に失敗しました。');
       setSaving(false);
     }
   }
-
-  const inputClass =
-    'w-full bg-[#1a1a1a] ring-1 ring-[#3d3d3d] text-white rounded-lg px-3 h-9 text-sm outline-none focus:ring-[#4693ff] focus:ring-2 placeholder:text-zinc-600 transition-all';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70" onClick={onClose}>
@@ -143,6 +519,23 @@ function DeviceModal({ initial, onClose, onSave }: DeviceModalProps) {
             <input value={appVersion} onChange={e => setAppVersion(e.target.value)}
               placeholder="1.2.0" className={inputClass} />
           </div>
+          {groups.length > 0 && (
+            <div>
+              <label className="block text-sm text-zinc-400 mb-1.5">グループを選択</label>
+              <select
+                value={groupId ?? ''}
+                onChange={e => setGroupId(e.target.value || null)}
+                className={selectClass}
+              >
+                <option value="">ー</option>
+                {flattenGroups(groupTree).map(({ group, depth }) => (
+                  <option key={group.id} value={group.id}>
+                    {'　'.repeat(depth)}{group.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           {error && <p className="text-red-400 text-sm">{error}</p>}
           <div className="flex justify-end gap-2 pt-2">
             <button type="button" onClick={onClose}
@@ -163,12 +556,12 @@ function DeviceModal({ initial, onClose, onSave }: DeviceModalProps) {
 // ── 削除依頼確認モーダル ───────────────────────────────────────────
 
 interface DeleteConfirmProps {
-  device:    Device;
+  name:      string;
   onClose:   () => void;
   onConfirm: () => Promise<void>;
 }
 
-function DeleteConfirm({ device, onClose, onConfirm }: DeleteConfirmProps) {
+function DeleteConfirm({ name, onClose, onConfirm }: DeleteConfirmProps) {
   const [sending, setSending] = useState(false);
 
   async function handleConfirm() {
@@ -189,7 +582,7 @@ function DeleteConfirm({ device, onClose, onConfirm }: DeleteConfirmProps) {
       >
         <h2 className="text-white text-lg font-semibold mb-2">削除依頼を送信</h2>
         <p className="text-zinc-400 text-sm mb-5">
-          「{device.name}」の削除依頼をオーナーに送信します。<br />
+          「{name}」の削除依頼をオーナーに送信します。<br />
           オーナーが承認するまで削除は実行されません。
         </p>
         <div className="flex justify-end gap-2">
@@ -213,46 +606,101 @@ export function ProjectDetail() {
   const { user, role } = useAuth();
   const { uuid, id } = useParams<{ uuid: string; id: string }>();
 
-  const [project,      setProject]      = useState<ProjectDoc | null>(null);
-  const [devices,      setDevices]      = useState<Device[]>([]);
-  const [loading,      setLoading]      = useState(true);
-  const [modalOpen,    setModalOpen]    = useState(false);
-  const [editTarget,   setEditTarget]   = useState<Device | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<Device | null>(null);
+  const [project,        setProject]        = useState<ProjectDoc | null>(null);
+  const [devices,        setDevices]        = useState<Device[]>([]);
+  const [groups,         setGroups]         = useState<DeviceGroup[]>([]);
+  const [loading,        setLoading]        = useState(true);
+  const [deviceModalOpen, setDeviceModalOpen] = useState(false);
+  const [groupModalOpen,  setGroupModalOpen]  = useState(false);
+  const [editDevice,     setEditDevice]     = useState<Device | null>(null);
+  const [editGroup,      setEditGroup]      = useState<DeviceGroup | null>(null);
+  const [deleteDevice,   setDeleteDevice]   = useState<Device | null>(null);
+  const [deleteGroup,    setDeleteGroup]    = useState<DeviceGroup | null>(null);
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!id) return;
+    let devicesLoaded = false;
+    let groupsLoaded  = false;
+
+    const checkDone = () => {
+      if (devicesLoaded && groupsLoaded) setLoading(false);
+    };
+
     const u1 = subscribeProjects(ps => {
       setProject(ps.find(p => p.id === id) ?? null);
     });
     const u2 = subscribeDevicesByProject(
       id,
-      devs => { setDevices(devs); setLoading(false); },
-      () => setLoading(false),
+      devs => { setDevices(devs); devicesLoaded = true; checkDone(); },
+      ()   => { devicesLoaded = true; checkDone(); },
     );
-    return () => { u1(); u2(); };
+    const u3 = subscribeGroupsByProject(
+      id,
+      grps => { setGroups(grps); groupsLoaded = true; checkDone(); },
+    );
+    return () => { u1(); u2(); u3(); };
   }, [id]);
 
   const canEdit = role === 'admin' || role === 'owner';
 
-  async function handleSave(data: Pick<Device, 'name' | 'ip' | 'port' | 'app' | 'appVersion'>) {
+  const groupTree    = buildGroupTree(groups, devices);
+  const ungrouped    = devices.filter(d => !d.groupId);
+  const hasGroups    = groups.length > 0;
+  const showDivider  = hasGroups && ungrouped.length > 0;
+
+  function toggleCollapse(groupId: string) {
+    setCollapsedGroups(prev => {
+      const next = new Set(prev);
+      if (next.has(groupId)) {
+        next.delete(groupId);
+      } else {
+        next.add(groupId);
+      }
+      return next;
+    });
+  }
+
+  async function handleSaveDevice(
+    data: Pick<Device, 'name' | 'ip' | 'port' | 'app' | 'appVersion'> & { groupId?: string | null }
+  ) {
     if (!id) return;
-    if (editTarget) {
-      await updateDevice(editTarget.id, data);
+    if (editDevice) {
+      await updateDevice(editDevice.id, data);
     } else {
       await addDevice({
         ...data,
         projectId: id,
-        status:  'offline',
+        status:   'offline',
         lastSeen: new Date().toISOString(),
-        system:  { cpu: 0, memory: 0, temperature: 0, storage: 0, uptime: 0 },
+        system:   { cpu: 0, memory: 0, temperature: 0, storage: 0, uptime: 0 },
       });
     }
   }
 
-  async function handleDeleteRequest() {
-    if (!deleteTarget || !user) return;
-    await requestDeletion('device', deleteTarget.id, deleteTarget.name, user.uid, user.email ?? '');
+  async function handleSaveGroup(
+    data: Pick<DeviceGroup, 'name' | 'parentGroupId'>,
+    selectedDeviceIds: string[],
+    previousDeviceIds: string[],
+  ) {
+    if (!id) return;
+    if (editGroup) {
+      await updateGroup(editGroup.id, data);
+      await setGroupDevices(editGroup.id, selectedDeviceIds, previousDeviceIds);
+    } else {
+      const newId = await addGroup({ ...data, projectId: id });
+      await setGroupDevices(newId, selectedDeviceIds, []);
+    }
+  }
+
+  async function handleDeleteDevice() {
+    if (!deleteDevice || !user) return;
+    await requestDeletion('device', deleteDevice.id, deleteDevice.name, user.uid, user.email ?? '');
+  }
+
+  async function handleDeleteGroup() {
+    if (!deleteGroup || !user) return;
+    await requestDeletion('group', deleteGroup.id, deleteGroup.name, user.uid, user.email ?? '');
   }
 
   if (loading) {
@@ -299,99 +747,114 @@ export function ProjectDetail() {
           <p className="text-[#999999] text-base">{project.address}</p>
         </div>
         {canEdit && (
-          <button
-            onClick={() => { setEditTarget(null); setModalOpen(true); }}
-            className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#4693ff] hover:bg-[#3a7fe0] transition-colors cursor-pointer mt-7"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-            デバイスを追加
-          </button>
+          <div className="flex items-center gap-2 mt-7">
+            <button
+              onClick={() => { setEditGroup(null); setGroupModalOpen(true); }}
+              className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              グループを作成
+            </button>
+            <button
+              onClick={() => { setEditDevice(null); setDeviceModalOpen(true); }}
+              className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#4693ff] hover:bg-[#3a7fe0] transition-colors cursor-pointer"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              デバイスを追加
+            </button>
+          </div>
         )}
       </div>
 
-      {/* デバイス一覧 */}
+      {/* デバイス・グループ一覧 */}
       <div className="px-4 sm:px-6 pb-8 space-y-3">
-        {devices.length === 0 ? (
+        {devices.length === 0 && !hasGroups ? (
           <div className="overflow-hidden rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-12 text-center">
             <p className="text-zinc-500 text-sm">デバイスが登録されていません。</p>
           </div>
-        ) : devices.map(device => (
-          <div key={device.id} className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-5">
-            <div className="flex items-center justify-between mb-5">
-              <div className="flex items-center gap-3">
-                <div>
-                  <p className="font-medium text-zinc-100 text-sm">{device.name}</p>
-                  <p className="text-xs text-zinc-500 font-mono mt-0.5">{device.ip}</p>
-                </div>
-                <StatusBadge status={device.status} />
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="text-right">
-                  <p className="text-sm text-zinc-300">
-                    {device.app}{' '}
-                    <span className="text-zinc-500 text-xs">v{device.appVersion}</span>
-                  </p>
-                  <p className="text-xs text-zinc-600 mt-0.5">最終確認: {formatLastSeen(device.lastSeen)}</p>
-                </div>
-                <div className="flex items-center gap-2 ml-2">
-                  <Link
-                    to={`/${uuid}/projects/${id}/devices/${device.id}`}
-                    className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors flex items-center"
-                  >
-                    詳細
-                  </Link>
-                  {canEdit && (
-                    <>
-                      <button
-                        onClick={() => { setEditTarget(device); setModalOpen(true); }}
-                        className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
-                      >
-                        編集
-                      </button>
-                      <button
-                        onClick={() => setDeleteTarget(device)}
-                        className="h-7 px-3 rounded-md text-xs text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-1 ring-red-900/50 transition-colors cursor-pointer"
-                      >
-                        削除依頼
-                      </button>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
+        ) : (
+          <>
+            {/* グループツリー */}
+            {hasGroups && groupTree.map(node => (
+              <GroupCard
+                key={node.group.id}
+                node={node}
+                uuid={uuid!}
+                projectId={id!}
+                canEdit={canEdit}
+                allGroups={groups}
+                collapsed={collapsedGroups}
+                onToggle={toggleCollapse}
+                onEditGroup={g => { setEditGroup(g); setGroupModalOpen(true); }}
+                onDeleteGroup={g => setDeleteGroup(g)}
+                onEditDevice={d => { setEditDevice(d); setDeviceModalOpen(true); }}
+                onDeleteDevice={d => setDeleteDevice(d)}
+              />
+            ))}
 
-            <div className="grid grid-cols-4 gap-6">
-              <div className="col-span-3 grid grid-cols-2 gap-x-8 gap-y-3">
-                <MetricBar label="CPU"        value={device.system.cpu}         unit="%" />
-                <MetricBar label="メモリ"     value={device.system.memory}      unit="%" />
-                <MetricBar label="温度"       value={device.system.temperature} unit="°C" warn={65} danger={80} />
-                <MetricBar label="ストレージ" value={device.system.storage}     unit="%" warn={80} danger={90} />
+            {/* グループ未設定の区切り */}
+            {showDivider && (
+              <div className="flex items-center gap-3 py-2">
+                <div className="flex-1 h-px bg-zinc-800" />
+                <span className="text-xs text-zinc-600 whitespace-nowrap">グループ未設定</span>
+                <div className="flex-1 h-px bg-zinc-800" />
               </div>
-              <div className="flex flex-col justify-center pl-5 border-l border-zinc-800">
-                <p className="text-xs text-zinc-500 mb-1">稼働時間</p>
-                <p className="text-lg font-semibold text-zinc-200"><UptimeClock uptimeSecs={device.system.uptime} lastSeen={device.lastSeen} /></p>
-              </div>
-            </div>
-          </div>
-        ))}
+            )}
+
+            {/* グループ未設定デバイス */}
+            {ungrouped.map(device => (
+              <DeviceCard
+                key={device.id}
+                device={device}
+                uuid={uuid!}
+                projectId={id!}
+                canEdit={canEdit}
+                onEdit={d => { setEditDevice(d); setDeviceModalOpen(true); }}
+                onDelete={d => setDeleteDevice(d)}
+              />
+            ))}
+          </>
+        )}
       </div>
 
       {/* モーダル */}
-      {modalOpen && (
+      {deviceModalOpen && (
         <DeviceModal
-          initial={editTarget}
-          onClose={() => setModalOpen(false)}
-          onSave={handleSave}
+          initial={editDevice}
+          groups={groups}
+          groupTree={groupTree}
+          onClose={() => setDeviceModalOpen(false)}
+          onSave={handleSaveDevice}
         />
       )}
-      {deleteTarget && (
+      {groupModalOpen && (
+        <GroupModal
+          initial={editGroup}
+          projectId={id!}
+          groups={groups}
+          devices={devices}
+          onClose={() => setGroupModalOpen(false)}
+          onSave={handleSaveGroup}
+        />
+      )}
+      {deleteDevice && (
         <DeleteConfirm
-          device={deleteTarget}
-          onClose={() => setDeleteTarget(null)}
-          onConfirm={handleDeleteRequest}
+          name={deleteDevice.name}
+          onClose={() => setDeleteDevice(null)}
+          onConfirm={handleDeleteDevice}
+        />
+      )}
+      {deleteGroup && (
+        <DeleteConfirm
+          name={deleteGroup.name}
+          onClose={() => setDeleteGroup(null)}
+          onConfirm={handleDeleteGroup}
         />
       )}
     </div>

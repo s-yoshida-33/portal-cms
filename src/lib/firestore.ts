@@ -21,6 +21,7 @@ import { db } from './firebase';
 import type {
   ProjectDoc,
   Device,
+  DeviceGroup,
   UserRole,
   UserRoleRecord,
   ApiToken,
@@ -58,6 +59,7 @@ const col = {
   apiTokens:        () => collection(db, 'apiTokens'),
   deletionRequests: () => collection(db, 'deletionRequests'),
   notifications:    () => collection(db, 'notifications'),
+  groups:           () => collection(db, 'groups'),
 };
 
 // ================================================================
@@ -152,6 +154,62 @@ export async function updateDevice(
     ...data,
     updatedAt: serverTimestamp(),
   });
+}
+
+// ================================================================
+// Groups
+// ================================================================
+
+export function subscribeGroupsByProject(
+  projectId: string,
+  onUpdate: (groups: DeviceGroup[]) => void,
+): Unsubscribe {
+  return onSnapshot(
+    query(col.groups(), where('projectId', '==', projectId)),
+    snap => {
+      const groups = snap.docs.map(d => fromDoc<DeviceGroup>(d));
+      groups.sort((a, b) => a.name.localeCompare(b.name, 'ja'));
+      onUpdate(groups);
+    }
+  );
+}
+
+export async function addGroup(
+  data: Pick<DeviceGroup, 'projectId' | 'name' | 'parentGroupId'>
+): Promise<string> {
+  const ref = await addDoc(col.groups(), {
+    ...data,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+  return ref.id;
+}
+
+export async function updateGroup(
+  id: string,
+  data: Partial<Pick<DeviceGroup, 'name' | 'parentGroupId'>>
+): Promise<void> {
+  await updateDoc(doc(col.groups(), id), {
+    ...data,
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function setGroupDevices(
+  groupId: string,
+  selectedIds: string[],
+  previousIds: string[],
+): Promise<void> {
+  const batch = writeBatch(db);
+  for (const id of selectedIds) {
+    batch.update(doc(col.devices(), id), { groupId, updatedAt: serverTimestamp() });
+  }
+  for (const id of previousIds) {
+    if (!selectedIds.includes(id)) {
+      batch.update(doc(col.devices(), id), { groupId: null, updatedAt: serverTimestamp() });
+    }
+  }
+  await batch.commit();
 }
 
 // ================================================================
@@ -324,6 +382,12 @@ export async function approveDeletion(
       batch.update(doc(col.apiTokens(), request.targetId), { revokedAt: serverTimestamp() });
       batch.update(doc(db, 'tokenLookup', tokenHash), { revokedAt: serverTimestamp() });
     }
+  } else if (request.type === 'group') {
+    const devSnap = await getDocs(
+      query(col.devices(), where('groupId', '==', request.targetId))
+    );
+    devSnap.docs.forEach(d => batch.update(d.ref, { groupId: null, updatedAt: serverTimestamp() }));
+    batch.delete(doc(col.groups(), request.targetId));
   }
 
   await batch.commit();
