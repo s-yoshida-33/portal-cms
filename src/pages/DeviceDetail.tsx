@@ -149,7 +149,7 @@ export function DeviceDetail() {
     }
   }, [logs, autoScroll]);
 
-  const baseUrl = device ? `http://${device.ip}:${device.port ?? 8090}` : null;
+  const baseUrl = device?.app === 'Bridge-Ground' ? `http://${device.ip}:${device.port ?? 8090}` : null;
 
   const filteredLogs = useMemo(
     () => logs.filter(l => logLevels.has(l.level || 'INFO')),
