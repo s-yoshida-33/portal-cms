@@ -160,7 +160,7 @@ export function Projects() {
   const canEdit = role === 'admin' || role === 'owner';
 
   const deviceCount = (projectId: string) =>
-    devices.filter(d => d.projectId === projectId).length;
+    devices.filter(d => d.projectId === projectId && d.app === 'Bridge-Ground').length;
 
   async function handleSave(data: Pick<ProjectDoc, 'name' | 'prefecture' | 'address'>) {
     if (editTarget) {
