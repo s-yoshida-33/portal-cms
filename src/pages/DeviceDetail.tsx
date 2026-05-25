@@ -119,7 +119,9 @@ export function DeviceDetail() {
   const [portalSsState,      setPortalSsState]      = useState<PortalSsState>('idle');
   const [portalSsBlobUrl,    setPortalSsBlobUrl]    = useState<string | null>(null);
   const [portalSsCapturedAt, setPortalSsCapturedAt] = useState<string | null>(null);
-  const portalBlobRef = useRef<string | null>(null);       setLogs]       = useState<DeviceLog[]>([]);
+  const portalBlobRef = useRef<string | null>(null);
+
+  const [logs,       setLogs]       = useState<DeviceLog[]>([]);
   const [logLevels,  setLogLevels]  = useState<Set<string>>(new Set(LOG_LEVELS));
   const [autoScroll, setAutoScroll] = useState(true);
   const logEndRef  = useRef<HTMLDivElement>(null);
