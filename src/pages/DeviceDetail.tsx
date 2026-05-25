@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { subscribeDevice } from '../lib/firestore';
 import { StatusBadge } from '../components/StatusBadge';
 import type { Device } from '../types';
@@ -205,9 +205,6 @@ export function DeviceDetail() {
         <div className="py-3 border-b border-zinc-800"><div className="h-7" /></div>
         <div className="p-8">
           <p className="text-zinc-400 mb-2">デバイスが見つかりません。</p>
-          <Link to={`/${uuid}/projects/${projectId}`} className="text-sm text-[#4693ff] hover:underline">
-            ← プロジェクトに戻る
-          </Link>
         </div>
       </div>
     );
@@ -222,12 +219,6 @@ export function DeviceDetail() {
       {/* ページヘッダー */}
       <div className="flex items-start justify-between gap-4 py-6 px-4 sm:px-6">
         <div className="flex flex-col gap-1">
-          <Link
-            to={`/${uuid}/projects/${projectId}`}
-            className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors mb-1 inline-block"
-          >
-            ← プロジェクトに戻る
-          </Link>
           <h1 className="text-white text-3xl font-semibold">{device.name}</h1>
           <p className="text-[#999999] text-base font-mono">{device.ip}</p>
         </div>

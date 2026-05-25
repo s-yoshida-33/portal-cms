@@ -720,10 +720,6 @@ export function ProjectDetail() {
         <div className="py-3 border-b border-zinc-800"><div className="h-7" /></div>
         <div className="p-8">
           <p className="text-zinc-400 mb-2">プロジェクトが見つかりません。</p>
-          <Link to={`/${uuid}/projects`}
-            className="text-sm text-[#4693ff] hover:underline">
-            ← プロジェクト一覧に戻る
-          </Link>
         </div>
       </div>
     );
@@ -739,10 +735,6 @@ export function ProjectDetail() {
       {/* ページヘッダー */}
       <div className="flex items-start justify-between gap-4 py-6 px-4 sm:px-6">
         <div className="flex flex-col gap-1">
-          <Link to={`/${uuid}/projects`}
-            className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors mb-1 inline-block">
-            ← プロジェクト一覧に戻る
-          </Link>
           <h1 className="text-white text-3xl font-semibold">{project.name}</h1>
           <p className="text-[#999999] text-base">{project.address}</p>
         </div>
