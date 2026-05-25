@@ -11,6 +11,7 @@ import {
   query,
   where,
   orderBy,
+  limit,
   serverTimestamp,
   writeBatch,
   Timestamp,
@@ -154,6 +155,35 @@ export async function updateDevice(
     ...data,
     updatedAt: serverTimestamp(),
   });
+}
+
+// ── Device Logs (subcollection) ──────────────────────────────────
+
+export interface DeviceLog {
+  id:        string;
+  timestamp: string;
+  level:     string;
+  tag:       string;
+  message:   string;
+  app:       string;
+  sentAt:    string;
+}
+
+export function subscribeDeviceLogs(
+  deviceId: string,
+  onUpdate: (logs: DeviceLog[]) => void,
+): Unsubscribe {
+  return onSnapshot(
+    query(
+      collection(db, 'devices', deviceId, 'logs'),
+      orderBy('sentAt', 'desc'),
+      limit(500),
+    ),
+    snap => {
+      const logs = snap.docs.map(d => fromDoc<DeviceLog>(d)).reverse();
+      onUpdate(logs);
+    }
+  );
 }
 
 // ================================================================

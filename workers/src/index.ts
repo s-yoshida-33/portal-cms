@@ -203,6 +203,42 @@ export default {
       return jsonRes({ success: true });
     }
 
+    // ── POST /v1/logs ─────────────────────────────────────
+    if (url.pathname === '/v1/logs') {
+      const tokenData = await verifyToken(fs, rawToken, 'device');
+      if (!tokenData) return jsonRes({ error: 'Invalid or revoked token' }, 401);
+
+      const body = await req.json() as {
+        deviceId: string;
+        app:      string;
+        entries:  Array<{ timestamp: string; level: string; tag: string; message: string }>;
+      };
+
+      if (!body.deviceId || !Array.isArray(body.entries) || body.entries.length === 0) {
+        return jsonRes({ error: 'Missing required fields: deviceId, entries' }, 400);
+      }
+
+      const now      = new Date();
+      const deleteAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+      const sentAt   = now.toISOString();
+
+      await Promise.all(
+        body.entries.map(entry =>
+          fs.create(`devices/${body.deviceId}/logs`, {
+            timestamp: entry.timestamp ?? '',
+            level:     entry.level     ?? '',
+            tag:       entry.tag       ?? '',
+            message:   entry.message   ?? '',
+            app:       body.app        ?? '',
+            sentAt,
+            deleteAt,
+          })
+        )
+      );
+
+      return jsonRes({ success: true, written: body.entries.length });
+    }
+
     return jsonRes({ error: 'Not found' }, 404);
   },
 };

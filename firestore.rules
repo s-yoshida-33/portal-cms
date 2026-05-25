@@ -33,6 +33,11 @@ service cloud.firestore {
       allow update: if isAdmin()
         || request.resource.data.diff(resource.data).affectedKeys()
              .hasOnly(['status', 'lastSeen', 'system', 'updatedAt', 'ip']);
+
+      match /logs/{logId} {
+        allow read:  if isAuth();
+        allow write: if false;
+      }
     }
 
     match /groups/{groupId} {
