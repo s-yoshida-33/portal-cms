@@ -6,6 +6,13 @@ compatibility_date = "2025-01-01"
 FIREBASE_PROJECT_ID = "portal-cms-emk"
 FIREBASE_API_KEY    = "AIzaSyCPyLBMiApOUs3L2K3SVPeF_Z9Klh5jp94"
 
+[[kv_namespaces]]
+binding = "SCREENSHOTS"
+id      = "d47db8794e8c4427847cf15147e8fcf5"
+
 # エンドポイント:
 #   https://portal-cms-api.tti-ninja.workers.dev/v1/register
 #   https://portal-cms-api.tti-ninja.workers.dev/v1/status
+#   https://portal-cms-api.tti-ninja.workers.dev/v1/screenshot/request
+#   https://portal-cms-api.tti-ninja.workers.dev/v1/screenshot
+#   https://portal-cms-api.tti-ninja.workers.dev/v1/screenshot/{deviceId}/{appId}

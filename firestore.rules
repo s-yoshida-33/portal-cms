@@ -82,5 +82,9 @@ service cloud.firestore {
       allow read, write: if isOwner();
     }
 
+    match /screenshotRequests/{requestId} {
+      allow read, write: if isAuth();
+    }
+
   }
 }

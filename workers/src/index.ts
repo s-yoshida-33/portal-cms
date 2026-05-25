@@ -1,13 +1,14 @@
 export interface Env {
   FIREBASE_API_KEY:    string;
   FIREBASE_PROJECT_ID: string;
+  SCREENSHOTS:         KVNamespace;
 }
 
 // ── CORS ──────────────────────────────────────────────────────────────────────
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin':  '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
@@ -23,6 +24,24 @@ function jsonRes(data: unknown, status = 200): Response {
 async function sha256Hex(input: string): Promise<string> {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input));
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// ── Firebase ID token verification ───────────────────────────────────────────
+
+async function verifyFirebaseIdToken(apiKey: string, idToken: string): Promise<boolean> {
+  try {
+    const resp = await fetch(
+      `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${apiKey}`,
+      {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ idToken }),
+      }
+    );
+    return resp.ok;
+  } catch {
+    return false;
+  }
 }
 
 // ── Firestore REST helper ─────────────────────────────────────────────────────
@@ -131,11 +150,49 @@ export default {
 
     const fs = new Firestore(env.FIREBASE_PROJECT_ID, env.FIREBASE_API_KEY);
 
+    // ── GET /v1/screenshot/pending?deviceId=... ───────────────────
+    if (req.method === 'GET' && url.pathname === '/v1/screenshot/pending') {
+      const tokenData = await verifyToken(fs, rawToken, 'device');
+      if (!tokenData) return jsonRes({ error: 'Invalid or revoked token' }, 401);
+
+      const deviceId = url.searchParams.get('deviceId');
+      if (!deviceId) return jsonRes({ error: 'Missing deviceId' }, 400);
+
+      const ssDoc = await fs.get('screenshotRequests', deviceId);
+      if (!ssDoc) return jsonRes({ pending: false });
+
+      const status = (ssDoc.fields.status as { stringValue?: string } | undefined)?.stringValue;
+      return jsonRes({ pending: status === 'pending' });
+    }
+
+    // ── GET /v1/screenshot/{deviceId} ─────────────────────────────
+    if (req.method === 'GET' && url.pathname.startsWith('/v1/screenshot/')) {
+      const isValid = await verifyFirebaseIdToken(env.FIREBASE_API_KEY, rawToken);
+      if (!isValid) return jsonRes({ error: 'Invalid Firebase token' }, 401);
+
+      const parts    = url.pathname.split('/').filter(Boolean);
+      const deviceId = parts[2]; // /v1/screenshot/{deviceId}
+      if (!deviceId) return jsonRes({ error: 'Missing deviceId in path' }, 400);
+
+      const imgBytes = await env.SCREENSHOTS.get(deviceId, 'arrayBuffer');
+      if (!imgBytes) {
+        return new Response('Screenshot not found', { status: 404, headers: CORS_HEADERS });
+      }
+
+      return new Response(imgBytes, {
+        headers: {
+          ...CORS_HEADERS,
+          'Content-Type':  'image/jpeg',
+          'Cache-Control': 'no-store',
+        },
+      });
+    }
+
     if (req.method !== 'POST') {
       return jsonRes({ error: 'Method not allowed' }, 405);
     }
 
-    // ── POST /v1/register ─────────────────────────────────
+    // ── POST /v1/register ─────────────────────────────────────────
     if (url.pathname === '/v1/register') {
       const tokenData = await verifyToken(fs, rawToken, 'registration');
       if (!tokenData) return jsonRes({ error: 'Invalid or revoked token' }, 401);
@@ -161,7 +218,7 @@ export default {
       return jsonRes({ success: true, pendingId }, 201);
     }
 
-    // ── POST /v1/status ───────────────────────────────────
+    // ── POST /v1/status ───────────────────────────────────────────
     if (url.pathname === '/v1/status') {
       const tokenData = await verifyToken(fs, rawToken, 'device');
       if (!tokenData) return jsonRes({ error: 'Invalid or revoked token' }, 401);
@@ -203,7 +260,7 @@ export default {
       return jsonRes({ success: true });
     }
 
-    // ── POST /v1/logs ─────────────────────────────────────
+    // ── POST /v1/logs ─────────────────────────────────────────────
     if (url.pathname === '/v1/logs') {
       const tokenData = await verifyToken(fs, rawToken, 'device');
       if (!tokenData) return jsonRes({ error: 'Invalid or revoked token' }, 401);
@@ -237,6 +294,36 @@ export default {
       );
 
       return jsonRes({ success: true, written: body.entries.length });
+    }
+
+    // ── POST /v1/screenshot ───────────────────────────────────────
+    if (url.pathname === '/v1/screenshot') {
+      const tokenData = await verifyToken(fs, rawToken, 'device');
+      if (!tokenData) return jsonRes({ error: 'Invalid or revoked token' }, 401);
+
+      const deviceId = url.searchParams.get('deviceId');
+      if (!deviceId) return jsonRes({ error: 'Missing deviceId' }, 400);
+
+      const imgBytes = await req.arrayBuffer();
+      if (imgBytes.byteLength === 0) return jsonRes({ error: 'Empty body' }, 400);
+      if (imgBytes.byteLength > 25 * 1024 * 1024) {
+        return jsonRes({ error: 'Image too large (max 25 MB)' }, 400);
+      }
+
+      await env.SCREENSHOTS.put(deviceId, imgBytes, {
+        metadata: { capturedAt: new Date().toISOString() },
+      });
+
+      // Mark the pending request as completed
+      const ssDoc = await fs.get('screenshotRequests', deviceId);
+      if (ssDoc) {
+        await fs.patch('screenshotRequests', deviceId, {
+          status:      'completed',
+          completedAt: new Date(),
+        });
+      }
+
+      return jsonRes({ success: true });
     }
 
     return jsonRes({ error: 'Not found' }, 404);
