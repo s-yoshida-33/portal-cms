@@ -289,17 +289,21 @@ function GroupCard({
               onDeleteDevice={onDeleteDevice}
             />
           ))}
-          {node.devices.map(device => (
-            <DeviceCard
-              key={device.id}
-              device={device}
-              uuid={uuid}
-              projectId={projectId}
-              canEdit={canEdit}
-              onEdit={onEditDevice}
-              onDelete={onDeleteDevice}
-            />
-          ))}
+          {node.devices.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
+              {node.devices.map(device => (
+                <DeviceCard
+                  key={device.id}
+                  device={device}
+                  uuid={uuid}
+                  projectId={projectId}
+                  canEdit={canEdit}
+                  onEdit={onEditDevice}
+                  onDelete={onDeleteDevice}
+                />
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -794,17 +798,21 @@ export function ProjectDetail() {
             )}
 
             {/* グループ未設定デバイス */}
-            {ungrouped.map(device => (
-              <DeviceCard
-                key={device.id}
-                device={device}
-                uuid={uuid!}
-                projectId={id!}
-                canEdit={canEdit}
-                onEdit={d => { setEditDevice(d); setDeviceModalOpen(true); }}
-                onDelete={d => setDeleteDevice(d)}
-              />
-            ))}
+            {ungrouped.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
+                {ungrouped.map(device => (
+                  <DeviceCard
+                    key={device.id}
+                    device={device}
+                    uuid={uuid!}
+                    projectId={id!}
+                    canEdit={canEdit}
+                    onEdit={d => { setEditDevice(d); setDeviceModalOpen(true); }}
+                    onDelete={d => setDeleteDevice(d)}
+                  />
+                ))}
+              </div>
+            )}
           </>
         )}
       </div>
