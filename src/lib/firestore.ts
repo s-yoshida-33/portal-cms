@@ -530,3 +530,25 @@ export async function approveDevice(
 export async function rejectPendingDevice(pendingDeviceId: string): Promise<void> {
   await deleteDoc(doc(col.pendingDevices(), pendingDeviceId));
 }
+
+// ================================================================
+// Screenshot Requests
+// ================================================================
+
+export async function requestScreenshot(deviceId: string): Promise<void> {
+  await setDoc(doc(db, 'screenshotRequests', deviceId), {
+    status:      'pending',
+    requestedAt: serverTimestamp(),
+    completedAt: null,
+  });
+}
+
+export function subscribeScreenshotRequest(
+  deviceId: string,
+  onUpdate: (data: { status: string } | null) => void,
+): Unsubscribe {
+  return onSnapshot(
+    doc(db, 'screenshotRequests', deviceId),
+    snap => onUpdate(snap.exists() ? (snap.data() as { status: string }) : null),
+  );
+}

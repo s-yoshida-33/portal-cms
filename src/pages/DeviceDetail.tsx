@@ -1,8 +1,11 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { subscribeDevice, subscribeDeviceLogs, type DeviceLog } from '../lib/firestore';
+import { subscribeDevice, subscribeDeviceLogs, requestScreenshot as requestPortalScreenshot, subscribeScreenshotRequest, type DeviceLog } from '../lib/firestore';
+import { auth } from '../lib/firebase';
 import { StatusBadge } from '../components/StatusBadge';
 import type { Device } from '../types';
+
+const WORKER_BASE_URL = 'https://portal-cms-api.tti-ninja.workers.dev';
 
 // ── Bridge-Ground API types ───────────────────────────────────────
 
@@ -112,6 +115,12 @@ export function DeviceDetail() {
 
   const [screenshots, setScreenshots] = useState<Record<string, ScreenshotEntry>>({});
 
+  type PortalSsState = 'idle' | 'pending' | 'ready' | 'error';
+  const [portalSsState,      setPortalSsState]      = useState<PortalSsState>('idle');
+  const [portalSsBlobUrl,    setPortalSsBlobUrl]    = useState<string | null>(null);
+  const [portalSsCapturedAt, setPortalSsCapturedAt] = useState<string | null>(null);
+  const portalBlobRef = useRef<string | null>(null);
+
   const [logs,       setLogs]       = useState<DeviceLog[]>([]);
   const [logLevels,  setLogLevels]  = useState<Set<string>>(new Set(LOG_LEVELS));
   const [autoScroll, setAutoScroll] = useState(true);
@@ -175,6 +184,57 @@ export function DeviceDetail() {
   useEffect(() => {
     if (baseUrl) fetchApps();
   }, [baseUrl, fetchApps]);
+
+  // Fetch portal screenshot from Worker using Firebase ID token
+  const fetchPortalScreenshot = useCallback(async () => {
+    if (!deviceId) return;
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      if (!idToken) { setPortalSsState('error'); return; }
+      const res = await fetch(`${WORKER_BASE_URL}/v1/screenshot/${deviceId}`, {
+        headers: { Authorization: `Bearer ${idToken}` },
+        cache: 'no-store',
+      });
+      if (!res.ok) throw new Error('fetch failed');
+      if (portalBlobRef.current) URL.revokeObjectURL(portalBlobRef.current);
+      const url = URL.createObjectURL(await res.blob());
+      portalBlobRef.current = url;
+      setPortalSsBlobUrl(url);
+      setPortalSsCapturedAt(new Date().toLocaleString('ja-JP'));
+      setPortalSsState('ready');
+    } catch {
+      setPortalSsState('error');
+    }
+  }, [deviceId]);
+
+  // Subscribe to screenshotRequests Firestore doc
+  useEffect(() => {
+    if (!deviceId || device?.app === 'Bridge-Ground') return;
+    return subscribeScreenshotRequest(deviceId, data => {
+      if (!data) return;
+      if (data.status === 'completed') {
+        fetchPortalScreenshot();
+      } else if (data.status === 'pending') {
+        setPortalSsState('pending');
+      }
+    });
+  }, [deviceId, device?.app, fetchPortalScreenshot]);
+
+  async function handlePortalScreenshotRequest() {
+    if (!deviceId) return;
+    setPortalSsState('pending');
+    setPortalSsBlobUrl(null);
+    try {
+      await requestPortalScreenshot(deviceId);
+    } catch {
+      setPortalSsState('error');
+    }
+  }
+
+  // Revoke portal blob URL on unmount
+  useEffect(() => {
+    return () => { if (portalBlobRef.current) URL.revokeObjectURL(portalBlobRef.current); };
+  }, []);
 
   // Fetch screenshot blob and store as object URL
   const fetchScreenshot = useCallback(async (appId: string) => {
@@ -306,105 +366,166 @@ export function DeviceDetail() {
           </div>
         </div>
 
-        {/* 外部アプリセクション */}
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-white font-semibold text-base">外部アプリ</h2>
-            <button
-              onClick={fetchApps}
-              disabled={appsLoading}
-              className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer disabled:opacity-50"
-            >
-              {appsLoading ? '更新中...' : '更新'}
-            </button>
-          </div>
+        {/* 外部アプリセクション（Bridge-Ground のみ表示） */}
+        {device.app === 'Bridge-Ground' && (
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-white font-semibold text-base">外部アプリ</h2>
+              <button
+                onClick={fetchApps}
+                disabled={appsLoading}
+                className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer disabled:opacity-50"
+              >
+                {appsLoading ? '更新中...' : '更新'}
+              </button>
+            </div>
 
-          {appsLoading ? (
-            <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-8 text-center">
-              <p className="text-zinc-500 text-sm">読み込み中...</p>
-            </div>
-          ) : appsError ? (
-            <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-8 text-center">
-              <p className="text-zinc-500 text-sm">{appsError}</p>
-            </div>
-          ) : apps.length === 0 ? (
-            <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-8 text-center">
-              <p className="text-zinc-500 text-sm">登録されている外部アプリはありません。</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {apps.map(app => {
-                const ss = screenshots[app.id];
-                return (
-                  <div key={app.id} className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-5">
+            {appsLoading ? (
+              <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-8 text-center">
+                <p className="text-zinc-500 text-sm">読み込み中...</p>
+              </div>
+            ) : appsError ? (
+              <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-8 text-center">
+                <p className="text-zinc-500 text-sm">{appsError}</p>
+              </div>
+            ) : apps.length === 0 ? (
+              <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-8 text-center">
+                <p className="text-zinc-500 text-sm">登録されている外部アプリはありません。</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {apps.map(app => {
+                  const ss = screenshots[app.id];
+                  return (
+                    <div key={app.id} className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-5">
 
-                    {/* アプリヘッダー */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div>
-                          <p className="font-medium text-zinc-100 text-sm">{app.name}</p>
-                          <p className="text-xs text-zinc-500 font-mono mt-0.5">{app.hostname}</p>
+                      {/* アプリヘッダー */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div>
+                            <p className="font-medium text-zinc-100 text-sm">{app.name}</p>
+                            <p className="text-xs text-zinc-500 font-mono mt-0.5">{app.hostname}</p>
+                          </div>
+                          <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${
+                            app.online
+                              ? 'bg-green-500/10 text-green-400'
+                              : 'bg-zinc-700/50 text-zinc-400'
+                          }`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${app.online ? 'bg-green-400' : 'bg-zinc-500'}`} />
+                            {app.online ? 'オンライン' : 'オフライン'}
+                          </span>
                         </div>
-                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${
-                          app.online
-                            ? 'bg-green-500/10 text-green-400'
-                            : 'bg-zinc-700/50 text-zinc-400'
-                        }`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${app.online ? 'bg-green-400' : 'bg-zinc-500'}`} />
-                          {app.online ? 'オンライン' : 'オフライン'}
-                        </span>
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs text-zinc-500">v{app.version}</span>
+                          <button
+                            onClick={() => requestScreenshot(app.id)}
+                            disabled={!app.online || ss?.state === 'requesting'}
+                            className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {ss?.state === 'requesting' ? '取得中...' : 'スクリーンショットを取得'}
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-xs text-zinc-500">v{app.version}</span>
-                        <button
-                          onClick={() => requestScreenshot(app.id)}
-                          disabled={!app.online || ss?.state === 'requesting'}
-                          className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {ss?.state === 'requesting' ? '取得中...' : 'スクリーンショットを取得'}
-                        </button>
-                      </div>
-                    </div>
 
-                    {/* スクリーンショット表示エリア */}
-                    {ss && ss.state !== 'idle' && (
-                      <div className="mt-4 border-t border-zinc-800 pt-4">
-                        {ss.state === 'requesting' && (
-                          <div className="flex items-center justify-center h-28 rounded-lg bg-[#0a0a0a] ring-1 ring-[#3d3d3d]">
-                            <p className="text-zinc-500 text-sm">スクリーンショットを取得中...</p>
-                          </div>
-                        )}
-                        {ss.state === 'error' && (
-                          <div className="flex items-center justify-center h-16 rounded-lg bg-[#0a0a0a] ring-1 ring-red-900/30">
-                            <p className="text-red-400 text-sm">取得に失敗しました。</p>
-                          </div>
-                        )}
-                        {ss.state === 'ready' && ss.blobUrl && (
-                          <div className="space-y-3">
-                            <div className="flex items-center justify-between">
-                              <p className="text-xs text-zinc-500">取得時刻: {ss.capturedAt}</p>
-                              <button
-                                onClick={() => downloadScreenshot(app.id, app.name)}
-                                className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
-                              >
-                                ダウンロード
-                              </button>
+                      {/* スクリーンショット表示エリア */}
+                      {ss && ss.state !== 'idle' && (
+                        <div className="mt-4 border-t border-zinc-800 pt-4">
+                          {ss.state === 'requesting' && (
+                            <div className="flex items-center justify-center h-28 rounded-lg bg-[#0a0a0a] ring-1 ring-[#3d3d3d]">
+                              <p className="text-zinc-500 text-sm">スクリーンショットを取得中...</p>
                             </div>
-                            <img
-                              src={ss.blobUrl}
-                              alt={`${app.name} のスクリーンショット`}
-                              className="w-full rounded-lg ring-1 ring-[#3d3d3d] object-contain max-h-[600px]"
-                            />
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+                          )}
+                          {ss.state === 'error' && (
+                            <div className="flex items-center justify-center h-16 rounded-lg bg-[#0a0a0a] ring-1 ring-red-900/30">
+                              <p className="text-red-400 text-sm">取得に失敗しました。</p>
+                            </div>
+                          )}
+                          {ss.state === 'ready' && ss.blobUrl && (
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between">
+                                <p className="text-xs text-zinc-500">取得時刻: {ss.capturedAt}</p>
+                                <button
+                                  onClick={() => downloadScreenshot(app.id, app.name)}
+                                  className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
+                                >
+                                  ダウンロード
+                                </button>
+                              </div>
+                              <img
+                                src={ss.blobUrl}
+                                alt={`${app.name} のスクリーンショット`}
+                                className="w-full rounded-lg ring-1 ring-[#3d3d3d] object-contain max-h-[600px]"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* スクリーンショットセクション（Bridge-Ground 以外） */}
+        {device.app !== 'Bridge-Ground' && (
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-white font-semibold text-base">スクリーンショット</h2>
+              <button
+                onClick={handlePortalScreenshotRequest}
+                disabled={portalSsState === 'pending'}
+                className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {portalSsState === 'pending' ? '取得中...' : 'スクリーンショットを取得'}
+              </button>
             </div>
-          )}
-        </div>
+
+            <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-5">
+              {portalSsState === 'idle' && (
+                <div className="flex items-center justify-center h-28 text-zinc-600 text-sm">
+                  ボタンを押してスクリーンショットを要求してください。
+                </div>
+              )}
+              {portalSsState === 'pending' && (
+                <div className="flex items-center justify-center h-28">
+                  <p className="text-zinc-500 text-sm">Bridge-Ground からの応答を待っています...</p>
+                </div>
+              )}
+              {portalSsState === 'error' && (
+                <div className="flex items-center justify-center h-16 rounded-lg bg-[#0a0a0a] ring-1 ring-red-900/30">
+                  <p className="text-red-400 text-sm">取得に失敗しました。</p>
+                </div>
+              )}
+              {portalSsState === 'ready' && portalSsBlobUrl && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-zinc-500">取得時刻: {portalSsCapturedAt}</p>
+                    <button
+                      onClick={() => {
+                        if (!portalSsBlobUrl) return;
+                        const a = document.createElement('a');
+                        const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+                        a.href = portalSsBlobUrl;
+                        a.download = `screenshot-${device.name}-${ts}.jpg`;
+                        a.click();
+                      }}
+                      className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
+                    >
+                      ダウンロード
+                    </button>
+                  </div>
+                  <img
+                    src={portalSsBlobUrl}
+                    alt={`${device.name} のスクリーンショット`}
+                    className="w-full rounded-lg ring-1 ring-[#3d3d3d] object-contain max-h-[600px]"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* ログセクション */}
         <div>
