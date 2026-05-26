@@ -29,8 +29,7 @@ function formatDate(iso: string) {
 // ── 承認モーダル ──────────────────────────────────────────────────
 
 interface ApprovalResult {
-  deviceId:    string;
-  deviceToken: string;
+  deviceId: string;
 }
 
 interface ApproveModalProps {
@@ -94,7 +93,7 @@ function ApproveModal({ pending, projects, onClose, onDone }: ApproveModalProps)
   const inputClass =
     'w-full h-9 bg-[#1a1a1a] ring-1 ring-[#3d3d3d] text-white rounded-lg px-3 text-sm outline-none focus:ring-[#4693ff] focus:ring-2 placeholder:text-zinc-600 transition-all';
 
-  // 承認完了 → 認証情報表示画面
+  // 承認完了 → 完了通知画面
   if (approvalResult) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
@@ -107,22 +106,12 @@ function ApproveModal({ pending, projects, onClose, onDone }: ApproveModalProps)
             <h2 className="text-white text-lg font-semibold">承認完了</h2>
           </div>
           <p className="text-zinc-400 text-sm mb-5">
-            以下の認証情報を Bridge-Ground の設定画面に入力してください。
+            デバイスが承認されました。Bridge-Ground は次回のポーリング時に自動的に接続されます。追加の設定は不要です。
           </p>
 
           <div className="space-y-4">
             <CopyField label="デバイス ID" value={approvalResult.deviceId} />
-            <CopyField label="デバイストークン" value={approvalResult.deviceToken} />
           </div>
-
-          <p className="text-amber-400 text-xs mt-4 flex items-start gap-1.5">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 shrink-0">
-              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
-            </svg>
-            デバイストークンはこの画面を閉じると確認できなくなります。
-          </p>
 
           <div className="flex justify-end pt-5">
             <button onClick={onClose}
