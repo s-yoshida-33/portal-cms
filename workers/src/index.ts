@@ -296,13 +296,13 @@ export default {
       const deleteAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
       const sentAt   = now.toISOString();
 
-      await Promise.all(
+      const results = await Promise.allSettled(
         body.entries.map(entry =>
           fs.create(`devices/${deviceId}/logs`, {
             timestamp: entry.timestamp ?? '',
             level:     entry.level     ?? '',
             tag:       entry.tag       ?? '',
-            message:   entry.message   ?? '',
+            message:   (entry.message ?? '').slice(0, 10_000),
             app:       body.app        ?? '',
             sentAt,
             deleteAt,
@@ -310,7 +310,11 @@ export default {
         )
       );
 
-      return jsonRes({ success: true, written: body.entries.length });
+      const failed = results.filter(r => r.status === 'rejected').length;
+      if (failed > 0) {
+        console.error(`Log write: ${failed}/${body.entries.length} entries failed for device ${deviceId}`);
+      }
+      return jsonRes({ success: true, written: body.entries.length - failed, failed });
     }
 
     // ── POST /v1/screenshot ───────────────────────────────────────
