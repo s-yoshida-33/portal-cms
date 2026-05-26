@@ -36,7 +36,7 @@ service cloud.firestore {
 
       match /logs/{logId} {
         allow read:  if isAuth();
-        allow write: if false;
+        allow write: if true;
       }
     }
 
@@ -84,6 +84,12 @@ service cloud.firestore {
 
     match /screenshotRequests/{requestId} {
       allow read, write: if isAuth();
+    }
+
+    match /deviceApprovals/{approvalId} {
+      allow get:    if true;
+      allow create: if isAdmin();
+      allow delete: if true;
     }
 
   }

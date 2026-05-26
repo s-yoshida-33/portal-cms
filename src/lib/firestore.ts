@@ -490,16 +490,17 @@ export async function approveDevice(
 
   // 1. Create device document.
   batch.set(deviceRef, {
-    name:       deviceName,
+    name:            deviceName,
     projectId,
-    ip:         pending.ip,
-    status:     'offline',
-    lastSeen:   now,
-    app:        pending.appName,
-    appVersion: '',
-    system:     { cpu: 0, memory: 0, temperature: 0, storage: 0, uptime: 0 },
-    createdAt:  serverTimestamp(),
-    updatedAt:  serverTimestamp(),
+    ip:              pending.ip,
+    status:          'offline',
+    lastSeen:        now,
+    app:             pending.appName,
+    appVersion:      '',
+    system:          { cpu: 0, memory: 0, temperature: 0, storage: 0, uptime: 0 },
+    pendingDeviceId: pendingDeviceId,
+    createdAt:       serverTimestamp(),
+    updatedAt:       serverTimestamp(),
   });
 
   // 2. Create apiTokens entry.
@@ -522,9 +523,48 @@ export async function approveDevice(
   // 4. Remove the pending entry.
   batch.delete(doc(col.pendingDevices(), pendingDeviceId));
 
+  // 5. Write credentials for Bridge-Ground to fetch via Worker poll.
+  batch.set(doc(db, 'deviceApprovals', pendingDeviceId), {
+    deviceId,
+    deviceToken: rawToken,
+    createdAt:   serverTimestamp(),
+  });
+
   await batch.commit();
 
   return { deviceId, deviceToken: rawToken };
+}
+
+export async function sendDeviceCredentials(
+  deviceId: string,
+  pendingDeviceId: string,
+): Promise<void> {
+  const rawToken  = generateToken();
+  const tokenHash = await hashToken(rawToken);
+
+  const tokenRef = doc(col.apiTokens());
+  const batch    = writeBatch(db);
+
+  batch.set(tokenRef, {
+    name:       `device-${deviceId}`,
+    type:       'device',
+    tokenHash,
+    deviceId,
+    createdAt:  serverTimestamp(),
+    lastUsedAt: null,
+    revokedAt:  null,
+  });
+  batch.set(doc(db, 'tokenLookup', tokenHash), {
+    type:      'device',
+    revokedAt: null,
+  });
+  batch.set(doc(db, 'deviceApprovals', pendingDeviceId), {
+    deviceId,
+    deviceToken: rawToken,
+    createdAt:   serverTimestamp(),
+  });
+
+  await batch.commit();
 }
 
 export async function rejectPendingDevice(pendingDeviceId: string): Promise<void> {
