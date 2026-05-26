@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { subscribeDevice, subscribeDeviceLogs, subscribeDevicesByProject, requestScreenshot as requestPortalScreenshot, cancelScreenshotRequest, subscribeScreenshotRequest, sendDeviceCredentials, type DeviceLog } from '../lib/firestore';
+import { subscribeDevice, subscribeDeviceLogs, subscribeDevicesByProject, requestScreenshot as requestPortalScreenshot, cancelScreenshotRequest, subscribeScreenshotRequest, setDeviceApproval, type DeviceLog } from '../lib/firestore';
 import { auth } from '../lib/firebase';
 import { StatusBadge } from '../components/StatusBadge';
 import type { Device } from '../types';
@@ -576,73 +576,55 @@ export function DeviceDetail() {
           </div>
         )}
 
-        {/* Bridge-Ground 認証情報セクション（Bridge-Ground 以外のデバイス） */}
+        {/* Bridge-Ground 連携セクション（Bridge-Ground 以外のデバイス） */}
         {device.app !== 'Bridge-Ground' && (
           <div>
             <h2 className="text-white font-semibold text-base mb-3">Bridge-Ground 連携</h2>
             <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-5 space-y-4">
-              <p className="text-xs text-zinc-500">
-                Bridge-Ground がこのデバイスの認証情報（DeviceID / DeviceToken）を未取得の場合、
-                以下から送信できます。Bridge-Ground の config.json 内の
-                <code className="mx-1 px-1 py-0.5 bg-zinc-800 rounded text-zinc-300">pendingId</code>
-                を入力してください。
-              </p>
               {device.pendingDeviceId ? (
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-zinc-400">
-                    PendingID: <code className="text-zinc-300">{device.pendingDeviceId}</code>
-                  </span>
-                  <button
-                    onClick={async () => {
-                      setCredSendState('sending');
-                      try {
-                        await sendDeviceCredentials(device.id, device.pendingDeviceId!);
-                        setCredSendState('done');
-                      } catch {
-                        setCredSendState('error');
-                      }
-                    }}
-                    disabled={credSendState === 'sending'}
-                    className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer disabled:opacity-50"
-                  >
-                    {credSendState === 'sending' ? '送信中...'
-                      : credSendState === 'done'    ? '送信済み ✓'
-                      : credSendState === 'error'   ? 'エラー'
-                      : '認証情報を送信'}
-                  </button>
-                </div>
+                <p className="text-xs text-zinc-500">
+                  PendingID: <code className="mx-1 px-1 py-0.5 bg-zinc-800 rounded text-zinc-300">{device.pendingDeviceId}</code>
+                  — 承認済み。Bridge-Ground は自動的に接続されます。
+                </p>
               ) : (
-                <div className="flex items-end gap-3">
-                  <div className="flex-1">
-                    <label className="block text-xs text-zinc-500 mb-1">PendingID（Bridge-Ground config.json より）</label>
-                    <input
-                      type="text"
-                      value={credPendingId}
-                      onChange={e => setCredPendingId(e.target.value)}
-                      placeholder="例: abc123def456..."
-                      className="w-full h-8 px-3 rounded-md text-xs text-zinc-200 bg-[#0a0a0a] ring-1 ring-[#3d3d3d] focus:outline-none focus:ring-zinc-500 font-mono"
-                    />
+                <>
+                  <p className="text-xs text-zinc-500">
+                    デバイスを承認済みの場合、Bridge-Ground の config.json 内の
+                    <code className="mx-1 px-1 py-0.5 bg-zinc-800 rounded text-zinc-300">pendingId</code>
+                    を入力して手動でリンクできます。
+                  </p>
+                  <div className="flex items-end gap-3">
+                    <div className="flex-1">
+                      <label className="block text-xs text-zinc-500 mb-1">PendingID（Bridge-Ground config.json より）</label>
+                      <input
+                        type="text"
+                        value={credPendingId}
+                        onChange={e => setCredPendingId(e.target.value)}
+                        placeholder="例: abc123def456..."
+                        className="w-full h-8 px-3 rounded-md text-xs text-zinc-200 bg-[#0a0a0a] ring-1 ring-[#3d3d3d] focus:outline-none focus:ring-zinc-500 font-mono"
+                      />
+                    </div>
+                    <button
+                      onClick={async () => {
+                        if (!credPendingId.trim()) return;
+                        setCredSendState('sending');
+                        try {
+                          await setDeviceApproval(credPendingId.trim(), device.id);
+                          setCredSendState('done');
+                        } catch {
+                          setCredSendState('error');
+                        }
+                      }}
+                      disabled={!credPendingId.trim() || credSendState === 'sending'}
+                      className="h-8 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                    >
+                      {credSendState === 'sending' ? '送信中...'
+                        : credSendState === 'done'    ? '設定済み ✓'
+                        : credSendState === 'error'   ? 'エラー'
+                        : 'リンクする'}
+                    </button>
                   </div>
-                  <button
-                    onClick={async () => {
-                      if (!credPendingId.trim()) return;
-                      setCredSendState('sending');
-                      try {
-                        await sendDeviceCredentials(device.id, credPendingId.trim());
-                        setCredSendState('done');
-                      } catch {
-                        setCredSendState('error');
-                      }
-                    }}
-                    disabled={!credPendingId.trim() || credSendState === 'sending'}
-                    className="h-8 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
-                  >
-                    {credSendState === 'sending' ? '送信中...'
-                      : credSendState === 'done'    ? '送信済み ✓'
-                      : credSendState === 'error'   ? 'エラー'
-                      : '認証情報を送信'}
-                  </button>
-                </div>
+                </>
               )}
             </div>
           </div>

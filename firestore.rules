@@ -87,9 +87,9 @@ service cloud.firestore {
     }
 
     match /deviceApprovals/{approvalId} {
-      allow get:    if true;
-      allow create: if isAdmin();
-      allow delete: if true;
+      allow get:           if true;
+      allow create, update: if isAdmin();
+      allow delete:        if false;
     }
 
   }

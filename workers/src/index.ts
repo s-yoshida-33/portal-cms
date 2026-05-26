@@ -109,10 +109,6 @@ class Firestore {
       body:    JSON.stringify(body),
     });
   }
-
-  async delete(collection: string, docId: string): Promise<void> {
-    await fetch(this.url(`${collection}/${docId}`), { method: 'DELETE' });
-  }
 }
 
 // ── Token verification ────────────────────────────────────────────────────────
@@ -137,6 +133,14 @@ async function verifyToken(
   return fields;
 }
 
+// ── Resolve pendingId → deviceId via permanent deviceApprovals doc ────────────
+
+async function resolveDeviceId(fs: Firestore, pendingId: string): Promise<string | null> {
+  const doc = await fs.get('deviceApprovals', pendingId);
+  if (!doc) return null;
+  return (doc.fields.deviceId as { stringValue?: string } | undefined)?.stringValue ?? null;
+}
+
 // ── Worker entry point ────────────────────────────────────────────────────────
 
 export default {
@@ -154,35 +158,16 @@ export default {
 
     const fs = new Firestore(env.FIREBASE_PROJECT_ID, env.FIREBASE_API_KEY);
 
-    // ── GET /v1/approval/{pendingId} ─────────────────────────────
-    if (req.method === 'GET' && url.pathname.startsWith('/v1/approval/')) {
+    // ── GET /v1/screenshot/pending?pendingId=... ──────────────────
+    if (req.method === 'GET' && url.pathname === '/v1/screenshot/pending') {
       const tokenData = await verifyToken(fs, rawToken, 'registration');
       if (!tokenData) return jsonRes({ error: 'Invalid or revoked token' }, 401);
 
-      const parts     = url.pathname.split('/').filter(Boolean);
-      const pendingId = parts[2];
+      const pendingId = url.searchParams.get('pendingId');
       if (!pendingId) return jsonRes({ error: 'Missing pendingId' }, 400);
 
-      const approvalDoc = await fs.get('deviceApprovals', pendingId);
-      if (!approvalDoc) return jsonRes({ approved: false });
-
-      const fields      = approvalDoc.fields ?? {};
-      const deviceId    = (fields.deviceId    as { stringValue?: string } | undefined)?.stringValue;
-      const deviceToken = (fields.deviceToken as { stringValue?: string } | undefined)?.stringValue;
-      if (!deviceId || !deviceToken) return jsonRes({ approved: false });
-
-      await fs.delete('deviceApprovals', pendingId);
-
-      return jsonRes({ approved: true, deviceId, deviceToken });
-    }
-
-    // ── GET /v1/screenshot/pending?deviceId=... ───────────────────
-    if (req.method === 'GET' && url.pathname === '/v1/screenshot/pending') {
-      const tokenData = await verifyToken(fs, rawToken, 'device');
-      if (!tokenData) return jsonRes({ error: 'Invalid or revoked token' }, 401);
-
-      const deviceId = url.searchParams.get('deviceId');
-      if (!deviceId) return jsonRes({ error: 'Missing deviceId' }, 400);
+      const deviceId = await resolveDeviceId(fs, pendingId);
+      if (!deviceId) return jsonRes({ pending: false });
 
       const ssDoc = await fs.get('screenshotRequests', deviceId);
       if (!ssDoc) return jsonRes({ pending: false });
@@ -246,11 +231,11 @@ export default {
 
     // ── POST /v1/status ───────────────────────────────────────────
     if (url.pathname === '/v1/status') {
-      const tokenData = await verifyToken(fs, rawToken, 'device');
+      const tokenData = await verifyToken(fs, rawToken, 'registration');
       if (!tokenData) return jsonRes({ error: 'Invalid or revoked token' }, 401);
 
       const body = await req.json() as {
-        deviceId:     string;
+        pendingId:    string;
         status?:      string;
         ip?:          string;
         cpu?:         number;
@@ -260,9 +245,12 @@ export default {
         uptime?:      number;
       };
 
-      if (!body.deviceId) {
-        return jsonRes({ error: 'Missing required field: deviceId' }, 400);
+      if (!body.pendingId) {
+        return jsonRes({ error: 'Missing required field: pendingId' }, 400);
       }
+
+      const deviceId = await resolveDeviceId(fs, body.pendingId);
+      if (!deviceId) return jsonRes({ error: 'Device not approved yet' }, 403);
 
       const validStatuses = ['online', 'offline', 'warning'];
       const deviceStatus  = validStatuses.includes(body.status ?? '') ? body.status! : 'online';
@@ -281,25 +269,28 @@ export default {
       };
       if (body.ip) patch.ip = body.ip;
 
-      await fs.patch('devices', body.deviceId, patch);
+      await fs.patch('devices', deviceId, patch);
 
       return jsonRes({ success: true });
     }
 
     // ── POST /v1/logs ─────────────────────────────────────────────
     if (url.pathname === '/v1/logs') {
-      const tokenData = await verifyToken(fs, rawToken, 'device');
+      const tokenData = await verifyToken(fs, rawToken, 'registration');
       if (!tokenData) return jsonRes({ error: 'Invalid or revoked token' }, 401);
 
       const body = await req.json() as {
-        deviceId: string;
-        app:      string;
-        entries:  Array<{ timestamp: string; level: string; tag: string; message: string }>;
+        pendingId: string;
+        app:       string;
+        entries:   Array<{ timestamp: string; level: string; tag: string; message: string }>;
       };
 
-      if (!body.deviceId || !Array.isArray(body.entries) || body.entries.length === 0) {
-        return jsonRes({ error: 'Missing required fields: deviceId, entries' }, 400);
+      if (!body.pendingId || !Array.isArray(body.entries) || body.entries.length === 0) {
+        return jsonRes({ error: 'Missing required fields: pendingId, entries' }, 400);
       }
+
+      const deviceId = await resolveDeviceId(fs, body.pendingId);
+      if (!deviceId) return jsonRes({ error: 'Device not approved yet' }, 403);
 
       const now      = new Date();
       const deleteAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
@@ -307,7 +298,7 @@ export default {
 
       await Promise.all(
         body.entries.map(entry =>
-          fs.create(`devices/${body.deviceId}/logs`, {
+          fs.create(`devices/${deviceId}/logs`, {
             timestamp: entry.timestamp ?? '',
             level:     entry.level     ?? '',
             tag:       entry.tag       ?? '',
@@ -324,11 +315,14 @@ export default {
 
     // ── POST /v1/screenshot ───────────────────────────────────────
     if (url.pathname === '/v1/screenshot') {
-      const tokenData = await verifyToken(fs, rawToken, 'device');
+      const tokenData = await verifyToken(fs, rawToken, 'registration');
       if (!tokenData) return jsonRes({ error: 'Invalid or revoked token' }, 401);
 
-      const deviceId = url.searchParams.get('deviceId');
-      if (!deviceId) return jsonRes({ error: 'Missing deviceId' }, 400);
+      const pendingId = url.searchParams.get('pendingId');
+      if (!pendingId) return jsonRes({ error: 'Missing pendingId' }, 400);
+
+      const deviceId = await resolveDeviceId(fs, pendingId);
+      if (!deviceId) return jsonRes({ error: 'Device not approved yet' }, 403);
 
       const imgBytes = await req.arrayBuffer();
       if (imgBytes.byteLength === 0) return jsonRes({ error: 'Empty body' }, 400);

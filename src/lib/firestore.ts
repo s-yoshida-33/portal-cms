@@ -476,14 +476,9 @@ export async function approveDevice(
   pending: PendingDevice,
   projectId: string,
   deviceName: string
-): Promise<{ deviceId: string; deviceToken: string }> {
-  // Pre-generate all IDs and token so the entire operation is a single atomic batch.
-  // This prevents partial state (duplicate devices/tokens) if any step fails.
+): Promise<{ deviceId: string }> {
   const deviceRef = doc(col.devices());
-  const tokenRef  = doc(col.apiTokens());
   const deviceId  = deviceRef.id;
-  const rawToken  = generateToken();
-  const tokenHash = await hashToken(rawToken);
   const now       = new Date().toISOString();
 
   const batch = writeBatch(db);
@@ -503,68 +498,30 @@ export async function approveDevice(
     updatedAt:       serverTimestamp(),
   });
 
-  // 2. Create apiTokens entry.
-  batch.set(tokenRef, {
-    name:      `device-${deviceId}`,
-    type:      'device',
-    tokenHash,
-    deviceId,
-    createdAt:  serverTimestamp(),
-    lastUsedAt: null,
-    revokedAt:  null,
-  });
-
-  // 3. Create tokenLookup entry for Worker token verification.
-  batch.set(doc(db, 'tokenLookup', tokenHash), {
-    type:      'device',
-    revokedAt: null,
-  });
-
-  // 4. Remove the pending entry.
+  // 2. Remove the pending entry.
   batch.delete(doc(col.pendingDevices(), pendingDeviceId));
 
-  // 5. Write credentials for Bridge-Ground to fetch via Worker poll.
+  // 3. Write permanent pendingId → deviceId mapping for Bridge-Ground.
   batch.set(doc(db, 'deviceApprovals', pendingDeviceId), {
     deviceId,
-    deviceToken: rawToken,
-    createdAt:   serverTimestamp(),
+    createdAt: serverTimestamp(),
   });
 
   await batch.commit();
 
-  return { deviceId, deviceToken: rawToken };
+  return { deviceId };
 }
 
-export async function sendDeviceCredentials(
-  deviceId: string,
-  pendingDeviceId: string,
+// setDeviceApproval writes (or overwrites) the permanent pendingId → deviceId
+// mapping used by the Worker to resolve Bridge-Ground requests without per-device tokens.
+export async function setDeviceApproval(
+  pendingId: string,
+  deviceId:  string,
 ): Promise<void> {
-  const rawToken  = generateToken();
-  const tokenHash = await hashToken(rawToken);
-
-  const tokenRef = doc(col.apiTokens());
-  const batch    = writeBatch(db);
-
-  batch.set(tokenRef, {
-    name:       `device-${deviceId}`,
-    type:       'device',
-    tokenHash,
+  await setDoc(doc(db, 'deviceApprovals', pendingId), {
     deviceId,
-    createdAt:  serverTimestamp(),
-    lastUsedAt: null,
-    revokedAt:  null,
+    createdAt: serverTimestamp(),
   });
-  batch.set(doc(db, 'tokenLookup', tokenHash), {
-    type:      'device',
-    revokedAt: null,
-  });
-  batch.set(doc(db, 'deviceApprovals', pendingDeviceId), {
-    deviceId,
-    deviceToken: rawToken,
-    createdAt:   serverTimestamp(),
-  });
-
-  await batch.commit();
 }
 
 export async function rejectPendingDevice(pendingDeviceId: string): Promise<void> {
