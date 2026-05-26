@@ -83,7 +83,7 @@ service cloud.firestore {
     }
 
     match /screenshotRequests/{requestId} {
-      allow read, write: if isAuth();
+      allow read, write: if true;
     }
 
     match /deviceApprovals/{approvalId} {
