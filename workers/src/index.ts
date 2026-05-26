@@ -109,6 +109,10 @@ class Firestore {
       body:    JSON.stringify(body),
     });
   }
+
+  async delete(collection: string, docId: string): Promise<void> {
+    await fetch(this.url(`${collection}/${docId}`), { method: 'DELETE' });
+  }
 }
 
 // ── Token verification ────────────────────────────────────────────────────────
@@ -149,6 +153,28 @@ export default {
     const rawToken = authHeader.slice(7);
 
     const fs = new Firestore(env.FIREBASE_PROJECT_ID, env.FIREBASE_API_KEY);
+
+    // ── GET /v1/approval/{pendingId} ─────────────────────────────
+    if (req.method === 'GET' && url.pathname.startsWith('/v1/approval/')) {
+      const tokenData = await verifyToken(fs, rawToken, 'registration');
+      if (!tokenData) return jsonRes({ error: 'Invalid or revoked token' }, 401);
+
+      const parts     = url.pathname.split('/').filter(Boolean);
+      const pendingId = parts[2];
+      if (!pendingId) return jsonRes({ error: 'Missing pendingId' }, 400);
+
+      const approvalDoc = await fs.get('deviceApprovals', pendingId);
+      if (!approvalDoc) return jsonRes({ approved: false });
+
+      const fields      = approvalDoc.fields ?? {};
+      const deviceId    = (fields.deviceId    as { stringValue?: string } | undefined)?.stringValue;
+      const deviceToken = (fields.deviceToken as { stringValue?: string } | undefined)?.stringValue;
+      if (!deviceId || !deviceToken) return jsonRes({ approved: false });
+
+      await fs.delete('deviceApprovals', pendingId);
+
+      return jsonRes({ approved: true, deviceId, deviceToken });
+    }
 
     // ── GET /v1/screenshot/pending?deviceId=... ───────────────────
     if (req.method === 'GET' && url.pathname === '/v1/screenshot/pending') {

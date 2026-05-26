@@ -15,19 +15,20 @@ export interface SystemInfo {
 
 // Firestore /devices/{deviceId}
 export interface Device {
-  id:        string;
-  projectId: string;
-  name:       string;
-  ip:         string;
-  port?:      number;
-  status:     DeviceStatus;
-  lastSeen:   string;
-  app:        AppName;
-  appVersion: string;
-  system:     SystemInfo;
-  createdAt:  string;
-  updatedAt:  string;
-  groupId?:   string | null;
+  id:               string;
+  projectId:        string;
+  name:             string;
+  ip:               string;
+  port?:            number;
+  status:           DeviceStatus;
+  lastSeen:         string;
+  app:              AppName;
+  appVersion:       string;
+  system:           SystemInfo;
+  createdAt:        string;
+  updatedAt:        string;
+  groupId?:         string | null;
+  pendingDeviceId?: string;
 }
 
 // Firestore /groups/{groupId}
