@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
-import { subscribeDevice, subscribeDeviceLogs, requestScreenshot as requestPortalScreenshot, subscribeScreenshotRequest, type DeviceLog } from '../lib/firestore';
+import { useParams, Link } from 'react-router-dom';
+import { subscribeDevice, subscribeDeviceLogs, subscribeDevicesByProject, requestScreenshot as requestPortalScreenshot, subscribeScreenshotRequest, type DeviceLog } from '../lib/firestore';
 import { auth } from '../lib/firebase';
 import { StatusBadge } from '../components/StatusBadge';
 import type { Device } from '../types';
@@ -104,7 +104,7 @@ function logLevelBadgeClass(level: string, active: boolean) {
 // ── Main page ─────────────────────────────────────────────────────
 
 export function DeviceDetail() {
-  const { deviceId } = useParams<{ deviceId: string }>();
+  const { deviceId, uuid, id: projectId } = useParams<{ deviceId: string; uuid: string; id: string }>();
 
   const [device,       setDevice]       = useState<Device | null>(null);
   const [deviceLoading, setDeviceLoading] = useState(true);
@@ -113,7 +113,8 @@ export function DeviceDetail() {
   const [appsLoading, setAppsLoading] = useState(false);
   const [appsError,  setAppsError]  = useState<string | null>(null);
 
-  const [screenshots, setScreenshots] = useState<Record<string, ScreenshotEntry>>({});
+  const [screenshots,    setScreenshots]    = useState<Record<string, ScreenshotEntry>>({});
+  const [projectDevices, setProjectDevices] = useState<Device[]>([]);
 
   type PortalSsState = 'idle' | 'pending' | 'ready' | 'error';
   const [portalSsState,      setPortalSsState]      = useState<PortalSsState>('idle');
@@ -136,6 +137,12 @@ export function DeviceDetail() {
     });
   }, [deviceId]);
 
+  // Subscribe to all devices in the same project (for Bridge-Ground app cross-referencing)
+  useEffect(() => {
+    if (!device || device.app !== 'Bridge-Ground' || !device.projectId) return;
+    return subscribeDevicesByProject(device.projectId, setProjectDevices);
+  }, [device?.app, device?.projectId]);
+
   // Subscribe to device logs
   useEffect(() => {
     if (!deviceId) return;
@@ -150,6 +157,15 @@ export function DeviceDetail() {
   }, [logs, autoScroll]);
 
   const baseUrl = device?.app === 'Bridge-Ground' ? `http://${device.ip}:${device.port ?? 8090}` : null;
+
+  // Map from app name → portal device ID (for linking from Bridge-Ground app cards)
+  const appDeviceMap = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const d of projectDevices) {
+      if (d.app !== 'Bridge-Ground') m.set(d.app, d.id);
+    }
+    return m;
+  }, [projectDevices]);
 
   const filteredLogs = useMemo(
     () => logs.filter(l => logLevels.has(l.level || 'INFO')),
@@ -424,6 +440,14 @@ export function DeviceDetail() {
                         </div>
                         <div className="flex items-center gap-3">
                           <span className="text-xs text-zinc-500">v{app.version}</span>
+                          {appDeviceMap.has(app.name) && (
+                            <Link
+                              to={`/${uuid}/projects/${projectId}/devices/${appDeviceMap.get(app.name)}`}
+                              className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors flex items-center"
+                            >
+                              デバイスページ
+                            </Link>
+                          )}
                           <button
                             onClick={() => requestScreenshot(app.id)}
                             disabled={!app.online || ss?.state === 'requesting'}
