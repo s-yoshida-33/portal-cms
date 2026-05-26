@@ -98,7 +98,7 @@ function logLevelBadgeClass(level: string, active: boolean) {
 // ── Main page ─────────────────────────────────────────────────────
 
 export function DeviceDetail() {
-  const { deviceId, uuid, id: projectId } = useParams<{ deviceId: string; uuid: string; id: string }>();
+  const { deviceId } = useParams<{ deviceId: string; uuid: string; id: string }>();
 
   const [device,        setDevice]        = useState<Device | null>(null);
   const [deviceLoading, setDeviceLoading] = useState(true);
