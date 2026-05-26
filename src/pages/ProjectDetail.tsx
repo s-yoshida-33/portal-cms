@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
@@ -137,6 +137,20 @@ interface DeviceCardProps {
 }
 
 function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: DeviceCardProps) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [menuOpen]);
+
   return (
     <div className="relative bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-5 hover:ring-[#4693ff] transition-colors cursor-pointer">
       <Link
@@ -161,19 +175,33 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
             <p className="text-xs text-zinc-600 mt-0.5">最終確認: {formatLastSeen(device.lastSeen)}</p>
           </div>
           {canEdit && (
-            <div className="relative z-10 flex items-center gap-2 ml-2">
+            <div ref={menuRef} className="relative z-10 ml-2">
               <button
-                onClick={() => onEdit(device)}
-                className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
+                onClick={e => { e.preventDefault(); setMenuOpen(o => !o); }}
+                className="w-7 h-7 flex items-center justify-center rounded-md text-zinc-400 hover:text-zinc-200 hover:bg-[#2a2a2a] transition-colors cursor-pointer"
               >
-                編集
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <circle cx="12" cy="5"  r="2" />
+                  <circle cx="12" cy="12" r="2" />
+                  <circle cx="12" cy="19" r="2" />
+                </svg>
               </button>
-              <button
-                onClick={() => onDelete(device)}
-                className="h-7 px-3 rounded-md text-xs text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-1 ring-red-900/50 transition-colors cursor-pointer"
-              >
-                削除依頼
-              </button>
+              {menuOpen && (
+                <div className="absolute right-0 top-full mt-1 w-32 bg-[#1a1a1a] ring-1 ring-[#3d3d3d] rounded-lg shadow-xl overflow-hidden">
+                  <button
+                    onClick={e => { e.preventDefault(); setMenuOpen(false); onEdit(device); }}
+                    className="w-full text-left px-3 py-2 text-sm text-zinc-300 hover:bg-[#2a2a2a] transition-colors cursor-pointer"
+                  >
+                    編集
+                  </button>
+                  <button
+                    onClick={e => { e.preventDefault(); setMenuOpen(false); onDelete(device); }}
+                    className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-950/40 transition-colors cursor-pointer"
+                  >
+                    削除依頼
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -523,18 +551,18 @@ function DeviceModal({ initial, groups, groupTree, onClose, onSave }: DeviceModa
           {groups.length > 0 && (
             <div>
               <label className="block text-sm text-zinc-400 mb-1.5">グループを選択</label>
-              <select
+              <CustomSelect
                 value={groupId ?? ''}
-                onChange={e => setGroupId(e.target.value || null)}
-                className={selectClass}
-              >
-                <option value="">ー</option>
-                {flattenGroups(groupTree).map(({ group, depth }) => (
-                  <option key={group.id} value={group.id}>
-                    {'　'.repeat(depth)}{group.name}
-                  </option>
-                ))}
-              </select>
+                onChange={val => setGroupId(val || null)}
+                options={[
+                  { value: '', label: 'ー' },
+                  ...flattenGroups(groupTree).map(({ group, depth }) => ({
+                    value: group.id,
+                    label: '　'.repeat(depth) + group.name,
+                  })),
+                ]}
+                className="w-full"
+              />
             </div>
           )}
           {error && <p className="text-red-400 text-sm">{error}</p>}
