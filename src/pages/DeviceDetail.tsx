@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { subscribeDevice, subscribeDeviceLogs, subscribeDevicesByProject, requestScreenshot as requestPortalScreenshot, subscribeScreenshotRequest, type DeviceLog } from '../lib/firestore';
+import { subscribeDevice, subscribeDeviceLogs, subscribeDevicesByProject, requestScreenshot as requestPortalScreenshot, cancelScreenshotRequest, subscribeScreenshotRequest, type DeviceLog } from '../lib/firestore';
 import { auth } from '../lib/firebase';
 import { StatusBadge } from '../components/StatusBadge';
 import type { Device } from '../types';
@@ -227,7 +227,7 @@ export function DeviceDetail() {
   useEffect(() => {
     if (!deviceId || device?.app === 'Bridge-Ground') return;
     return subscribeScreenshotRequest(deviceId, data => {
-      if (!data) return;
+      if (!data || data.status === 'cancelled') return;
       if (data.status === 'completed') {
         fetchPortalScreenshot();
       } else if (data.status === 'pending') {
@@ -523,7 +523,10 @@ export function DeviceDetail() {
                 <div className="flex flex-col items-center justify-center h-28 gap-3">
                   <p className="text-zinc-500 text-sm">Bridge-Ground からの応答を待っています...</p>
                   <button
-                    onClick={() => setPortalSsState('idle')}
+                    onClick={() => {
+                      setPortalSsState('idle');
+                      if (deviceId) cancelScreenshotRequest(deviceId).catch(() => {});
+                    }}
                     className="h-6 px-3 rounded-md text-xs text-zinc-500 bg-zinc-800 hover:bg-zinc-700 ring-1 ring-zinc-700 transition-colors cursor-pointer"
                   >
                     キャンセル

@@ -543,6 +543,10 @@ export async function requestScreenshot(deviceId: string): Promise<void> {
   });
 }
 
+export async function cancelScreenshotRequest(deviceId: string): Promise<void> {
+  await setDoc(doc(db, 'screenshotRequests', deviceId), { status: 'cancelled' }, { merge: true });
+}
+
 export function subscribeScreenshotRequest(
   deviceId: string,
   onUpdate: (data: { status: string } | null) => void,
