@@ -82,7 +82,13 @@ export function Breadcrumbs() {
               const isLast = i === crumbs.length - 1;
               return (
                 <span key={i} className="flex items-center gap-1.5">
-                  {i > 0 && <span className="text-zinc-700">&gt;</span>}
+                  {i > 0 && (
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                      className="text-zinc-700 shrink-0">
+                      <polyline points="9 18 15 12 9 6" />
+                    </svg>
+                  )}
                   {crumb.to && !isLast ? (
                     <Link to={crumb.to} className="text-zinc-400 hover:text-zinc-200 transition-colors">
                       {crumb.label}
