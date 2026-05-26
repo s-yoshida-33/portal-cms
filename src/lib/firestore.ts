@@ -180,7 +180,12 @@ export function subscribeDeviceLogs(
       limit(500),
     ),
     snap => {
-      const logs = snap.docs.map(d => fromDoc<DeviceLog>(d)).reverse();
+      const logs = snap.docs.map(d => fromDoc<DeviceLog>(d));
+      logs.sort((a, b) => {
+        const ta = a.timestamp || a.sentAt;
+        const tb = b.timestamp || b.sentAt;
+        return ta < tb ? -1 : ta > tb ? 1 : 0;
+      });
       onUpdate(logs);
     }
   );
