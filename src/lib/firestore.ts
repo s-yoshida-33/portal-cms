@@ -551,11 +551,11 @@ export async function cancelScreenshotRequest(deviceId: string): Promise<void> {
 
 export function subscribeScreenshotRequest(
   deviceId: string,
-  onUpdate: (data: { status: string } | null) => void,
+  onUpdate: (data: { status: string; completedAt?: { toDate(): Date } | null } | null) => void,
 ): Unsubscribe {
   return onSnapshot(
     doc(db, 'screenshotRequests', deviceId),
-    snap => onUpdate(snap.exists() ? (snap.data() as { status: string }) : null),
+    snap => onUpdate(snap.exists() ? (snap.data() as { status: string; completedAt?: { toDate(): Date } | null }) : null),
     _err => onUpdate(null),
   );
 }

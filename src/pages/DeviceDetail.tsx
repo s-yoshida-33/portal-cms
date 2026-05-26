@@ -192,8 +192,9 @@ export function DeviceDetail() {
     if (baseUrl) fetchApps();
   }, [baseUrl, fetchApps]);
 
-  // Fetch portal screenshot from Worker using Firebase ID token
-  const fetchPortalScreenshot = useCallback(async () => {
+  // Fetch portal screenshot from Worker using Firebase ID token.
+  // completedAt is the Firestore Timestamp from the screenshotRequests doc.
+  const fetchPortalScreenshot = useCallback(async (completedAt?: { toDate(): Date } | null) => {
     if (!deviceId) return;
     try {
       const idToken = await auth.currentUser?.getIdToken();
@@ -207,30 +208,35 @@ export function DeviceDetail() {
       const url = URL.createObjectURL(await res.blob());
       portalBlobRef.current = url;
       setPortalSsBlobUrl(url);
-      setPortalSsCapturedAt(new Date().toLocaleString('ja-JP'));
+      const capturedDate = completedAt?.toDate() ?? null;
+      setPortalSsCapturedAt(capturedDate ? capturedDate.toLocaleString('ja-JP') : null);
       setPortalSsState('ready');
     } catch {
       setPortalSsState('error');
     }
   }, [deviceId]);
 
-  // Subscribe to screenshotRequests Firestore doc
+  // Subscribe to screenshotRequests Firestore doc.
+  // On initial snapshot we silently restore a previous screenshot without updating state;
+  // pending/completed transitions after that drive the UI normally.
   useEffect(() => {
     if (!deviceId || device?.app === 'Bridge-Ground') return;
+    let isFirst = true;
     return subscribeScreenshotRequest(deviceId, data => {
-      if (!data || data.status === 'cancelled') return;
+      if (!data || data.status === 'cancelled') { isFirst = false; return; }
       if (data.status === 'completed') {
-        fetchPortalScreenshot();
-      } else if (data.status === 'pending') {
+        fetchPortalScreenshot(data.completedAt);
+      } else if (data.status === 'pending' && !isFirst) {
         setPortalSsState('pending');
       }
+      isFirst = false;
     });
   }, [deviceId, device?.app, fetchPortalScreenshot]);
 
   async function handlePortalScreenshotRequest() {
     if (!deviceId) return;
     setPortalSsState('pending');
-    setPortalSsBlobUrl(null);
+    // Keep the existing blob URL so the previous screenshot stays visible while fetching.
     try {
       await requestPortalScreenshot(deviceId);
     } catch {
@@ -397,12 +403,14 @@ export function DeviceDetail() {
             </div>
 
             <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-5">
-              {portalSsState === 'idle' && (
+              {/* 画像なし・idle */}
+              {!portalSsBlobUrl && portalSsState === 'idle' && (
                 <div className="flex items-center justify-center h-28 text-zinc-600 text-sm">
                   ボタンを押してスクリーンショットを要求してください。
                 </div>
               )}
-              {portalSsState === 'pending' && (
+              {/* 画像なし・pending */}
+              {!portalSsBlobUrl && portalSsState === 'pending' && (
                 <div className="flex flex-col items-center justify-center h-28 gap-3">
                   <p className="text-zinc-500 text-sm">Bridge-Ground からの応答を待っています...</p>
                   <button
@@ -416,7 +424,8 @@ export function DeviceDetail() {
                   </button>
                 </div>
               )}
-              {portalSsState === 'error' && (
+              {/* 画像なし・error */}
+              {!portalSsBlobUrl && portalSsState === 'error' && (
                 <div className="flex flex-col items-center justify-center h-20 gap-2 rounded-lg bg-[#0a0a0a] ring-1 ring-red-900/30">
                   <p className="text-red-400 text-sm">取得に失敗しました（タイムアウトまたはエラー）。</p>
                   <button
@@ -427,29 +436,58 @@ export function DeviceDetail() {
                   </button>
                 </div>
               )}
-              {portalSsState === 'ready' && portalSsBlobUrl && (
+              {/* 画像あり（ready / pending / error すべてで表示） */}
+              {portalSsBlobUrl && (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <p className="text-xs text-zinc-500">取得時刻: {portalSsCapturedAt}</p>
-                    <button
-                      onClick={() => {
-                        if (!portalSsBlobUrl) return;
-                        const a = document.createElement('a');
-                        const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-                        a.href = portalSsBlobUrl;
-                        a.download = `screenshot-${device.name}-${ts}.jpg`;
-                        a.click();
-                      }}
-                      className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
-                    >
-                      ダウンロード
-                    </button>
+                    <p className="text-xs text-zinc-500">
+                      {portalSsCapturedAt ? `最終取得時刻: ${portalSsCapturedAt}` : '最終取得時刻: —'}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      {portalSsState === 'error' && (
+                        <button
+                          onClick={handlePortalScreenshotRequest}
+                          className="h-7 px-3 rounded-md text-xs text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-1 ring-red-900/50 transition-colors cursor-pointer"
+                        >
+                          再試行
+                        </button>
+                      )}
+                      <button
+                        onClick={() => {
+                          const a = document.createElement('a');
+                          const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+                          a.href = portalSsBlobUrl;
+                          a.download = `screenshot-${device.name}-${ts}.jpg`;
+                          a.click();
+                        }}
+                        className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
+                      >
+                        ダウンロード
+                      </button>
+                    </div>
                   </div>
-                  <img
-                    src={portalSsBlobUrl}
-                    alt={`${device.name} のスクリーンショット`}
-                    className="w-full rounded-lg ring-1 ring-[#3d3d3d] object-contain max-h-[600px]"
-                  />
+                  <div className="relative">
+                    <img
+                      src={portalSsBlobUrl}
+                      alt={`${device.name} のスクリーンショット`}
+                      className="w-full rounded-lg ring-1 ring-[#3d3d3d] object-contain max-h-[600px]"
+                    />
+                    {/* 取得中オーバーレイ */}
+                    {portalSsState === 'pending' && (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-lg bg-black/60">
+                        <p className="text-zinc-300 text-sm">Bridge-Ground からの応答を待っています...</p>
+                        <button
+                          onClick={() => {
+                            setPortalSsState('ready');
+                            if (deviceId) cancelScreenshotRequest(deviceId).catch(() => {});
+                          }}
+                          className="h-6 px-3 rounded-md text-xs text-zinc-400 bg-zinc-800 hover:bg-zinc-700 ring-1 ring-zinc-700 transition-colors cursor-pointer"
+                        >
+                          キャンセル
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
