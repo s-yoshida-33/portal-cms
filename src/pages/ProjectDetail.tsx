@@ -551,18 +551,18 @@ function DeviceModal({ initial, groups, groupTree, onClose, onSave }: DeviceModa
           {groups.length > 0 && (
             <div>
               <label className="block text-sm text-zinc-400 mb-1.5">グループを選択</label>
-              <select
+              <CustomSelect
                 value={groupId ?? ''}
-                onChange={e => setGroupId(e.target.value || null)}
-                className={selectClass}
-              >
-                <option value="">ー</option>
-                {flattenGroups(groupTree).map(({ group, depth }) => (
-                  <option key={group.id} value={group.id}>
-                    {'　'.repeat(depth)}{group.name}
-                  </option>
-                ))}
-              </select>
+                onChange={val => setGroupId(val || null)}
+                options={[
+                  { value: '', label: 'ー' },
+                  ...flattenGroups(groupTree).map(({ group, depth }) => ({
+                    value: group.id,
+                    label: '　'.repeat(depth) + group.name,
+                  })),
+                ]}
+                className="w-full"
+              />
             </div>
           )}
           {error && <p className="text-red-400 text-sm">{error}</p>}
