@@ -412,7 +412,7 @@ export function DeviceDetail() {
               {/* 画像なし・pending */}
               {!portalSsBlobUrl && portalSsState === 'pending' && (
                 <div className="flex flex-col items-center justify-center h-28 gap-3">
-                  <p className="text-zinc-500 text-sm">Bridge-Ground からの応答を待っています...</p>
+                  <p className="text-zinc-500 text-sm">取得中...</p>
                   <button
                     onClick={() => {
                       setPortalSsState('idle');
@@ -475,7 +475,7 @@ export function DeviceDetail() {
                     {/* 取得中オーバーレイ */}
                     {portalSsState === 'pending' && (
                       <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-lg bg-black/60">
-                        <p className="text-zinc-300 text-sm">Bridge-Ground からの応答を待っています...</p>
+                        <p className="text-zinc-300 text-sm">取得中...</p>
                         <button
                           onClick={() => {
                             setPortalSsState('ready');
