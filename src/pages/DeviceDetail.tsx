@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { subscribeDevice, subscribeDeviceLogs, subscribeDevicesByProject, requestScreenshot as requestPortalScreenshot, cancelScreenshotRequest, subscribeScreenshotRequest, setDeviceApproval, type DeviceLog } from '../lib/firestore';
+import { subscribeDevice, subscribeDeviceLogs, subscribeDevicesByProject, requestScreenshot as requestPortalScreenshot, cancelScreenshotRequest, subscribeScreenshotRequest, type DeviceLog } from '../lib/firestore';
 import { auth } from '../lib/firebase';
 import { StatusBadge } from '../components/StatusBadge';
 import type { Device } from '../types';
@@ -21,13 +21,7 @@ interface AppInfo {
   startedAt?:   string;
 }
 
-type SsState = 'idle' | 'requesting' | 'ready' | 'error';
-
-interface ScreenshotEntry {
-  state:       SsState;
-  blobUrl:     string | null;
-  capturedAt:  string | null;
-}
+type PortalSsState = 'idle' | 'pending' | 'ready' | 'error';
 
 // ── Helpers ───────────────────────────────────────────────────────
 
@@ -106,19 +100,14 @@ function logLevelBadgeClass(level: string, active: boolean) {
 export function DeviceDetail() {
   const { deviceId, uuid, id: projectId } = useParams<{ deviceId: string; uuid: string; id: string }>();
 
-  const [device,       setDevice]       = useState<Device | null>(null);
+  const [device,        setDevice]        = useState<Device | null>(null);
   const [deviceLoading, setDeviceLoading] = useState(true);
 
-  const [apps,       setApps]       = useState<AppInfo[]>([]);
+  const [apps,        setApps]        = useState<AppInfo[]>([]);
   const [appsLoading, setAppsLoading] = useState(false);
-  const [appsError,  setAppsError]  = useState<string | null>(null);
+  const [appsError,   setAppsError]   = useState<string | null>(null);
 
-  const [screenshots,    setScreenshots]    = useState<Record<string, ScreenshotEntry>>({});
   const [projectDevices, setProjectDevices] = useState<Device[]>([]);
-
-  type PortalSsState = 'idle' | 'pending' | 'ready' | 'error';
-  const [credPendingId,    setCredPendingId]    = useState('');
-  const [credSendState,    setCredSendState]    = useState<'idle' | 'sending' | 'done' | 'error'>('idle');
 
   const [portalSsState,      setPortalSsState]      = useState<PortalSsState>('idle');
   const [portalSsBlobUrl,    setPortalSsBlobUrl]    = useState<string | null>(null);
@@ -128,8 +117,7 @@ export function DeviceDetail() {
   const [logs,       setLogs]       = useState<DeviceLog[]>([]);
   const [logLevels,  setLogLevels]  = useState<Set<string>>(new Set(LOG_LEVELS));
   const [autoScroll, setAutoScroll] = useState(true);
-  const logEndRef  = useRef<HTMLDivElement>(null);
-  const blobUrlsRef = useRef<string[]>([]);
+  const logContainerRef = useRef<HTMLDivElement>(null);
 
   // Subscribe to Firestore device document
   useEffect(() => {
@@ -152,10 +140,10 @@ export function DeviceDetail() {
     return subscribeDeviceLogs(deviceId, setLogs);
   }, [deviceId]);
 
-  // Auto-scroll log panel to bottom
+  // Auto-scroll log container only (page itself does not scroll)
   useEffect(() => {
-    if (autoScroll && logEndRef.current) {
-      logEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (autoScroll && logContainerRef.current) {
+      logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
     }
   }, [logs, autoScroll]);
 
@@ -262,70 +250,6 @@ export function DeviceDetail() {
     return () => { if (portalBlobRef.current) URL.revokeObjectURL(portalBlobRef.current); };
   }, []);
 
-  // Fetch screenshot blob and store as object URL
-  const fetchScreenshot = useCallback(async (appId: string) => {
-    if (!baseUrl) return;
-    try {
-      const res = await fetch(`${baseUrl}/api/apps/${appId}/screenshot`, {
-        cache: 'no-store',
-        signal: AbortSignal.timeout(15000),
-      });
-      if (!res.ok) throw new Error('fetch failed');
-      const url = URL.createObjectURL(await res.blob());
-      blobUrlsRef.current.push(url);
-      setScreenshots(prev => ({
-        ...prev,
-        [appId]: { state: 'ready', blobUrl: url, capturedAt: new Date().toLocaleString('ja-JP') },
-      }));
-    } catch {
-      setScreenshots(prev => ({
-        ...prev,
-        [appId]: { state: 'error', blobUrl: null, capturedAt: null },
-      }));
-    }
-  }, [baseUrl]);
-
-  // SSE for screenshot_ready events
-  useEffect(() => {
-    if (!baseUrl) return;
-    const es = new EventSource(`${baseUrl}/api/events`);
-    es.addEventListener('screenshot_ready', (e: MessageEvent) => {
-      const { appId } = JSON.parse(e.data) as { appId: string };
-      fetchScreenshot(appId);
-    });
-    return () => es.close();
-  }, [baseUrl, fetchScreenshot]);
-
-  // Revoke object URLs on unmount
-  useEffect(() => {
-    const urls = blobUrlsRef.current;
-    return () => urls.forEach(u => URL.revokeObjectURL(u));
-  }, []);
-
-  async function requestScreenshot(appId: string) {
-    if (!baseUrl) return;
-    setScreenshots(prev => ({ ...prev, [appId]: { state: 'requesting', blobUrl: null, capturedAt: null } }));
-    try {
-      const res = await fetch(`${baseUrl}/api/apps/${appId}/screenshot/request`, {
-        method: 'POST',
-        signal: AbortSignal.timeout(5000),
-      });
-      if (!res.ok) throw new Error('request failed');
-    } catch {
-      setScreenshots(prev => ({ ...prev, [appId]: { state: 'error', blobUrl: null, capturedAt: null } }));
-    }
-  }
-
-  function downloadScreenshot(appId: string, appName: string) {
-    const ss = screenshots[appId];
-    if (!ss?.blobUrl) return;
-    const a = document.createElement('a');
-    const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-    a.href     = ss.blobUrl;
-    a.download = `screenshot-${appName}-${ts}.jpg`;
-    a.click();
-  }
-
   // ── Loading / not found ────────────────────────────────────────
 
   if (deviceLoading) {
@@ -387,7 +311,9 @@ export function DeviceDetail() {
             </div>
             <div className="flex flex-col justify-center pl-5 border-l border-zinc-800">
               <p className="text-xs text-zinc-500 mb-1">稼働時間</p>
-              <p className="text-lg font-semibold text-zinc-200"><UptimeClock uptimeSecs={device.system.uptime} lastSeen={device.lastSeen} /></p>
+              <p className="text-lg font-semibold text-zinc-200">
+                <UptimeClock uptimeSecs={device.system.uptime} lastSeen={device.lastSeen} />
+              </p>
             </div>
           </div>
         </div>
@@ -420,83 +346,37 @@ export function DeviceDetail() {
               </div>
             ) : (
               <div className="space-y-3">
-                {apps.map(app => {
-                  const ss = screenshots[app.id];
-                  return (
-                    <div key={app.id} className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-5">
-
-                      {/* アプリヘッダー */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div>
-                            <p className="font-medium text-zinc-100 text-sm">{app.name}</p>
-                            <p className="text-xs text-zinc-500 font-mono mt-0.5">{app.hostname}</p>
-                          </div>
-                          <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${
-                            app.online
-                              ? 'bg-green-500/10 text-green-400'
-                              : 'bg-zinc-700/50 text-zinc-400'
-                          }`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${app.online ? 'bg-green-400' : 'bg-zinc-500'}`} />
-                            {app.online ? 'オンライン' : 'オフライン'}
-                          </span>
+                {apps.map(app => (
+                  <div key={app.id} className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div>
+                          <p className="font-medium text-zinc-100 text-sm">{app.name}</p>
+                          <p className="text-xs text-zinc-500 font-mono mt-0.5">{app.hostname}</p>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <span className="text-xs text-zinc-500">v{app.version}</span>
-                          {appDeviceMap.has(app.name) && (
-                            <Link
-                              to={`/${uuid}/projects/${projectId}/devices/${appDeviceMap.get(app.name)}`}
-                              className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors flex items-center"
-                            >
-                              デバイスページ
-                            </Link>
-                          )}
-                          <button
-                            onClick={() => requestScreenshot(app.id)}
-                            disabled={!app.online || ss?.state === 'requesting'}
-                            className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            {ss?.state === 'requesting' ? '取得中...' : 'スクリーンショットを取得'}
-                          </button>
-                        </div>
+                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${
+                          app.online
+                            ? 'bg-green-500/10 text-green-400'
+                            : 'bg-zinc-700/50 text-zinc-400'
+                        }`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${app.online ? 'bg-green-400' : 'bg-zinc-500'}`} />
+                          {app.online ? 'オンライン' : 'オフライン'}
+                        </span>
                       </div>
-
-                      {/* スクリーンショット表示エリア */}
-                      {ss && ss.state !== 'idle' && (
-                        <div className="mt-4 border-t border-zinc-800 pt-4">
-                          {ss.state === 'requesting' && (
-                            <div className="flex items-center justify-center h-28 rounded-lg bg-[#0a0a0a] ring-1 ring-[#3d3d3d]">
-                              <p className="text-zinc-500 text-sm">スクリーンショットを取得中...</p>
-                            </div>
-                          )}
-                          {ss.state === 'error' && (
-                            <div className="flex items-center justify-center h-16 rounded-lg bg-[#0a0a0a] ring-1 ring-red-900/30">
-                              <p className="text-red-400 text-sm">取得に失敗しました。</p>
-                            </div>
-                          )}
-                          {ss.state === 'ready' && ss.blobUrl && (
-                            <div className="space-y-3">
-                              <div className="flex items-center justify-between">
-                                <p className="text-xs text-zinc-500">取得時刻: {ss.capturedAt}</p>
-                                <button
-                                  onClick={() => downloadScreenshot(app.id, app.name)}
-                                  className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
-                                >
-                                  ダウンロード
-                                </button>
-                              </div>
-                              <img
-                                src={ss.blobUrl}
-                                alt={`${app.name} のスクリーンショット`}
-                                className="w-full rounded-lg ring-1 ring-[#3d3d3d] object-contain max-h-[600px]"
-                              />
-                            </div>
-                          )}
-                        </div>
-                      )}
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs text-zinc-500">v{app.version}</span>
+                        {appDeviceMap.has(app.name) && (
+                          <Link
+                            to={`/${uuid}/projects/${projectId}/devices/${appDeviceMap.get(app.name)}`}
+                            className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors flex items-center"
+                          >
+                            デバイスページ
+                          </Link>
+                        )}
+                      </div>
                     </div>
-                  );
-                })}
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -576,60 +456,6 @@ export function DeviceDetail() {
           </div>
         )}
 
-        {/* Bridge-Ground 連携セクション（Bridge-Ground 以外のデバイス） */}
-        {device.app !== 'Bridge-Ground' && (
-          <div>
-            <h2 className="text-white font-semibold text-base mb-3">Bridge-Ground 連携</h2>
-            <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-5 space-y-4">
-              {device.pendingDeviceId ? (
-                <p className="text-xs text-zinc-500">
-                  PendingID: <code className="mx-1 px-1 py-0.5 bg-zinc-800 rounded text-zinc-300">{device.pendingDeviceId}</code>
-                  — 承認済み。Bridge-Ground は自動的に接続されます。
-                </p>
-              ) : (
-                <>
-                  <p className="text-xs text-zinc-500">
-                    デバイスを承認済みの場合、Bridge-Ground の config.json 内の
-                    <code className="mx-1 px-1 py-0.5 bg-zinc-800 rounded text-zinc-300">pendingId</code>
-                    を入力して手動でリンクできます。
-                  </p>
-                  <div className="flex items-end gap-3">
-                    <div className="flex-1">
-                      <label className="block text-xs text-zinc-500 mb-1">PendingID（Bridge-Ground config.json より）</label>
-                      <input
-                        type="text"
-                        value={credPendingId}
-                        onChange={e => setCredPendingId(e.target.value)}
-                        placeholder="例: abc123def456..."
-                        className="w-full h-8 px-3 rounded-md text-xs text-zinc-200 bg-[#0a0a0a] ring-1 ring-[#3d3d3d] focus:outline-none focus:ring-zinc-500 font-mono"
-                      />
-                    </div>
-                    <button
-                      onClick={async () => {
-                        if (!credPendingId.trim()) return;
-                        setCredSendState('sending');
-                        try {
-                          await setDeviceApproval(credPendingId.trim(), device.id);
-                          setCredSendState('done');
-                        } catch {
-                          setCredSendState('error');
-                        }
-                      }}
-                      disabled={!credPendingId.trim() || credSendState === 'sending'}
-                      className="h-8 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
-                    >
-                      {credSendState === 'sending' ? '送信中...'
-                        : credSendState === 'done'    ? '設定済み ✓'
-                        : credSendState === 'error'   ? 'エラー'
-                        : 'リンクする'}
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        )}
-
         {/* ログセクション */}
         <div>
           <div className="flex items-center justify-between mb-3">
@@ -659,7 +485,7 @@ export function DeviceDetail() {
           </div>
 
           <div className="bg-[#0a0a0a] ring-1 ring-[#3d3d3d] rounded-xl overflow-hidden">
-            <div className="h-96 overflow-y-auto p-4 font-mono text-xs leading-5 space-y-0.5">
+            <div ref={logContainerRef} className="h-96 overflow-y-auto p-4 font-mono text-xs leading-5 space-y-0.5">
               {filteredLogs.length === 0 ? (
                 <p className="text-zinc-600 text-center py-8">
                   {logs.length === 0 ? 'ログがありません。Bridge-Ground からの送信をお待ちください。' : '表示対象のログがありません。'}
@@ -674,7 +500,6 @@ export function DeviceDetail() {
                   </div>
                 ))
               )}
-              <div ref={logEndRef} />
             </div>
             <div className="flex items-center justify-between px-4 py-2 bg-black border-t border-[#3d3d3d] text-xs text-zinc-600">
               <span>{filteredLogs.length} 件表示（最大 500 件）</span>
