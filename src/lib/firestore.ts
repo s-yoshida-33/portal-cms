@@ -169,26 +169,21 @@ export interface DeviceLog {
   sentAt:    string;
 }
 
-export function subscribeDeviceLogs(
-  deviceId: string,
-  onUpdate: (logs: DeviceLog[]) => void,
-): Unsubscribe {
-  return onSnapshot(
+export async function fetchDeviceLogs(deviceId: string): Promise<DeviceLog[]> {
+  const snap = await getDocs(
     query(
       collection(db, 'devices', deviceId, 'logs'),
       orderBy('sentAt', 'desc'),
-      limit(500),
+      limit(200),
     ),
-    snap => {
-      const logs = snap.docs.map(d => fromDoc<DeviceLog>(d));
-      logs.sort((a, b) => {
-        const ta = a.timestamp || a.sentAt;
-        const tb = b.timestamp || b.sentAt;
-        return ta < tb ? -1 : ta > tb ? 1 : 0;
-      });
-      onUpdate(logs);
-    }
   );
+  const logs = snap.docs.map(d => fromDoc<DeviceLog>(d));
+  logs.sort((a, b) => {
+    const ta = a.timestamp || a.sentAt;
+    const tb = b.timestamp || b.sentAt;
+    return ta < tb ? -1 : ta > tb ? 1 : 0;
+  });
+  return logs;
 }
 
 // ================================================================
