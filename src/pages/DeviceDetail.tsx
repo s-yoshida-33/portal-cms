@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { subscribeDevice, subscribeDeviceLogs, requestScreenshot as requestPortalScreenshot, cancelScreenshotRequest, subscribeScreenshotRequest, type DeviceLog } from '../lib/firestore';
+import { subscribeDevice, fetchDeviceLogs, requestScreenshot as requestPortalScreenshot, cancelScreenshotRequest, subscribeScreenshotRequest, type DeviceLog } from '../lib/firestore';
 import { auth } from '../lib/firebase';
 import { StatusBadge } from '../components/StatusBadge';
 import type { Device } from '../types';
@@ -114,9 +114,11 @@ export function DeviceDetail() {
   const [portalSsCapturedAt, setPortalSsCapturedAt] = useState<string | null>(null);
   const portalBlobRef = useRef<string | null>(null);
 
-  const [logs,       setLogs]       = useState<DeviceLog[]>([]);
-  const [logLevels,  setLogLevels]  = useState<Set<string>>(new Set(LOG_LEVELS));
-  const [autoScroll, setAutoScroll] = useState(true);
+  const [logs,             setLogs]             = useState<DeviceLog[]>([]);
+  const [logsLastFetched,  setLogsLastFetched]  = useState<Date | null>(null);
+  const [logsRefreshing,   setLogsRefreshing]   = useState(false);
+  const [logLevels,        setLogLevels]        = useState<Set<string>>(new Set(LOG_LEVELS));
+  const [autoScroll,       setAutoScroll]       = useState(true);
   const logContainerRef = useRef<HTMLDivElement>(null);
 
   // Subscribe to Firestore device document
@@ -128,11 +130,30 @@ export function DeviceDetail() {
     });
   }, [deviceId]);
 
-  // Subscribe to device logs
+  // Poll device logs every 30 seconds (avoids real-time listener read costs)
+  const pollLogs = useCallback(async (id: string) => {
+    try {
+      const fetched = await fetchDeviceLogs(id);
+      setLogs(fetched);
+      setLogsLastFetched(new Date());
+    } catch {
+      // silently ignore transient errors; next poll will retry
+    }
+  }, []);
+
   useEffect(() => {
     if (!deviceId) return;
-    return subscribeDeviceLogs(deviceId, setLogs);
-  }, [deviceId]);
+    pollLogs(deviceId);
+    const id = setInterval(() => pollLogs(deviceId), 30_000);
+    return () => clearInterval(id);
+  }, [deviceId, pollLogs]);
+
+  const handleRefreshLogs = useCallback(async () => {
+    if (!deviceId || logsRefreshing) return;
+    setLogsRefreshing(true);
+    await pollLogs(deviceId);
+    setLogsRefreshing(false);
+  }, [deviceId, logsRefreshing, pollLogs]);
 
   // Auto-scroll log container only (page itself does not scroll)
   useEffect(() => {
@@ -496,6 +517,14 @@ export function DeviceDetail() {
               >
                 自動スクロール
               </button>
+              <div className="w-px h-4 bg-zinc-700 mx-1" />
+              <button
+                onClick={handleRefreshLogs}
+                disabled={logsRefreshing}
+                className="h-6 px-2.5 rounded-md text-xs font-medium ring-1 transition-colors cursor-pointer text-zinc-400 bg-zinc-800 ring-zinc-700 hover:bg-zinc-700 disabled:opacity-50"
+              >
+                {logsRefreshing ? '更新中...' : '更新'}
+              </button>
             </div>
           </div>
 
@@ -517,8 +546,8 @@ export function DeviceDetail() {
               )}
             </div>
             <div className="flex items-center justify-between px-4 py-2 bg-black border-t border-[#3d3d3d] text-xs text-zinc-600">
-              <span>{filteredLogs.length} 件表示（最大 500 件）</span>
-              <span>最終更新: {logs.length > 0 ? new Date(logs[logs.length - 1].sentAt).toLocaleString('ja-JP') : '—'}</span>
+              <span>{filteredLogs.length} 件表示（最大 200 件）</span>
+              <span>最終取得: {logsLastFetched ? logsLastFetched.toLocaleString('ja-JP') : '—'}</span>
             </div>
           </div>
         </div>
