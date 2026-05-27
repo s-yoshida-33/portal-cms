@@ -45,15 +45,16 @@ function MetricBar({ label, value, unit, warn = 70, danger = 90 }: {
   );
 }
 
-function UptimeClock({ uptimeSecs, lastSeen }: { uptimeSecs: number; lastSeen: string }) {
+function UptimeClock({ uptimeSecs, lastSeen, status }: { uptimeSecs: number; lastSeen: string; status: string }) {
   const calc = () => Math.max(0, uptimeSecs + Math.floor((Date.now() - new Date(lastSeen).getTime()) / 1000));
   const [secs, setSecs] = useState(calc);
   useEffect(() => {
+    if (status !== 'online') { setSecs(uptimeSecs); return; }
     setSecs(calc());
     const id = setInterval(() => setSecs(calc()), 1000);
     return () => clearInterval(id);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [uptimeSecs, lastSeen]);
+  }, [uptimeSecs, lastSeen, status]);
   if (secs <= 0) return <span className="font-mono">--:--:--</span>;
   const h = Math.floor(secs / 3600);
   const m = Math.floor((secs % 3600) / 60);
@@ -302,7 +303,7 @@ export function DeviceDetail() {
             <div className="flex flex-col justify-center pl-5 border-l border-zinc-800">
               <p className="text-xs text-zinc-500 mb-1">稼働時間</p>
               <p className="text-lg font-semibold text-zinc-200">
-                <UptimeClock uptimeSecs={device.system.uptime} lastSeen={device.lastSeen} />
+                <UptimeClock uptimeSecs={device.system.uptime} lastSeen={device.lastSeen} status={device.status} />
               </p>
             </div>
           </div>
