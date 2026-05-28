@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   createUserWithEmailAndPassword,
-  signInWithRedirect,
+  signInWithPopup,
 } from 'firebase/auth';
 import { auth, googleProvider } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
@@ -38,7 +38,7 @@ export function Signup() {
     setError('');
     setLoading(true);
     try {
-      await signInWithRedirect(auth, googleProvider);
+      await signInWithPopup(auth, googleProvider);
     } catch {
       setError('Googleログインに失敗しました。');
       setLoading(false);
