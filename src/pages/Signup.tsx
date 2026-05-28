@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   createUserWithEmailAndPassword,
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
 } from 'firebase/auth';
 import { auth, googleProvider } from '../lib/firebase';
 
@@ -19,21 +20,34 @@ function GoogleIcon() {
 
 export function Signup() {
   const navigate = useNavigate();
-  const [email, setEmail]         = useState('');
-  const [password, setPassword]   = useState('');
-  const [confirm, setConfirm]     = useState('');
-  const [error, setError]         = useState('');
-  const [loading, setLoading]     = useState(false);
+  const [email, setEmail]                       = useState('');
+  const [password, setPassword]                 = useState('');
+  const [confirm, setConfirm]                   = useState('');
+  const [error, setError]                       = useState('');
+  const [loading, setLoading]                   = useState(false);
+  const [redirectChecking, setRedirectChecking] = useState(true);
+
+  // Googleリダイレクト認証の結果をページ復帰時に受け取る
+  useEffect(() => {
+    getRedirectResult(auth)
+      .then(result => {
+        if (result) {
+          navigate(`/${result.user.uid}/home/overview`);
+        }
+      })
+      .catch(() => {
+        setError('Googleログインに失敗しました。');
+      })
+      .finally(() => setRedirectChecking(false));
+  }, [navigate]);
 
   async function handleGoogleSignup() {
     setError('');
     setLoading(true);
     try {
-      const result = await signInWithPopup(auth, googleProvider);
-      navigate(`/${result.user.uid}/home/overview`);
+      await signInWithRedirect(auth, googleProvider);
     } catch {
       setError('Googleログインに失敗しました。');
-    } finally {
       setLoading(false);
     }
   }
@@ -63,6 +77,14 @@ export function Signup() {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (redirectChecking) {
+    return (
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+        <p className="text-zinc-500 text-sm">認証中...</p>
+      </div>
+    );
   }
 
   return (

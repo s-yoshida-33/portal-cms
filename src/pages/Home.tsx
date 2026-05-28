@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { subscribeProjects, subscribeDevices } from '../lib/firestore';
+import { fetchProjects, fetchDevices } from '../lib/firestore';
 import type { ProjectDoc, Device, DeviceStatus } from '../types';
 
 function countByStatus(devices: Device[], status: DeviceStatus) {
@@ -55,11 +55,17 @@ export function Home() {
   const [loading,  setLoading]  = useState(true);
 
   useEffect(() => {
-    let p = false, d = false;
-    const done = () => { if (p && d) setLoading(false); };
-    const u1 = subscribeProjects(ps => { setProjects(ps); p = true; done(); });
-    const u2 = subscribeDevices(ds  => { setDevices(ds);  d = true; done(); });
-    return () => { u1(); u2(); };
+    let cancelled = false;
+    async function poll() {
+      const [ps, ds] = await Promise.all([fetchProjects(), fetchDevices()]);
+      if (cancelled) return;
+      setProjects(ps);
+      setDevices(ds);
+      setLoading(false);
+    }
+    poll();
+    const id = setInterval(poll, 60_000);
+    return () => { cancelled = true; clearInterval(id); };
   }, []);
 
   // Bridge-Ground の数 = 物理デバイス数（各端末に必ず1つ存在）

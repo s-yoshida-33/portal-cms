@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
-  subscribeProjects,
-  subscribeDevices,
+  fetchProjects,
+  fetchDevices,
   addProject,
   updateProject,
   requestDeletion,
@@ -148,13 +148,17 @@ export function Projects() {
   const [deleteTarget, setDeleteTarget] = useState<ProjectDoc | null>(null);
 
   useEffect(() => {
-    let first = true;
-    const u1 = subscribeProjects(ps => {
+    let cancelled = false;
+    async function poll() {
+      const [ps, ds] = await Promise.all([fetchProjects(), fetchDevices()]);
+      if (cancelled) return;
       setProjects(ps);
-      if (first) { setLoading(false); first = false; }
-    });
-    const u2 = subscribeDevices(setDevices);
-    return () => { u1(); u2(); };
+      setDevices(ds);
+      setLoading(false);
+    }
+    poll();
+    const id = setInterval(poll, 60_000);
+    return () => { cancelled = true; clearInterval(id); };
   }, []);
 
   const canEdit = role === 'admin' || role === 'owner';
