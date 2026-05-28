@@ -76,6 +76,16 @@ export function subscribeProjects(
   );
 }
 
+export async function fetchProjects(): Promise<ProjectDoc[]> {
+  const snap = await getDocs(query(col.projects(), orderBy('name')));
+  return snap.docs.map(d => fromDoc<ProjectDoc>(d));
+}
+
+export async function fetchProject(id: string): Promise<ProjectDoc | null> {
+  const snap = await getDoc(doc(col.projects(), id));
+  return snap.exists() ? fromDoc<ProjectDoc>(snap) : null;
+}
+
 export async function addProject(
   data: Pick<ProjectDoc, 'name' | 'prefecture' | 'address'>
 ): Promise<string> {
@@ -118,6 +128,11 @@ export function subscribeDevices(
     query(col.devices(), orderBy('name')),
     snap => onUpdate(snap.docs.map(d => fromDoc<Device>(d)))
   );
+}
+
+export async function fetchDevices(): Promise<Device[]> {
+  const snap = await getDocs(query(col.devices(), orderBy('name')));
+  return snap.docs.map(d => fromDoc<Device>(d));
 }
 
 export function subscribeDevicesByProject(

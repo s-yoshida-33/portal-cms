@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
-  subscribeProjects,
+  fetchProject,
   subscribeDevicesByProject,
   addDevice,
   updateDevice,
@@ -657,9 +657,8 @@ export function ProjectDetail() {
       if (devicesLoaded && groupsLoaded) setLoading(false);
     };
 
-    const u1 = subscribeProjects(ps => {
-      setProject(ps.find(p => p.id === id) ?? null);
-    });
+    fetchProject(id).then(p => setProject(p));
+
     const u2 = subscribeDevicesByProject(
       id,
       devs => { setDevices(devs); devicesLoaded = true; checkDone(); },
@@ -669,7 +668,7 @@ export function ProjectDetail() {
       id,
       grps => { setGroups(grps); groupsLoaded = true; checkDone(); },
     );
-    return () => { u1(); u2(); u3(); };
+    return () => { u2(); u3(); };
   }, [id]);
 
   const canEdit = role === 'admin' || role === 'owner';
