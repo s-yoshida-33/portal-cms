@@ -3,9 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   signInWithEmailAndPassword,
   signInWithRedirect,
-  getRedirectResult,
 } from 'firebase/auth';
 import { auth, googleProvider } from '../lib/firebase';
+import { useAuth } from '../contexts/AuthContext';
 
 function GoogleIcon() {
   return (
@@ -20,30 +20,18 @@ function GoogleIcon() {
 
 export function Login() {
   const navigate = useNavigate();
-  const [email, setEmail]             = useState('');
-  const [password, setPassword]       = useState('');
-  const [error, setError]             = useState('');
-  const [loading, setLoading]         = useState(false);
-  const [redirectChecking, setRedirectChecking] = useState(true);
+  const { user, loading: authLoading } = useAuth();
+  const [email, setEmail]     = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError]     = useState('');
+  const [loading, setLoading] = useState(false);
 
-  // Googleリダイレクト認証の結果をページ復帰時に受け取る
+  // 認証済みになったらホームへ遷移（リダイレクト認証・既ログイン両方に対応）
   useEffect(() => {
-    getRedirectResult(auth)
-      .then(result => {
-        if (result) {
-          navigate(`/${result.user.uid}/home/overview`);
-        }
-      })
-      .catch((e: unknown) => {
-        const code = (e as { code?: string }).code ?? 'unknown';
-        if (code === 'auth/unauthorized-domain') {
-          setError(`このドメインはFirebaseで承認されていません。(${code})`);
-        } else {
-          setError(`Googleログインに失敗しました。(${code})`);
-        }
-      })
-      .finally(() => setRedirectChecking(false));
-  }, [navigate]);
+    if (!authLoading && user) {
+      navigate(`/${user.uid}/home/overview`, { replace: true });
+    }
+  }, [user, authLoading, navigate]);
 
   async function handleGoogleLogin() {
     setError('');
@@ -71,7 +59,7 @@ export function Login() {
     }
   }
 
-  if (redirectChecking) {
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
         <p className="text-zinc-500 text-sm">認証中...</p>
