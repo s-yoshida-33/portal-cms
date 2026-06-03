@@ -1,6 +1,7 @@
 name            = "portal-cms-api"
 main            = "src/index.ts"
 compatibility_date = "2025-01-01"
+account_id      = "68949cf64c159f36911a7ebed666be12"
 
 [vars]
 FIREBASE_PROJECT_ID = "portal-cms-emk"
@@ -10,12 +11,9 @@ FIREBASE_API_KEY    = "AIzaSyCPyLBMiApOUs3L2K3SVPeF_Z9Klh5jp94"
 binding = "SCREENSHOTS"
 id      = "d47db8794e8c4427847cf15147e8fcf5"
 
-# KV namespace for token caching and claim replay-protection (optional).
-# Create via: wrangler kv namespace create "PORTAL_CACHE"
-# Then uncomment and replace the id value below.
-# [[kv_namespaces]]
-# binding = "PORTAL_CACHE"
-# id      = "REPLACE_WITH_KV_NAMESPACE_ID"
+[[kv_namespaces]]
+binding = "PORTAL_CACHE"
+id      = "54eb4761d1e54988ab484976991850c4"
 
 # エンドポイント一覧:
 #   GET  /v1/device?pendingId=xxx          承認済みデバイスの deviceId + deviceToken を取得 (registrationToken 認証)
