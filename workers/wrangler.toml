@@ -10,9 +10,19 @@ FIREBASE_API_KEY    = "AIzaSyCPyLBMiApOUs3L2K3SVPeF_Z9Klh5jp94"
 binding = "SCREENSHOTS"
 id      = "d47db8794e8c4427847cf15147e8fcf5"
 
-# エンドポイント:
-#   https://portal-cms-api.tti-ninja.workers.dev/v1/register
-#   https://portal-cms-api.tti-ninja.workers.dev/v1/status
-#   https://portal-cms-api.tti-ninja.workers.dev/v1/screenshot/request
-#   https://portal-cms-api.tti-ninja.workers.dev/v1/screenshot
-#   https://portal-cms-api.tti-ninja.workers.dev/v1/screenshot/{deviceId}/{appId}
+# KV namespace for token caching and claim replay-protection (optional).
+# Create via: wrangler kv namespace create "PORTAL_CACHE"
+# Then uncomment and replace the id value below.
+# [[kv_namespaces]]
+# binding = "PORTAL_CACHE"
+# id      = "REPLACE_WITH_KV_NAMESPACE_ID"
+
+# エンドポイント一覧:
+#   GET  /v1/device?pendingId=xxx          承認済みデバイスの deviceId + deviceToken を取得 (registrationToken 認証)
+#   GET  /v1/screenshot/pending?pendingId= スクリーンショット撮影リクエスト確認 (registrationToken 認証)
+#   GET  /v1/screenshot/{deviceId}         スクリーンショット取得 (Firebase ID token 認証)
+#   POST /v1/register                      デバイス登録申請 (registrationToken 認証)
+#   POST /v1/heartbeat                     一括ステータス報告 + スクリーンショット命令応答 (deviceToken 認証)
+#   POST /v1/status                        ステータス報告 旧形式・後方互換 (registrationToken 認証)
+#   POST /v1/logs                          WARN/ERROR ログ送信 (deviceToken または registrationToken 認証)
+#   POST /v1/screenshot                    スクリーンショット送信 (deviceToken または registrationToken 認証)
