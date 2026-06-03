@@ -1,13 +1,14 @@
 export interface Env {
   FIREBASE_API_KEY:    string;
   FIREBASE_PROJECT_ID: string;
+  PORTAL_CACHE?:       KVNamespace; // optional — caching disabled when not bound
 }
 
 // ── CORS ──────────────────────────────────────────────────────────────────────
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin':  '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
@@ -44,6 +45,14 @@ function toFsValue(val: unknown): FsVal {
     };
   }
   return { nullValue: null };
+}
+
+function fsStr(fields: Record<string, FsVal>, key: string): string | null {
+  return (fields[key] as { stringValue?: string } | undefined)?.stringValue ?? null;
+}
+
+function fsBool(fields: Record<string, FsVal>, key: string): boolean {
+  return (fields[key] as { booleanValue?: boolean } | undefined)?.booleanValue ?? false;
 }
 
 class Firestore {
@@ -90,6 +99,31 @@ class Firestore {
       body:    JSON.stringify(body),
     });
   }
+
+  async delete(collection: string, docId: string): Promise<void> {
+    await fetch(this.url(`${collection}/${docId}`), { method: 'DELETE' });
+  }
+
+  // patchMany updates multiple device docs concurrently (one PATCH + one GET per device).
+  // Returns a map of deviceId → screenshotRequested flag.
+  async patchDevicesAndCheckScreenshots(
+    updates: Array<{
+      deviceId: string;
+      fields:   Record<string, unknown>;
+    }>
+  ): Promise<Record<string, boolean>> {
+    const results: Record<string, boolean> = {};
+    await Promise.all(updates.map(async ({ deviceId, fields }) => {
+      const [doc] = await Promise.all([
+        this.get('devices', deviceId),
+        this.patch('devices', deviceId, fields),
+      ]);
+      if (doc?.fields) {
+        results[deviceId] = fsBool(doc.fields, 'screenshotRequested');
+      }
+    }));
+    return results;
+  }
 }
 
 // ── Token verification ────────────────────────────────────────────────────────
@@ -114,6 +148,28 @@ async function verifyToken(
   return fields;
 }
 
+// KV-cached token verification. Falls back to Firestore on cache miss.
+// Cache TTL: 5 minutes. Key format: t:{hash}:{type}
+async function verifyTokenCached(
+  fs:  Firestore,
+  kv:  KVNamespace | undefined,
+  raw: string,
+  type: string
+): Promise<Record<string, FsVal> | null> {
+  if (!kv) return verifyToken(fs, raw, type);
+
+  const hash     = await sha256Hex(raw);
+  const cacheKey = `t:${hash}:${type}`;
+  const cached   = await kv.get(cacheKey);
+
+  if (cached === '1') return { type: { stringValue: type } };
+  if (cached === '0') return null;
+
+  const result = await verifyToken(fs, raw, type);
+  await kv.put(cacheKey, result ? '1' : '0', { expirationTtl: 300 });
+  return result;
+}
+
 // ── Worker entry point ────────────────────────────────────────────────────────
 
 export default {
@@ -130,14 +186,53 @@ export default {
     const rawToken = authHeader.slice(7);
 
     const fs = new Firestore(env.FIREBASE_PROJECT_ID, env.FIREBASE_API_KEY);
+    const kv = env.PORTAL_CACHE;
+
+    // ── GET /v1/device?pendingId=xxx ──────────────────────────────
+    // Bridge-Ground calls this after registration to auto-pickup deviceId + deviceToken
+    // once an admin approves the device in the portal.
+    //
+    // Requires: Firestore security rule for pendingDeviceApprovals:
+    //   allow read, delete: if true;
+    //   allow create, update: if request.auth != null;
+    if (req.method === 'GET' && url.pathname === '/v1/device') {
+      const tokenData = await verifyTokenCached(fs, kv, rawToken, 'registration');
+      if (!tokenData) return jsonRes({ error: 'Invalid or revoked token' }, 401);
+
+      const pendingId = url.searchParams.get('pendingId');
+      if (!pendingId) return jsonRes({ error: 'Missing pendingId parameter' }, 400);
+
+      // Check KV for replay protection (token already claimed)
+      if (kv) {
+        const claimed = await kv.get(`claimed:${pendingId}`);
+        if (claimed) return jsonRes({ status: 'pending' });
+      }
+
+      const claimDoc = await fs.get('pendingDeviceApprovals', pendingId);
+      if (!claimDoc?.fields) return jsonRes({ status: 'pending' });
+
+      const fields      = claimDoc.fields;
+      const deviceId    = fsStr(fields, 'deviceId')    ?? '';
+      const deviceToken = fsStr(fields, 'deviceToken') ?? '';
+      const expiresAt   = fsStr(fields, 'expiresAt')   ?? '';
+
+      if (!deviceId || !deviceToken) return jsonRes({ status: 'pending' });
+      if (expiresAt && new Date(expiresAt) < new Date()) return jsonRes({ status: 'pending' });
+
+      // Mark claimed in KV and attempt to delete the one-time claim doc
+      if (kv) await kv.put(`claimed:${pendingId}`, '1', { expirationTtl: 3600 });
+      fs.delete('pendingDeviceApprovals', pendingId).catch(() => {});
+
+      return jsonRes({ status: 'approved', deviceId, deviceToken });
+    }
 
     if (req.method !== 'POST') {
       return jsonRes({ error: 'Method not allowed' }, 405);
     }
 
-    // ── POST /v1/register ─────────────────────────────────
+    // ── POST /v1/register ─────────────────────────────────────────
     if (url.pathname === '/v1/register') {
-      const tokenData = await verifyToken(fs, rawToken, 'registration');
+      const tokenData = await verifyTokenCached(fs, kv, rawToken, 'registration');
       if (!tokenData) return jsonRes({ error: 'Invalid or revoked token' }, 401);
 
       const body = await req.json() as Record<string, string>;
@@ -161,44 +256,85 @@ export default {
       return jsonRes({ success: true, pendingId }, 201);
     }
 
-    // ── POST /v1/status ───────────────────────────────────
-    if (url.pathname === '/v1/status') {
-      const tokenData = await verifyToken(fs, rawToken, 'device');
+    // ── POST /v1/heartbeat ────────────────────────────────────────
+    // Batched status update — one request per Bridge-Ground instance for all
+    // devices it manages. Response includes per-device screenshot commands.
+    if (url.pathname === '/v1/heartbeat') {
+      const tokenData = await verifyTokenCached(fs, kv, rawToken, 'device');
       if (!tokenData) return jsonRes({ error: 'Invalid or revoked token' }, 401);
 
       const body = await req.json() as {
-        deviceId:     string;
-        status?:      string;
-        ip?:          string;
-        cpu?:         number;
-        memory?:      number;
-        temperature?: number;
-        storage?:     number;
-        uptime?:      number;
+        devices: Array<{
+          deviceId:     string;
+          status?:      string;
+          ip?:          string;
+          cpu?:         number;
+          memory?:      number;
+          temperature?: number;
+          storage?:     number;
+          uptime?:      number;
+        }>;
       };
 
-      if (!body.deviceId) {
-        return jsonRes({ error: 'Missing required field: deviceId' }, 400);
+      if (!Array.isArray(body.devices) || body.devices.length === 0) {
+        return jsonRes({ error: 'devices array required' }, 400);
       }
 
-      const validStatuses = ['online', 'offline', 'warning'];
-      const deviceStatus  = validStatuses.includes(body.status ?? '') ? body.status! : 'online';
+      const validStatuses = new Set(['online', 'offline', 'warning']);
+      const now = new Date().toISOString();
 
-      const patch: Record<string, unknown> = {
-        status:    deviceStatus,
-        lastSeen:  new Date().toISOString(),
-        updatedAt: new Date(),
-        system: {
-          cpu:         body.cpu         ?? 0,
-          memory:      body.memory      ?? 0,
-          temperature: body.temperature ?? 0,
-          storage:     body.storage     ?? 0,
-          uptime:      body.uptime      ?? 0,
-        },
+      const updates = body.devices
+        .filter(d => d.deviceId)
+        .map(d => {
+          const fields: Record<string, unknown> = {
+            status:    validStatuses.has(d.status ?? '') ? d.status! : 'online',
+            lastSeen:  now,
+            updatedAt: new Date(),
+            system: {
+              cpu:         d.cpu         ?? 0,
+              memory:      d.memory      ?? 0,
+              temperature: d.temperature ?? 0,
+              storage:     d.storage     ?? 0,
+              uptime:      d.uptime      ?? 0,
+            },
+          };
+          if (d.ip) fields.ip = d.ip;
+          return { deviceId: d.deviceId, fields };
+        });
+
+      const screenshotFlags = await fs.patchDevicesAndCheckScreenshots(updates);
+
+      // Build commands map — only include devices that need a screenshot
+      const commands: Record<string, { screenshot: true }> = {};
+      for (const [id, requested] of Object.entries(screenshotFlags)) {
+        if (requested) commands[id] = { screenshot: true };
+      }
+
+      return jsonRes({ success: true, ...(Object.keys(commands).length > 0 ? { commands } : {}) });
+    }
+
+    // ── POST /v1/logs ─────────────────────────────────────────────
+    // Stores WARN/ERROR log entries for a device.
+    if (url.pathname === '/v1/logs') {
+      const tokenData = await verifyTokenCached(fs, kv, rawToken, 'device');
+      if (!tokenData) return jsonRes({ error: 'Invalid or revoked token' }, 401);
+
+      const body = await req.json() as {
+        deviceId: string;
+        app:      string;
+        entries:  Array<{ timestamp: string; level: string; tag: string; message: string }>;
       };
-      if (body.ip) patch.ip = body.ip;
 
-      await fs.patch('devices', body.deviceId, patch);
+      if (!body.deviceId || !Array.isArray(body.entries)) {
+        return jsonRes({ error: 'Missing required fields: deviceId, entries' }, 400);
+      }
+
+      // Append entries to a rolling log document (last 200 entries kept on portal side)
+      await fs.patch('deviceLogs', body.deviceId, {
+        app:       body.app ?? '',
+        entries:   body.entries,
+        updatedAt: new Date(),
+      });
 
       return jsonRes({ success: true });
     }

@@ -455,21 +455,24 @@ export async function approveDevice(
   const rawToken  = generateToken();
   const tokenHash = await hashToken(rawToken);
   const now       = new Date().toISOString();
+  // Claim expires in 1 hour — Bridge-Ground auto-picks up credentials via GET /v1/device.
+  const claimExpiresAt = new Date(Date.now() + 3600 * 1000).toISOString();
 
   const batch = writeBatch(db);
 
   // 1. Create device document.
   batch.set(deviceRef, {
-    name:       deviceName,
+    name:                deviceName,
     projectId,
-    ip:         pending.ip,
-    status:     'offline',
-    lastSeen:   now,
-    app:        pending.appName,
-    appVersion: '',
-    system:     { cpu: 0, memory: 0, temperature: 0, storage: 0, uptime: 0 },
-    createdAt:  serverTimestamp(),
-    updatedAt:  serverTimestamp(),
+    ip:                  pending.ip,
+    status:              'offline',
+    lastSeen:            now,
+    app:                 pending.appName,
+    appVersion:          '',
+    system:              { cpu: 0, memory: 0, temperature: 0, storage: 0, uptime: 0 },
+    screenshotRequested: false,
+    createdAt:           serverTimestamp(),
+    updatedAt:           serverTimestamp(),
   });
 
   // 2. Create apiTokens entry.
@@ -491,6 +494,14 @@ export async function approveDevice(
 
   // 4. Remove the pending entry.
   batch.delete(doc(col.pendingDevices(), pendingDeviceId));
+
+  // 5. Create one-time approval claim for Bridge-Ground to auto-pickup credentials.
+  //    Requires Firestore rule: allow read, delete: if true; on pendingDeviceApprovals.
+  batch.set(doc(db, 'pendingDeviceApprovals', pendingDeviceId), {
+    deviceId,
+    deviceToken: rawToken,
+    expiresAt:   claimExpiresAt,
+  });
 
   await batch.commit();
 
