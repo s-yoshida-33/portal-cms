@@ -509,6 +509,7 @@ export async function approveDevice(
   batch.set(deviceRef, {
     name:                deviceName,
     projectId,
+    hostname:            pending.hostname,
     ip:                  pending.ip,
     status:              'offline',
     lastSeen:            now,

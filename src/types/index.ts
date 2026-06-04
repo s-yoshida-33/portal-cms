@@ -18,6 +18,7 @@ export interface Device {
   id:               string;
   projectId:        string;
   name:             string;
+  hostname?:        string;
   ip:               string;
   port?:            number;
   status:           DeviceStatus;
