@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
-import { subscribeDevice, fetchDeviceLogs, requestScreenshot as requestPortalScreenshot, cancelScreenshotRequest, subscribeScreenshotRequest, type DeviceLog } from '../lib/firestore';
+import { Link, useParams } from 'react-router-dom';
+import { subscribeDevice, subscribeDevicesByProject, fetchDeviceLogs, requestScreenshot as requestPortalScreenshot, cancelScreenshotRequest, subscribeScreenshotRequest, type DeviceLog } from '../lib/firestore';
 import { auth } from '../lib/firebase';
 import { StatusBadge } from '../components/StatusBadge';
 import type { Device } from '../types';
@@ -99,10 +99,11 @@ function logLevelBadgeClass(level: string, active: boolean) {
 // ── Main page ─────────────────────────────────────────────────────
 
 export function DeviceDetail() {
-  const { deviceId } = useParams<{ deviceId: string; uuid: string; id: string }>();
+  const { deviceId, id: projectId, uuid } = useParams<{ deviceId: string; uuid: string; id: string }>();
 
   const [device,        setDevice]        = useState<Device | null>(null);
   const [deviceLoading, setDeviceLoading] = useState(true);
+  const [projectDevices, setProjectDevices] = useState<Device[]>([]);
 
   const [apps,        setApps]        = useState<AppInfo[]>([]);
   const [appsLoading, setAppsLoading] = useState(false);
@@ -129,6 +130,12 @@ export function DeviceDetail() {
       setDeviceLoading(false);
     });
   }, [deviceId]);
+
+  // Subscribe to all devices in the project so we can link to app device pages
+  useEffect(() => {
+    if (!projectId) return;
+    return subscribeDevicesByProject(projectId, setProjectDevices);
+  }, [projectId]);
 
   // Poll device logs every 30 seconds (avoids real-time listener read costs)
   const pollLogs = useCallback(async (id: string) => {
@@ -358,7 +365,12 @@ export function DeviceDetail() {
               </div>
             ) : (
               <div className="space-y-3">
-                {apps.map(app => (
+                {apps.map(app => {
+                  const appDevice = projectDevices.find(
+                    d => d.app === app.name && (d.hostname === app.hostname || d.hostname == null)
+                      && d.id !== deviceId
+                  );
+                  return (
                   <div key={app.id} className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
@@ -377,10 +389,19 @@ export function DeviceDetail() {
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="text-xs text-zinc-500">v{app.version}</span>
+                        {appDevice && (
+                          <Link
+                            to={`/${uuid}/projects/${projectId}/devices/${appDevice.id}`}
+                            className="h-6 px-2.5 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors inline-flex items-center"
+                          >
+                            詳細
+                          </Link>
+                        )}
                       </div>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
