@@ -541,6 +541,20 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
           {initial ? 'デバイスを編集' : 'デバイスを追加'}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {initial && projects.length > 1 && (
+            <div>
+              <label className="block text-sm text-zinc-400 mb-1.5">プロジェクト</label>
+              <select
+                value={projectId}
+                onChange={e => setProjectId(e.target.value)}
+                className={selectClass}
+              >
+                {projects.map(p => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
           <div>
             <label className="block text-sm text-zinc-400 mb-1.5">デバイス名</label>
             <input value={name} onChange={e => setName(e.target.value)}
@@ -590,20 +604,6 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
                 ]}
                 className="w-full"
               />
-            </div>
-          )}
-          {initial && projects.length > 1 && (
-            <div>
-              <label className="block text-sm text-zinc-400 mb-1.5">プロジェクト</label>
-              <select
-                value={projectId}
-                onChange={e => setProjectId(e.target.value)}
-                className={selectClass}
-              >
-                {projects.map(p => (
-                  <option key={p.id} value={p.id}>{p.name}</option>
-                ))}
-              </select>
             </div>
           )}
           {error && <p className="text-red-400 text-sm">{error}</p>}
@@ -848,14 +848,14 @@ export function ProjectDetail() {
       {visibleApps.length > 1 && (
         <div className="px-4 sm:px-6 pb-2 flex flex-wrap items-center gap-2">
           {visibleApps.map(app => {
-            const active = filterApps.has(app);
-            const style  = APP_BADGE_STYLE[app] ?? 'bg-zinc-500/15 text-zinc-400 ring-zinc-500/30';
+            const active      = filterApps.has(app) || filterApps.size === 0;
+            const activeStyle = APP_BADGE_STYLE[app] ?? 'bg-zinc-500/15 text-zinc-400 ring-zinc-500/30';
             return (
               <button
                 key={app}
                 onClick={() => toggleFilterApp(app)}
-                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ring-1 transition-opacity cursor-pointer ${style} ${
-                  active ? 'opacity-100' : filterApps.size === 0 ? 'opacity-100' : 'opacity-35'
+                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ring-1 transition-colors cursor-pointer ${
+                  active ? activeStyle : 'text-zinc-600 bg-zinc-800 ring-zinc-700'
                 }`}
               >
                 {app}
