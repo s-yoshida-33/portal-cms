@@ -82,6 +82,10 @@ function formatLastSeen(iso: string) {
 
 // ── Log helpers ──────────────────────────────────────────────────
 
+function localDateStr(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 const LOG_LEVELS = ['INFO', 'WARN', 'ERROR', 'FATAL'] as const;
 
 function logLevelClass(level: string) {
@@ -124,8 +128,8 @@ export function DeviceDetail() {
   const [portalSsCapturedAt, setPortalSsCapturedAt] = useState<string | null>(null);
   const portalBlobRef = useRef<string | null>(null);
 
-  const todayStr   = new Date().toISOString().slice(0, 10);
-  const minLogDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const todayStr   = localDateStr(new Date());
+  const minLogDate = localDateStr(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000));
 
   const [logs,             setLogs]             = useState<RtdbLogEntry[]>([]);
   const [logsLastFetched,  setLogsLastFetched]  = useState<Date | null>(null);
