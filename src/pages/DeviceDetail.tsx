@@ -1,11 +1,19 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { subscribeDevice, subscribeDevicesByProject, fetchDeviceLogs, requestScreenshot as requestPortalScreenshot, cancelScreenshotRequest, subscribeScreenshotRequest, type DeviceLog } from '../lib/firestore';
-import { auth } from '../lib/firebase';
+import { subscribeDevice, subscribeDevicesByProject, requestScreenshot as requestPortalScreenshot, cancelScreenshotRequest, subscribeScreenshotRequest, requestLogs } from '../lib/firestore';
+import { auth, rtdb } from '../lib/firebase';
+import { ref as rtdbRef, onValue } from 'firebase/database';
 import { StatusBadge } from '../components/StatusBadge';
 import type { Device } from '../types';
 
 const WORKER_BASE_URL = 'https://portal-cms-api.tti-ninja.workers.dev';
+
+interface RtdbLogEntry {
+  timestamp: string;
+  level:     string;
+  tag:       string;
+  message:   string;
+}
 
 // ── Bridge-Ground API types ───────────────────────────────────────
 
@@ -115,12 +123,13 @@ export function DeviceDetail() {
   const [portalSsCapturedAt, setPortalSsCapturedAt] = useState<string | null>(null);
   const portalBlobRef = useRef<string | null>(null);
 
-  const [logs,             setLogs]             = useState<DeviceLog[]>([]);
-  const [logsLastFetched,  setLogsLastFetched]  = useState<Date | null>(null);
-  const [logsRefreshing,   setLogsRefreshing]   = useState(false);
-  const [logLevels,        setLogLevels]        = useState<Set<string>>(new Set(LOG_LEVELS));
-  const [autoScroll,       setAutoScroll]       = useState(true);
-  const logContainerRef = useRef<HTMLDivElement>(null);
+  const [logs,            setLogs]            = useState<RtdbLogEntry[]>([]);
+  const [logsLastFetched, setLogsLastFetched] = useState<Date | null>(null);
+  const [logsRefreshing,  setLogsRefreshing]  = useState(false);
+  const [logLevels,       setLogLevels]       = useState<Set<string>>(new Set(LOG_LEVELS));
+  const [autoScroll,      setAutoScroll]      = useState(true);
+  const logContainerRef  = useRef<HTMLDivElement>(null);
+  const logRequestedAt   = useRef<number>(0);
 
   // Subscribe to Firestore device document
   useEffect(() => {
@@ -137,30 +146,39 @@ export function DeviceDetail() {
     return subscribeDevicesByProject(projectId, setProjectDevices);
   }, [projectId]);
 
-  // Poll device logs every 30 seconds (avoids real-time listener read costs)
-  const pollLogs = useCallback(async (id: string) => {
-    try {
-      const fetched = await fetchDeviceLogs(id);
-      setLogs(fetched);
-      setLogsLastFetched(new Date());
-    } catch {
-      // silently ignore transient errors; next poll will retry
-    }
-  }, []);
-
+  // Subscribe to RTDB logs/{deviceId} — updated by Bridge-Ground on demand.
   useEffect(() => {
     if (!deviceId) return;
-    pollLogs(deviceId);
-    const id = setInterval(() => pollLogs(deviceId), 30_000);
-    return () => clearInterval(id);
-  }, [deviceId, pollLogs]);
+    const logRef = rtdbRef(rtdb, `logs/${deviceId}`);
+    return onValue(logRef, snap => {
+      const data = snap.val() as { entries?: RtdbLogEntry[]; at?: number } | null;
+      if (!data) return;
+      setLogs(Array.isArray(data.entries) ? data.entries : []);
+      const fetchedAt = data.at ? new Date(data.at) : new Date();
+      setLogsLastFetched(fetchedAt);
+      if (data.at && data.at >= logRequestedAt.current) {
+        setLogsRefreshing(false);
+      }
+    });
+  }, [deviceId]);
+
+  // Timeout fallback: clear loading state after 30s in case BG is unreachable.
+  useEffect(() => {
+    if (!logsRefreshing) return;
+    const id = window.setTimeout(() => setLogsRefreshing(false), 30_000);
+    return () => window.clearTimeout(id);
+  }, [logsRefreshing]);
 
   const handleRefreshLogs = useCallback(async () => {
     if (!deviceId || logsRefreshing) return;
     setLogsRefreshing(true);
-    await pollLogs(deviceId);
-    setLogsRefreshing(false);
-  }, [deviceId, logsRefreshing, pollLogs]);
+    logRequestedAt.current = Date.now();
+    try {
+      await requestLogs(deviceId);
+    } catch {
+      setLogsRefreshing(false);
+    }
+  }, [deviceId, logsRefreshing]);
 
   // Auto-scroll log container only (page itself does not scroll)
   useEffect(() => {
@@ -172,7 +190,7 @@ export function DeviceDetail() {
   const baseUrl = device?.app === 'Bridge-Ground' ? `http://${device.ip}:${device.port ?? 8090}` : null;
 
   const filteredLogs = useMemo(
-    () => logs.filter(l => logLevels.has(l.level || 'INFO')),
+    () => logs.filter(l => logLevels.has(l.level || 'INFO')).map((l, i) => ({ ...l, _key: i })),
     [logs, logLevels]
   );
 
@@ -553,12 +571,12 @@ export function DeviceDetail() {
             <div ref={logContainerRef} className="h-96 overflow-y-auto p-4 font-mono text-xs leading-5 space-y-0.5">
               {filteredLogs.length === 0 ? (
                 <p className="text-zinc-600 text-center py-8">
-                  {logs.length === 0 ? 'ログがありません。Bridge-Ground からの送信をお待ちください。' : '表示対象のログがありません。'}
+                  {logs.length === 0 ? 'ログがありません。「更新」ボタンを押してログを取得してください。' : '表示対象のログがありません。'}
                 </p>
               ) : (
                 filteredLogs.map(log => (
-                  <div key={log.id} className="flex gap-2 min-w-0">
-                    <span className="shrink-0 text-zinc-600">{log.timestamp || log.sentAt.slice(0, 23)}</span>
+                  <div key={log._key} className="flex gap-2 min-w-0">
+                    <span className="shrink-0 text-zinc-600">{log.timestamp}</span>
                     <span className={`shrink-0 w-10 ${logLevelClass(log.level)}`}>{log.level || '----'}</span>
                     {log.tag && <span className="shrink-0 text-zinc-500">[{log.tag}]</span>}
                     <span className="text-zinc-300 break-all">{log.message}</span>
