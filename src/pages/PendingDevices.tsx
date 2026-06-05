@@ -13,10 +13,10 @@ import { CustomSelect } from '../components/CustomSelect';
 
 const appBadge: Record<AppName, string> = {
   'Gido':           'text-blue-400   bg-blue-950/40   ring-1 ring-blue-900/50',
-  'Gido-Touch':     'text-cyan-400   bg-cyan-950/40   ring-1 ring-cyan-900/50',
-  'Gido-Touch-Mini':'text-teal-400   bg-teal-950/40   ring-1 ring-teal-900/50',
-  'Grain-Link':     'text-purple-400 bg-purple-950/40 ring-1 ring-purple-900/50',
-  'Bridge-Ground':  'text-orange-400 bg-orange-950/40 ring-1 ring-orange-900/50',
+  'Gido-Touch':     'text-red-400    bg-red-950/40    ring-1 ring-red-900/50',
+  'Gido-Touch-Mini':'text-green-400  bg-green-950/40  ring-1 ring-green-900/50',
+  'Grain-Link':     'text-orange-400 bg-orange-950/40 ring-1 ring-orange-900/50',
+  'Bridge-Ground':  'text-purple-400 bg-purple-950/40 ring-1 ring-purple-900/50',
 };
 
 function formatDate(iso: string) {
