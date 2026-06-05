@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
   fetchProject,
+  fetchProjects,
   subscribeDevicesByProject,
   addDevice,
   updateDevice,
@@ -120,6 +121,25 @@ function formatLastSeen(iso: string) {
 
 const APP_OPTIONS: AppName[] = ['Gido', 'Gido-Touch', 'Gido-Touch-Mini', 'Grain-Link', 'Bridge-Ground'];
 
+const APP_SORT_ORDER = Object.fromEntries(APP_OPTIONS.map((app, i) => [app, i])) as Record<string, number>;
+
+const APP_BADGE_STYLE: Record<string, string> = {
+  'Gido':           'bg-blue-500/15 text-blue-400 ring-blue-500/30',
+  'Gido-Touch':     'bg-red-500/15 text-red-400 ring-red-500/30',
+  'Gido-Touch-Mini':'bg-green-500/15 text-green-400 ring-green-500/30',
+  'Grain-Link':     'bg-orange-500/15 text-orange-400 ring-orange-500/30',
+  'Bridge-Ground':  'bg-purple-500/15 text-purple-400 ring-purple-500/30',
+};
+
+function AppBadge({ app }: { app: string }) {
+  const style = APP_BADGE_STYLE[app] ?? 'bg-zinc-500/15 text-zinc-400 ring-zinc-500/30';
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ring-1 ${style}`}>
+      {app}
+    </span>
+  );
+}
+
 const inputClass =
   'w-full bg-[#1a1a1a] ring-1 ring-[#3d3d3d] text-white rounded-lg px-3 h-9 text-sm outline-none focus:ring-[#4693ff] focus:ring-2 placeholder:text-zinc-600 transition-all';
 
@@ -169,10 +189,10 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
         </div>
         <div className="flex items-center gap-3">
           <div className="text-right">
-            <p className="text-sm text-zinc-300">
-              {device.app}{' '}
+            <div className="flex items-center justify-end gap-1.5">
+              <AppBadge app={device.app} />
               <span className="text-zinc-500 text-xs">v{device.appVersion}</span>
-            </p>
+            </div>
             <p className="text-xs text-zinc-600 mt-0.5">最終確認: {formatLastSeen(device.lastSeen)}</p>
           </div>
           {canEdit && (
@@ -475,17 +495,19 @@ interface DeviceModalProps {
   initial:   Device | null;
   groups:    DeviceGroup[];
   groupTree: GroupNode[];
+  projects:  ProjectDoc[];
   onClose:   () => void;
-  onSave:    (data: Pick<Device, 'name' | 'ip' | 'port' | 'app' | 'appVersion'> & { groupId?: string | null }) => Promise<void>;
+  onSave:    (data: Pick<Device, 'name' | 'ip' | 'port' | 'app' | 'appVersion'> & { groupId?: string | null; projectId?: string }) => Promise<void>;
 }
 
-function DeviceModal({ initial, groups, groupTree, onClose, onSave }: DeviceModalProps) {
+function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: DeviceModalProps) {
   const [name,       setName]       = useState(initial?.name       ?? '');
   const [ip,         setIp]         = useState(initial?.ip         ?? '');
   const [port,       setPort]       = useState(initial?.port       ?? 8090);
   const [app,        setApp]        = useState<AppName>(initial?.app ?? 'Gido');
   const [appVersion, setAppVersion] = useState(initial?.appVersion ?? '');
   const [groupId,    setGroupId]    = useState<string | null>(initial?.groupId ?? null);
+  const [projectId,  setProjectId]  = useState<string>(initial?.projectId ?? '');
   const [saving,     setSaving]     = useState(false);
   const [error,      setError]      = useState('');
 
@@ -497,7 +519,11 @@ function DeviceModal({ initial, groups, groupTree, onClose, onSave }: DeviceModa
     }
     setSaving(true);
     try {
-      await onSave({ name: name.trim(), ip: ip.trim(), port, app, appVersion: appVersion.trim(), groupId });
+      const data: Parameters<typeof onSave>[0] = {
+        name: name.trim(), ip: ip.trim(), port, app, appVersion: appVersion.trim(), groupId,
+      };
+      if (initial && projectId) data.projectId = projectId;
+      await onSave(data);
       onClose();
     } catch {
       setError('保存に失敗しました。');
@@ -564,6 +590,20 @@ function DeviceModal({ initial, groups, groupTree, onClose, onSave }: DeviceModa
                 ]}
                 className="w-full"
               />
+            </div>
+          )}
+          {initial && projects.length > 1 && (
+            <div>
+              <label className="block text-sm text-zinc-400 mb-1.5">プロジェクト</label>
+              <select
+                value={projectId}
+                onChange={e => setProjectId(e.target.value)}
+                className={selectClass}
+              >
+                {projects.map(p => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
             </div>
           )}
           {error && <p className="text-red-400 text-sm">{error}</p>}
@@ -637,6 +677,7 @@ export function ProjectDetail() {
   const { uuid, id } = useParams<{ uuid: string; id: string }>();
 
   const [project,        setProject]        = useState<ProjectDoc | null>(null);
+  const [projects,       setProjects]       = useState<ProjectDoc[]>([]);
   const [devices,        setDevices]        = useState<Device[]>([]);
   const [groups,         setGroups]         = useState<DeviceGroup[]>([]);
   const [loading,        setLoading]        = useState(true);
@@ -647,6 +688,7 @@ export function ProjectDetail() {
   const [deleteDevice,   setDeleteDevice]   = useState<Device | null>(null);
   const [deleteGroup,    setDeleteGroup]    = useState<DeviceGroup | null>(null);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+  const [sortByApp,      setSortByApp]      = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -658,6 +700,7 @@ export function ProjectDetail() {
     };
 
     fetchProject(id).then(p => setProject(p));
+    fetchProjects().then(ps => setProjects(ps));
 
     const u2 = subscribeDevicesByProject(
       id,
@@ -673,8 +716,11 @@ export function ProjectDetail() {
 
   const canEdit = role === 'admin' || role === 'owner';
 
-  const groupTree    = buildGroupTree(groups, devices);
-  const ungrouped    = devices.filter(d => !d.groupId);
+  const sortedDevices = sortByApp
+    ? [...devices].sort((a, b) => (APP_SORT_ORDER[a.app] ?? 99) - (APP_SORT_ORDER[b.app] ?? 99))
+    : devices;
+  const groupTree    = buildGroupTree(groups, sortedDevices);
+  const ungrouped    = sortedDevices.filter(d => !d.groupId);
   const hasGroups    = groups.length > 0;
   const showDivider  = hasGroups && ungrouped.length > 0;
 
@@ -691,14 +737,15 @@ export function ProjectDetail() {
   }
 
   async function handleSaveDevice(
-    data: Pick<Device, 'name' | 'ip' | 'port' | 'app' | 'appVersion'> & { groupId?: string | null }
+    data: Pick<Device, 'name' | 'ip' | 'port' | 'app' | 'appVersion'> & { groupId?: string | null; projectId?: string }
   ) {
     if (!id) return;
     if (editDevice) {
       await updateDevice(editDevice.id, data);
     } else {
+      const { projectId: _pid, ...rest } = data;
       await addDevice({
-        ...data,
+        ...rest,
         projectId: id,
         status:   'offline',
         lastSeen: new Date().toISOString(),
@@ -761,30 +808,48 @@ export function ProjectDetail() {
           <h1 className="text-white text-3xl font-semibold">{project.name}</h1>
           <p className="text-[#999999] text-base">{project.address}</p>
         </div>
-        {canEdit && (
-          <div className="flex items-center gap-2 mt-7">
-            <button
-              onClick={() => { setEditGroup(null); setGroupModalOpen(true); }}
-              className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-              グループを作成
-            </button>
-            <button
-              onClick={() => { setEditDevice(null); setDeviceModalOpen(true); }}
-              className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#4693ff] hover:bg-[#3a7fe0] transition-colors cursor-pointer"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-              デバイスを追加
-            </button>
-          </div>
-        )}
+        <div className="flex items-center gap-2 mt-7">
+          <button
+            onClick={() => setSortByApp(v => !v)}
+            className={`flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium ring-1 transition-colors cursor-pointer ${
+              sortByApp
+                ? 'text-white bg-[#4693ff] ring-[#4693ff] hover:bg-[#3a7fe0]'
+                : 'text-zinc-300 bg-[#222222] ring-[#3d3d3d] hover:bg-[#2a2a2a]'
+            }`}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="4" y1="6" x2="20" y2="6" />
+              <line x1="4" y1="12" x2="14" y2="12" />
+              <line x1="4" y1="18" x2="9" y2="18" />
+            </svg>
+            アプリ順
+          </button>
+          {canEdit && (
+            <>
+              <button
+                onClick={() => { setEditGroup(null); setGroupModalOpen(true); }}
+                className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                グループを作成
+              </button>
+              <button
+                onClick={() => { setEditDevice(null); setDeviceModalOpen(true); }}
+                className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#4693ff] hover:bg-[#3a7fe0] transition-colors cursor-pointer"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                デバイスを追加
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* デバイス・グループ一覧 */}
@@ -848,6 +913,7 @@ export function ProjectDetail() {
           initial={editDevice}
           groups={groups}
           groupTree={groupTree}
+          projects={projects}
           onClose={() => setDeviceModalOpen(false)}
           onSave={handleSaveDevice}
         />
