@@ -145,7 +145,14 @@ export function subscribeDevicesByProject(
     query(col.devices(), where('projectId', '==', projectId)),
     snap => {
       const devs = snap.docs.map(d => fromDoc<Device>(d));
-      devs.sort((a, b) => a.name.localeCompare(b.name, 'ja'));
+      devs.sort((a, b) => {
+        const n = a.name.localeCompare(b.name, 'ja');
+        if (n !== 0) return n;
+        // Same name: external apps before Bridge-Ground
+        const aBG = a.app === 'Bridge-Ground' ? 1 : 0;
+        const bBG = b.app === 'Bridge-Ground' ? 1 : 0;
+        return aBG - bBG;
+      });
       onUpdate(devs);
     },
     onError,
