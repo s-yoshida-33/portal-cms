@@ -587,12 +587,12 @@ export async function requestScreenshot(deviceId: string): Promise<void> {
     requestedAt: serverTimestamp(),
     completedAt: null,
   });
-  // Signal BG via RTDB SSE so it reacts instantly without waiting for the next heartbeat.
-  await rtdbSet(rtdbRef(rtdb, `screenshot-requests/${deviceId}`), { at: Date.now() }).catch(() => {});
+  // Signal BG via RTDB SSE (unified signals path, type field routes the handler).
+  await rtdbSet(rtdbRef(rtdb, `signals/${deviceId}`), { at: Date.now(), type: 'screenshot' }).catch(() => {});
 }
 
 export async function requestLogs(deviceId: string, date: string): Promise<void> {
-  await rtdbSet(rtdbRef(rtdb, `log-requests/${deviceId}`), { at: Date.now(), date }).catch(() => {});
+  await rtdbSet(rtdbRef(rtdb, `signals/${deviceId}`), { at: Date.now(), type: 'log', date }).catch(() => {});
 }
 
 export async function cancelScreenshotRequest(deviceId: string): Promise<void> {
