@@ -10,7 +10,7 @@ const firebaseConfig = {
   storageBucket:     'portal-cms-emk.firebasestorage.app',
   messagingSenderId: '987736791169',
   appId:             '1:987736791169:web:de4e33cc8821d9be25d580',
-  databaseURL:       'https://portal-cms-emk-default-rtdb.firebaseio.com',
+  databaseURL:       'https://portal-cms-emk-default-rtdb.asia-southeast1.firebasedatabase.app',
 };
 
 const app = initializeApp(firebaseConfig);
