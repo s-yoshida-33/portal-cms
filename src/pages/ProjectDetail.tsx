@@ -688,7 +688,7 @@ export function ProjectDetail() {
   const [deleteDevice,   setDeleteDevice]   = useState<Device | null>(null);
   const [deleteGroup,    setDeleteGroup]    = useState<DeviceGroup | null>(null);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
-  const [sortByApp,      setSortByApp]      = useState(false);
+  const [filterApps,     setFilterApps]     = useState<Set<AppName>>(new Set());
 
   useEffect(() => {
     if (!id) return;
@@ -716,13 +716,23 @@ export function ProjectDetail() {
 
   const canEdit = role === 'admin' || role === 'owner';
 
-  const sortedDevices = sortByApp
-    ? [...devices].sort((a, b) => (APP_SORT_ORDER[a.app] ?? 99) - (APP_SORT_ORDER[b.app] ?? 99))
+  const visibleApps   = Array.from(new Set(devices.map(d => d.app)))
+    .sort((a, b) => (APP_SORT_ORDER[a] ?? 99) - (APP_SORT_ORDER[b] ?? 99)) as AppName[];
+  const filteredDevices = filterApps.size > 0
+    ? devices.filter(d => filterApps.has(d.app))
     : devices;
-  const groupTree    = buildGroupTree(groups, sortedDevices);
-  const ungrouped    = sortedDevices.filter(d => !d.groupId);
+  const groupTree    = buildGroupTree(groups, filteredDevices);
+  const ungrouped    = filteredDevices.filter(d => !d.groupId);
   const hasGroups    = groups.length > 0;
   const showDivider  = hasGroups && ungrouped.length > 0;
+
+  function toggleFilterApp(app: AppName) {
+    setFilterApps(prev => {
+      const next = new Set(prev);
+      if (next.has(app)) { next.delete(app); } else { next.add(app); }
+      return next;
+    });
+  }
 
   function toggleCollapse(groupId: string) {
     setCollapsedGroups(prev => {
@@ -808,55 +818,68 @@ export function ProjectDetail() {
           <h1 className="text-white text-3xl font-semibold">{project.name}</h1>
           <p className="text-[#999999] text-base">{project.address}</p>
         </div>
-        <div className="flex items-center gap-2 mt-7">
-          <button
-            onClick={() => setSortByApp(v => !v)}
-            className={`flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium ring-1 transition-colors cursor-pointer ${
-              sortByApp
-                ? 'text-white bg-[#4693ff] ring-[#4693ff] hover:bg-[#3a7fe0]'
-                : 'text-zinc-300 bg-[#222222] ring-[#3d3d3d] hover:bg-[#2a2a2a]'
-            }`}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="4" y1="6" x2="20" y2="6" />
-              <line x1="4" y1="12" x2="14" y2="12" />
-              <line x1="4" y1="18" x2="9" y2="18" />
-            </svg>
-            アプリ順
-          </button>
-          {canEdit && (
-            <>
-              <button
-                onClick={() => { setEditGroup(null); setGroupModalOpen(true); }}
-                className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-                グループを作成
-              </button>
-              <button
-                onClick={() => { setEditDevice(null); setDeviceModalOpen(true); }}
-                className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#4693ff] hover:bg-[#3a7fe0] transition-colors cursor-pointer"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-                デバイスを追加
-              </button>
-            </>
-          )}
-        </div>
+        {canEdit && (
+          <div className="flex items-center gap-2 mt-7">
+            <button
+              onClick={() => { setEditGroup(null); setGroupModalOpen(true); }}
+              className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              グループを作成
+            </button>
+            <button
+              onClick={() => { setEditDevice(null); setDeviceModalOpen(true); }}
+              className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#4693ff] hover:bg-[#3a7fe0] transition-colors cursor-pointer"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              デバイスを追加
+            </button>
+          </div>
+        )}
       </div>
 
+      {/* アプリフィルター */}
+      {visibleApps.length > 1 && (
+        <div className="px-4 sm:px-6 pb-2 flex flex-wrap items-center gap-2">
+          {visibleApps.map(app => {
+            const active = filterApps.has(app);
+            const style  = APP_BADGE_STYLE[app] ?? 'bg-zinc-500/15 text-zinc-400 ring-zinc-500/30';
+            return (
+              <button
+                key={app}
+                onClick={() => toggleFilterApp(app)}
+                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ring-1 transition-opacity cursor-pointer ${style} ${
+                  active ? 'opacity-100' : filterApps.size === 0 ? 'opacity-100' : 'opacity-35'
+                }`}
+              >
+                {app}
+              </button>
+            );
+          })}
+          {filterApps.size > 0 && (
+            <button
+              onClick={() => setFilterApps(new Set())}
+              className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer underline-offset-2 hover:underline"
+            >
+              クリア
+            </button>
+          )}
+        </div>
+      )}
+
       {/* デバイス・グループ一覧 */}
-      <div className="px-4 sm:px-6 pt-8 pb-8 space-y-4 md:space-y-5">
-        {devices.length === 0 && !hasGroups ? (
+      <div className="px-4 sm:px-6 pt-4 pb-8 space-y-4 md:space-y-5">
+        {filteredDevices.length === 0 && (!hasGroups || filterApps.size > 0) ? (
           <div className="overflow-hidden rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-12 text-center">
-            <p className="text-zinc-500 text-sm">デバイスが登録されていません。</p>
+            <p className="text-zinc-500 text-sm">
+              {filterApps.size > 0 ? '該当するデバイスがありません。' : 'デバイスが登録されていません。'}
+            </p>
           </div>
         ) : (
           <>
