@@ -18,7 +18,8 @@ import {
   type DocumentSnapshot,
   type Unsubscribe,
 } from 'firebase/firestore';
-import { db } from './firebase';
+import { db, rtdb } from './firebase';
+import { ref as rtdbRef, set as rtdbSet } from 'firebase/database';
 import type {
   ProjectDoc,
   Device,
@@ -586,6 +587,8 @@ export async function requestScreenshot(deviceId: string): Promise<void> {
     requestedAt: serverTimestamp(),
     completedAt: null,
   });
+  // Signal BG via RTDB SSE so it reacts instantly without waiting for the next heartbeat.
+  await rtdbSet(rtdbRef(rtdb, `screenshot-requests/${deviceId}`), { at: Date.now() }).catch(() => {});
 }
 
 export async function cancelScreenshotRequest(deviceId: string): Promise<void> {
