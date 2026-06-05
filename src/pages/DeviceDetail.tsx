@@ -89,7 +89,7 @@ function logLevelClass(level: string) {
     case 'ERROR':
     case 'FATAL': return 'text-red-400';
     case 'WARN':  return 'text-yellow-400';
-    case 'INFO':  return 'text-sky-400';
+    case 'INFO':  return 'text-green-400';
     default:      return 'text-zinc-500';
   }
 }
@@ -100,7 +100,8 @@ function logLevelBadgeClass(level: string, active: boolean) {
     case 'ERROR':
     case 'FATAL': return 'text-red-400 bg-red-950/40 ring-red-800/50';
     case 'WARN':  return 'text-yellow-400 bg-yellow-950/40 ring-yellow-800/50';
-    default:      return 'text-sky-400 bg-sky-950/40 ring-sky-800/50';
+    case 'INFO':  return 'text-green-400 bg-green-950/40 ring-green-800/50';
+    default:      return 'text-zinc-400 bg-zinc-800/40 ring-zinc-700/50';
   }
 }
 
@@ -123,13 +124,16 @@ export function DeviceDetail() {
   const [portalSsCapturedAt, setPortalSsCapturedAt] = useState<string | null>(null);
   const portalBlobRef = useRef<string | null>(null);
 
-  const [logs,            setLogs]            = useState<RtdbLogEntry[]>([]);
-  const [logsLastFetched, setLogsLastFetched] = useState<Date | null>(null);
-  const [logsRefreshing,  setLogsRefreshing]  = useState(false);
-  const [logLevels,       setLogLevels]       = useState<Set<string>>(new Set(LOG_LEVELS));
-  const [autoScroll,      setAutoScroll]      = useState(true);
-  const logContainerRef  = useRef<HTMLDivElement>(null);
-  const logRequestedAt   = useRef<number>(0);
+  const todayStr   = new Date().toISOString().slice(0, 10);
+  const minLogDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
+  const [logs,             setLogs]             = useState<RtdbLogEntry[]>([]);
+  const [logsLastFetched,  setLogsLastFetched]  = useState<Date | null>(null);
+  const [logsRefreshing,   setLogsRefreshing]   = useState(false);
+  const [logLevels,        setLogLevels]        = useState<Set<string>>(new Set(LOG_LEVELS));
+  const [selectedLogDate,  setSelectedLogDate]  = useState(todayStr);
+  const logContainerRef = useRef<HTMLDivElement>(null);
+  const logRequestedAt  = useRef<number>(0);
 
   // Subscribe to Firestore device document
   useEffect(() => {
@@ -174,18 +178,18 @@ export function DeviceDetail() {
     setLogsRefreshing(true);
     logRequestedAt.current = Date.now();
     try {
-      await requestLogs(deviceId);
+      await requestLogs(deviceId, selectedLogDate);
     } catch {
       setLogsRefreshing(false);
     }
-  }, [deviceId, logsRefreshing]);
+  }, [deviceId, logsRefreshing, selectedLogDate]);
 
-  // Auto-scroll log container only (page itself does not scroll)
+  // Scroll to bottom when new log data arrives.
   useEffect(() => {
-    if (autoScroll && logContainerRef.current) {
+    if (logContainerRef.current) {
       logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
     }
-  }, [logs, autoScroll]);
+  }, [logs]);
 
   const baseUrl = device?.app === 'Bridge-Ground' ? `http://${device.ip}:${device.port ?? 8090}` : null;
 
@@ -535,7 +539,7 @@ export function DeviceDetail() {
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-white font-semibold text-base">ログ</h2>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap justify-end">
               {LOG_LEVELS.map(level => (
                 <button
                   key={level}
@@ -546,17 +550,14 @@ export function DeviceDetail() {
                 </button>
               ))}
               <div className="w-px h-4 bg-zinc-700 mx-1" />
-              <button
-                onClick={() => setAutoScroll(v => !v)}
-                className={`h-6 px-2.5 rounded-md text-xs font-medium ring-1 transition-colors cursor-pointer ${
-                  autoScroll
-                    ? 'text-zinc-300 bg-zinc-700/50 ring-zinc-600'
-                    : 'text-zinc-600 bg-zinc-800 ring-zinc-700'
-                }`}
-              >
-                自動スクロール
-              </button>
-              <div className="w-px h-4 bg-zinc-700 mx-1" />
+              <input
+                type="date"
+                value={selectedLogDate}
+                min={minLogDate}
+                max={todayStr}
+                onChange={e => setSelectedLogDate(e.target.value)}
+                className="h-6 px-2 rounded-md text-xs text-zinc-300 bg-zinc-800 ring-1 ring-zinc-700 focus:outline-none focus:ring-zinc-500 cursor-pointer"
+              />
               <button
                 onClick={handleRefreshLogs}
                 disabled={logsRefreshing}
