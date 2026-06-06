@@ -164,29 +164,6 @@ async function verifyToken(
   return fields;
 }
 
-// KV-cached token verification. Falls back to Firestore on cache miss.
-// Cache TTL: 5 minutes. Key format: t:{hash}:{type}
-async function verifyTokenCached(
-  fs:  Firestore,
-  kv:  KVNamespace | undefined,
-  raw: string,
-  type: string
-): Promise<Record<string, FsVal> | null> {
-  if (!kv) return verifyToken(fs, raw, type);
-
-  const hash     = await sha256Hex(raw);
-  const cacheKey = `t:${hash}:${type}`;
-  const cached   = await kv.get(cacheKey);
-
-  if (cached === '1') return { type: { stringValue: type } };
-  if (cached === '0') return null;
-
-  const result = await verifyToken(fs, raw, type);
-  await kv.put(cacheKey, result ? '1' : '0', { expirationTtl: 300 });
-  return result;
-}
-
-// ── Resolve pendingId → deviceId via permanent deviceApprovals doc ────────────
 
 async function resolveDeviceId(fs: Firestore, pendingId: string): Promise<string | null> {
   const doc = await fs.get('deviceApprovals', pendingId);
@@ -214,7 +191,7 @@ export default {
 
     // ── GET /v1/screenshot/pending?pendingId=... ──────────────────
     if (req.method === 'GET' && url.pathname === '/v1/screenshot/pending') {
-      const tokenData = await verifyTokenCached(fs, kv, rawToken, 'registration');
+      const tokenData = await verifyToken(fs, rawToken, 'registration');
       if (!tokenData) return jsonRes({ error: 'Invalid or revoked token' }, 401);
 
       const pendingId = url.searchParams.get('pendingId');
@@ -261,7 +238,7 @@ export default {
     //   allow read, delete: if true;
     //   allow create, update: if request.auth != null;
     if (req.method === 'GET' && url.pathname === '/v1/device') {
-      const tokenData = await verifyTokenCached(fs, kv, rawToken, 'registration');
+      const tokenData = await verifyToken(fs, rawToken, 'registration');
       if (!tokenData) return jsonRes({ error: 'Invalid or revoked token' }, 401);
 
       const pendingId = url.searchParams.get('pendingId');
@@ -297,7 +274,7 @@ export default {
 
     // ── POST /v1/register ─────────────────────────────────────────
     if (url.pathname === '/v1/register') {
-      const tokenData = await verifyTokenCached(fs, kv, rawToken, 'registration');
+      const tokenData = await verifyToken(fs, rawToken, 'registration');
       if (!tokenData) return jsonRes({ error: 'Invalid or revoked token' }, 401);
 
       const body = await req.json() as Record<string, string>;
@@ -325,7 +302,7 @@ export default {
     // Batched status update — one request per Bridge-Ground instance for all
     // devices it manages. Response includes per-device screenshot commands.
     if (url.pathname === '/v1/heartbeat') {
-      const tokenData = await verifyTokenCached(fs, kv, rawToken, 'device');
+      const tokenData = await verifyToken(fs, rawToken, 'device');
       if (!tokenData) return jsonRes({ error: 'Invalid or revoked token' }, 401);
 
       const body = await req.json() as {
@@ -380,7 +357,7 @@ export default {
     // ── POST /v1/status ───────────────────────────────────────────
     // Legacy endpoint — kept for backward compatibility with older BG firmware.
     if (url.pathname === '/v1/status') {
-      const tokenData = await verifyTokenCached(fs, kv, rawToken, 'registration');
+      const tokenData = await verifyToken(fs, rawToken, 'registration');
       if (!tokenData) return jsonRes({ error: 'Invalid or revoked token' }, 401);
 
       const body = await req.json() as {
@@ -442,12 +419,12 @@ export default {
 
       if (body.deviceId) {
         // New format: device token auth
-        const tokenData = await verifyTokenCached(fs, kv, rawToken, 'device');
+        const tokenData = await verifyToken(fs, rawToken, 'device');
         if (!tokenData) return jsonRes({ error: 'Invalid or revoked token' }, 401);
         deviceId = body.deviceId;
       } else if (body.pendingId) {
         // Legacy format: registration token auth
-        const tokenData = await verifyTokenCached(fs, kv, rawToken, 'registration');
+        const tokenData = await verifyToken(fs, rawToken, 'registration');
         if (!tokenData) return jsonRes({ error: 'Invalid or revoked token' }, 401);
         deviceId = await resolveDeviceId(fs, body.pendingId);
         if (!deviceId) return jsonRes({ error: 'Device not approved yet' }, 403);
@@ -491,12 +468,12 @@ export default {
 
       if (deviceIdParam) {
         // New format: device token auth
-        const tokenData = await verifyTokenCached(fs, kv, rawToken, 'device');
+        const tokenData = await verifyToken(fs, rawToken, 'device');
         if (!tokenData) return jsonRes({ error: 'Invalid or revoked token' }, 401);
         deviceId = deviceIdParam;
       } else if (pendingIdParam) {
         // Legacy format: registration token auth
-        const tokenData = await verifyTokenCached(fs, kv, rawToken, 'registration');
+        const tokenData = await verifyToken(fs, rawToken, 'registration');
         if (!tokenData) return jsonRes({ error: 'Invalid or revoked token' }, 401);
         deviceId = await resolveDeviceId(fs, pendingIdParam);
         if (!deviceId) return jsonRes({ error: 'Device not approved yet' }, 403);
