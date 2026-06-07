@@ -233,18 +233,38 @@ export function DeviceDetail() {
 
   // Fetch portal screenshot from Worker using Firebase ID token.
   // completedAt is the Firestore Timestamp from the screenshotRequests doc.
+  // Retries up to 3 times (2.5 s apart) when KV returns a stale image.
   const fetchPortalScreenshot = useCallback(async (completedAt?: { toDate(): Date } | null) => {
     if (!deviceId) return;
     try {
       const idToken = await auth.currentUser?.getIdToken();
       if (!idToken) { setPortalSsState('error'); return; }
-      const res = await fetch(`${WORKER_BASE_URL}/v1/screenshot/${deviceId}`, {
-        headers: { Authorization: `Bearer ${idToken}` },
-        cache: 'no-store',
-      });
-      if (!res.ok) throw new Error('fetch failed');
+
+      // Accept images captured within 15 s before the completedAt timestamp.
+      const expectedAfter = completedAt ? completedAt.toDate().getTime() - 15_000 : null;
+
+      let imgBlob: Blob | null = null;
+      for (let attempt = 0; attempt < 4; attempt++) {
+        if (attempt > 0) await new Promise<void>(r => setTimeout(r, 2500));
+        const res = await fetch(`${WORKER_BASE_URL}/v1/screenshot/${deviceId}`, {
+          headers: { Authorization: `Bearer ${idToken}` },
+          cache: 'no-store',
+        });
+        if (!res.ok) throw new Error('fetch failed');
+        const capturedAtHeader = res.headers.get('X-Captured-At');
+        const capturedAtMs = capturedAtHeader ? new Date(capturedAtHeader).getTime() : 0;
+        if (expectedAfter !== null && capturedAtMs < expectedAfter && attempt < 3) {
+          // KV returned a stale image — discard and retry
+          continue;
+        }
+        imgBlob = await res.blob();
+        break;
+      }
+
+      if (!imgBlob) throw new Error('no image after retries');
+
       if (portalBlobRef.current) URL.revokeObjectURL(portalBlobRef.current);
-      const url = URL.createObjectURL(await res.blob());
+      const url = URL.createObjectURL(imgBlob);
       portalBlobRef.current = url;
       setPortalSsBlobUrl(url);
       const capturedDate = completedAt?.toDate() ?? null;
