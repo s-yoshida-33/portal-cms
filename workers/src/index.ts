@@ -216,7 +216,7 @@ export default {
       const deviceId = parts[2];
       if (!deviceId) return jsonRes({ error: 'Missing deviceId in path' }, 400);
 
-      const imgBytes = await env.SCREENSHOTS.get(deviceId, 'arrayBuffer');
+      const { value: imgBytes, metadata } = await env.SCREENSHOTS.getWithMetadata<{ capturedAt: string }>(deviceId, 'arrayBuffer');
       if (!imgBytes) {
         return new Response('Screenshot not found', { status: 404, headers: CORS_HEADERS });
       }
@@ -226,6 +226,7 @@ export default {
           ...CORS_HEADERS,
           'Content-Type':  'image/jpeg',
           'Cache-Control': 'no-store',
+          ...(metadata?.capturedAt ? { 'X-Captured-At': metadata.capturedAt } : {}),
         },
       });
     }
