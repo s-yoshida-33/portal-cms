@@ -413,8 +413,7 @@ export function DeviceDetail() {
               <div className="space-y-3">
                 {apps.map(app => {
                   const appDevice = projectDevices.find(
-                    d => d.app === app.name && (d.hostname === app.hostname || d.hostname == null)
-                      && d.id !== deviceId
+                    d => d.app === app.name && d.hostname === app.hostname && d.id !== deviceId
                   );
                   return (
                   <div key={app.id} className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-4">
