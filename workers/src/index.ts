@@ -224,6 +224,7 @@ export default {
       return new Response(imgBytes, {
         headers: {
           ...CORS_HEADERS,
+          'Access-Control-Expose-Headers': 'X-Captured-At',
           'Content-Type':  'image/jpeg',
           'Cache-Control': 'no-store',
           ...(metadata?.capturedAt ? { 'X-Captured-At': metadata.capturedAt } : {}),
