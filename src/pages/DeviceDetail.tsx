@@ -233,16 +233,15 @@ export function DeviceDetail() {
 
   // Fetch portal screenshot from Worker using Firebase ID token.
   // completedAt is the Firestore Timestamp from the screenshotRequests doc.
-  // Retries up to 3 times (2.5 s apart) when KV returns a stale image.
+  // Retries up to 4 times (2.5s apart) to handle Workers KV eventual consistency:
+  // BG marks Firestore 'completed' before KV propagates to all edge nodes.
   const fetchPortalScreenshot = useCallback(async (completedAt?: { toDate(): Date } | null) => {
     if (!deviceId) return;
     try {
       const idToken = await auth.currentUser?.getIdToken();
       if (!idToken) { setPortalSsState('error'); return; }
-
-      // Accept images captured within 15 s before the completedAt timestamp.
+      // Accept images captured within 15s before the completedAt timestamp.
       const expectedAfter = completedAt ? completedAt.toDate().getTime() - 15_000 : null;
-
       let imgBlob: Blob | null = null;
       for (let attempt = 0; attempt < 4; attempt++) {
         if (attempt > 0) await new Promise<void>(r => setTimeout(r, 2500));
@@ -254,15 +253,12 @@ export function DeviceDetail() {
         const capturedAtHeader = res.headers.get('X-Captured-At');
         const capturedAtMs = capturedAtHeader ? new Date(capturedAtHeader).getTime() : 0;
         if (expectedAfter !== null && capturedAtMs < expectedAfter && attempt < 3) {
-          // KV returned a stale image — discard and retry
-          continue;
+          continue; // KV returned a stale image — discard and retry
         }
         imgBlob = await res.blob();
         break;
       }
-
       if (!imgBlob) throw new Error('no image after retries');
-
       if (portalBlobRef.current) URL.revokeObjectURL(portalBlobRef.current);
       const url = URL.createObjectURL(imgBlob);
       portalBlobRef.current = url;
