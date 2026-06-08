@@ -493,16 +493,14 @@ export default {
         metadata: { capturedAt: new Date().toISOString() },
       });
 
-      // Clear screenshotRequested flag (new design) and legacy screenshotRequests doc
+      // Clear screenshotRequested flag and always mark screenshotRequests as completed.
+      // Previously used fs.get() + conditional patch, but that skipped the update if
+      // the doc was transiently missing, leaving Portal stuck in 'pending' state.
       await Promise.allSettled([
         fs.patch('devices', deviceId, { screenshotRequested: false }),
-        fs.get('screenshotRequests', deviceId).then(ssDoc => {
-          if (ssDoc) {
-            return fs.patch('screenshotRequests', deviceId, {
-              status:      'completed',
-              completedAt: new Date(),
-            });
-          }
+        fs.patch('screenshotRequests', deviceId, {
+          status:      'completed',
+          completedAt: new Date(),
         }),
       ]);
 
