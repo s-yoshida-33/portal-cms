@@ -244,7 +244,7 @@ export function DeviceDetail() {
       const path = encodeURIComponent(`screenshots/${deviceId}`);
       const res = await fetch(
         `https://firebasestorage.googleapis.com/v0/b/${STORAGE_BUCKET}/o/${path}?alt=media`,
-        { headers: { Authorization: `Bearer ${idToken}` }, cache: 'no-store' },
+        { headers: { Authorization: `Firebase ${idToken}` }, cache: 'no-store' },
       );
       if (!res.ok) throw new Error(`fetch failed (${res.status})`);
 
