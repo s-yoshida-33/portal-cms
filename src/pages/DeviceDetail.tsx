@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { subscribeDevice, subscribeDevicesByProject, requestScreenshot as requestPortalScreenshot, cancelScreenshotRequest, subscribeScreenshotRequest, requestLogs } from '../lib/firestore';
+import { useParams } from 'react-router-dom';
+import { subscribeDevice, requestScreenshot as requestPortalScreenshot, cancelScreenshotRequest, subscribeScreenshotRequest, requestLogs } from '../lib/firestore';
 import { auth, rtdb } from '../lib/firebase';
 import { ref as rtdbRef, onValue } from 'firebase/database';
 import { StatusBadge } from '../components/StatusBadge';
@@ -13,20 +13,6 @@ interface RtdbLogEntry {
   level:     string;
   tag:       string;
   message:   string;
-}
-
-// ── Bridge-Ground API types ───────────────────────────────────────
-
-interface AppInfo {
-  id:           string;
-  name:         string;
-  version:      string;
-  hostname:     string;
-  ip:           string;
-  online:       boolean;
-  registeredAt: string;
-  lastSeen:     string;
-  startedAt?:   string;
 }
 
 type PortalSsState = 'idle' | 'pending' | 'ready' | 'error';
@@ -112,16 +98,10 @@ function logLevelBadgeClass(level: string, active: boolean) {
 // ── Main page ─────────────────────────────────────────────────────
 
 export function DeviceDetail() {
-  const { deviceId, id: projectId, uuid } = useParams<{ deviceId: string; uuid: string; id: string }>();
+  const { deviceId } = useParams<{ deviceId: string }>();
 
   const [device,        setDevice]        = useState<Device | null>(null);
   const [deviceLoading, setDeviceLoading] = useState(true);
-  const [projectDevices, setProjectDevices] = useState<Device[]>([]);
-
-  const [apps,        setApps]        = useState<AppInfo[]>([]);
-  const [appsLoading, setAppsLoading] = useState(false);
-  const [appsError,   setAppsError]   = useState<string | null>(null);
-
 
   const [portalSsState,      setPortalSsState]      = useState<PortalSsState>('idle');
   const [portalSsBlobUrl,    setPortalSsBlobUrl]    = useState<string | null>(null);
@@ -147,12 +127,6 @@ export function DeviceDetail() {
       setDeviceLoading(false);
     });
   }, [deviceId]);
-
-  // Subscribe to all devices in the project so we can link to app device pages
-  useEffect(() => {
-    if (!projectId) return;
-    return subscribeDevicesByProject(projectId, setProjectDevices);
-  }, [projectId]);
 
   // Subscribe to RTDB logs/{deviceId} — updated by Bridge-Ground on demand.
   useEffect(() => {
@@ -195,8 +169,6 @@ export function DeviceDetail() {
     }
   }, [logs]);
 
-  const baseUrl = device?.app === 'Bridge-Ground' ? `http://${device.ip}:${device.port ?? 8090}` : null;
-
   const filteredLogs = useMemo(
     () => logs.filter(l => logLevels.has(l.level || 'INFO')).map((l, i) => ({ ...l, _key: i })),
     [logs, logLevels]
@@ -209,27 +181,6 @@ export function DeviceDetail() {
       return next;
     });
   }
-
-  // Fetch app list from Bridge-Ground
-  const fetchApps = useCallback(async () => {
-    if (!baseUrl) return;
-    setAppsLoading(true);
-    setAppsError(null);
-    try {
-      const res = await fetch(`${baseUrl}/api/apps`, { signal: AbortSignal.timeout(5000) });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      setApps(await res.json() as AppInfo[]);
-    } catch {
-      setAppsError('Bridge-Ground に接続できませんでした。デバイスがオンラインか確認してください。');
-      setApps([]);
-    } finally {
-      setAppsLoading(false);
-    }
-  }, [baseUrl]);
-
-  useEffect(() => {
-    if (baseUrl) fetchApps();
-  }, [baseUrl, fetchApps]);
 
   // Fetch portal screenshot directly from Firebase Storage using Firebase ID token.
   // Firebase Storage has strong read-after-write consistency, so a single fetch
@@ -366,75 +317,6 @@ export function DeviceDetail() {
             </div>
           </div>
         </div>
-
-        {/* 外部アプリセクション（Bridge-Ground のみ表示） */}
-        {device.app === 'Bridge-Ground' && (
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-white font-semibold text-base">外部アプリ</h2>
-              <button
-                onClick={fetchApps}
-                disabled={appsLoading}
-                className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer disabled:opacity-50"
-              >
-                {appsLoading ? '更新中...' : '更新'}
-              </button>
-            </div>
-
-            {appsLoading ? (
-              <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-8 text-center">
-                <p className="text-zinc-500 text-sm">読み込み中...</p>
-              </div>
-            ) : appsError ? (
-              <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-8 text-center">
-                <p className="text-zinc-500 text-sm">{appsError}</p>
-              </div>
-            ) : apps.length === 0 ? (
-              <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-8 text-center">
-                <p className="text-zinc-500 text-sm">登録されている外部アプリはありません。</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {apps.map(app => {
-                  const appDevice = projectDevices.find(
-                    d => d.app === app.name && d.hostname === app.hostname && d.id !== deviceId
-                  );
-                  return (
-                  <div key={app.id} className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div>
-                          <p className="font-medium text-zinc-100 text-sm">{app.name}</p>
-                          <p className="text-xs text-zinc-500 font-mono mt-0.5">{app.hostname}</p>
-                        </div>
-                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${
-                          app.online
-                            ? 'bg-green-500/10 text-green-400'
-                            : 'bg-zinc-700/50 text-zinc-400'
-                        }`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${app.online ? 'bg-green-400' : 'bg-zinc-500'}`} />
-                          {app.online ? 'オンライン' : 'オフライン'}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-xs text-zinc-500">v{app.version}</span>
-                        {appDevice && (
-                          <Link
-                            to={`/${uuid}/projects/${projectId}/devices/${appDevice.id}`}
-                            className="h-6 px-2.5 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors inline-flex items-center"
-                          >
-                            詳細
-                          </Link>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
 
         {/* スクリーンショットセクション（Bridge-Ground 以外） */}
         {device.app !== 'Bridge-Ground' && (
