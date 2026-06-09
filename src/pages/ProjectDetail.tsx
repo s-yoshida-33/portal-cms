@@ -172,6 +172,37 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
     return () => document.removeEventListener('mousedown', handleClick);
   }, [menuOpen]);
 
+  const menu = canEdit && (
+    <div ref={menuRef} className="relative z-10 shrink-0">
+      <button
+        onClick={e => { e.preventDefault(); setMenuOpen(o => !o); }}
+        className="w-7 h-7 flex items-center justify-center rounded-md text-zinc-400 hover:text-zinc-200 hover:bg-[#2a2a2a] transition-colors cursor-pointer"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+          <circle cx="12" cy="5"  r="2" />
+          <circle cx="12" cy="12" r="2" />
+          <circle cx="12" cy="19" r="2" />
+        </svg>
+      </button>
+      {menuOpen && (
+        <div className="absolute right-0 top-full mt-1 w-32 bg-[#1a1a1a] ring-1 ring-[#3d3d3d] rounded-lg shadow-xl overflow-hidden">
+          <button
+            onClick={e => { e.preventDefault(); setMenuOpen(false); onEdit(device); }}
+            className="w-full text-left px-3 py-2 text-sm text-zinc-300 hover:bg-[#2a2a2a] transition-colors cursor-pointer"
+          >
+            編集
+          </button>
+          <button
+            onClick={e => { e.preventDefault(); setMenuOpen(false); onDelete(device); }}
+            className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-950/40 transition-colors cursor-pointer"
+          >
+            削除依頼
+          </button>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="relative bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-5 hover:ring-[#4693ff] transition-colors cursor-pointer">
       <Link
@@ -179,7 +210,30 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
         className="absolute inset-0 rounded-xl"
         aria-label={device.name}
       />
-      <div className="flex items-center justify-between mb-5">
+
+      {/* Mobile header: no status, 3-row right section */}
+      <div className="flex items-start justify-between mb-4 sm:hidden">
+        <div className="min-w-0 mr-3">
+          <p className="font-medium text-zinc-100 text-sm truncate">{device.name}</p>
+          <p className="text-xs text-zinc-500 font-mono mt-0.5">{device.ip}</p>
+        </div>
+        <div className="flex items-start gap-2 shrink-0">
+          <div className="text-right">
+            <div className="flex items-center justify-end gap-1">
+              <AppBadge app={device.app} />
+              <span className="text-zinc-500 text-xs">v{device.appVersion}</span>
+            </div>
+            <p className="text-xs text-zinc-600 mt-1">最終確認: {formatLastSeen(device.lastSeen)}</p>
+            <p className="text-xs text-zinc-400 mt-1 font-mono">
+              <UptimeClock uptimeSecs={device.system.uptime} lastSeen={device.lastSeen} status={device.status} />
+            </p>
+          </div>
+          {menu}
+        </div>
+      </div>
+
+      {/* Desktop header: original layout */}
+      <div className="hidden sm:flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
           <div>
             <p className="font-medium text-zinc-100 text-sm">{device.name}</p>
@@ -195,40 +249,20 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
             </div>
             <p className="text-xs text-zinc-600 mt-0.5">最終確認: {formatLastSeen(device.lastSeen)}</p>
           </div>
-          {canEdit && (
-            <div ref={menuRef} className="relative z-10 ml-2">
-              <button
-                onClick={e => { e.preventDefault(); setMenuOpen(o => !o); }}
-                className="w-7 h-7 flex items-center justify-center rounded-md text-zinc-400 hover:text-zinc-200 hover:bg-[#2a2a2a] transition-colors cursor-pointer"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                  <circle cx="12" cy="5"  r="2" />
-                  <circle cx="12" cy="12" r="2" />
-                  <circle cx="12" cy="19" r="2" />
-                </svg>
-              </button>
-              {menuOpen && (
-                <div className="absolute right-0 top-full mt-1 w-32 bg-[#1a1a1a] ring-1 ring-[#3d3d3d] rounded-lg shadow-xl overflow-hidden">
-                  <button
-                    onClick={e => { e.preventDefault(); setMenuOpen(false); onEdit(device); }}
-                    className="w-full text-left px-3 py-2 text-sm text-zinc-300 hover:bg-[#2a2a2a] transition-colors cursor-pointer"
-                  >
-                    編集
-                  </button>
-                  <button
-                    onClick={e => { e.preventDefault(); setMenuOpen(false); onDelete(device); }}
-                    className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-950/40 transition-colors cursor-pointer"
-                  >
-                    削除依頼
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
+          {menu}
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-6">
+      {/* Mobile metrics: 2×2 grid (uptime already shown above) */}
+      <div className="sm:hidden grid grid-cols-2 gap-x-8 gap-y-3">
+        <MetricBar label="CPU"        value={device.system.cpu}         unit="%" />
+        <MetricBar label="メモリ"     value={device.system.memory}      unit="%" />
+        <MetricBar label="温度"       value={device.system.temperature} unit="°C" warn={65} danger={80} />
+        <MetricBar label="ストレージ" value={device.system.storage}     unit="%" warn={80} danger={90} />
+      </div>
+
+      {/* Desktop metrics: original 4-col with uptime */}
+      <div className="hidden sm:grid grid-cols-4 gap-6">
         <div className="col-span-3 grid grid-cols-2 gap-x-8 gap-y-3">
           <MetricBar label="CPU"        value={device.system.cpu}         unit="%" />
           <MetricBar label="メモリ"     value={device.system.memory}      unit="%" />
