@@ -292,62 +292,27 @@ export function DeviceDetail() {
 
         {/* システム情報セクション */}
         <div>
-          {/* Mobile: セクションタイトルをカード外に */}
-          <h2 className="sm:hidden text-white font-semibold text-base mb-3">システム情報</h2>
-
+          <h2 className="text-white font-semibold text-base mb-3">システム情報</h2>
           <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-5">
-
-            {/* Mobile レイアウト */}
-            <div className="sm:hidden">
-              <div className="mb-1">
-                <div className="flex items-center gap-1.5 mb-0.5">
-                  <span className="text-sm text-zinc-300">{device.app}</span>
-                  <span className="text-zinc-500 text-xs">v{device.appVersion}</span>
-                </div>
-                <p className="text-xs text-zinc-500">最終確認: {formatLastSeen(device.lastSeen)}</p>
+            <div className="mb-1">
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <span className="text-sm text-zinc-300">{device.app}</span>
+                <span className="text-zinc-500 text-xs">v{device.appVersion}</span>
               </div>
-              <p className="text-xs text-zinc-500 mt-2 mb-4">
-                稼働時間:{' '}
-                <span className="text-sm font-semibold text-zinc-200">
-                  <UptimeClock uptimeSecs={device.system.uptime} lastSeen={device.lastSeen} status={device.status} />
-                </span>
-              </p>
-              <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-                <MetricBar label="CPU"        value={device.system.cpu}         unit="%" />
-                <MetricBar label="メモリ"     value={device.system.memory}      unit="%" />
-                <MetricBar label="温度"       value={device.system.temperature} unit="°C" warn={65} danger={80} />
-                <MetricBar label="ストレージ" value={device.system.storage}     unit="%" warn={80} danger={90} />
-              </div>
+              <p className="text-xs text-zinc-500">最終確認: {formatLastSeen(device.lastSeen)}</p>
             </div>
-
-            {/* Desktop レイアウト（元のまま） */}
-            <div className="hidden sm:block">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-white font-medium text-sm">システム情報</h2>
-                <div className="text-right">
-                  <p className="text-sm text-zinc-300">
-                    {device.app}{' '}
-                    <span className="text-zinc-500 text-xs">v{device.appVersion}</span>
-                  </p>
-                  <p className="text-xs text-zinc-600 mt-0.5">最終確認: {formatLastSeen(device.lastSeen)}</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-4 gap-6">
-                <div className="col-span-3 grid grid-cols-2 gap-x-8 gap-y-3">
-                  <MetricBar label="CPU"        value={device.system.cpu}         unit="%" />
-                  <MetricBar label="メモリ"     value={device.system.memory}      unit="%" />
-                  <MetricBar label="温度"       value={device.system.temperature} unit="°C" warn={65} danger={80} />
-                  <MetricBar label="ストレージ" value={device.system.storage}     unit="%" warn={80} danger={90} />
-                </div>
-                <div className="flex flex-col justify-center pl-5 border-l border-zinc-800">
-                  <p className="text-xs text-zinc-500 mb-1">稼働時間</p>
-                  <p className="text-lg font-semibold text-zinc-200">
-                    <UptimeClock uptimeSecs={device.system.uptime} lastSeen={device.lastSeen} status={device.status} />
-                  </p>
-                </div>
-              </div>
+            <p className="text-xs text-zinc-500 mt-2 mb-4">
+              稼働時間:{' '}
+              <span className="text-sm font-semibold text-zinc-200">
+                <UptimeClock uptimeSecs={device.system.uptime} lastSeen={device.lastSeen} status={device.status} />
+              </span>
+            </p>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-4 sm:gap-x-8">
+              <MetricBar label="CPU"        value={device.system.cpu}         unit="%" />
+              <MetricBar label="メモリ"     value={device.system.memory}      unit="%" />
+              <MetricBar label="温度"       value={device.system.temperature} unit="°C" warn={65} danger={80} />
+              <MetricBar label="ストレージ" value={device.system.storage}     unit="%" warn={80} danger={90} />
             </div>
-
           </div>
         </div>
 
@@ -460,19 +425,20 @@ export function DeviceDetail() {
         {/* ログセクション */}
         <div>
           <div className="mb-3 space-y-2">
-            {/* 1行目: タイトル + レベルフィルター */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-white font-semibold text-base">ログ</h2>
-              <div className="w-px h-4 bg-zinc-700" />
-              {LOG_LEVELS.map(level => (
-                <button
-                  key={level}
-                  onClick={() => toggleLevel(level)}
-                  className={`h-6 px-2.5 rounded-md text-xs font-medium ring-1 transition-colors cursor-pointer ${logLevelBadgeClass(level, logLevels.has(level))}`}
-                >
-                  {level}
-                </button>
-              ))}
+            {/* 1行目: タイトル（左）＋ レベルフィルター（右） */}
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="text-white font-semibold text-base shrink-0">ログ</h2>
+              <div className="flex items-center gap-1.5 flex-wrap justify-end">
+                {LOG_LEVELS.map(level => (
+                  <button
+                    key={level}
+                    onClick={() => toggleLevel(level)}
+                    className={`h-6 px-2.5 rounded-md text-xs font-medium ring-1 transition-colors cursor-pointer ${logLevelBadgeClass(level, logLevels.has(level))}`}
+                  >
+                    {level}
+                  </button>
+                ))}
+              </div>
             </div>
             {/* 2行目: 日付 + 更新ボタン（右詰） */}
             <div className="flex items-center justify-end gap-2">
