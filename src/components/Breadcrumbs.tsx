@@ -74,7 +74,7 @@ export function Breadcrumbs({ onMenuOpen }: { onMenuOpen?: () => void }) {
   return (
     <div className="shrink-0 border-b border-zinc-800 bg-black py-3 px-4 sm:px-6">
       <div className="h-7 flex items-center gap-3">
-        {/* Hamburger button — mobile only */}
+        {/* Hamburger button — mobile only, stays fixed */}
         <button
           onClick={onMenuOpen}
           className="sm:hidden p-1 -ml-1 rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60 transition-colors shrink-0"
@@ -88,29 +88,32 @@ export function Breadcrumbs({ onMenuOpen }: { onMenuOpen?: () => void }) {
         </button>
 
         {crumbs.length >= 2 && (
-          <nav aria-label="パンくずリスト" className="flex items-center gap-1.5 text-sm">
-            {crumbs.map((crumb, i) => {
-              const isLast = i === crumbs.length - 1;
-              return (
-                <span key={i} className="flex items-center gap-1.5">
-                  {i > 0 && (
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-                      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                      className="text-zinc-700 shrink-0">
-                      <polyline points="9 18 15 12 9 6" />
-                    </svg>
-                  )}
-                  {crumb.to && !isLast ? (
-                    <Link to={crumb.to} className="text-zinc-400 hover:text-zinc-200 transition-colors">
-                      {crumb.label}
-                    </Link>
-                  ) : (
-                    <span className={isLast ? 'text-zinc-200' : 'text-zinc-400'}>{crumb.label}</span>
-                  )}
-                </span>
-              );
-            })}
-          </nav>
+          /* Mobile: horizontal scroll; Desktop: unchanged */
+          <div className="sm:contents overflow-x-auto min-w-0 flex-1">
+            <nav aria-label="パンくずリスト" className="flex items-center gap-1.5 text-sm whitespace-nowrap">
+              {crumbs.map((crumb, i) => {
+                const isLast = i === crumbs.length - 1;
+                return (
+                  <span key={i} className="flex items-center gap-1.5">
+                    {i > 0 && (
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                        className="text-zinc-700 shrink-0">
+                        <polyline points="9 18 15 12 9 6" />
+                      </svg>
+                    )}
+                    {crumb.to && !isLast ? (
+                      <Link to={crumb.to} className="text-zinc-400 hover:text-zinc-200 transition-colors">
+                        {crumb.label}
+                      </Link>
+                    ) : (
+                      <span className={isLast ? 'text-zinc-200' : 'text-zinc-400'}>{crumb.label}</span>
+                    )}
+                  </span>
+                );
+              })}
+            </nav>
+          </div>
         )}
       </div>
     </div>
