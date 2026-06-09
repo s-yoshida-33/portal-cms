@@ -221,56 +221,97 @@ export function Projects() {
             )}
           </div>
         ) : (
-          <div className="overflow-hidden rounded-lg ring-1 ring-[#3d3d3d]">
-            {/* テーブルヘッダー */}
-            <div className="grid grid-cols-[1fr_110px_1.2fr_72px_160px] gap-4 px-4 py-3 bg-black border-b border-[#3d3d3d] text-xs font-medium text-zinc-500 uppercase tracking-wider">
-              <span>プロジェクト名</span>
-              <span>都道府県</span>
-              <span>住所</span>
-              <span>台数</span>
-              <span />
+          <>
+            {/* ── スマホ: カードレイアウト ── */}
+            <div className="sm:hidden space-y-2">
+              {projects.map((p) => (
+                <div key={p.id} className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl px-4 py-4">
+                  <div className="flex items-start justify-between gap-3 mb-1.5">
+                    <Link
+                      to={`/${uuid}/projects/${p.id}`}
+                      className="text-white text-sm font-semibold hover:text-[#4693ff] transition-colors leading-snug"
+                    >
+                      {p.name}
+                    </Link>
+                    <span className="shrink-0 text-xs font-medium text-zinc-300 bg-zinc-800 ring-1 ring-zinc-700 rounded-md px-2 py-0.5 tabular-nums">
+                      {deviceCount(p.id)}台
+                    </span>
+                  </div>
+                  <p className="text-zinc-500 text-xs mb-3">
+                    {p.prefecture}　{p.address}
+                  </p>
+                  {canEdit && (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => { setEditTarget(p); setModalOpen(true); }}
+                        className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
+                      >
+                        編集
+                      </button>
+                      <button
+                        onClick={() => setDeleteTarget(p)}
+                        className="h-7 px-3 rounded-md text-xs text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-1 ring-red-900/50 transition-colors cursor-pointer"
+                      >
+                        削除依頼
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
 
-            {/* テーブル行 */}
-            {projects.map((p, i) => (
-              <div
-                key={p.id}
-                className={`grid grid-cols-[1fr_110px_1.2fr_72px_160px] gap-4 px-4 py-4 items-center bg-[#111111] hover:bg-[#161616] transition-colors ${
-                  i < projects.length - 1 ? 'border-b border-[#3d3d3d]' : ''
-                }`}
-              >
-                <Link
-                  to={`/${uuid}/projects/${p.id}`}
-                  className="text-white text-sm font-medium hover:text-[#4693ff] transition-colors truncate"
-                >
-                  {p.name}
-                </Link>
-                <span className="text-zinc-400 text-sm">{p.prefecture}</span>
-                <span className="text-zinc-400 text-sm truncate">{p.address}</span>
-                <span className="text-zinc-300 text-sm font-medium tabular-nums">
-                  {deviceCount(p.id)}
-                </span>
-                {canEdit ? (
-                  <div className="flex items-center gap-2 justify-end">
-                    <button
-                      onClick={() => { setEditTarget(p); setModalOpen(true); }}
-                      className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
-                    >
-                      編集
-                    </button>
-                    <button
-                      onClick={() => setDeleteTarget(p)}
-                      className="h-7 px-3 rounded-md text-xs text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-1 ring-red-900/50 transition-colors cursor-pointer"
-                    >
-                      削除依頼
-                    </button>
-                  </div>
-                ) : (
-                  <div />
-                )}
+            {/* ── PC: テーブルレイアウト ── */}
+            <div className="hidden sm:block overflow-hidden rounded-lg ring-1 ring-[#3d3d3d]">
+              {/* テーブルヘッダー */}
+              <div className="grid grid-cols-[1fr_110px_1.2fr_72px_160px] gap-4 px-4 py-3 bg-black border-b border-[#3d3d3d] text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                <span>プロジェクト名</span>
+                <span>都道府県</span>
+                <span>住所</span>
+                <span>台数</span>
+                <span />
               </div>
-            ))}
-          </div>
+
+              {/* テーブル行 */}
+              {projects.map((p, i) => (
+                <div
+                  key={p.id}
+                  className={`grid grid-cols-[1fr_110px_1.2fr_72px_160px] gap-4 px-4 py-4 items-center bg-[#111111] hover:bg-[#161616] transition-colors ${
+                    i < projects.length - 1 ? 'border-b border-[#3d3d3d]' : ''
+                  }`}
+                >
+                  <Link
+                    to={`/${uuid}/projects/${p.id}`}
+                    className="text-white text-sm font-medium hover:text-[#4693ff] transition-colors truncate"
+                  >
+                    {p.name}
+                  </Link>
+                  <span className="text-zinc-400 text-sm">{p.prefecture}</span>
+                  <span className="text-zinc-400 text-sm truncate">{p.address}</span>
+                  <span className="text-zinc-300 text-sm font-medium tabular-nums">
+                    {deviceCount(p.id)}
+                  </span>
+                  {canEdit ? (
+                    <div className="flex items-center gap-2 justify-end">
+                      <button
+                        onClick={() => { setEditTarget(p); setModalOpen(true); }}
+                        className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
+                      >
+                        編集
+                      </button>
+                      <button
+                        onClick={() => setDeleteTarget(p)}
+                        className="h-7 px-3 rounded-md text-xs text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-1 ring-red-900/50 transition-colors cursor-pointer"
+                      >
+                        削除依頼
+                      </button>
+                    </div>
+                  ) : (
+                    <div />
+                  )}
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
 
