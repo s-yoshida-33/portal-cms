@@ -446,9 +446,10 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
   const groupNameMap = new Map(groups.map(g => [g.id, g.name]));
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/70" onClick={onClose}>
+      <div className="flex min-h-full items-center justify-center p-4">
       <div
-        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl max-h-[90vh] overflow-y-auto"
+        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl"
         onClick={e => e.stopPropagation()}
       >
         <h2 className="text-white text-lg font-semibold mb-5">
@@ -518,6 +519,7 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
           </div>
         </form>
       </div>
+      </div>
     </div>
   );
 }
@@ -565,9 +567,10 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/70" onClick={onClose}>
+      <div className="flex min-h-full items-center justify-center p-4">
       <div
-        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-sm p-6 shadow-2xl max-h-[90vh] overflow-y-auto"
+        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-sm p-6 shadow-2xl"
         onClick={e => e.stopPropagation()}
       >
         <h2 className="text-white text-lg font-semibold mb-5">
@@ -649,6 +652,7 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
           </div>
         </form>
       </div>
+      </div>
     </div>
   );
 }
@@ -675,7 +679,8 @@ function DeleteConfirm({ name, onClose, onConfirm }: DeleteConfirmProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/70" onClick={onClose}>
+      <div className="flex min-h-full items-center justify-center p-4">
       <div
         className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl"
         onClick={e => e.stopPropagation()}
@@ -695,6 +700,7 @@ function DeleteConfirm({ name, onClose, onConfirm }: DeleteConfirmProps) {
             {sending ? '送信中...' : '依頼を送信'}
           </button>
         </div>
+      </div>
       </div>
     </div>
   );
