@@ -86,8 +86,8 @@ export function ProfileSettings() {
   return (
     <div className="flex flex-col min-w-0 bg-black text-white font-sans min-h-screen">
 
-      {/* ロゴエリアと高さを揃えるスペーサー */}
-      <div className="py-3 border-b border-[#3d3d3d] bg-black">
+      {/* ロゴエリアと高さを揃えるスペーサー（モバイルは非表示） */}
+      <div className="hidden sm:block py-3 border-b border-[#3d3d3d] bg-black">
         <div className="h-7" />
       </div>
 
