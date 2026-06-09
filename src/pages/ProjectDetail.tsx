@@ -827,7 +827,8 @@ export function ProjectDetail() {
 
       {/* ページヘッダー */}
       <div className="py-6 px-4 sm:px-6">
-        <div className="flex items-start gap-2 min-w-0">
+        {/* Mobile: truncated text + 3-dot menu */}
+        <div className="flex items-start gap-2 min-w-0 sm:hidden">
           <div className="flex-1 min-w-0 flex flex-col gap-1">
             <h1 className="text-white text-3xl font-semibold truncate leading-tight">{project.name}</h1>
             <p className="text-[#999999] text-base truncate">{project.address}</p>
@@ -869,6 +870,38 @@ export function ProjectDetail() {
                   </button>
                 </div>
               )}
+            </div>
+          )}
+        </div>
+
+        {/* Desktop: original layout */}
+        <div className="hidden sm:flex items-start justify-between gap-4">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-white text-3xl font-semibold">{project.name}</h1>
+            <p className="text-[#999999] text-base">{project.address}</p>
+          </div>
+          {canEdit && (
+            <div className="flex items-center gap-2 mt-7">
+              <button
+                onClick={() => { setEditGroup(null); setGroupModalOpen(true); }}
+                className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                グループを作成
+              </button>
+              <button
+                onClick={() => { setEditDevice(null); setDeviceModalOpen(true); }}
+                className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#4693ff] hover:bg-[#3a7fe0] transition-colors cursor-pointer"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                デバイスを追加
+              </button>
             </div>
           )}
         </div>
