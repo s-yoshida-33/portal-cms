@@ -459,9 +459,11 @@ export function DeviceDetail() {
 
         {/* ログセクション */}
         <div>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-white font-semibold text-base">ログ</h2>
-            <div className="flex items-center gap-2 flex-wrap justify-end">
+          <div className="mb-3 space-y-2">
+            {/* 1行目: タイトル + レベルフィルター */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="text-white font-semibold text-base">ログ</h2>
+              <div className="w-px h-4 bg-zinc-700" />
               {LOG_LEVELS.map(level => (
                 <button
                   key={level}
@@ -471,7 +473,9 @@ export function DeviceDetail() {
                   {level}
                 </button>
               ))}
-              <div className="w-px h-4 bg-zinc-700 mx-1" />
+            </div>
+            {/* 2行目: 日付 + 更新ボタン（右詰） */}
+            <div className="flex items-center justify-end gap-2">
               <input
                 type="date"
                 value={selectedLogDate}
@@ -491,18 +495,18 @@ export function DeviceDetail() {
           </div>
 
           <div className="bg-[#0a0a0a] ring-1 ring-[#3d3d3d] rounded-xl overflow-hidden">
-            <div ref={logContainerRef} className="h-96 overflow-y-auto p-4 font-mono text-xs leading-5 space-y-0.5">
+            <div ref={logContainerRef} className="h-96 overflow-y-auto overflow-x-auto p-4 font-mono text-xs leading-5 space-y-0.5">
               {filteredLogs.length === 0 ? (
-                <p className="text-zinc-600 text-center py-8">
+                <p className="text-zinc-600 text-center py-8 whitespace-nowrap">
                   {logs.length === 0 ? 'ログがありません。「更新」ボタンを押してログを取得してください。' : '表示対象のログがありません。'}
                 </p>
               ) : (
                 filteredLogs.map(log => (
-                  <div key={log._key} className="flex gap-2 min-w-0">
+                  <div key={log._key} className="flex gap-2 whitespace-nowrap">
                     <span className="shrink-0 text-zinc-600">{log.timestamp}</span>
                     <span className={`shrink-0 w-10 ${logLevelClass(log.level)}`}>{log.level || '----'}</span>
                     {log.tag && <span className="shrink-0 text-zinc-500">[{log.tag}]</span>}
-                    <span className="text-zinc-300 break-all">{log.message}</span>
+                    <span className="text-zinc-300">{log.message}</span>
                   </div>
                 ))
               )}
