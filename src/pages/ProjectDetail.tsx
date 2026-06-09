@@ -689,6 +689,19 @@ export function ProjectDetail() {
   const [deleteGroup,    setDeleteGroup]    = useState<DeviceGroup | null>(null);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
   const [filterApps,     setFilterApps]     = useState<Set<AppName>>(new Set());
+  const [headerMenuOpen, setHeaderMenuOpen] = useState(false);
+  const headerMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!headerMenuOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (headerMenuRef.current && !headerMenuRef.current.contains(e.target as Node)) {
+        setHeaderMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [headerMenuOpen]);
 
   useEffect(() => {
     if (!id) return;
@@ -813,35 +826,52 @@ export function ProjectDetail() {
     <div className="flex flex-col min-h-full">
 
       {/* ページヘッダー */}
-      <div className="flex items-start justify-between gap-4 py-6 px-4 sm:px-6">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-white text-3xl font-semibold">{project.name}</h1>
-          <p className="text-[#999999] text-base">{project.address}</p>
-        </div>
-        {canEdit && (
-          <div className="flex items-center gap-2 mt-7">
-            <button
-              onClick={() => { setEditGroup(null); setGroupModalOpen(true); }}
-              className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-              グループを作成
-            </button>
-            <button
-              onClick={() => { setEditDevice(null); setDeviceModalOpen(true); }}
-              className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#4693ff] hover:bg-[#3a7fe0] transition-colors cursor-pointer"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-              デバイスを追加
-            </button>
+      <div className="py-6 px-4 sm:px-6">
+        <div className="flex items-start gap-2 min-w-0">
+          <div className="flex-1 min-w-0 flex flex-col gap-1">
+            <h1 className="text-white text-3xl font-semibold truncate leading-tight">{project.name}</h1>
+            <p className="text-[#999999] text-base truncate">{project.address}</p>
           </div>
-        )}
+          {canEdit && (
+            <div ref={headerMenuRef} className="relative shrink-0 mt-2">
+              <button
+                onClick={() => setHeaderMenuOpen(o => !o)}
+                className="w-8 h-8 flex items-center justify-center rounded-md text-zinc-400 hover:text-zinc-200 hover:bg-[#2a2a2a] transition-colors cursor-pointer"
+                aria-label="メニュー"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <circle cx="12" cy="5"  r="2" />
+                  <circle cx="12" cy="12" r="2" />
+                  <circle cx="12" cy="19" r="2" />
+                </svg>
+              </button>
+              {headerMenuOpen && (
+                <div className="absolute right-0 top-full mt-1 w-40 bg-[#1a1a1a] ring-1 ring-[#3d3d3d] rounded-lg shadow-xl overflow-hidden z-10">
+                  <button
+                    onClick={() => { setHeaderMenuOpen(false); setEditGroup(null); setGroupModalOpen(true); }}
+                    className="w-full text-left px-4 py-2.5 text-sm text-zinc-300 hover:bg-[#2a2a2a] transition-colors cursor-pointer flex items-center gap-2"
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                    グループを作成
+                  </button>
+                  <button
+                    onClick={() => { setHeaderMenuOpen(false); setEditDevice(null); setDeviceModalOpen(true); }}
+                    className="w-full text-left px-4 py-2.5 text-sm text-white hover:bg-[#2a2a2a] transition-colors cursor-pointer flex items-center gap-2"
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                    デバイスを追加
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* アプリフィルター */}
