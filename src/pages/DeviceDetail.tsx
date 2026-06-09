@@ -6,7 +6,7 @@ import { ref as rtdbRef, onValue } from 'firebase/database';
 import { StatusBadge } from '../components/StatusBadge';
 import type { Device } from '../types';
 
-const STORAGE_BUCKET = 'portal-cms-emk.firebasestorage.app';
+const WORKERS_BASE_URL = 'https://portal-cms-api.tti-ninja.workers.dev';
 
 interface RtdbLogEntry {
   timestamp: string;
@@ -241,10 +241,9 @@ export function DeviceDetail() {
       const idToken = await auth.currentUser?.getIdToken();
       if (!idToken) { setPortalSsState('error'); return; }
 
-      const path = encodeURIComponent(`screenshots/${deviceId}`);
       const res = await fetch(
-        `https://firebasestorage.googleapis.com/v0/b/${STORAGE_BUCKET}/o/${path}?alt=media`,
-        { headers: { Authorization: `Firebase ${idToken}` }, cache: 'no-store' },
+        `${WORKERS_BASE_URL}/v1/screenshot?deviceId=${encodeURIComponent(deviceId)}`,
+        { headers: { Authorization: `Bearer ${idToken}` }, cache: 'no-store' },
       );
       if (!res.ok) throw new Error(`fetch failed (${res.status})`);
 

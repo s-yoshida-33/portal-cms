@@ -183,21 +183,16 @@ function pemToDer(pem: string): ArrayBuffer {
   const binary = atob(b64);
   const buf = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) buf[i] = binary.charCodeAt(i);
-  return buf.buffer;
+  return buf.buffer as ArrayBuffer;
 }
 
-function base64url(data: ArrayBuffer): string {
-  return btoa(String.fromCharCode(...new Uint8Array(data)))
+function base64url(data: ArrayBuffer | Uint8Array): string {
+  const bytes = data instanceof Uint8Array ? data : new Uint8Array(data);
+  return btoa(String.fromCharCode(...bytes))
     .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 }
 
-// Uploads a JPEG to Cloud Storage using a service account JWT.
-// The Firestore screenshotRequests patch must happen AFTER this resolves
-// so Portal always reads a fresh image on the first attempt.
-async function uploadScreenshotToStorage(
-  bucket: string, deviceId: string, data: ArrayBuffer,
-  saEmail: string, saPrivateKey: string,
-): Promise<void> {
+async function getGcsAccessToken(saEmail: string, saPrivateKey: string): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   const enc = (v: unknown) => base64url(new TextEncoder().encode(JSON.stringify(v)));
   const header  = enc({ alg: 'RS256', typ: 'JWT' });
@@ -227,6 +222,17 @@ async function uploadScreenshotToStorage(
   });
   if (!tokenResp.ok) throw new Error(`GCS token exchange failed: ${tokenResp.status}`);
   const { access_token } = await tokenResp.json() as { access_token: string };
+  return access_token;
+}
+
+// Uploads a JPEG to Cloud Storage using a service account JWT.
+// The Firestore screenshotRequests patch must happen AFTER this resolves
+// so Portal always reads a fresh image on the first attempt.
+async function uploadScreenshotToStorage(
+  bucket: string, deviceId: string, data: ArrayBuffer,
+  saEmail: string, saPrivateKey: string,
+): Promise<void> {
+  const access_token = await getGcsAccessToken(saEmail, saPrivateKey);
 
   const uploadResp = await fetch(
     `https://storage.googleapis.com/upload/storage/v1/b/${encodeURIComponent(bucket)}/o` +
@@ -274,6 +280,35 @@ export default {
 
       const status = (ssDoc.fields.status as { stringValue?: string } | undefined)?.stringValue;
       return jsonRes({ pending: status === 'pending' });
+    }
+
+    // ── GET /v1/screenshot?deviceId=xxx ──────────────────────────
+    // Portal fetches screenshot via Workers proxy to avoid CORS restrictions
+    // when reading directly from Firebase Storage.
+    if (req.method === 'GET' && url.pathname === '/v1/screenshot') {
+      const isValid = await verifyFirebaseIdToken(env.FIREBASE_API_KEY, rawToken);
+      if (!isValid) return jsonRes({ error: 'Invalid Firebase token' }, 401);
+
+      const deviceId = url.searchParams.get('deviceId');
+      if (!deviceId) return jsonRes({ error: 'Missing deviceId parameter' }, 400);
+
+      const accessToken = await getGcsAccessToken(env.FIREBASE_SA_EMAIL, env.FIREBASE_SA_PRIVATE_KEY);
+      const imgResp = await fetch(
+        `https://storage.googleapis.com/storage/v1/b/${encodeURIComponent(env.FIREBASE_STORAGE_BUCKET)}/o` +
+        `/${encodeURIComponent(`screenshots/${deviceId}`)}?alt=media`,
+        { headers: { Authorization: `Bearer ${accessToken}` } },
+      );
+      if (!imgResp.ok) {
+        return new Response('Screenshot not found', { status: 404, headers: CORS_HEADERS });
+      }
+
+      return new Response(imgResp.body, {
+        headers: {
+          ...CORS_HEADERS,
+          'Content-Type':  'image/jpeg',
+          'Cache-Control': 'no-store',
+        },
+      });
     }
 
     // ── GET /v1/device?pendingId=xxx ──────────────────────────────
