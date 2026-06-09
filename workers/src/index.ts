@@ -176,7 +176,10 @@ async function resolveDeviceId(fs: Firestore, pendingId: string): Promise<string
 // ── Firebase Storage upload ───────────────────────────────────────────────────
 
 function pemToDer(pem: string): ArrayBuffer {
-  const b64 = pem.replace(/-----[^-]+-----/g, '').replace(/\s/g, '');
+  const b64 = pem
+    .replace(/\\n/g, '\n')          // literal \n (from JSON secrets) → actual newline
+    .replace(/-----[^-]+-----/g, '')
+    .replace(/\s/g, '');
   const binary = atob(b64);
   const buf = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) buf[i] = binary.charCodeAt(i);
