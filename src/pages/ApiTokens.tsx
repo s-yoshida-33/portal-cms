@@ -436,7 +436,7 @@ export function ApiTokens() {
               ) : (
                 <>
                   {/* Mobile cards */}
-                  <div className="sm:hidden space-y-2">
+                  <div className="sm:hidden space-y-4">
                     {activeSlice.map(t => <TokenCard key={t.id} t={t} />)}
                   </div>
                   {/* Desktop table */}
@@ -457,7 +457,7 @@ export function ApiTokens() {
                 <p className="text-sm font-medium text-zinc-400 mb-2">失効済み <span className="text-zinc-600">({revoked.length})</span></p>
                 <>
                   {/* Mobile cards */}
-                  <div className="sm:hidden space-y-2">
+                  <div className="sm:hidden space-y-4">
                     {revokedSlice.map(t => <TokenCard key={t.id} t={t} />)}
                   </div>
                   {/* Desktop table */}
