@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
   fetchProject,
@@ -158,6 +158,7 @@ interface DeviceCardProps {
 }
 
 function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: DeviceCardProps) {
+  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -204,12 +205,10 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
   );
 
   return (
-    <div className="relative bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-5 hover:ring-[#4693ff] transition-colors cursor-pointer">
-      <Link
-        to={`/${uuid}/projects/${projectId}/devices/${device.id}`}
-        className="absolute inset-0 rounded-xl"
-        aria-label={device.name}
-      />
+    <div
+      className="relative bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-5 hover:ring-[#4693ff] transition-colors cursor-pointer"
+      onClick={() => navigate(`/${uuid}/projects/${projectId}/devices/${device.id}`)}
+    >
 
       {/* Mobile layout */}
       <div className="sm:hidden">
@@ -441,7 +440,7 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
   const groupNameMap = new Map(groups.map(g => [g.id, g.name]));
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4" onClick={onClose}>
       <div
         className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl max-h-[90vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}
@@ -560,7 +559,7 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4" onClick={onClose}>
       <div
         className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-sm p-6 shadow-2xl"
         onClick={e => e.stopPropagation()}
@@ -673,7 +672,7 @@ function DeleteConfirm({ name, onClose, onConfirm }: DeleteConfirmProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4" onClick={onClose}>
       <div
         className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl"
         onClick={e => e.stopPropagation()}
