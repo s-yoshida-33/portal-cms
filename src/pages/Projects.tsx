@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
@@ -146,6 +146,23 @@ export function Projects() {
   const [modalOpen,    setModalOpen]    = useState(false);
   const [editTarget,   setEditTarget]   = useState<ProjectDoc | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<ProjectDoc | null>(null);
+  const [headerMenuOpen, setHeaderMenuOpen] = useState(false);
+  const headerMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!headerMenuOpen) return;
+    function handleOutside(e: MouseEvent | TouchEvent) {
+      if (headerMenuRef.current && !headerMenuRef.current.contains(e.target as Node)) {
+        setHeaderMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleOutside);
+    document.addEventListener('touchstart', handleOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleOutside);
+      document.removeEventListener('touchstart', handleOutside);
+    };
+  }, [headerMenuOpen]);
 
   useEffect(() => {
     let cancelled = false;
@@ -183,23 +200,63 @@ export function Projects() {
     <div className="flex flex-col min-h-full">
 
       {/* ページヘッダー */}
-      <div className="flex items-center justify-between gap-4 py-6 px-4 sm:px-6">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-white text-3xl font-semibold">プロジェクト管理</h1>
-          <p className="text-[#999999] text-base">登録プロジェクトの確認・追加・編集</p>
+      <div className="py-6 px-4 sm:px-6">
+        {/* Mobile: タイトル + 3点メニュー */}
+        <div className="flex items-start gap-2 min-w-0 sm:hidden">
+          <div className="flex-1 min-w-0 flex flex-col gap-1">
+            <h1 className="text-white text-3xl font-semibold leading-tight">プロジェクト管理</h1>
+            <p className="text-[#999999] text-base">登録プロジェクトの確認・追加・編集</p>
+          </div>
+          {canEdit && (
+            <div ref={headerMenuRef} className="relative shrink-0 mt-2">
+              <button
+                onClick={() => setHeaderMenuOpen(o => !o)}
+                className="w-8 h-8 flex items-center justify-center rounded-md text-zinc-400 hover:text-zinc-200 hover:bg-[#2a2a2a] transition-colors cursor-pointer"
+                aria-label="メニュー"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <circle cx="12" cy="5"  r="2" />
+                  <circle cx="12" cy="12" r="2" />
+                  <circle cx="12" cy="19" r="2" />
+                </svg>
+              </button>
+              {headerMenuOpen && (
+                <div className="absolute right-0 top-full mt-1 w-44 bg-[#1a1a1a] ring-1 ring-[#3d3d3d] rounded-lg shadow-xl overflow-hidden z-10">
+                  <button
+                    onClick={() => { setHeaderMenuOpen(false); setEditTarget(null); setModalOpen(true); }}
+                    className="w-full text-left px-4 py-2.5 text-sm text-white hover:bg-[#2a2a2a] transition-colors cursor-pointer flex items-center gap-2"
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                    プロジェクトを追加
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
-        {canEdit && (
-          <button
-            onClick={() => { setEditTarget(null); setModalOpen(true); }}
-            className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#4693ff] hover:bg-[#3a7fe0] transition-colors cursor-pointer"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-            プロジェクトを追加
-          </button>
-        )}
+
+        {/* Desktop: タイトル + CTAボタン */}
+        <div className="hidden sm:flex items-start justify-between gap-4">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-white text-3xl font-semibold">プロジェクト管理</h1>
+            <p className="text-[#999999] text-base">登録プロジェクトの確認・追加・編集</p>
+          </div>
+          {canEdit && (
+            <button
+              onClick={() => { setEditTarget(null); setModalOpen(true); }}
+              className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#4693ff] hover:bg-[#3a7fe0] transition-colors cursor-pointer mt-1"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              プロジェクトを追加
+            </button>
+          )}
+        </div>
       </div>
 
       {/* コンテンツ */}
@@ -225,15 +282,18 @@ export function Projects() {
             {/* ── スマホ: カードレイアウト ── */}
             <div className="sm:hidden space-y-2">
               {projects.map((p) => (
-                <div key={p.id} className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl px-4 py-4">
+                <div key={p.id} className="relative bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl px-4 py-4">
+                  {/* カード全体のタップ領域 */}
+                  <Link
+                    to={`/${uuid}/projects/${p.id}`}
+                    className="absolute inset-0 rounded-xl"
+                    aria-label={p.name}
+                  />
                   <div className="flex items-start justify-between gap-3 mb-1.5">
-                    <Link
-                      to={`/${uuid}/projects/${p.id}`}
-                      className="text-white text-sm font-semibold hover:text-[#4693ff] transition-colors leading-snug"
-                    >
+                    <span className="text-white text-sm font-semibold leading-snug">
                       {p.name}
-                    </Link>
-                    <span className="shrink-0 text-xs font-medium text-zinc-300 bg-zinc-800 ring-1 ring-zinc-700 rounded-md px-2 py-0.5 tabular-nums">
+                    </span>
+                    <span className="relative z-10 shrink-0 text-xs font-medium text-zinc-300 bg-zinc-800 ring-1 ring-zinc-700 rounded-md px-2 py-0.5 tabular-nums">
                       {deviceCount(p.id)}台
                     </span>
                   </div>
@@ -241,7 +301,7 @@ export function Projects() {
                     {p.prefecture}　{p.address}
                   </p>
                   {canEdit && (
-                    <div className="flex gap-2">
+                    <div className="relative z-10 flex gap-2">
                       <button
                         onClick={() => { setEditTarget(p); setModalOpen(true); }}
                         className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
