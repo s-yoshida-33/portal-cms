@@ -448,14 +448,14 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div
-        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md shadow-2xl max-h-[calc(100dvh-2rem)] flex flex-col overflow-hidden"
+        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md shadow-2xl max-h-[calc(100dvh-2rem)] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
-        <h2 className="text-white text-lg font-semibold shrink-0 px-6 pt-6 pb-5">
+        <h2 className="text-white text-lg font-semibold px-6 pt-6 pb-5">
           {initial ? 'グループを編集' : 'グループを作成'}
         </h2>
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
-          <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-4">
+        <form onSubmit={handleSubmit}>
+          <div className="px-6 pb-6 space-y-4">
             <div>
               <label className="block text-sm text-zinc-400 mb-1.5">グループ名</label>
               <input
@@ -508,7 +508,7 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
             </div>
             {error && <p className="text-red-400 text-sm">{error}</p>}
           </div>
-          <div className="shrink-0 flex justify-end gap-2 px-6 py-4 border-t border-[#2a2a2a]">
+          <div className="sticky bottom-0 bg-[#111111] flex justify-end gap-2 px-6 py-4 border-t border-[#2a2a2a]">
             <button type="button" onClick={onClose}
               className="h-9 px-4 rounded-lg text-sm text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
               キャンセル
@@ -569,14 +569,14 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div
-        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-sm shadow-2xl max-h-[calc(100dvh-2rem)] flex flex-col overflow-hidden"
+        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-sm shadow-2xl max-h-[calc(100dvh-2rem)] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
-        <h2 className="text-white text-lg font-semibold shrink-0 px-6 pt-6 pb-5">
+        <h2 className="text-white text-lg font-semibold px-6 pt-6 pb-5">
           {initial ? 'デバイスを編集' : 'デバイスを追加'}
         </h2>
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
-          <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-4">
+        <form onSubmit={handleSubmit}>
+          <div className="px-6 pb-6 space-y-4">
             {initial && projects.length > 1 && (
               <div>
                 <label className="block text-sm text-zinc-400 mb-1.5">プロジェクト</label>
@@ -639,9 +639,9 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
                 />
               </div>
             )}
-            {error && <p className="text-red-400 text-sm pb-1">{error}</p>}
+            {error && <p className="text-red-400 text-sm">{error}</p>}
           </div>
-          <div className="shrink-0 flex justify-end gap-2 px-6 py-4 border-t border-[#2a2a2a]">
+          <div className="sticky bottom-0 bg-[#111111] flex justify-end gap-2 px-6 py-4 border-t border-[#2a2a2a]">
             <button type="button" onClick={onClose}
               className="h-9 px-4 rounded-lg text-sm text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
               キャンセル
