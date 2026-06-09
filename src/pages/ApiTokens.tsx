@@ -6,6 +6,8 @@ import { CustomSelect } from '../components/CustomSelect';
 
 // ── helpers ──────────────────────────────────────────────────────
 
+const PAGE_SIZE = 20;
+
 const typeLabel: Record<ApiTokenType, string> = {
   registration: '登録用',
   device:       'デバイス用',
@@ -22,6 +24,38 @@ function formatDate(iso: string | null) {
     year: 'numeric', month: 'numeric', day: 'numeric',
     hour: '2-digit', minute: '2-digit',
   });
+}
+
+// ── ページネーション ───────────────────────────────────────────────
+
+function Pagination({ page, total, onPage }: { page: number; total: number; onPage: (p: number) => void }) {
+  const pages = Math.ceil(total / PAGE_SIZE);
+  if (pages <= 1) return null;
+  return (
+    <div className="flex items-center justify-center gap-3 pt-3">
+      <button
+        onClick={() => onPage(page - 1)}
+        disabled={page === 1}
+        className="h-7 w-7 flex items-center justify-center rounded-md text-zinc-400 hover:text-white hover:bg-[#2a2a2a] disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+        aria-label="前のページ"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+      </button>
+      <span className="text-xs text-zinc-500 tabular-nums">{page} / {pages}</span>
+      <button
+        onClick={() => onPage(page + 1)}
+        disabled={page === pages}
+        className="h-7 w-7 flex items-center justify-center rounded-md text-zinc-400 hover:text-white hover:bg-[#2a2a2a] disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+        aria-label="次のページ"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="9 18 15 12 9 6" />
+        </svg>
+      </button>
+    </div>
+  );
 }
 
 // ── トークン発行モーダル ──────────────────────────────────────────
@@ -179,16 +213,23 @@ function RevokeConfirm({ token, onClose, onConfirm }: RevokeConfirmProps) {
 
 export function ApiTokens() {
   const { role } = useAuth();
-  const [tokens,        setTokens]        = useState<ApiToken[]>([]);
-  const [loading,       setLoading]       = useState(true);
-  const [createOpen,    setCreateOpen]    = useState(false);
-  const [revealToken,   setRevealToken]   = useState<string | null>(null);
-  const [revokeTarget,  setRevokeTarget]  = useState<ApiToken | null>(null);
+  const [tokens,         setTokens]         = useState<ApiToken[]>([]);
+  const [loading,        setLoading]        = useState(true);
+  const [createOpen,     setCreateOpen]     = useState(false);
+  const [revealToken,    setRevealToken]    = useState<string | null>(null);
+  const [revokeTarget,   setRevokeTarget]   = useState<ApiToken | null>(null);
   const [headerMenuOpen, setHeaderMenuOpen] = useState(false);
+  const [activePage,     setActivePage]     = useState(1);
+  const [revokedPage,    setRevokedPage]    = useState(1);
   const headerMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const unsub = subscribeApiTokens(ts => { setTokens(ts); setLoading(false); });
+    const unsub = subscribeApiTokens(ts => {
+      setTokens(ts);
+      setLoading(false);
+      setActivePage(1);
+      setRevokedPage(1);
+    });
     return unsub;
   }, []);
 
@@ -217,6 +258,42 @@ export function ApiTokens() {
   const active  = tokens.filter(t => !t.revokedAt);
   const revoked = tokens.filter(t =>  t.revokedAt);
 
+  const activeSlice  = active.slice((activePage  - 1) * PAGE_SIZE, activePage  * PAGE_SIZE);
+  const revokedSlice = revoked.slice((revokedPage - 1) * PAGE_SIZE, revokedPage * PAGE_SIZE);
+
+  // ── モバイルカード ────────────────────────────────────────────────
+  function TokenCard({ t }: { t: ApiToken }) {
+    const isRevoked = !!t.revokedAt;
+    return (
+      <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl px-4 py-4">
+        <div className="flex items-start justify-between gap-3 mb-2">
+          <span className={`text-sm font-semibold leading-snug truncate flex-1 ${isRevoked ? 'text-zinc-500 line-through' : 'text-white'}`}>
+            {t.name}
+          </span>
+          <span className={`shrink-0 inline-flex items-center h-5 px-2 rounded-full text-xs font-medium ${typeBadge[t.type]}`}>
+            {typeLabel[t.type]}
+          </span>
+        </div>
+        <div className="space-y-0.5 mb-3">
+          <p className="text-zinc-500 text-xs">発行: {formatDate(t.createdAt)}</p>
+          <p className="text-zinc-500 text-xs">最終使用: {formatDate(t.lastUsedAt)}</p>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className={`text-xs font-medium ${isRevoked ? 'text-zinc-600' : 'text-green-400'}`}>
+            {isRevoked ? '失効済み' : '有効'}
+          </span>
+          {!isRevoked && (
+            <button onClick={() => setRevokeTarget(t)}
+              className="h-7 px-3 rounded-md text-xs text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-1 ring-red-900/50 transition-colors cursor-pointer">
+              失効
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // ── デスクトップ行 ─────────────────────────────────────────────────
   function TokenRow({ t }: { t: ApiToken }) {
     const isRevoked = !!t.revokedAt;
     return (
@@ -318,12 +395,20 @@ export function ApiTokens() {
                   <p className="text-zinc-500 text-sm">有効なトークンがありません。</p>
                 </div>
               ) : (
-                <div className="overflow-hidden rounded-lg ring-1 ring-[#3d3d3d]">
-                  <div className="grid grid-cols-[1fr_90px_160px_160px_100px_80px] gap-4 px-4 py-3 bg-black border-b border-[#3d3d3d] text-xs font-medium text-zinc-500 uppercase tracking-wider">
-                    <span>名前</span><span>種別</span><span>発行日時</span><span>最終使用</span><span>状態</span><span />
+                <>
+                  {/* Mobile cards */}
+                  <div className="sm:hidden space-y-2">
+                    {activeSlice.map(t => <TokenCard key={t.id} t={t} />)}
                   </div>
-                  {active.map(t => <TokenRow key={t.id} t={t} />)}
-                </div>
+                  {/* Desktop table */}
+                  <div className="hidden sm:block overflow-hidden rounded-lg ring-1 ring-[#3d3d3d]">
+                    <div className="grid grid-cols-[1fr_90px_160px_160px_100px_80px] gap-4 px-4 py-3 bg-black border-b border-[#3d3d3d] text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                      <span>名前</span><span>種別</span><span>発行日時</span><span>最終使用</span><span>状態</span><span />
+                    </div>
+                    {activeSlice.map(t => <TokenRow key={t.id} t={t} />)}
+                  </div>
+                  <Pagination page={activePage} total={active.length} onPage={setActivePage} />
+                </>
               )}
             </div>
 
@@ -331,12 +416,20 @@ export function ApiTokens() {
             {revoked.length > 0 && (
               <div>
                 <p className="text-sm font-medium text-zinc-400 mb-2">失効済み <span className="text-zinc-600">({revoked.length})</span></p>
-                <div className="overflow-hidden rounded-lg ring-1 ring-[#3d3d3d]">
-                  <div className="grid grid-cols-[1fr_90px_160px_160px_100px_80px] gap-4 px-4 py-3 bg-black border-b border-[#3d3d3d] text-xs font-medium text-zinc-500 uppercase tracking-wider">
-                    <span>名前</span><span>種別</span><span>発行日時</span><span>最終使用</span><span>状態</span><span />
+                <>
+                  {/* Mobile cards */}
+                  <div className="sm:hidden space-y-2">
+                    {revokedSlice.map(t => <TokenCard key={t.id} t={t} />)}
                   </div>
-                  {revoked.map(t => <TokenRow key={t.id} t={t} />)}
-                </div>
+                  {/* Desktop table */}
+                  <div className="hidden sm:block overflow-hidden rounded-lg ring-1 ring-[#3d3d3d]">
+                    <div className="grid grid-cols-[1fr_90px_160px_160px_100px_80px] gap-4 px-4 py-3 bg-black border-b border-[#3d3d3d] text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                      <span>名前</span><span>種別</span><span>発行日時</span><span>最終使用</span><span>状態</span><span />
+                    </div>
+                    {revokedSlice.map(t => <TokenRow key={t.id} t={t} />)}
+                  </div>
+                  <Pagination page={revokedPage} total={revoked.length} onPage={setRevokedPage} />
+                </>
               </div>
             )}
           </>
