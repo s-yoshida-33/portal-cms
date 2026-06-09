@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { subscribeApiTokens, createApiToken, revokeApiToken } from '../lib/firestore';
 import type { ApiToken, ApiTokenType } from '../types';
@@ -184,10 +184,22 @@ export function ApiTokens() {
   const [createOpen,    setCreateOpen]    = useState(false);
   const [revealToken,   setRevealToken]   = useState<string | null>(null);
   const [revokeTarget,  setRevokeTarget]  = useState<ApiToken | null>(null);
+  const [headerMenuOpen, setHeaderMenuOpen] = useState(false);
+  const headerMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const unsub = subscribeApiTokens(ts => { setTokens(ts); setLoading(false); });
     return unsub;
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (headerMenuRef.current && !headerMenuRef.current.contains(e.target as Node)) {
+        setHeaderMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const canEdit = role === 'admin' || role === 'owner';
@@ -235,21 +247,60 @@ export function ApiTokens() {
   return (
     <div className="flex flex-col min-h-full">
 
-      <div className="flex items-center justify-between gap-4 py-6 px-4 sm:px-6">
+      {/* Mobile header */}
+      <div className="flex items-start gap-2 min-w-0 py-6 px-4 sm:hidden">
+        <div className="flex-1 min-w-0 flex flex-col gap-1">
+          <h1 className="text-white text-3xl font-semibold leading-tight">API トークン</h1>
+          <p className="text-[#999999] text-base">デバイス認証用トークンの発行・管理</p>
+        </div>
+        {canEdit && (
+          <div ref={headerMenuRef} className="relative shrink-0 mt-2">
+            <button
+              onClick={() => setHeaderMenuOpen(o => !o)}
+              className="w-8 h-8 flex items-center justify-center rounded-md text-zinc-400 hover:text-zinc-200 hover:bg-[#2a2a2a] transition-colors cursor-pointer"
+              aria-label="メニュー"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="12" cy="5" r="2" />
+                <circle cx="12" cy="12" r="2" />
+                <circle cx="12" cy="19" r="2" />
+              </svg>
+            </button>
+            {headerMenuOpen && (
+              <div className="absolute right-0 top-full mt-1 w-44 bg-[#1a1a1a] ring-1 ring-[#3d3d3d] rounded-lg shadow-xl overflow-hidden z-10">
+                <button
+                  onClick={() => { setHeaderMenuOpen(false); setCreateOpen(true); }}
+                  className="w-full text-left px-4 py-2.5 text-sm text-white hover:bg-[#2a2a2a] transition-colors cursor-pointer flex items-center gap-2"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                  トークンを発行
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Desktop header */}
+      <div className="hidden sm:flex items-start justify-between gap-4 py-6 px-6">
         <div className="flex flex-col gap-2">
           <h1 className="text-white text-3xl font-semibold">API トークン</h1>
           <p className="text-[#999999] text-base">デバイス認証用トークンの発行・管理</p>
         </div>
-        <button
-          onClick={() => setCreateOpen(true)}
-          className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#4693ff] hover:bg-[#3a7fe0] transition-colors cursor-pointer"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-          トークンを発行
-        </button>
+        {canEdit && (
+          <button
+            onClick={() => setCreateOpen(true)}
+            className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#4693ff] hover:bg-[#3a7fe0] transition-colors cursor-pointer"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            トークンを発行
+          </button>
+        )}
       </div>
 
       <div className="px-4 sm:px-6 pt-8 pb-8 space-y-6">
