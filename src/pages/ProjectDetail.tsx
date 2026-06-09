@@ -176,7 +176,7 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
   const menu = canEdit && (
     <div ref={menuRef} className="relative z-10 shrink-0">
       <button
-        onPointerDown={e => e.stopPropagation()}
+        onTouchEnd={e => { e.preventDefault(); e.stopPropagation(); setMenuOpen(o => !o); }}
         onClick={e => { e.stopPropagation(); setMenuOpen(o => !o); }}
         className="w-7 h-7 flex items-center justify-center rounded-md text-zinc-400 hover:text-zinc-200 hover:bg-[#2a2a2a] transition-colors cursor-pointer"
       >
@@ -189,14 +189,14 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
       {menuOpen && (
         <div className="absolute right-0 top-full mt-1 w-32 bg-[#1a1a1a] ring-1 ring-[#3d3d3d] rounded-lg shadow-xl overflow-hidden">
           <button
-            onPointerDown={e => e.stopPropagation()}
+            onTouchEnd={e => { e.preventDefault(); e.stopPropagation(); setMenuOpen(false); onEdit(device); }}
             onClick={e => { e.stopPropagation(); setMenuOpen(false); onEdit(device); }}
             className="w-full text-left px-3 py-2 text-sm text-zinc-300 hover:bg-[#2a2a2a] transition-colors cursor-pointer"
           >
             編集
           </button>
           <button
-            onPointerDown={e => e.stopPropagation()}
+            onTouchEnd={e => { e.preventDefault(); e.stopPropagation(); setMenuOpen(false); onDelete(device); }}
             onClick={e => { e.stopPropagation(); setMenuOpen(false); onDelete(device); }}
             className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-950/40 transition-colors cursor-pointer"
           >
