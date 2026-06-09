@@ -455,7 +455,7 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
           {initial ? 'グループを編集' : 'グループを作成'}
         </h2>
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
-          <div className="flex-1 overflow-y-auto px-6 space-y-4">
+          <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-4">
             <div>
               <label className="block text-sm text-zinc-400 mb-1.5">グループ名</label>
               <input
@@ -576,7 +576,7 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
           {initial ? 'デバイスを編集' : 'デバイスを追加'}
         </h2>
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
-          <div className="flex-1 overflow-y-auto px-6 space-y-4">
+          <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-4">
             {initial && projects.length > 1 && (
               <div>
                 <label className="block text-sm text-zinc-400 mb-1.5">プロジェクト</label>
