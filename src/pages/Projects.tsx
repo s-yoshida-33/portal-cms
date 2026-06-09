@@ -280,7 +280,7 @@ export function Projects() {
         ) : (
           <>
             {/* ── スマホ: カードレイアウト ── */}
-            <div className="sm:hidden space-y-2">
+            <div className="sm:hidden space-y-4">
               {projects.map((p) => (
                 <div key={p.id} className="relative bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl px-4 py-4">
                   {/* カード全体のタップ領域 */}
