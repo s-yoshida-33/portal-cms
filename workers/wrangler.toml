@@ -4,12 +4,12 @@ compatibility_date = "2025-01-01"
 account_id      = "68949cf64c159f36911a7ebed666be12"
 
 [vars]
-FIREBASE_PROJECT_ID = "portal-cms-emk"
-FIREBASE_API_KEY    = "AIzaSyCPyLBMiApOUs3L2K3SVPeF_Z9Klh5jp94"
-
-[[kv_namespaces]]
-binding = "SCREENSHOTS"
-id      = "d47db8794e8c4427847cf15147e8fcf5"
+FIREBASE_PROJECT_ID     = "portal-cms-emk"
+FIREBASE_API_KEY        = "AIzaSyCPyLBMiApOUs3L2K3SVPeF_Z9Klh5jp94"
+FIREBASE_STORAGE_BUCKET = "portal-cms-emk.firebasestorage.app"
+# FIREBASE_SA_EMAIL and FIREBASE_SA_PRIVATE_KEY are stored as secrets:
+#   wrangler secret put FIREBASE_SA_EMAIL
+#   wrangler secret put FIREBASE_SA_PRIVATE_KEY
 
 [[kv_namespaces]]
 binding = "PORTAL_CACHE"
@@ -18,9 +18,8 @@ id      = "54eb4761d1e54988ab484976991850c4"
 # エンドポイント一覧:
 #   GET  /v1/device?pendingId=xxx          承認済みデバイスの deviceId + deviceToken を取得 (registrationToken 認証)
 #   GET  /v1/screenshot/pending?pendingId= スクリーンショット撮影リクエスト確認 (registrationToken 認証)
-#   GET  /v1/screenshot/{deviceId}         スクリーンショット取得 (Firebase ID token 認証)
 #   POST /v1/register                      デバイス登録申請 (registrationToken 認証)
 #   POST /v1/heartbeat                     一括ステータス報告 + スクリーンショット命令応答 (deviceToken 認証)
 #   POST /v1/status                        ステータス報告 旧形式・後方互換 (registrationToken 認証)
 #   POST /v1/logs                          WARN/ERROR ログ送信 (deviceToken または registrationToken 認証)
-#   POST /v1/screenshot                    スクリーンショット送信 (deviceToken または registrationToken 認証)
+#   POST /v1/screenshot                    スクリーンショット送信 → Firebase Storage保存 (deviceToken または registrationToken 認証)

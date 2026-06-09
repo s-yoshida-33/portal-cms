@@ -1,8 +1,10 @@
 export interface Env {
-  FIREBASE_API_KEY:    string;
-  FIREBASE_PROJECT_ID: string;
-  SCREENSHOTS:         KVNamespace;
-  PORTAL_CACHE?:       KVNamespace; // optional — token caching disabled when not bound
+  FIREBASE_API_KEY:        string;
+  FIREBASE_PROJECT_ID:     string;
+  FIREBASE_STORAGE_BUCKET: string;   // e.g. portal-cms-emk.firebasestorage.app
+  FIREBASE_SA_EMAIL:       string;   // service account email (secret)
+  FIREBASE_SA_PRIVATE_KEY: string;   // service account private key PEM (secret)
+  PORTAL_CACHE?:           KVNamespace; // optional — token caching disabled when not bound
 }
 
 // ── CORS ──────────────────────────────────────────────────────────────────────
@@ -171,6 +173,70 @@ async function resolveDeviceId(fs: Firestore, pendingId: string): Promise<string
   return (doc.fields.deviceId as { stringValue?: string } | undefined)?.stringValue ?? null;
 }
 
+// ── Firebase Storage upload ───────────────────────────────────────────────────
+
+function pemToDer(pem: string): ArrayBuffer {
+  const b64 = pem.replace(/-----[^-]+-----/g, '').replace(/\s/g, '');
+  const binary = atob(b64);
+  const buf = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) buf[i] = binary.charCodeAt(i);
+  return buf.buffer;
+}
+
+function base64url(data: ArrayBuffer): string {
+  return btoa(String.fromCharCode(...new Uint8Array(data)))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+
+// Uploads a JPEG to Cloud Storage using a service account JWT.
+// The Firestore screenshotRequests patch must happen AFTER this resolves
+// so Portal always reads a fresh image on the first attempt.
+async function uploadScreenshotToStorage(
+  bucket: string, deviceId: string, data: ArrayBuffer,
+  saEmail: string, saPrivateKey: string,
+): Promise<void> {
+  const now = Math.floor(Date.now() / 1000);
+  const enc = (v: unknown) => base64url(new TextEncoder().encode(JSON.stringify(v)));
+  const header  = enc({ alg: 'RS256', typ: 'JWT' });
+  const payload = enc({
+    iss:   saEmail,
+    scope: 'https://www.googleapis.com/auth/devstorage.read_write',
+    aud:   'https://oauth2.googleapis.com/token',
+    exp:   now + 3600,
+    iat:   now,
+  });
+  const toSign = `${header}.${payload}`;
+
+  const key = await crypto.subtle.importKey(
+    'pkcs8', pemToDer(saPrivateKey),
+    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['sign'],
+  );
+  const sig = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, new TextEncoder().encode(toSign));
+  const jwt = `${toSign}.${base64url(sig)}`;
+
+  const tokenResp = await fetch('https://oauth2.googleapis.com/token', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body:    new URLSearchParams({
+      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+      assertion:  jwt,
+    }),
+  });
+  if (!tokenResp.ok) throw new Error(`GCS token exchange failed: ${tokenResp.status}`);
+  const { access_token } = await tokenResp.json() as { access_token: string };
+
+  const uploadResp = await fetch(
+    `https://storage.googleapis.com/upload/storage/v1/b/${encodeURIComponent(bucket)}/o` +
+    `?uploadType=media&name=${encodeURIComponent(`screenshots/${deviceId}`)}`,
+    {
+      method:  'POST',
+      headers: { 'Authorization': `Bearer ${access_token}`, 'Content-Type': 'image/jpeg' },
+      body:    data,
+    },
+  );
+  if (!uploadResp.ok) throw new Error(`GCS upload failed: ${uploadResp.status}`);
+}
+
 // ── Worker entry point ────────────────────────────────────────────────────────
 
 export default {
@@ -205,31 +271,6 @@ export default {
 
       const status = (ssDoc.fields.status as { stringValue?: string } | undefined)?.stringValue;
       return jsonRes({ pending: status === 'pending' });
-    }
-
-    // ── GET /v1/screenshot/{deviceId} ─────────────────────────────
-    if (req.method === 'GET' && url.pathname.startsWith('/v1/screenshot/')) {
-      const isValid = await verifyFirebaseIdToken(env.FIREBASE_API_KEY, rawToken);
-      if (!isValid) return jsonRes({ error: 'Invalid Firebase token' }, 401);
-
-      const parts    = url.pathname.split('/').filter(Boolean);
-      const deviceId = parts[2];
-      if (!deviceId) return jsonRes({ error: 'Missing deviceId in path' }, 400);
-
-      const { value: imgBytes, metadata } = await env.SCREENSHOTS.getWithMetadata<{ capturedAt: string }>(deviceId, 'arrayBuffer');
-      if (!imgBytes) {
-        return new Response('Screenshot not found', { status: 404, headers: CORS_HEADERS });
-      }
-
-      return new Response(imgBytes, {
-        headers: {
-          ...CORS_HEADERS,
-          'Access-Control-Expose-Headers': 'X-Captured-At',
-          'Content-Type':  'image/jpeg',
-          'Cache-Control': 'no-store',
-          ...(metadata?.capturedAt ? { 'X-Captured-At': metadata.capturedAt } : {}),
-        },
-      });
     }
 
     // ── GET /v1/device?pendingId=xxx ──────────────────────────────
@@ -489,14 +530,14 @@ export default {
         return jsonRes({ error: 'Image too large (max 25 MB)' }, 400);
       }
 
-      await env.SCREENSHOTS.put(deviceId, imgBytes, {
-        metadata: { capturedAt: new Date().toISOString() },
-      });
+      // Upload to Firebase Storage first — strong read-after-write consistency
+      // guarantees Portal sees the fresh image on the very first fetch.
+      // Firestore is patched only after upload completes to preserve ordering.
+      await uploadScreenshotToStorage(
+        env.FIREBASE_STORAGE_BUCKET, deviceId, imgBytes,
+        env.FIREBASE_SA_EMAIL, env.FIREBASE_SA_PRIVATE_KEY,
+      );
 
-      // Clear screenshotRequested flag and mark screenshotRequests as completed.
-      // Always patch directly — Firestore PATCH creates the doc if absent, so no
-      // conditional GET needed. The old if(ssDoc) guard caused the completedAt
-      // update to be silently skipped on transient Firestore read failures.
       await Promise.allSettled([
         fs.patch('devices', deviceId, { screenshotRequested: false }),
         fs.patch('screenshotRequests', deviceId, {
