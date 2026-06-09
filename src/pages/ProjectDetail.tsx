@@ -172,6 +172,37 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
     return () => document.removeEventListener('mousedown', handleClick);
   }, [menuOpen]);
 
+  const menu = canEdit && (
+    <div ref={menuRef} className="relative z-10 shrink-0">
+      <button
+        onClick={e => { e.preventDefault(); setMenuOpen(o => !o); }}
+        className="w-7 h-7 flex items-center justify-center rounded-md text-zinc-400 hover:text-zinc-200 hover:bg-[#2a2a2a] transition-colors cursor-pointer"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+          <circle cx="12" cy="5"  r="2" />
+          <circle cx="12" cy="12" r="2" />
+          <circle cx="12" cy="19" r="2" />
+        </svg>
+      </button>
+      {menuOpen && (
+        <div className="absolute right-0 top-full mt-1 w-32 bg-[#1a1a1a] ring-1 ring-[#3d3d3d] rounded-lg shadow-xl overflow-hidden">
+          <button
+            onClick={e => { e.preventDefault(); setMenuOpen(false); onEdit(device); }}
+            className="w-full text-left px-3 py-2 text-sm text-zinc-300 hover:bg-[#2a2a2a] transition-colors cursor-pointer"
+          >
+            編集
+          </button>
+          <button
+            onClick={e => { e.preventDefault(); setMenuOpen(false); onDelete(device); }}
+            className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-950/40 transition-colors cursor-pointer"
+          >
+            削除依頼
+          </button>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="relative bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-5 hover:ring-[#4693ff] transition-colors cursor-pointer">
       <Link
@@ -179,7 +210,30 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
         className="absolute inset-0 rounded-xl"
         aria-label={device.name}
       />
-      <div className="flex items-center justify-between mb-5">
+
+      {/* Mobile header: no status, 3-row right section */}
+      <div className="flex items-start justify-between mb-4 sm:hidden">
+        <div className="min-w-0 mr-3">
+          <p className="font-medium text-zinc-100 text-sm truncate">{device.name}</p>
+          <p className="text-xs text-zinc-500 font-mono mt-0.5">{device.ip}</p>
+        </div>
+        <div className="flex items-start gap-2 shrink-0">
+          <div className="text-right">
+            <div className="flex items-center justify-end gap-1">
+              <AppBadge app={device.app} />
+              <span className="text-zinc-500 text-xs">v{device.appVersion}</span>
+            </div>
+            <p className="text-xs text-zinc-600 mt-1">最終確認: {formatLastSeen(device.lastSeen)}</p>
+            <p className="text-xs text-zinc-400 mt-1 font-mono">
+              <UptimeClock uptimeSecs={device.system.uptime} lastSeen={device.lastSeen} status={device.status} />
+            </p>
+          </div>
+          {menu}
+        </div>
+      </div>
+
+      {/* Desktop header: original layout */}
+      <div className="hidden sm:flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
           <div>
             <p className="font-medium text-zinc-100 text-sm">{device.name}</p>
@@ -195,40 +249,20 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
             </div>
             <p className="text-xs text-zinc-600 mt-0.5">最終確認: {formatLastSeen(device.lastSeen)}</p>
           </div>
-          {canEdit && (
-            <div ref={menuRef} className="relative z-10 ml-2">
-              <button
-                onClick={e => { e.preventDefault(); setMenuOpen(o => !o); }}
-                className="w-7 h-7 flex items-center justify-center rounded-md text-zinc-400 hover:text-zinc-200 hover:bg-[#2a2a2a] transition-colors cursor-pointer"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                  <circle cx="12" cy="5"  r="2" />
-                  <circle cx="12" cy="12" r="2" />
-                  <circle cx="12" cy="19" r="2" />
-                </svg>
-              </button>
-              {menuOpen && (
-                <div className="absolute right-0 top-full mt-1 w-32 bg-[#1a1a1a] ring-1 ring-[#3d3d3d] rounded-lg shadow-xl overflow-hidden">
-                  <button
-                    onClick={e => { e.preventDefault(); setMenuOpen(false); onEdit(device); }}
-                    className="w-full text-left px-3 py-2 text-sm text-zinc-300 hover:bg-[#2a2a2a] transition-colors cursor-pointer"
-                  >
-                    編集
-                  </button>
-                  <button
-                    onClick={e => { e.preventDefault(); setMenuOpen(false); onDelete(device); }}
-                    className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-950/40 transition-colors cursor-pointer"
-                  >
-                    削除依頼
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
+          {menu}
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-6">
+      {/* Mobile metrics: 2×2 grid (uptime already shown above) */}
+      <div className="sm:hidden grid grid-cols-2 gap-x-8 gap-y-3">
+        <MetricBar label="CPU"        value={device.system.cpu}         unit="%" />
+        <MetricBar label="メモリ"     value={device.system.memory}      unit="%" />
+        <MetricBar label="温度"       value={device.system.temperature} unit="°C" warn={65} danger={80} />
+        <MetricBar label="ストレージ" value={device.system.storage}     unit="%" warn={80} danger={90} />
+      </div>
+
+      {/* Desktop metrics: original 4-col with uptime */}
+      <div className="hidden sm:grid grid-cols-4 gap-6">
         <div className="col-span-3 grid grid-cols-2 gap-x-8 gap-y-3">
           <MetricBar label="CPU"        value={device.system.cpu}         unit="%" />
           <MetricBar label="メモリ"     value={device.system.memory}      unit="%" />
@@ -827,7 +861,8 @@ export function ProjectDetail() {
 
       {/* ページヘッダー */}
       <div className="py-6 px-4 sm:px-6">
-        <div className="flex items-start gap-2 min-w-0">
+        {/* Mobile: truncated text + 3-dot menu */}
+        <div className="flex items-start gap-2 min-w-0 sm:hidden">
           <div className="flex-1 min-w-0 flex flex-col gap-1">
             <h1 className="text-white text-3xl font-semibold truncate leading-tight">{project.name}</h1>
             <p className="text-[#999999] text-base truncate">{project.address}</p>
@@ -869,6 +904,38 @@ export function ProjectDetail() {
                   </button>
                 </div>
               )}
+            </div>
+          )}
+        </div>
+
+        {/* Desktop: original layout */}
+        <div className="hidden sm:flex items-start justify-between gap-4">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-white text-3xl font-semibold">{project.name}</h1>
+            <p className="text-[#999999] text-base">{project.address}</p>
+          </div>
+          {canEdit && (
+            <div className="flex items-center gap-2 mt-7">
+              <button
+                onClick={() => { setEditGroup(null); setGroupModalOpen(true); }}
+                className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                グループを作成
+              </button>
+              <button
+                onClick={() => { setEditDevice(null); setDeviceModalOpen(true); }}
+                className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#4693ff] hover:bg-[#3a7fe0] transition-colors cursor-pointer"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                デバイスを追加
+              </button>
             </div>
           )}
         </div>
