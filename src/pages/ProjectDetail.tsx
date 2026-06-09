@@ -448,7 +448,7 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div
-        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md shadow-2xl max-h-[calc(100dvh-2rem)] overflow-y-auto"
+        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md shadow-2xl h-fit max-h-[calc(100dvh-2rem)] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
         <h2 className="text-white text-lg font-semibold px-6 pt-6 pb-5">
@@ -569,7 +569,7 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div
-        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-sm shadow-2xl max-h-[calc(100dvh-2rem)] overflow-y-auto"
+        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-sm shadow-2xl h-fit max-h-[calc(100dvh-2rem)] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
         <h2 className="text-white text-lg font-semibold px-6 pt-6 pb-5">
@@ -681,7 +681,7 @@ function DeleteConfirm({ name, onClose, onConfirm }: DeleteConfirmProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div
-        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl max-h-[calc(100dvh-2rem)] overflow-y-auto"
+        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl h-fit max-h-[calc(100dvh-2rem)] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
         <h2 className="text-white text-lg font-semibold mb-2">削除依頼を送信</h2>
