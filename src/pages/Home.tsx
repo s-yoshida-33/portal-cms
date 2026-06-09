@@ -102,9 +102,9 @@ export function Home() {
   return (
     <div className="flex flex-col min-h-full">
 
-      <div className="flex items-center gap-4 py-6 px-4 sm:px-6">
+      <div className="flex items-start gap-4 py-6 px-4 sm:px-6">
         <div className="flex flex-col gap-2">
-          <h1 className="text-white text-3xl font-semibold">ホーム</h1>
+          <h1 className="text-white text-3xl font-semibold leading-tight">ホーム</h1>
           <p className="text-[#999999] text-base">{user?.email ?? ''}</p>
         </div>
       </div>

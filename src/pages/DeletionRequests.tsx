@@ -151,13 +151,13 @@ export function DeletionRequests() {
     <div className="flex flex-col min-h-full">
 
       {/* ページヘッダー */}
-      <div className="flex items-center justify-between gap-4 py-6 px-4 sm:px-6">
+      <div className="flex items-start justify-between gap-4 py-6 px-4 sm:px-6">
         <div className="flex flex-col gap-2">
-          <h1 className="text-white text-3xl font-semibold">削除依頼</h1>
+          <h1 className="text-white text-3xl font-semibold leading-tight">削除依頼</h1>
           <p className="text-[#999999] text-base">承認待ちの削除依頼を確認・処理</p>
         </div>
         {!loading && requests.length > 0 && (
-          <span className="flex items-center justify-center h-6 min-w-6 px-2 rounded-full bg-red-600 text-white text-xs font-semibold">
+          <span className="flex items-center justify-center h-6 min-w-6 px-2 rounded-full bg-red-600 text-white text-xs font-semibold mt-1">
             {requests.length}
           </span>
         )}

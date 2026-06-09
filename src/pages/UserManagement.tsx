@@ -109,13 +109,13 @@ export function UserManagement() {
     <div className="flex flex-col min-h-full">
 
       {/* ページヘッダー */}
-      <div className="flex items-center justify-between gap-4 py-6 px-4 sm:px-6">
+      <div className="flex items-start justify-between gap-4 py-6 px-4 sm:px-6">
         <div className="flex flex-col gap-2">
-          <h1 className="text-white text-3xl font-semibold">ユーザー管理</h1>
+          <h1 className="text-white text-3xl font-semibold leading-tight">ユーザー管理</h1>
           <p className="text-[#999999] text-base">ユーザーのロール管理・除名</p>
         </div>
         {!loading && (
-          <span className="text-sm text-zinc-500">{users.length} 名</span>
+          <span className="text-sm text-zinc-500 mt-1">{users.length} 名</span>
         )}
       </div>
 
