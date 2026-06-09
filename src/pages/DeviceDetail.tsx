@@ -6,7 +6,8 @@ import { ref as rtdbRef, onValue } from 'firebase/database';
 import { StatusBadge } from '../components/StatusBadge';
 import type { Device } from '../types';
 
-const WORKER_BASE_URL = 'https://portal-cms-api.tti-ninja.workers.dev';
+const WORKER_BASE_URL    = 'https://portal-cms-api.tti-ninja.workers.dev';
+const STORAGE_BUCKET     = 'portal-cms-emk.firebasestorage.app';
 
 interface RtdbLogEntry {
   timestamp: string;
@@ -231,42 +232,25 @@ export function DeviceDetail() {
     if (baseUrl) fetchApps();
   }, [baseUrl, fetchApps]);
 
-  // Fetch portal screenshot from Worker using Firebase ID token.
-  // completedAt is the Firestore Timestamp from the screenshotRequests doc.
-  // Retries up to 4 times (2.5s apart) to handle Workers KV eventual consistency:
-  // BG marks Firestore 'completed' before KV propagates to all edge nodes.
+  // Fetch portal screenshot directly from Firebase Storage using Firebase ID token.
+  // Firebase Storage has strong read-after-write consistency, so a single fetch
+  // always returns the fresh image (Workers patches Firestore completedAt only
+  // after the Storage upload completes).
   const fetchPortalScreenshot = useCallback(async (completedAt?: { toDate(): Date } | null) => {
     if (!deviceId) return;
     try {
       const idToken = await auth.currentUser?.getIdToken();
       if (!idToken) { setPortalSsState('error'); return; }
 
-      // KV is eventually consistent — the image may not have propagated to the
-      // edge node serving this browser yet. Retry up to 6 times (max ~18s total)
-      // using X-Captured-At to detect when a fresh image is available.
-      // expectedAfter: accept images captured within 15s before completedAt.
-      const expectedAfter = completedAt ? completedAt.toDate().getTime() - 15_000 : null;
-      let imgBlob: Blob | null = null;
+      const path = encodeURIComponent(`screenshots/${deviceId}`);
+      const res = await fetch(
+        `https://firebasestorage.googleapis.com/v0/b/${STORAGE_BUCKET}/o/${path}?alt=media`,
+        { headers: { Authorization: `Bearer ${idToken}` }, cache: 'no-store' },
+      );
+      if (!res.ok) throw new Error(`fetch failed (${res.status})`);
 
-      for (let attempt = 0; attempt < 6; attempt++) {
-        if (attempt > 0) await new Promise<void>(r => setTimeout(r, 3000));
-        const res = await fetch(`${WORKER_BASE_URL}/v1/screenshot/${deviceId}`, {
-          headers: { Authorization: `Bearer ${idToken}` },
-          cache: 'no-store',
-        });
-        if (!res.ok) throw new Error('fetch failed');
-        const capturedAtHeader = res.headers.get('X-Captured-At');
-        const capturedAtMs = capturedAtHeader ? new Date(capturedAtHeader).getTime() : 0;
-        if (expectedAfter !== null && capturedAtMs < expectedAfter && attempt < 5) {
-          continue; // KV returned a stale image — discard and retry
-        }
-        imgBlob = await res.blob();
-        break;
-      }
-
-      if (!imgBlob) throw new Error('no image after retries');
       if (portalBlobRef.current) URL.revokeObjectURL(portalBlobRef.current);
-      const url = URL.createObjectURL(imgBlob);
+      const url = URL.createObjectURL(await res.blob());
       portalBlobRef.current = url;
       setPortalSsBlobUrl(url);
       const capturedDate = completedAt?.toDate() ?? null;
