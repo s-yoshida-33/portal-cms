@@ -577,15 +577,12 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
           {initial && projects.length > 1 && (
             <div>
               <label className="block text-sm text-zinc-400 mb-1.5">プロジェクト</label>
-              <select
+              <CustomSelect
                 value={projectId}
-                onChange={e => setProjectId(e.target.value)}
-                className={selectClass}
-              >
-                {projects.map(p => (
-                  <option key={p.id} value={p.id}>{p.name}</option>
-                ))}
-              </select>
+                onChange={val => setProjectId(val)}
+                options={projects.map(p => ({ value: p.id, label: p.name }))}
+                className="w-full"
+              />
             </div>
           )}
           <div>
