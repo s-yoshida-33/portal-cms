@@ -457,6 +457,26 @@ export function DeviceDetail() {
               >
                 {logsRefreshing ? '更新中...' : '更新'}
               </button>
+              <button
+                onClick={() => {
+                  if (filteredLogs.length === 0) return;
+                  const lines = filteredLogs.map(log =>
+                    `[${log.timestamp}] ${(log.level || '----').padEnd(5)} ${log.tag ? `[${log.tag}] ` : ''}${log.message}`
+                  ).join('\n');
+                  const blob = new Blob([lines], { type: 'text/plain' });
+                  const url  = URL.createObjectURL(blob);
+                  const a    = document.createElement('a');
+                  a.href     = url;
+                  a.download = `${device?.name ?? deviceId}-${selectedLogDate}.log`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                }}
+                disabled={filteredLogs.length === 0}
+                className="h-6 px-2.5 rounded-md text-xs font-medium ring-1 transition-colors cursor-pointer text-zinc-400 bg-zinc-800 ring-zinc-700 hover:bg-zinc-700 disabled:opacity-30 disabled:cursor-not-allowed"
+                title="表示中のログをダウンロード"
+              >
+                DL
+              </button>
             </div>
           </div>
 
