@@ -18,6 +18,18 @@ const typeBadge: Record<ApiTokenType, string> = {
   device:       'text-blue-400 bg-blue-950/40 ring-1 ring-blue-900/50',
 };
 
+const filterTypeOptions = [
+  { value: '',             label: '種別' },
+  { value: 'registration', label: '登録用' },
+  { value: 'device',       label: 'デバイス用' },
+];
+
+const filterStatusOptions = [
+  { value: '',        label: '状態' },
+  { value: 'active',  label: '有効' },
+  { value: 'revoked', label: '失効済み' },
+];
+
 function formatDate(iso: string | null) {
   if (!iso) return '-';
   return new Date(iso).toLocaleString('ja-JP', {
@@ -221,6 +233,8 @@ export function ApiTokens() {
   const [headerMenuOpen, setHeaderMenuOpen] = useState(false);
   const [activePage,     setActivePage]     = useState(1);
   const [revokedPage,    setRevokedPage]    = useState(1);
+  const [filterType,     setFilterType]     = useState('');
+  const [filterStatus,   setFilterStatus]   = useState('');
   const headerMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -232,6 +246,11 @@ export function ApiTokens() {
     });
     return unsub;
   }, []);
+
+  useEffect(() => {
+    setActivePage(1);
+    setRevokedPage(1);
+  }, [filterType, filterStatus]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -255,8 +274,12 @@ export function ApiTokens() {
     );
   }
 
-  const active  = tokens.filter(t => !t.revokedAt);
-  const revoked = tokens.filter(t =>  t.revokedAt);
+  const filtered = tokens
+    .filter(t => filterType   === '' || t.type === filterType)
+    .filter(t => filterStatus === '' || (filterStatus === 'active' ? !t.revokedAt : !!t.revokedAt));
+
+  const active  = filtered.filter(t => !t.revokedAt);
+  const revoked = filtered.filter(t =>  t.revokedAt);
 
   const activeSlice  = active.slice((activePage  - 1) * PAGE_SIZE, activePage  * PAGE_SIZE);
   const revokedSlice = revoked.slice((revokedPage - 1) * PAGE_SIZE, revokedPage * PAGE_SIZE);
@@ -380,7 +403,23 @@ export function ApiTokens() {
         )}
       </div>
 
-      <div className="px-4 sm:px-6 pt-8 pb-8 space-y-6">
+      {/* フィルターバー */}
+      <div className="px-4 sm:px-6 pb-2 flex gap-2">
+        <CustomSelect
+          value={filterType}
+          onChange={v => setFilterType(v)}
+          options={filterTypeOptions}
+          className="w-32"
+        />
+        <CustomSelect
+          value={filterStatus}
+          onChange={v => setFilterStatus(v)}
+          options={filterStatusOptions}
+          className="w-32"
+        />
+      </div>
+
+      <div className="px-4 sm:px-6 pt-4 pb-8 space-y-6">
         {loading ? (
           <div className="rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-12 text-center">
             <p className="text-zinc-500 text-sm">読み込み中...</p>
