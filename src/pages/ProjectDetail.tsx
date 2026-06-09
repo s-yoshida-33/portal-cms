@@ -448,65 +448,67 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div
-        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl max-h-[calc(100dvh-2rem)] overflow-y-auto"
+        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md shadow-2xl max-h-[calc(100dvh-2rem)] flex flex-col overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
-        <h2 className="text-white text-lg font-semibold mb-5">
+        <h2 className="text-white text-lg font-semibold shrink-0 px-6 pt-6 pb-5">
           {initial ? 'グループを編集' : 'グループを作成'}
         </h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm text-zinc-400 mb-1.5">グループ名</label>
-            <input
-              value={name}
-              onChange={e => setName(e.target.value)}
-              placeholder="グループ名を入力"
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label className="block text-sm text-zinc-400 mb-1.5">親グループ</label>
-            <select
-              value={parentGroupId ?? ''}
-              onChange={e => setParentGroupId(e.target.value || null)}
-              className={selectClass}
-            >
-              <option value="">ー（ルートグループ）</option>
-              {flattenGroups(availableRoots).map(({ group, depth }) => (
-                <option key={group.id} value={group.id}>
-                  {'　'.repeat(depth)}{group.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm text-zinc-400 mb-1.5">デバイス</label>
-            <div className="bg-[#1a1a1a] ring-1 ring-[#3d3d3d] rounded-lg divide-y divide-[#2a2a2a] max-h-48 overflow-y-auto">
-              {devices.length === 0 ? (
-                <p className="px-3 py-2 text-sm text-zinc-600">デバイスがありません</p>
-              ) : devices.map(device => {
-                const isSelected = selectedIds.includes(device.id);
-                const otherGroupId = device.groupId && device.groupId !== initial?.id ? device.groupId : null;
-                const otherGroupName = otherGroupId ? (groupNameMap.get(otherGroupId) ?? otherGroupId) : null;
-                return (
-                  <label key={device.id} className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-[#222222] transition-colors">
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={() => toggleDevice(device.id)}
-                      className="w-4 h-4 accent-[#4693ff]"
-                    />
-                    <span className="text-sm text-zinc-200 flex-1">{device.name}</span>
-                    {otherGroupName && (
-                      <span className="text-xs text-yellow-400">現在: {otherGroupName}</span>
-                    )}
-                  </label>
-                );
-              })}
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+          <div className="flex-1 overflow-y-auto px-6 space-y-4">
+            <div>
+              <label className="block text-sm text-zinc-400 mb-1.5">グループ名</label>
+              <input
+                value={name}
+                onChange={e => setName(e.target.value)}
+                placeholder="グループ名を入力"
+                className={inputClass}
+              />
             </div>
+            <div>
+              <label className="block text-sm text-zinc-400 mb-1.5">親グループ</label>
+              <select
+                value={parentGroupId ?? ''}
+                onChange={e => setParentGroupId(e.target.value || null)}
+                className={selectClass}
+              >
+                <option value="">ー（ルートグループ）</option>
+                {flattenGroups(availableRoots).map(({ group, depth }) => (
+                  <option key={group.id} value={group.id}>
+                    {'　'.repeat(depth)}{group.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm text-zinc-400 mb-1.5">デバイス</label>
+              <div className="bg-[#1a1a1a] ring-1 ring-[#3d3d3d] rounded-lg divide-y divide-[#2a2a2a] max-h-48 overflow-y-auto">
+                {devices.length === 0 ? (
+                  <p className="px-3 py-2 text-sm text-zinc-600">デバイスがありません</p>
+                ) : devices.map(device => {
+                  const isSelected = selectedIds.includes(device.id);
+                  const otherGroupId = device.groupId && device.groupId !== initial?.id ? device.groupId : null;
+                  const otherGroupName = otherGroupId ? (groupNameMap.get(otherGroupId) ?? otherGroupId) : null;
+                  return (
+                    <label key={device.id} className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-[#222222] transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleDevice(device.id)}
+                        className="w-4 h-4 accent-[#4693ff]"
+                      />
+                      <span className="text-sm text-zinc-200 flex-1">{device.name}</span>
+                      {otherGroupName && (
+                        <span className="text-xs text-yellow-400">現在: {otherGroupName}</span>
+                      )}
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+            {error && <p className="text-red-400 text-sm">{error}</p>}
           </div>
-          {error && <p className="text-red-400 text-sm">{error}</p>}
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="shrink-0 flex justify-end gap-2 px-6 py-4 border-t border-[#2a2a2a]">
             <button type="button" onClick={onClose}
               className="h-9 px-4 rounded-lg text-sm text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
               キャンセル
@@ -567,77 +569,79 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div
-        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-sm p-6 shadow-2xl max-h-[calc(100dvh-2rem)] overflow-y-auto"
+        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-sm shadow-2xl max-h-[calc(100dvh-2rem)] flex flex-col overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
-        <h2 className="text-white text-lg font-semibold mb-5">
+        <h2 className="text-white text-lg font-semibold shrink-0 px-6 pt-6 pb-5">
           {initial ? 'デバイスを編集' : 'デバイスを追加'}
         </h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {initial && projects.length > 1 && (
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+          <div className="flex-1 overflow-y-auto px-6 space-y-4">
+            {initial && projects.length > 1 && (
+              <div>
+                <label className="block text-sm text-zinc-400 mb-1.5">プロジェクト</label>
+                <CustomSelect
+                  value={projectId}
+                  onChange={val => setProjectId(val)}
+                  options={projects.map(p => ({ value: p.id, label: p.name }))}
+                  className="w-full"
+                />
+              </div>
+            )}
             <div>
-              <label className="block text-sm text-zinc-400 mb-1.5">プロジェクト</label>
+              <label className="block text-sm text-zinc-400 mb-1.5">デバイス名</label>
+              <input value={name} onChange={e => setName(e.target.value)}
+                placeholder="PC-200" className={inputClass} />
+            </div>
+            <div>
+              <label className="block text-sm text-zinc-400 mb-1.5">IPアドレス</label>
+              <input value={ip} onChange={e => setIp(e.target.value)}
+                placeholder="192.168.1.100" className={inputClass} />
+            </div>
+            <div>
+              <label className="block text-sm text-zinc-400 mb-1.5">ポート (Bridge-Ground)</label>
+              <input
+                type="number"
+                value={port}
+                onChange={e => setPort(Number(e.target.value))}
+                placeholder="8090"
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-zinc-400 mb-1.5">アプリ</label>
               <CustomSelect
-                value={projectId}
-                onChange={val => setProjectId(val)}
-                options={projects.map(p => ({ value: p.id, label: p.name }))}
+                value={app}
+                onChange={val => setApp(val as AppName)}
+                options={APP_OPTIONS.map(o => ({ value: o, label: o }))}
                 className="w-full"
               />
             </div>
-          )}
-          <div>
-            <label className="block text-sm text-zinc-400 mb-1.5">デバイス名</label>
-            <input value={name} onChange={e => setName(e.target.value)}
-              placeholder="PC-200" className={inputClass} />
-          </div>
-          <div>
-            <label className="block text-sm text-zinc-400 mb-1.5">IPアドレス</label>
-            <input value={ip} onChange={e => setIp(e.target.value)}
-              placeholder="192.168.1.100" className={inputClass} />
-          </div>
-          <div>
-            <label className="block text-sm text-zinc-400 mb-1.5">ポート (Bridge-Ground)</label>
-            <input
-              type="number"
-              value={port}
-              onChange={e => setPort(Number(e.target.value))}
-              placeholder="8090"
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label className="block text-sm text-zinc-400 mb-1.5">アプリ</label>
-            <CustomSelect
-              value={app}
-              onChange={val => setApp(val as AppName)}
-              options={APP_OPTIONS.map(o => ({ value: o, label: o }))}
-              className="w-full"
-            />
-          </div>
-          <div>
-            <label className="block text-sm text-zinc-400 mb-1.5">バージョン</label>
-            <input value={appVersion} onChange={e => setAppVersion(e.target.value)}
-              placeholder="1.2.0" className={inputClass} />
-          </div>
-          {groups.length > 0 && (
             <div>
-              <label className="block text-sm text-zinc-400 mb-1.5">グループを選択</label>
-              <CustomSelect
-                value={groupId ?? ''}
-                onChange={val => setGroupId(val || null)}
-                options={[
-                  { value: '', label: 'ー' },
-                  ...flattenGroups(groupTree).map(({ group, depth }) => ({
-                    value: group.id,
-                    label: '　'.repeat(depth) + group.name,
-                  })),
-                ]}
-                className="w-full"
-              />
+              <label className="block text-sm text-zinc-400 mb-1.5">バージョン</label>
+              <input value={appVersion} onChange={e => setAppVersion(e.target.value)}
+                placeholder="1.2.0" className={inputClass} />
             </div>
-          )}
-          {error && <p className="text-red-400 text-sm">{error}</p>}
-          <div className="flex justify-end gap-2 pt-2">
+            {groups.length > 0 && (
+              <div>
+                <label className="block text-sm text-zinc-400 mb-1.5">グループを選択</label>
+                <CustomSelect
+                  value={groupId ?? ''}
+                  onChange={val => setGroupId(val || null)}
+                  options={[
+                    { value: '', label: 'ー' },
+                    ...flattenGroups(groupTree).map(({ group, depth }) => ({
+                      value: group.id,
+                      label: '　'.repeat(depth) + group.name,
+                    })),
+                  ]}
+                  className="w-full"
+                />
+              </div>
+            )}
+            {error && <p className="text-red-400 text-sm pb-1">{error}</p>}
+          </div>
+          <div className="shrink-0 flex justify-end gap-2 px-6 py-4 border-t border-[#2a2a2a]">
             <button type="button" onClick={onClose}
               className="h-9 px-4 rounded-lg text-sm text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
               キャンセル
