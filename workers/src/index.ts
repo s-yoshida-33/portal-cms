@@ -493,9 +493,10 @@ export default {
         metadata: { capturedAt: new Date().toISOString() },
       });
 
-      // Clear screenshotRequested flag and always mark screenshotRequests as completed.
-      // Previously used fs.get() + conditional patch, but that skipped the update if
-      // the doc was transiently missing, leaving Portal stuck in 'pending' state.
+      // Clear screenshotRequested flag and mark screenshotRequests as completed.
+      // Always patch directly — Firestore PATCH creates the doc if absent, so no
+      // conditional GET needed. The old if(ssDoc) guard caused the completedAt
+      // update to be silently skipped on transient Firestore read failures.
       await Promise.allSettled([
         fs.patch('devices', deviceId, { screenshotRequested: false }),
         fs.patch('screenshotRequests', deviceId, {

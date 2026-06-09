@@ -240,11 +240,16 @@ export function DeviceDetail() {
     try {
       const idToken = await auth.currentUser?.getIdToken();
       if (!idToken) { setPortalSsState('error'); return; }
-      // Accept images captured within 15s before the completedAt timestamp.
+
+      // KV is eventually consistent — the image may not have propagated to the
+      // edge node serving this browser yet. Retry up to 6 times (max ~18s total)
+      // using X-Captured-At to detect when a fresh image is available.
+      // expectedAfter: accept images captured within 15s before completedAt.
       const expectedAfter = completedAt ? completedAt.toDate().getTime() - 15_000 : null;
       let imgBlob: Blob | null = null;
-      for (let attempt = 0; attempt < 4; attempt++) {
-        if (attempt > 0) await new Promise<void>(r => setTimeout(r, 2500));
+
+      for (let attempt = 0; attempt < 6; attempt++) {
+        if (attempt > 0) await new Promise<void>(r => setTimeout(r, 3000));
         const res = await fetch(`${WORKER_BASE_URL}/v1/screenshot/${deviceId}`, {
           headers: { Authorization: `Bearer ${idToken}` },
           cache: 'no-store',
@@ -252,12 +257,13 @@ export function DeviceDetail() {
         if (!res.ok) throw new Error('fetch failed');
         const capturedAtHeader = res.headers.get('X-Captured-At');
         const capturedAtMs = capturedAtHeader ? new Date(capturedAtHeader).getTime() : 0;
-        if (expectedAfter !== null && capturedAtMs < expectedAfter && attempt < 3) {
+        if (expectedAfter !== null && capturedAtMs < expectedAfter && attempt < 5) {
           continue; // KV returned a stale image — discard and retry
         }
         imgBlob = await res.blob();
         break;
       }
+
       if (!imgBlob) throw new Error('no image after retries');
       if (portalBlobRef.current) URL.revokeObjectURL(portalBlobRef.current);
       const url = URL.createObjectURL(imgBlob);
