@@ -211,69 +211,63 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
         aria-label={device.name}
       />
 
-      {/* Mobile header: no status, 3-row right section */}
-      <div className="flex items-start justify-between mb-4 sm:hidden">
-        <div className="min-w-0 mr-3">
-          <p className="font-medium text-zinc-100 text-sm truncate">{device.name}</p>
-          <p className="text-xs text-zinc-500 font-mono mt-0.5">{device.ip}</p>
+      {/* Mobile layout */}
+      <div className="sm:hidden">
+        {/* Row 1: name (truncated) + status + menu */}
+        <div className="flex items-center gap-2 min-w-0 mb-0.5">
+          <p className="font-medium text-zinc-100 text-sm truncate flex-1 min-w-0">{device.name}</p>
+          <StatusBadge status={device.status} />
+          {menu}
         </div>
-        <div className="flex items-start gap-2 shrink-0">
-          <div className="text-right">
-            <div className="flex items-center justify-end gap-1">
-              <AppBadge app={device.app} />
-              <span className="text-zinc-500 text-xs">v{device.appVersion}</span>
+        {/* Row 2: IP */}
+        <p className="text-xs text-zinc-500 font-mono mb-4">{device.ip}</p>
+        {/* Info section: app / last seen / uptime */}
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-1.5">
+            <AppBadge app={device.app} />
+            <span className="text-zinc-500 text-xs">v{device.appVersion}</span>
+          </div>
+          <p className="text-xs text-zinc-500">最終確認: {formatLastSeen(device.lastSeen)}</p>
+          <p className="text-xs text-zinc-400">
+            稼働時間: <UptimeClock uptimeSecs={device.system.uptime} lastSeen={device.lastSeen} status={device.status} />
+          </p>
+        </div>
+      </div>
+
+      {/* Desktop layout: original */}
+      <div className="hidden sm:block">
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-3">
+            <div>
+              <p className="font-medium text-zinc-100 text-sm">{device.name}</p>
+              <p className="text-xs text-zinc-500 font-mono mt-0.5">{device.ip}</p>
             </div>
-            <p className="text-xs text-zinc-600 mt-1">最終確認: {formatLastSeen(device.lastSeen)}</p>
-            <p className="text-xs text-zinc-400 mt-1 font-mono">
+            <StatusBadge status={device.status} />
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="text-right">
+              <div className="flex items-center justify-end gap-1.5">
+                <AppBadge app={device.app} />
+                <span className="text-zinc-500 text-xs">v{device.appVersion}</span>
+              </div>
+              <p className="text-xs text-zinc-600 mt-0.5">最終確認: {formatLastSeen(device.lastSeen)}</p>
+            </div>
+            {menu}
+          </div>
+        </div>
+        <div className="grid grid-cols-4 gap-6">
+          <div className="col-span-3 grid grid-cols-2 gap-x-8 gap-y-3">
+            <MetricBar label="CPU"        value={device.system.cpu}         unit="%" />
+            <MetricBar label="メモリ"     value={device.system.memory}      unit="%" />
+            <MetricBar label="温度"       value={device.system.temperature} unit="°C" warn={65} danger={80} />
+            <MetricBar label="ストレージ" value={device.system.storage}     unit="%" warn={80} danger={90} />
+          </div>
+          <div className="flex flex-col justify-center pl-5 border-l border-zinc-800">
+            <p className="text-xs text-zinc-500 mb-1">稼働時間</p>
+            <p className="text-lg font-semibold text-zinc-200">
               <UptimeClock uptimeSecs={device.system.uptime} lastSeen={device.lastSeen} status={device.status} />
             </p>
           </div>
-          {menu}
-        </div>
-      </div>
-
-      {/* Desktop header: original layout */}
-      <div className="hidden sm:flex items-center justify-between mb-5">
-        <div className="flex items-center gap-3">
-          <div>
-            <p className="font-medium text-zinc-100 text-sm">{device.name}</p>
-            <p className="text-xs text-zinc-500 font-mono mt-0.5">{device.ip}</p>
-          </div>
-          <StatusBadge status={device.status} />
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="text-right">
-            <div className="flex items-center justify-end gap-1.5">
-              <AppBadge app={device.app} />
-              <span className="text-zinc-500 text-xs">v{device.appVersion}</span>
-            </div>
-            <p className="text-xs text-zinc-600 mt-0.5">最終確認: {formatLastSeen(device.lastSeen)}</p>
-          </div>
-          {menu}
-        </div>
-      </div>
-
-      {/* Mobile metrics: 2×2 grid (uptime already shown above) */}
-      <div className="sm:hidden grid grid-cols-2 gap-x-8 gap-y-3">
-        <MetricBar label="CPU"        value={device.system.cpu}         unit="%" />
-        <MetricBar label="メモリ"     value={device.system.memory}      unit="%" />
-        <MetricBar label="温度"       value={device.system.temperature} unit="°C" warn={65} danger={80} />
-        <MetricBar label="ストレージ" value={device.system.storage}     unit="%" warn={80} danger={90} />
-      </div>
-
-      {/* Desktop metrics: original 4-col with uptime */}
-      <div className="hidden sm:grid grid-cols-4 gap-6">
-        <div className="col-span-3 grid grid-cols-2 gap-x-8 gap-y-3">
-          <MetricBar label="CPU"        value={device.system.cpu}         unit="%" />
-          <MetricBar label="メモリ"     value={device.system.memory}      unit="%" />
-          <MetricBar label="温度"       value={device.system.temperature} unit="°C" warn={65} danger={80} />
-          <MetricBar label="ストレージ" value={device.system.storage}     unit="%" warn={80} danger={90} />
-        </div>
-        <div className="flex flex-col justify-center pl-5 border-l border-zinc-800">
-          <p className="text-xs text-zinc-500 mb-1">稼働時間</p>
-          <p className="text-lg font-semibold text-zinc-200">
-            <UptimeClock uptimeSecs={device.system.uptime} lastSeen={device.lastSeen} status={device.status} />
-          </p>
         </div>
       </div>
     </div>
