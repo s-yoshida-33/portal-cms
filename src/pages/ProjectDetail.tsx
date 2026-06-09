@@ -175,7 +175,7 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
   const menu = canEdit && (
     <div ref={menuRef} className="relative z-10 shrink-0">
       <button
-        onClick={e => { e.preventDefault(); setMenuOpen(o => !o); }}
+        onClick={e => { e.preventDefault(); e.stopPropagation(); setMenuOpen(o => !o); }}
         className="w-7 h-7 flex items-center justify-center rounded-md text-zinc-400 hover:text-zinc-200 hover:bg-[#2a2a2a] transition-colors cursor-pointer"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
@@ -187,13 +187,13 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
       {menuOpen && (
         <div className="absolute right-0 top-full mt-1 w-32 bg-[#1a1a1a] ring-1 ring-[#3d3d3d] rounded-lg shadow-xl overflow-hidden">
           <button
-            onClick={e => { e.preventDefault(); setMenuOpen(false); onEdit(device); }}
+            onClick={e => { e.preventDefault(); e.stopPropagation(); setMenuOpen(false); onEdit(device); }}
             className="w-full text-left px-3 py-2 text-sm text-zinc-300 hover:bg-[#2a2a2a] transition-colors cursor-pointer"
           >
             編集
           </button>
           <button
-            onClick={e => { e.preventDefault(); setMenuOpen(false); onDelete(device); }}
+            onClick={e => { e.preventDefault(); e.stopPropagation(); setMenuOpen(false); onDelete(device); }}
             className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-950/40 transition-colors cursor-pointer"
           >
             削除依頼
@@ -443,7 +443,7 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70" onClick={onClose}>
       <div
-        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-lg p-6 shadow-2xl max-h-[90vh] overflow-y-auto"
+        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl max-h-[90vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
         <h2 className="text-white text-lg font-semibold mb-5">
@@ -562,7 +562,7 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70" onClick={onClose}>
       <div
-        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl"
+        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-sm p-6 shadow-2xl"
         onClick={e => e.stopPropagation()}
       >
         <h2 className="text-white text-lg font-semibold mb-5">
