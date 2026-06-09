@@ -6,8 +6,7 @@ import { ref as rtdbRef, onValue } from 'firebase/database';
 import { StatusBadge } from '../components/StatusBadge';
 import type { Device } from '../types';
 
-const WORKER_BASE_URL    = 'https://portal-cms-api.tti-ninja.workers.dev';
-const STORAGE_BUCKET     = 'portal-cms-emk.firebasestorage.app';
+const STORAGE_BUCKET = 'portal-cms-emk.firebasestorage.app';
 
 interface RtdbLogEntry {
   timestamp: string;
