@@ -116,6 +116,7 @@ export function DeviceDetail() {
   const [logsRefreshing,   setLogsRefreshing]   = useState(false);
   const [logLevels,        setLogLevels]        = useState<Set<string>>(new Set(LOG_LEVELS));
   const [selectedLogDate,  setSelectedLogDate]  = useState(todayStr);
+  const [logCopied,        setLogCopied]        = useState(false);
   const logContainerRef = useRef<HTMLDivElement>(null);
   const logRequestedAt  = useRef<number>(0);
 
@@ -467,25 +468,42 @@ export function DeviceDetail() {
                   最終取得: {logsLastFetched ? logsLastFetched.toLocaleString('ja-JP') : '—'}
                 </span>
               </div>
-              <button
-                onClick={() => {
-                  if (filteredLogs.length === 0) return;
-                  const lines = filteredLogs.map(log =>
-                    `[${log.timestamp}] ${(log.level || '----').padEnd(5)} ${log.tag ? `[${log.tag}] ` : ''}${log.message}`
-                  ).join('\n');
-                  const blob = new Blob([lines], { type: 'text/plain' });
-                  const url  = URL.createObjectURL(blob);
-                  const a    = document.createElement('a');
-                  a.href     = url;
-                  a.download = `${device?.name ?? deviceId}-${selectedLogDate}.log`;
-                  a.click();
-                  URL.revokeObjectURL(url);
-                }}
-                disabled={filteredLogs.length === 0}
-                className="shrink-0 h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
-              >
-                ダウンロード
-              </button>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={async () => {
+                    if (filteredLogs.length === 0) return;
+                    const text = filteredLogs.map(log =>
+                      `[${log.timestamp}] ${(log.level || '----').padEnd(5)} ${log.tag ? `[${log.tag}] ` : ''}${log.message}`
+                    ).join('\n');
+                    await navigator.clipboard.writeText(text);
+                    setLogCopied(true);
+                    setTimeout(() => setLogCopied(false), 2000);
+                  }}
+                  disabled={filteredLogs.length === 0}
+                  className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  {logCopied ? 'コピー済み' : 'コピー'}
+                </button>
+                <button
+                  onClick={() => {
+                    if (filteredLogs.length === 0) return;
+                    const lines = filteredLogs.map(log =>
+                      `[${log.timestamp}] ${(log.level || '----').padEnd(5)} ${log.tag ? `[${log.tag}] ` : ''}${log.message}`
+                    ).join('\n');
+                    const blob = new Blob([lines], { type: 'text/plain' });
+                    const url  = URL.createObjectURL(blob);
+                    const a    = document.createElement('a');
+                    a.href     = url;
+                    a.download = `${device?.name ?? deviceId}-${selectedLogDate}.log`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  }}
+                  disabled={filteredLogs.length === 0}
+                  className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  ダウンロード
+                </button>
+              </div>
             </div>
 
             {/* 内枠: ログビューア */}
