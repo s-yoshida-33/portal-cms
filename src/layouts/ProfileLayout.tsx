@@ -4,9 +4,31 @@ import { useAuth } from '../contexts/AuthContext';
 import { Footer } from '../components/Footer';
 
 const profileNav = [
-  { to: '/profile/settings', label: '設定' },
-  { to: '/profile/access',   label: 'アクセス管理' },
-  { to: '/profile/tokens',   label: 'API トークン' },
+  {
+    to: '/profile/settings', label: '設定',
+    icon: (
+      <svg viewBox="0 0 16 16" className="w-4 h-4 fill-current opacity-50 shrink-0" role="presentation" aria-hidden="true">
+        <path d="M5.685 11.864l.254-.136 7.105-7.085v-.707l-2.48-2.48h-.707L2.753 8.54l-.138.258-.605 3.105.59.586 3.085-.625zM3.567 9.14l6.643-6.625 1.773 1.773-6.644 6.625-2.205.447.433-2.22zM14 13.5H2v1h12v-1z" />
+      </svg>
+    ),
+  },
+  {
+    to: '/profile/access', label: 'アクセス管理',
+    icon: (
+      <svg viewBox="0 0 16 16" className="w-4 h-4 fill-current opacity-50 shrink-0" role="presentation" aria-hidden="true">
+        <path d="M12.39 6.902h-1.193V4.705a3.197 3.197 0 10-6.394 0v2.197H3.61l-.5.5V14l.5.5h8.78l.5-.5V7.402l-.5-.5zM5.803 4.705a2.197 2.197 0 014.394 0v2.197H5.803V4.705zM11.89 13.5H4.11V7.902h7.78V13.5z" />
+        <path d="M8 8.95a.965.965 0 00-.43 1.83v1.57h.86v-1.57A.965.965 0 008 8.95z" />
+      </svg>
+    ),
+  },
+  {
+    to: '/profile/tokens', label: 'API トークン',
+    icon: (
+      <svg viewBox="0 0 16 16" className="w-4 h-4 fill-current opacity-50 shrink-0" role="presentation" aria-hidden="true">
+        <path d="M5.562 14.5v-.995c-1.15 0-1.506-.539-1.506-1.727V9.747c0-.828-.252-1.442-1.387-1.67v-.153c1.135-.229 1.387-.843 1.387-1.67V4.221c0-1.188.357-1.727 1.506-1.727V1.5c-1.942 0-2.576.853-2.576 2.722v1.625c0 1.112-.381 1.544-1.486 1.544v1.218c1.105 0 1.486.432 1.486 1.544v1.625c0 1.869.634 2.722 2.576 2.722zM10.438 1.5v.995c1.15 0 1.506.539 1.506 1.727v2.031c0 .828.252 1.442 1.387 1.67v.153c-1.134.229-1.387.843-1.387 1.67v2.032c0 1.188-.357 1.727-1.506 1.727v.995c1.942 0 2.576-.853 2.576-2.722v-1.625c0-1.112.381-1.544 1.486-1.544V7.391c-1.105 0-1.486-.432-1.486-1.544V4.222c0-1.869-.634-2.722-2.576-2.722z" />
+      </svg>
+    ),
+  },
 ];
 
 export function ProfileLayout() {
@@ -83,19 +105,20 @@ export function ProfileLayout() {
 
         {/* ── Scrollable navigation ── */}
         <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-0.5">
-          {profileNav.map(({ to, label }) => (
+          {profileNav.map(({ to, label, icon }) => (
             <NavLink
               key={to}
               to={to}
               onClick={closeMobile}
               className={({ isActive }) =>
-                `flex items-center px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
+                `flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
                   isActive
                     ? 'bg-[#222222] text-white font-medium'
                     : 'text-[#999999] hover:bg-[#222222]/60 hover:text-white'
                 }`
               }
             >
+              {icon}
               {label}
             </NavLink>
           ))}

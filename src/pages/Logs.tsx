@@ -123,30 +123,31 @@ export function Logs() {
       </div>
 
       {/* タブ */}
-      <div className="px-4 sm:px-6 border-b border-[#3d3d3d]">
-        <div className="flex gap-1">
-          {([
-            { key: 'site',   label: '操作ログ',   enabled: true  },
-            { key: 'device', label: 'デバイスログ', enabled: false },
-          ] as { key: Tab; label: string; enabled: boolean }[]).map(t => (
+      <header className="flex items-center h-[58px] gap-3 px-4 sm:px-6 border-b border-[#3d3d3d] bg-black">
+        <div className="relative isolate min-w-0 font-medium">
+          <div role="tablist" className="relative flex min-w-0 shrink items-stretch overflow-x-auto rounded-lg bg-[#222222] px-0.5 ring-1 ring-[#3d3d3d] h-9">
             <button
-              key={t.key}
-              onClick={() => t.enabled && setTab(t.key)}
-              disabled={!t.enabled}
-              className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${
-                tab === t.key
-                  ? 'text-white border-white'
-                  : t.enabled
-                    ? 'text-zinc-500 border-transparent hover:text-zinc-300 cursor-pointer'
-                    : 'text-zinc-700 border-transparent cursor-not-allowed'
+              onClick={() => setTab('site')}
+              style={{ cursor: 'pointer' }}
+              className={`no-underline relative z-2 flex items-center whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4693ff] text-base my-0.5 rounded-md px-2.5 transition-colors ${
+                tab === 'site'
+                  ? 'bg-[#111111] text-white shadow-sm ring-1 ring-[#3d3d3d]'
+                  : 'bg-transparent text-[#999999] hover:text-white'
               }`}
             >
-              {t.label}
-              {!t.enabled && <span className="ml-1.5 text-zinc-700 text-xs font-normal">準備中</span>}
+              操作ログ
             </button>
-          ))}
+            <button
+              disabled
+              style={{ cursor: 'not-allowed' }}
+              className="no-underline relative z-2 flex items-center gap-1.5 whitespace-nowrap text-base my-0.5 rounded-md px-2.5 bg-transparent text-[#555555]"
+            >
+              デバイスログ
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#2a2a2a] text-[#555555] font-medium">準備中</span>
+            </button>
+          </div>
         </div>
-      </div>
+      </header>
 
       {/* コンテンツ */}
       <div className="px-4 sm:px-6 pt-6 pb-8">
