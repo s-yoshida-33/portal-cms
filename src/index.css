@@ -5,7 +5,7 @@
 .no-scrollbar::-webkit-scrollbar { display: none; }
 
 /* ログビューア用フォント */
-.font-jetbrains { font-family: 'JetBrains Mono', ui-monospace, 'Cascadia Code', 'Fira Code', monospace; }
+.font-log { font-family: "Paper Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
 
 /* 細いダークスクロールバー（ログビューア等） */
 .scrollbar-subtle { scrollbar-width: thin; scrollbar-color: #3d3d3d transparent; }

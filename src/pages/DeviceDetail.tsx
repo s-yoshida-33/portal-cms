@@ -490,7 +490,7 @@ export function DeviceDetail() {
 
             {/* 内枠: ログビューア */}
             <div className="bg-[#0a0a0a] ring-1 ring-[#3d3d3d] rounded-xl overflow-hidden">
-              <div ref={logContainerRef} className="h-96 overflow-y-auto overflow-x-auto p-4 font-jetbrains text-xs leading-5 space-y-0.5 scrollbar-subtle">
+              <div ref={logContainerRef} className="h-96 overflow-y-auto overflow-x-auto p-4 font-log text-xs leading-5 space-y-0.5 scrollbar-subtle">
                 {filteredLogs.length === 0 ? (
                   <p className="text-zinc-600 text-center py-8 whitespace-nowrap">
                     {logs.length === 0 ? 'ログがありません。「更新」ボタンを押してログを取得してください。' : '表示対象のログがありません。'}
@@ -498,10 +498,9 @@ export function DeviceDetail() {
                 ) : (
                   filteredLogs.map((log, i) => (
                     <div key={log._key} className="flex gap-2 whitespace-nowrap">
-                      <span className="shrink-0 select-none text-zinc-700 text-right tabular-nums" style={{ minWidth: `${String(filteredLogs.length).length}ch` }}>
+                      <span className="shrink-0 select-none text-zinc-700 text-right tabular-nums pr-2" style={{ minWidth: `${String(filteredLogs.length).length}ch` }}>
                         {i + 1}
                       </span>
-                      <span className="shrink-0 text-zinc-700 select-none">│</span>
                       <span className="shrink-0 text-zinc-600">{log.timestamp}</span>
                       <span className={`shrink-0 w-10 ${logLevelClass(log.level)}`}>{log.level || '----'}</span>
                       {log.tag && <span className="shrink-0 text-zinc-500">[{log.tag}]</span>}
