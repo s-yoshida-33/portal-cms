@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { subscribeDevice, requestScreenshot as requestPortalScreenshot, cancelScreenshotRequest, subscribeScreenshotRequest, requestLogs } from '../lib/firestore';
+import { subscribeDevice, requestScreenshot as requestPortalScreenshot, cancelScreenshotRequest, subscribeScreenshotRequest, requestLogs, addSiteLog } from '../lib/firestore';
 import { auth, rtdb } from '../lib/firebase';
 import { ref as rtdbRef, onValue } from 'firebase/database';
+import { useAuth } from '../contexts/AuthContext';
 import { StatusBadge } from '../components/StatusBadge';
 import type { Device } from '../types';
 
@@ -99,6 +100,7 @@ function logLevelBadgeClass(level: string, active: boolean) {
 
 export function DeviceDetail() {
   const { deviceId } = useParams<{ deviceId: string }>();
+  const { user }     = useAuth();
 
   const [device,        setDevice]        = useState<Device | null>(null);
   const [deviceLoading, setDeviceLoading] = useState(true);
@@ -158,10 +160,12 @@ export function DeviceDetail() {
     logRequestedAt.current = Date.now();
     try {
       await requestLogs(deviceId, selectedLogDate);
+      addSiteLog({ category: 'log', action: 'fetched', targetId: deviceId, targetName: device?.name ?? deviceId, performedBy: siteLogActor() }).catch(() => {});
     } catch {
       setLogsRefreshing(false);
     }
-  }, [deviceId, logsRefreshing, selectedLogDate]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deviceId, logsRefreshing, selectedLogDate, device?.name, user]);
 
   // Scroll to bottom when new log data arrives.
   useEffect(() => {
@@ -228,12 +232,21 @@ export function DeviceDetail() {
     });
   }, [deviceId, device?.app, fetchPortalScreenshot]);
 
+  function siteLogActor() {
+    return {
+      uid:         user?.uid          ?? '',
+      email:       user?.email        ?? '',
+      displayName: user?.displayName  ?? '',
+    };
+  }
+
   async function handlePortalScreenshotRequest() {
     if (!deviceId) return;
     setPortalSsState('pending');
     // Keep the existing blob URL so the previous screenshot stays visible while fetching.
     try {
       await requestPortalScreenshot(deviceId);
+      addSiteLog({ category: 'screenshot', action: 'captured', targetId: deviceId, targetName: device?.name ?? deviceId, performedBy: siteLogActor() }).catch(() => {});
     } catch {
       setPortalSsState('error');
     }
@@ -388,6 +401,7 @@ export function DeviceDetail() {
                           a.href = portalSsBlobUrl;
                           a.download = `screenshot-${device.name}-${ts}.jpg`;
                           a.click();
+                          addSiteLog({ category: 'screenshot', action: 'downloaded', targetId: deviceId, targetName: device.name, performedBy: siteLogActor() }).catch(() => {});
                         }}
                         className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
                       >
@@ -497,6 +511,7 @@ export function DeviceDetail() {
                     a.download = `${device?.name ?? deviceId}-${selectedLogDate}.log`;
                     a.click();
                     URL.revokeObjectURL(url);
+                    addSiteLog({ category: 'log', action: 'downloaded', targetId: deviceId, targetName: device?.name ?? deviceId ?? '', performedBy: siteLogActor() }).catch(() => {});
                   }}
                   disabled={filteredLogs.length === 0}
                   className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"

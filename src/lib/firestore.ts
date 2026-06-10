@@ -32,6 +32,7 @@ import type {
   DeletionRequest,
   DeletionTargetType,
   PortalNotification,
+  SiteLog,
 } from '../types';
 
 // ---------- helpers ----------
@@ -62,6 +63,7 @@ const col = {
   deletionRequests: () => collection(db, 'deletionRequests'),
   notifications:    () => collection(db, 'notifications'),
   groups:           () => collection(db, 'groups'),
+  siteLogs:         () => collection(db, 'siteLogs'),
 };
 
 // ================================================================
@@ -614,5 +616,29 @@ export function subscribeScreenshotRequest(
     doc(db, 'screenshotRequests', deviceId),
     snap => onUpdate(snap.exists() ? (snap.data() as { status: string; completedAt?: { toDate(): Date } | null }) : null),
     _err => onUpdate(null),
+  );
+}
+
+// ================================================================
+// Site Logs
+// ================================================================
+
+export async function addSiteLog(
+  log: Omit<SiteLog, 'id'>
+): Promise<void> {
+  await addDoc(col.siteLogs(), {
+    ...log,
+    performedAt: serverTimestamp(),
+  });
+}
+
+export function subscribeSiteLogs(
+  onUpdate: (logs: SiteLog[]) => void,
+  onError?: (e: Error) => void,
+): Unsubscribe {
+  return onSnapshot(
+    query(col.siteLogs(), orderBy('performedAt', 'desc'), limit(500)),
+    snap => onUpdate(snap.docs.map(d => fromDoc<SiteLog>(d))),
+    onError,
   );
 }
