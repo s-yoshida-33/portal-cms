@@ -437,7 +437,7 @@ export function DeviceDetail() {
                   {level}
                 </button>
               ))}
-              <div className="w-px h-4 bg-zinc-700 mx-1" />
+              <div className="hidden sm:block w-px h-4 bg-zinc-700 mx-1" />
               <input
                 type="date"
                 value={selectedLogDate}
@@ -489,7 +489,7 @@ export function DeviceDetail() {
 
             {/* 内枠: ログビューア */}
             <div className="bg-[#0a0a0a] ring-1 ring-[#3d3d3d] rounded-xl overflow-hidden">
-              <div ref={logContainerRef} className="h-96 overflow-y-auto overflow-x-auto p-4 font-mono text-xs leading-5 space-y-0.5">
+              <div ref={logContainerRef} className="h-96 overflow-y-auto overflow-x-auto p-4 font-mono text-xs leading-5 space-y-0.5 no-scrollbar">
                 {filteredLogs.length === 0 ? (
                   <p className="text-zinc-600 text-center py-8 whitespace-nowrap">
                     {logs.length === 0 ? 'ログがありません。「更新」ボタンを押してログを取得してください。' : '表示対象のログがありません。'}
