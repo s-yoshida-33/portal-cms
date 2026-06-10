@@ -424,24 +424,20 @@ export function DeviceDetail() {
 
         {/* ログセクション */}
         <div>
-          <div className="mb-3 space-y-2">
-            {/* 1行目: タイトル（左）＋ レベルフィルター（右） */}
-            <div className="flex items-center justify-between gap-2">
-              <h2 className="text-white font-semibold text-base shrink-0">ログ</h2>
-              <div className="flex items-center gap-1.5 flex-wrap justify-end">
-                {LOG_LEVELS.map(level => (
-                  <button
-                    key={level}
-                    onClick={() => toggleLevel(level)}
-                    className={`h-6 px-2.5 rounded-md text-xs font-medium ring-1 transition-colors cursor-pointer ${logLevelBadgeClass(level, logLevels.has(level))}`}
-                  >
-                    {level}
-                  </button>
-                ))}
-              </div>
-            </div>
-            {/* 2行目: 日付 + 更新ボタン（右詰） */}
-            <div className="flex items-center justify-end gap-2">
+          {/* 外枠の外: タイトル + ログレベル + 日付 + 更新（PC: 1行、スマホ: 折り返し） */}
+          <div className="flex items-start sm:items-center justify-between gap-3 mb-3">
+            <h2 className="text-white font-semibold text-base shrink-0">ログ</h2>
+            <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap justify-end">
+              {LOG_LEVELS.map(level => (
+                <button
+                  key={level}
+                  onClick={() => toggleLevel(level)}
+                  className={`h-6 px-2.5 rounded-md text-xs font-medium ring-1 transition-colors cursor-pointer ${logLevelBadgeClass(level, logLevels.has(level))}`}
+                >
+                  {level}
+                </button>
+              ))}
+              <div className="w-px h-4 bg-zinc-700 mx-1" />
               <input
                 type="date"
                 value={selectedLogDate}
@@ -457,49 +453,58 @@ export function DeviceDetail() {
               >
                 {logsRefreshing ? '更新中...' : '更新'}
               </button>
-              <button
-                onClick={() => {
-                  if (filteredLogs.length === 0) return;
-                  const lines = filteredLogs.map(log =>
-                    `[${log.timestamp}] ${(log.level || '----').padEnd(5)} ${log.tag ? `[${log.tag}] ` : ''}${log.message}`
-                  ).join('\n');
-                  const blob = new Blob([lines], { type: 'text/plain' });
-                  const url  = URL.createObjectURL(blob);
-                  const a    = document.createElement('a');
-                  a.href     = url;
-                  a.download = `${device?.name ?? deviceId}-${selectedLogDate}.log`;
-                  a.click();
-                  URL.revokeObjectURL(url);
-                }}
-                disabled={filteredLogs.length === 0}
-                className="h-6 px-2.5 rounded-md text-xs font-medium ring-1 transition-colors cursor-pointer text-zinc-400 bg-zinc-800 ring-zinc-700 hover:bg-zinc-700 disabled:opacity-30 disabled:cursor-not-allowed"
-                title="表示中のログをダウンロード"
-              >
-                DL
-              </button>
             </div>
           </div>
 
-          <div className="bg-[#0a0a0a] ring-1 ring-[#3d3d3d] rounded-xl overflow-hidden">
-            <div ref={logContainerRef} className="h-96 overflow-y-auto overflow-x-auto p-4 font-mono text-xs leading-5 space-y-0.5">
-              {filteredLogs.length === 0 ? (
-                <p className="text-zinc-600 text-center py-8 whitespace-nowrap">
-                  {logs.length === 0 ? 'ログがありません。「更新」ボタンを押してログを取得してください。' : '表示対象のログがありません。'}
-                </p>
-              ) : (
-                filteredLogs.map(log => (
-                  <div key={log._key} className="flex gap-2 whitespace-nowrap">
-                    <span className="shrink-0 text-zinc-600">{log.timestamp}</span>
-                    <span className={`shrink-0 w-10 ${logLevelClass(log.level)}`}>{log.level || '----'}</span>
-                    {log.tag && <span className="shrink-0 text-zinc-500">[{log.tag}]</span>}
-                    <span className="text-zinc-300">{log.message}</span>
-                  </div>
-                ))
-              )}
+          {/* 外枠 */}
+          <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-4">
+            {/* 外枠と内枠の間: 件数・最終取得・ダウンロード */}
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs text-zinc-600">{filteredLogs.length} 件表示（最大 200 件）</span>
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-zinc-600">
+                  最終取得: {logsLastFetched ? logsLastFetched.toLocaleString('ja-JP') : '—'}
+                </span>
+                <button
+                  onClick={() => {
+                    if (filteredLogs.length === 0) return;
+                    const lines = filteredLogs.map(log =>
+                      `[${log.timestamp}] ${(log.level || '----').padEnd(5)} ${log.tag ? `[${log.tag}] ` : ''}${log.message}`
+                    ).join('\n');
+                    const blob = new Blob([lines], { type: 'text/plain' });
+                    const url  = URL.createObjectURL(blob);
+                    const a    = document.createElement('a');
+                    a.href     = url;
+                    a.download = `${device?.name ?? deviceId}-${selectedLogDate}.log`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  }}
+                  disabled={filteredLogs.length === 0}
+                  className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  ダウンロード
+                </button>
+              </div>
             </div>
-            <div className="flex items-center justify-between px-4 py-2 bg-black border-t border-[#3d3d3d] text-xs text-zinc-600">
-              <span>{filteredLogs.length} 件表示（最大 200 件）</span>
-              <span>最終取得: {logsLastFetched ? logsLastFetched.toLocaleString('ja-JP') : '—'}</span>
+
+            {/* 内枠: ログビューア */}
+            <div className="bg-[#0a0a0a] ring-1 ring-[#3d3d3d] rounded-xl overflow-hidden">
+              <div ref={logContainerRef} className="h-96 overflow-y-auto overflow-x-auto p-4 font-mono text-xs leading-5 space-y-0.5">
+                {filteredLogs.length === 0 ? (
+                  <p className="text-zinc-600 text-center py-8 whitespace-nowrap">
+                    {logs.length === 0 ? 'ログがありません。「更新」ボタンを押してログを取得してください。' : '表示対象のログがありません。'}
+                  </p>
+                ) : (
+                  filteredLogs.map(log => (
+                    <div key={log._key} className="flex gap-2 whitespace-nowrap">
+                      <span className="shrink-0 text-zinc-600">{log.timestamp}</span>
+                      <span className={`shrink-0 w-10 ${logLevelClass(log.level)}`}>{log.level || '----'}</span>
+                      {log.tag && <span className="shrink-0 text-zinc-500">[{log.tag}]</span>}
+                      <span className="text-zinc-300">{log.message}</span>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </div>
         </div>
