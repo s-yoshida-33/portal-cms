@@ -178,46 +178,79 @@ export function DeletionRequests() {
             <p className="text-zinc-500 text-sm">承認待ちの削除依頼はありません。</p>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-lg ring-1 ring-[#3d3d3d]">
-            {/* テーブルヘッダー */}
-            <div className="grid grid-cols-[88px_1fr_1fr_160px_176px] gap-4 px-4 py-3 bg-black border-b border-[#3d3d3d] text-xs font-medium text-zinc-500 uppercase tracking-wider">
-              <span>種別</span>
-              <span>対象名</span>
-              <span>依頼者</span>
-              <span>依頼日時</span>
-              <span />
+          <>
+            {/* モバイルカード */}
+            <div className="sm:hidden space-y-4">
+              {requests.map(req => (
+                <div key={req.id} className="rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-4 space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className={`inline-flex items-center h-5 px-2 rounded-full text-xs font-medium ${typeBadge[req.type]}`}>
+                      {typeLabel[req.type]}
+                    </span>
+                    <span className="text-zinc-500 text-xs tabular-nums">{formatDate(req.requestedAt)}</span>
+                  </div>
+                  <div>
+                    <p className="text-white text-sm font-medium truncate">{req.targetName}</p>
+                    <p className="text-zinc-500 text-xs truncate mt-0.5">{req.requestedByEmail}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setApproveTarget(req)}
+                      className="h-7 px-3 rounded-md text-xs font-medium text-white bg-[#e81403] hover:bg-[#b20f03] transition-colors cursor-pointer"
+                    >
+                      承認・削除
+                    </button>
+                    <button
+                      onClick={() => setRejectTarget(req)}
+                      className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
+                    >
+                      却下
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
 
-            {requests.map((req, i) => (
-              <div
-                key={req.id}
-                className={`grid grid-cols-[88px_1fr_1fr_160px_176px] gap-4 px-4 py-4 items-center bg-[#111111] hover:bg-[#161616] transition-colors ${
-                  i < requests.length - 1 ? 'border-b border-[#3d3d3d]' : ''
-                }`}
-              >
-                <span className={`inline-flex items-center justify-center h-5 px-2 rounded-full text-xs font-medium ${typeBadge[req.type]}`}>
-                  {typeLabel[req.type]}
-                </span>
-                <span className="text-white text-sm font-medium truncate">{req.targetName}</span>
-                <span className="text-zinc-400 text-sm truncate">{req.requestedByEmail}</span>
-                <span className="text-zinc-400 text-sm tabular-nums">{formatDate(req.requestedAt)}</span>
-                <div className="flex items-center gap-2 justify-end">
-                  <button
-                    onClick={() => setApproveTarget(req)}
-                    className="h-7 px-3 rounded-md text-xs font-medium text-white bg-[#e81403] hover:bg-[#b20f03] transition-colors cursor-pointer"
-                  >
-                    承認・削除
-                  </button>
-                  <button
-                    onClick={() => setRejectTarget(req)}
-                    className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
-                  >
-                    却下
-                  </button>
-                </div>
+            {/* デスクトップテーブル */}
+            <div className="hidden sm:block overflow-hidden rounded-lg ring-1 ring-[#3d3d3d]">
+              <div className="grid grid-cols-[88px_1fr_1fr_160px_176px] gap-4 px-4 py-3 bg-black border-b border-[#3d3d3d] text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                <span>種別</span>
+                <span>対象名</span>
+                <span>依頼者</span>
+                <span>依頼日時</span>
+                <span />
               </div>
-            ))}
-          </div>
+              {requests.map((req, i) => (
+                <div
+                  key={req.id}
+                  className={`grid grid-cols-[88px_1fr_1fr_160px_176px] gap-4 px-4 py-4 items-center bg-[#111111] hover:bg-[#161616] transition-colors ${
+                    i < requests.length - 1 ? 'border-b border-[#3d3d3d]' : ''
+                  }`}
+                >
+                  <span className={`inline-flex items-center justify-center h-5 px-2 rounded-full text-xs font-medium ${typeBadge[req.type]}`}>
+                    {typeLabel[req.type]}
+                  </span>
+                  <span className="text-white text-sm font-medium truncate">{req.targetName}</span>
+                  <span className="text-zinc-400 text-sm truncate">{req.requestedByEmail}</span>
+                  <span className="text-zinc-400 text-sm tabular-nums">{formatDate(req.requestedAt)}</span>
+                  <div className="flex items-center gap-2 justify-end">
+                    <button
+                      onClick={() => setApproveTarget(req)}
+                      className="h-7 px-3 rounded-md text-xs font-medium text-white bg-[#e81403] hover:bg-[#b20f03] transition-colors cursor-pointer"
+                    >
+                      承認・削除
+                    </button>
+                    <button
+                      onClick={() => setRejectTarget(req)}
+                      className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
+                    >
+                      却下
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
 
