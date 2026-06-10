@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { subscribeUserRoles, setUserRole, removeUserRole } from '../lib/firestore';
+import { subscribeUserRoles, setUserRole, removeUserRole, addSiteLog } from '../lib/firestore';
 import type { UserRoleRecord, UserRole } from '../types';
 import { CustomSelect } from '../components/CustomSelect';
 
@@ -69,6 +69,10 @@ function RemoveConfirm({ target, onClose, onConfirm }: RemoveConfirmProps) {
 
 export function UserManagement() {
   const { user, role } = useAuth();
+
+  function siteLogActor() {
+    return { uid: user?.uid ?? '', email: user?.email ?? '', displayName: user?.displayName ?? '' };
+  }
   const [users,        setUsers]        = useState<UserRoleRecord[]>([]);
   const [loading,      setLoading]      = useState(true);
   const [removeTarget, setRemoveTarget] = useState<UserRoleRecord | null>(null);
@@ -96,6 +100,7 @@ export function UserManagement() {
     setUpdating(target.uid);
     try {
       await setUserRole(target.uid, { ...target, role: newRole });
+      addSiteLog({ category: 'user', action: 'roleChanged', targetId: target.uid, targetName: target.displayName, performedBy: siteLogActor() }).catch(() => {});
     } finally {
       setUpdating(null);
     }
@@ -103,6 +108,7 @@ export function UserManagement() {
 
   async function handleRemove(target: UserRoleRecord) {
     await removeUserRole(target.uid);
+    addSiteLog({ category: 'user', action: 'removed', targetId: target.uid, targetName: target.displayName, performedBy: siteLogActor() }).catch(() => {});
   }
 
   return (

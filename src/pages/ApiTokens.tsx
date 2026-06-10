@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { subscribeApiTokens, createApiToken, revokeApiToken } from '../lib/firestore';
+import { subscribeApiTokens, createApiToken, revokeApiToken, addSiteLog } from '../lib/firestore';
 import type { ApiToken, ApiTokenType } from '../types';
 import { CustomSelect } from '../components/CustomSelect';
 
@@ -74,7 +74,7 @@ function Pagination({ page, total, onPage }: { page: number; total: number; onPa
 
 interface CreateModalProps {
   onClose:   () => void;
-  onCreated: (token: string) => void;
+  onCreated: (token: string, name: string, type: ApiTokenType) => void;
 }
 
 function CreateModal({ onClose, onCreated }: CreateModalProps) {
@@ -92,7 +92,7 @@ function CreateModal({ onClose, onCreated }: CreateModalProps) {
     setSaving(true);
     try {
       const { token } = await createApiToken(name.trim(), type);
-      onCreated(token);
+      onCreated(token, name.trim(), type);
     } catch {
       setError('発行に失敗しました。');
       setSaving(false);
@@ -224,7 +224,11 @@ function RevokeConfirm({ token, onClose, onConfirm }: RevokeConfirmProps) {
 // ── メインページ ──────────────────────────────────────────────────
 
 export function ApiTokens() {
-  const { role } = useAuth();
+  const { user, role } = useAuth();
+
+  function siteLogActor() {
+    return { uid: user?.uid ?? '', email: user?.email ?? '', displayName: user?.displayName ?? '' };
+  }
   const [tokens,         setTokens]         = useState<ApiToken[]>([]);
   const [loading,        setLoading]        = useState(true);
   const [createOpen,     setCreateOpen]     = useState(false);
@@ -478,7 +482,11 @@ export function ApiTokens() {
       {createOpen && (
         <CreateModal
           onClose={() => setCreateOpen(false)}
-          onCreated={token => { setCreateOpen(false); setRevealToken(token); }}
+          onCreated={(token, tokenName, tokenType) => {
+            setCreateOpen(false);
+            setRevealToken(token);
+            addSiteLog({ category: 'apiToken', action: 'issued', targetName: `${tokenName} (${tokenType})`, performedBy: siteLogActor() }).catch(() => {});
+          }}
         />
       )}
       {revealToken && (
@@ -488,7 +496,10 @@ export function ApiTokens() {
         <RevokeConfirm
           token={revokeTarget}
           onClose={() => setRevokeTarget(null)}
-          onConfirm={() => revokeApiToken(revokeTarget.id)}
+          onConfirm={async () => {
+            await revokeApiToken(revokeTarget.id);
+            addSiteLog({ category: 'apiToken', action: 'revoked', targetId: revokeTarget.id, targetName: revokeTarget.name, performedBy: siteLogActor() }).catch(() => {});
+          }}
         />
       )}
     </div>

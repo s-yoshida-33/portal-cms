@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { subscribeDeletionRequests, approveDeletion, rejectDeletion } from '../lib/firestore';
+import { subscribeDeletionRequests, approveDeletion, rejectDeletion, addSiteLog } from '../lib/firestore';
 import type { DeletionRequest, DeletionTargetType } from '../types';
 
 // ── helpers ──────────────────────────────────────────────────────
@@ -123,7 +123,11 @@ function RejectModal({ request, onClose, onConfirm }: RejectModalProps) {
 // ── メインページ ──────────────────────────────────────────────────
 
 export function DeletionRequests() {
-  const { role } = useAuth();
+  const { user, role } = useAuth();
+
+  function siteLogActor() {
+    return { uid: user?.uid ?? '', email: user?.email ?? '', displayName: user?.displayName ?? '' };
+  }
   const [requests,      setRequests]      = useState<DeletionRequest[]>([]);
   const [loading,       setLoading]       = useState(true);
   const [approveTarget, setApproveTarget] = useState<DeletionRequest | null>(null);
@@ -222,14 +226,20 @@ export function DeletionRequests() {
         <ApproveConfirm
           request={approveTarget}
           onClose={() => setApproveTarget(null)}
-          onConfirm={() => approveDeletion(approveTarget.id, approveTarget)}
+          onConfirm={async () => {
+            await approveDeletion(approveTarget.id, approveTarget);
+            addSiteLog({ category: 'deletionRequest', action: 'approved', targetId: approveTarget.id, targetName: approveTarget.targetName, performedBy: siteLogActor() }).catch(() => {});
+          }}
         />
       )}
       {rejectTarget && (
         <RejectModal
           request={rejectTarget}
           onClose={() => setRejectTarget(null)}
-          onConfirm={note => rejectDeletion(rejectTarget.id, note)}
+          onConfirm={async (note: string) => {
+            await rejectDeletion(rejectTarget.id, note);
+            addSiteLog({ category: 'deletionRequest', action: 'rejected', targetId: rejectTarget.id, targetName: rejectTarget.targetName, performedBy: siteLogActor() }).catch(() => {});
+          }}
         />
       )}
     </div>
