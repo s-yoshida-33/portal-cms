@@ -5,6 +5,7 @@ import {
   approveDevice,
   rejectPendingDevice,
   subscribeProjects,
+  addSiteLog,
 } from '../lib/firestore';
 import type { PendingDevice, ProjectDoc, AppName } from '../types';
 import { CustomSelect } from '../components/CustomSelect';
@@ -37,7 +38,7 @@ interface ApproveModalProps {
   pending:  PendingDevice;
   projects: ProjectDoc[];
   onClose:  () => void;
-  onDone:   () => void;
+  onDone:   (deviceName: string) => void;
 }
 
 function CopyField({ label, value }: { label: string; value: string }) {
@@ -83,7 +84,7 @@ function ApproveModal({ pending, projects, onClose, onDone }: ApproveModalProps)
     setRunning(true);
     try {
       const result = await approveDevice(pending.id, pending, projectId, deviceName.trim());
-      onDone();
+      onDone(deviceName.trim());
       setApprovalResult(result);
     } catch {
       setError('承認に失敗しました。');
@@ -255,7 +256,11 @@ function RejectConfirm({ pending, onClose, onDone }: RejectConfirmProps) {
 // ── メインページ ──────────────────────────────────────────────────
 
 export function PendingDevices() {
-  const { role } = useAuth();
+  const { user, role } = useAuth();
+
+  function siteLogActor() {
+    return { uid: user?.uid ?? '', email: user?.email ?? '', displayName: user?.displayName ?? '' };
+  }
   const [devices,       setDevices]       = useState<PendingDevice[]>([]);
   const [projects,      setProjects]      = useState<ProjectDoc[]>([]);
   const [loading,       setLoading]       = useState(true);
@@ -350,14 +355,20 @@ export function PendingDevices() {
           pending={approveTarget}
           projects={projects}
           onClose={() => setApproveTarget(null)}
-          onDone={() => {}}
+          onDone={(deviceName) => {
+            setApproveTarget(null);
+            addSiteLog({ category: 'device', action: 'added', targetId: approveTarget?.id, targetName: deviceName, performedBy: siteLogActor() }).catch(() => {});
+          }}
         />
       )}
       {rejectTarget && (
         <RejectConfirm
           pending={rejectTarget}
           onClose={() => setRejectTarget(null)}
-          onDone={() => {}}
+          onDone={() => {
+            setRejectTarget(null);
+            addSiteLog({ category: 'device', action: 'rejected', targetId: rejectTarget?.id, targetName: rejectTarget?.hostname ?? '', performedBy: siteLogActor() }).catch(() => {});
+          }}
         />
       )}
     </div>
