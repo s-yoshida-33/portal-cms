@@ -459,44 +459,49 @@ export function DeviceDetail() {
           {/* 外枠 */}
           <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-4">
             {/* 外枠と内枠の間: 件数・最終取得・ダウンロード */}
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs text-zinc-600">{filteredLogs.length} 件表示（最大 200 件）</span>
-              <div className="flex items-center gap-3">
+            <div className="flex items-start sm:items-center justify-between mb-3">
+              {/* スマホ: 2行 / PC: 1行 */}
+              <div className="flex flex-col sm:flex-row sm:items-center gap-0 sm:gap-3">
+                <span className="text-xs text-zinc-600">{filteredLogs.length} 件表示（最大 200 件）</span>
                 <span className="text-xs text-zinc-600">
                   最終取得: {logsLastFetched ? logsLastFetched.toLocaleString('ja-JP') : '—'}
                 </span>
-                <button
-                  onClick={() => {
-                    if (filteredLogs.length === 0) return;
-                    const lines = filteredLogs.map(log =>
-                      `[${log.timestamp}] ${(log.level || '----').padEnd(5)} ${log.tag ? `[${log.tag}] ` : ''}${log.message}`
-                    ).join('\n');
-                    const blob = new Blob([lines], { type: 'text/plain' });
-                    const url  = URL.createObjectURL(blob);
-                    const a    = document.createElement('a');
-                    a.href     = url;
-                    a.download = `${device?.name ?? deviceId}-${selectedLogDate}.log`;
-                    a.click();
-                    URL.revokeObjectURL(url);
-                  }}
-                  disabled={filteredLogs.length === 0}
-                  className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
-                >
-                  ダウンロード
-                </button>
               </div>
+              <button
+                onClick={() => {
+                  if (filteredLogs.length === 0) return;
+                  const lines = filteredLogs.map(log =>
+                    `[${log.timestamp}] ${(log.level || '----').padEnd(5)} ${log.tag ? `[${log.tag}] ` : ''}${log.message}`
+                  ).join('\n');
+                  const blob = new Blob([lines], { type: 'text/plain' });
+                  const url  = URL.createObjectURL(blob);
+                  const a    = document.createElement('a');
+                  a.href     = url;
+                  a.download = `${device?.name ?? deviceId}-${selectedLogDate}.log`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                }}
+                disabled={filteredLogs.length === 0}
+                className="shrink-0 h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                ダウンロード
+              </button>
             </div>
 
             {/* 内枠: ログビューア */}
             <div className="bg-[#0a0a0a] ring-1 ring-[#3d3d3d] rounded-xl overflow-hidden">
-              <div ref={logContainerRef} className="h-96 overflow-y-auto overflow-x-auto p-4 font-mono text-xs leading-5 space-y-0.5 scrollbar-subtle">
+              <div ref={logContainerRef} className="h-96 overflow-y-auto overflow-x-auto p-4 font-jetbrains text-xs leading-5 space-y-0.5 scrollbar-subtle">
                 {filteredLogs.length === 0 ? (
                   <p className="text-zinc-600 text-center py-8 whitespace-nowrap">
                     {logs.length === 0 ? 'ログがありません。「更新」ボタンを押してログを取得してください。' : '表示対象のログがありません。'}
                   </p>
                 ) : (
-                  filteredLogs.map(log => (
+                  filteredLogs.map((log, i) => (
                     <div key={log._key} className="flex gap-2 whitespace-nowrap">
+                      <span className="shrink-0 select-none text-zinc-700 text-right tabular-nums" style={{ minWidth: `${String(filteredLogs.length).length}ch` }}>
+                        {i + 1}
+                      </span>
+                      <span className="shrink-0 text-zinc-700 select-none">│</span>
                       <span className="shrink-0 text-zinc-600">{log.timestamp}</span>
                       <span className={`shrink-0 w-10 ${logLevelClass(log.level)}`}>{log.level || '----'}</span>
                       {log.tag && <span className="shrink-0 text-zinc-500">[{log.tag}]</span>}
