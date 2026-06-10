@@ -115,7 +115,7 @@ export function Logs() {
     <div className="flex flex-col min-h-full">
 
       {/* ページヘッダー */}
-      <div className="flex items-start justify-between gap-4 py-6 px-4 sm:px-6">
+      <div className="flex items-start justify-between gap-4 py-6 px-4 sm:px-6 border-b border-[#3d3d3d]">
         <div className="flex flex-col gap-2">
           <h1 className="text-white text-3xl font-semibold leading-tight">ログ</h1>
           <p className="text-[#999999] text-base">操作履歴とデバイスログの確認</p>
@@ -138,12 +138,15 @@ export function Logs() {
               操作ログ
             </button>
             <button
-              disabled
-              style={{ cursor: 'not-allowed' }}
-              className="no-underline relative z-2 flex items-center gap-1.5 whitespace-nowrap text-base my-0.5 rounded-md px-2.5 bg-transparent text-[#555555]"
+              onClick={() => setTab('device')}
+              style={{ cursor: 'pointer' }}
+              className={`no-underline relative z-2 flex items-center whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4693ff] text-base my-0.5 rounded-md px-2.5 transition-colors ${
+                tab === 'device'
+                  ? 'bg-[#111111] text-white shadow-sm ring-1 ring-[#3d3d3d]'
+                  : 'bg-transparent text-[#999999] hover:text-white'
+              }`}
             >
               デバイスログ
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#2a2a2a] text-[#555555] font-medium">準備中</span>
             </button>
           </div>
         </div>
