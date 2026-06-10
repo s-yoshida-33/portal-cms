@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { subscribeDeletionRequests, approveDeletion, rejectDeletion, addSiteLog } from '../lib/firestore';
 import type { DeletionRequest, DeletionTargetType } from '../types';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 // ── helpers ──────────────────────────────────────────────────────
 
@@ -123,6 +124,7 @@ function RejectModal({ request, onClose, onConfirm }: RejectModalProps) {
 // ── メインページ ──────────────────────────────────────────────────
 
 export function DeletionRequests() {
+  usePageTitle('削除依頼');
   const { user, role } = useAuth();
 
   function siteLogActor() {

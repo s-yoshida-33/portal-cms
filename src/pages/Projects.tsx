@@ -10,6 +10,7 @@ import {
   addSiteLog,
 } from '../lib/firestore';
 import type { ProjectDoc, Device } from '../types';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 // ── プロジェクト追加・編集モーダル ────────────────────────────────
 
@@ -138,6 +139,7 @@ function DeleteConfirm({ project, onClose, onConfirm }: DeleteConfirmProps) {
 // ── メインページ ──────────────────────────────────────────────────
 
 export function Projects() {
+  usePageTitle('プロジェクト管理');
   const { user, role } = useAuth();
 
   function siteLogActor() {

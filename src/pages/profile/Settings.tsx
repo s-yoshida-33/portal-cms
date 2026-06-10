@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { CustomSelect } from '../../components/CustomSelect';
 import type { SelectOption } from '../../components/CustomSelect';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 type Appearance = 'light' | 'dark' | 'system';
 type Language   = 'ja' | 'en';
@@ -34,6 +35,7 @@ function applyAppearance(value: Appearance) {
 
 
 export function ProfileSettings() {
+  usePageTitle('プロフィール設定');
   const { user } = useAuth();
 
   const [tab, setTab] = useState<Tab>('settings');

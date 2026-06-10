@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { subscribeSiteLogs } from '../lib/firestore';
 import type { SiteLog, SiteLogCategory } from '../types';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 // ── helpers ──────────────────────────────────────────────────────
 
@@ -105,6 +106,7 @@ type Tab = 'site' | 'device';
 // ── メインページ ──────────────────────────────────────────────────
 
 export function Logs() {
+  usePageTitle('ログ');
   const [tab,     setTab]     = useState<Tab>('site');
   const [logs,    setLogs]    = useState<SiteLog[]>([]);
   const [loading, setLoading] = useState(true);

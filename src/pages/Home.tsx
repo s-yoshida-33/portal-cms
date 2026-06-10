@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { fetchProjects, fetchDevices } from '../lib/firestore';
 import type { ProjectDoc, Device, DeviceStatus } from '../types';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 function countByStatus(devices: Device[], status: DeviceStatus) {
   return devices.filter(d => d.status === status).length;
@@ -47,6 +48,7 @@ function SplitStatCard({ leftLabel, leftValue, leftColor, rightLabel, rightValue
 }
 
 export function Home() {
+  usePageTitle('ホーム');
   const { user } = useAuth();
   const { uuid } = useParams<{ uuid: string }>();
 

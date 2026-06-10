@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { subscribeUserRoles, setUserRole, removeUserRole, addSiteLog } from '../lib/firestore';
 import type { UserRoleRecord, UserRole } from '../types';
 import { CustomSelect } from '../components/CustomSelect';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 // ── helpers ──────────────────────────────────────────────────────
 
@@ -68,6 +69,7 @@ function RemoveConfirm({ target, onClose, onConfirm }: RemoveConfirmProps) {
 // ── メインページ ──────────────────────────────────────────────────
 
 export function UserManagement() {
+  usePageTitle('ユーザー管理');
   const { user, role } = useAuth();
 
   function siteLogActor() {
