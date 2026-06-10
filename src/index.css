@@ -1,5 +1,16 @@
 @import "tailwindcss";
 
+/* スクロールバー非表示 */
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* 細いダークスクロールバー（ログビューア等） */
+.scrollbar-subtle { scrollbar-width: thin; scrollbar-color: #3d3d3d transparent; }
+.scrollbar-subtle::-webkit-scrollbar { width: 4px; height: 4px; }
+.scrollbar-subtle::-webkit-scrollbar-track { background: transparent; }
+.scrollbar-subtle::-webkit-scrollbar-thumb { background: #3d3d3d; border-radius: 9999px; }
+.scrollbar-subtle::-webkit-scrollbar-thumb:hover { background: #555555; }
+
 @keyframes fade-slide-in {
   from { opacity: 0; transform: translateY(-4px); }
   to   { opacity: 1; transform: translateY(0); }
