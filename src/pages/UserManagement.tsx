@@ -130,79 +130,135 @@ export function UserManagement() {
             <p className="text-zinc-500 text-sm">ユーザーが登録されていません。</p>
           </div>
         ) : (
-          <div className="rounded-lg ring-1 ring-[#3d3d3d]">
-            {/* テーブルヘッダー */}
-            <div className="grid grid-cols-[1fr_1fr_160px_120px_120px] gap-4 px-4 py-3 bg-black rounded-t-lg border-b border-[#3d3d3d] text-xs font-medium text-zinc-500 uppercase tracking-wider">
-              <span>表示名</span>
-              <span>メール</span>
-              <span>ロール</span>
-              <span>登録日</span>
-              <span />
+          <>
+            {/* ── モバイルカード ── */}
+            <div className="sm:hidden space-y-4">
+              {users.map(u => {
+                const isSelf     = u.uid === user?.uid;
+                const isUpdating = updating === u.uid;
+                return (
+                  <div key={u.uid} className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-4">
+                    {/* アバター + 表示名 + ロール */}
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shrink-0 text-white text-sm font-medium">
+                          {u.displayName[0]?.toUpperCase() ?? '?'}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-white text-sm font-medium truncate">
+                            {u.displayName}
+                            {isSelf && <span className="ml-1.5 text-zinc-500 text-xs">（自分）</span>}
+                          </div>
+                          <div className="text-zinc-500 text-xs truncate mt-0.5">{u.email}</div>
+                        </div>
+                      </div>
+                      {isSelf ? (
+                        <span className={`inline-flex items-center justify-center h-5 px-2 rounded-full text-xs font-medium shrink-0 ${roleBadge[u.role]}`}>
+                          {roleLabel[u.role]}
+                        </span>
+                      ) : (
+                        <CustomSelect
+                          value={u.role}
+                          disabled={isUpdating}
+                          onChange={val => handleRoleChange(u, val as UserRole)}
+                          options={[
+                            { value: 'owner', label: 'オーナー' },
+                            { value: 'admin', label: '管理者' },
+                            { value: 'user',  label: '一般' },
+                          ]}
+                          className="w-28 shrink-0"
+                        />
+                      )}
+                    </div>
+                    {/* 登録日 + 除名ボタン */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-zinc-500 text-xs tabular-nums">登録: {formatDate(u.assignedAt)}</span>
+                      {!isSelf && (
+                        <button
+                          onClick={() => setRemoveTarget(u)}
+                          disabled={isUpdating}
+                          className="h-7 px-3 rounded-md text-xs text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-1 ring-red-900/50 transition-colors cursor-pointer disabled:opacity-50"
+                        >
+                          除名
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
-            {users.map((u, i) => {
-              const isSelf    = u.uid === user?.uid;
-              const isUpdating = updating === u.uid;
+            {/* ── PCテーブル ── */}
+            <div className="hidden sm:block rounded-lg ring-1 ring-[#3d3d3d]">
+              {/* テーブルヘッダー */}
+              <div className="grid grid-cols-[1fr_1fr_160px_120px_120px] gap-4 px-4 py-3 bg-black rounded-t-lg border-b border-[#3d3d3d] text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                <span>表示名</span>
+                <span>メール</span>
+                <span>ロール</span>
+                <span>登録日</span>
+                <span />
+              </div>
 
-              return (
-                <div
-                  key={u.uid}
-                  className={`grid grid-cols-[1fr_1fr_160px_120px_120px] gap-4 px-4 py-3.5 items-center bg-[#111111] hover:bg-[#161616] transition-colors ${
-                    i < users.length - 1 ? 'border-b border-[#3d3d3d]' : 'rounded-b-lg'
-                  }`}
-                >
-                  {/* 表示名 */}
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center shrink-0 text-white text-xs font-medium">
-                      {u.displayName[0]?.toUpperCase() ?? '?'}
+              {users.map((u, i) => {
+                const isSelf     = u.uid === user?.uid;
+                const isUpdating = updating === u.uid;
+
+                return (
+                  <div
+                    key={u.uid}
+                    className={`grid grid-cols-[1fr_1fr_160px_120px_120px] gap-4 px-4 py-3.5 items-center bg-[#111111] hover:bg-[#161616] transition-colors ${
+                      i < users.length - 1 ? 'border-b border-[#3d3d3d]' : 'rounded-b-lg'
+                    }`}
+                  >
+                    {/* 表示名 */}
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center shrink-0 text-white text-xs font-medium">
+                        {u.displayName[0]?.toUpperCase() ?? '?'}
+                      </div>
+                      <span className="text-white text-sm truncate">
+                        {u.displayName}
+                        {isSelf && <span className="ml-1.5 text-zinc-500 text-xs">（自分）</span>}
+                      </span>
                     </div>
-                    <span className="text-white text-sm truncate">
-                      {u.displayName}
-                      {isSelf && <span className="ml-1.5 text-zinc-500 text-xs">（自分）</span>}
-                    </span>
-                  </div>
-
-                  {/* メール */}
-                  <span className="text-zinc-400 text-sm truncate">{u.email}</span>
-
-                  {/* ロール */}
-                  {isSelf ? (
-                    <span className={`inline-flex items-center justify-center h-5 px-2 rounded-full text-xs font-medium w-fit ${roleBadge[u.role]}`}>
-                      {roleLabel[u.role]}
-                    </span>
-                  ) : (
-                    <CustomSelect
-                      value={u.role}
-                      disabled={isUpdating}
-                      onChange={val => handleRoleChange(u, val as UserRole)}
-                      options={[
-                        { value: 'owner', label: 'オーナー' },
-                        { value: 'admin', label: '管理者' },
-                        { value: 'user',  label: '一般' },
-                      ]}
-                      className="w-36"
-                    />
-                  )}
-
-                  {/* 登録日 */}
-                  <span className="text-zinc-500 text-xs tabular-nums">{formatDate(u.assignedAt)}</span>
-
-                  {/* 操作 */}
-                  <div className="flex justify-end">
-                    {!isSelf && (
-                      <button
-                        onClick={() => setRemoveTarget(u)}
+                    {/* メール */}
+                    <span className="text-zinc-400 text-sm truncate">{u.email}</span>
+                    {/* ロール */}
+                    {isSelf ? (
+                      <span className={`inline-flex items-center justify-center h-5 px-2 rounded-full text-xs font-medium w-fit ${roleBadge[u.role]}`}>
+                        {roleLabel[u.role]}
+                      </span>
+                    ) : (
+                      <CustomSelect
+                        value={u.role}
                         disabled={isUpdating}
-                        className="h-7 px-3 rounded-md text-xs text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-1 ring-red-900/50 transition-colors cursor-pointer disabled:opacity-50"
-                      >
-                        除名
-                      </button>
+                        onChange={val => handleRoleChange(u, val as UserRole)}
+                        options={[
+                          { value: 'owner', label: 'オーナー' },
+                          { value: 'admin', label: '管理者' },
+                          { value: 'user',  label: '一般' },
+                        ]}
+                        className="w-36"
+                      />
                     )}
+                    {/* 登録日 */}
+                    <span className="text-zinc-500 text-xs tabular-nums">{formatDate(u.assignedAt)}</span>
+                    {/* 操作 */}
+                    <div className="flex justify-end">
+                      {!isSelf && (
+                        <button
+                          onClick={() => setRemoveTarget(u)}
+                          disabled={isUpdating}
+                          className="h-7 px-3 rounded-md text-xs text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-1 ring-red-900/50 transition-colors cursor-pointer disabled:opacity-50"
+                        >
+                          除名
+                        </button>
+                      )}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          </>
         )}
       </div>
 
