@@ -166,33 +166,74 @@ export function Logs() {
             </div>
           ) : (
             <>
-              {/* テーブル */}
-              <div className="overflow-hidden rounded-lg ring-1 ring-[#3d3d3d]">
-                <div className="grid grid-cols-[120px_1fr_1fr_1fr_160px] gap-4 px-4 py-3 bg-black border-b border-[#3d3d3d] text-xs font-medium text-zinc-500 uppercase tracking-wider">
+              {/* モバイルカード */}
+              <div className="sm:hidden space-y-4">
+                {paged.map(log => {
+                  const projectCol = log.projectName ?? (log.deviceName ? '—' : log.targetName);
+                  const deviceCol  = log.deviceName  ?? '—';
+                  return (
+                    <div key={log.id} className="rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-4 space-y-2.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className={`inline-flex items-center h-5 px-2 rounded-full text-xs font-medium ${categoryBadge[log.category]}`}>
+                          {categoryLabel[log.category]}
+                        </span>
+                        <span className="text-zinc-500 text-xs tabular-nums">{formatDate(log.performedAt)}</span>
+                      </div>
+                      <p className="text-white text-sm">{actionLabel[`${log.category}.${log.action}`] ?? log.action}</p>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                        <div>
+                          <span className="text-zinc-600">プロジェクト</span>
+                          <p className="text-zinc-300 truncate mt-0.5">{projectCol}</p>
+                        </div>
+                        <div>
+                          <span className="text-zinc-600">デバイス</span>
+                          <p className="text-zinc-300 truncate mt-0.5">{deviceCol}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-5 h-5 rounded-full bg-blue-600 flex items-center justify-center shrink-0 text-white text-[10px] font-medium">
+                          {log.performedBy.displayName[0]?.toUpperCase() ?? '?'}
+                        </div>
+                        <span className="text-zinc-400 text-xs truncate">{log.performedBy.displayName}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* デスクトップテーブル */}
+              <div className="hidden sm:block overflow-hidden rounded-lg ring-1 ring-[#3d3d3d]">
+                <div className="grid grid-cols-[120px_1fr_1fr_1fr_1fr_160px] gap-4 px-4 py-3 bg-black border-b border-[#3d3d3d] text-xs font-medium text-zinc-500 uppercase tracking-wider">
                   <span>種別</span>
                   <span>操作</span>
-                  <span>対象</span>
+                  <span>プロジェクト</span>
+                  <span>デバイス</span>
                   <span>実行者</span>
                   <span>日時</span>
                 </div>
-                {paged.map((log, i) => (
-                  <div
-                    key={log.id}
-                    className={`grid grid-cols-[120px_1fr_1fr_1fr_160px] gap-4 px-4 py-3.5 items-center bg-[#111111] hover:bg-[#161616] transition-colors ${
-                      i < paged.length - 1 ? 'border-b border-[#3d3d3d]' : ''
-                    }`}
-                  >
-                    <span className={`inline-flex items-center justify-center h-5 px-2 rounded-full text-xs font-medium w-fit ${categoryBadge[log.category]}`}>
-                      {categoryLabel[log.category]}
-                    </span>
-                    <span className="text-white text-sm">
-                      {actionLabel[`${log.category}.${log.action}`] ?? log.action}
-                    </span>
-                    <span className="text-zinc-400 text-sm truncate">{log.targetName}</span>
-                    <span className="text-zinc-400 text-sm truncate">{log.performedBy.displayName}</span>
-                    <span className="text-zinc-500 text-xs tabular-nums">{formatDate(log.performedAt)}</span>
-                  </div>
-                ))}
+                {paged.map((log, i) => {
+                  const projectCol = log.projectName ?? (log.deviceName ? '—' : log.targetName);
+                  const deviceCol  = log.deviceName  ?? '—';
+                  return (
+                    <div
+                      key={log.id}
+                      className={`grid grid-cols-[120px_1fr_1fr_1fr_1fr_160px] gap-4 px-4 py-3.5 items-center bg-[#111111] hover:bg-[#161616] transition-colors ${
+                        i < paged.length - 1 ? 'border-b border-[#3d3d3d]' : ''
+                      }`}
+                    >
+                      <span className={`inline-flex items-center justify-center h-5 px-2 rounded-full text-xs font-medium w-fit ${categoryBadge[log.category]}`}>
+                        {categoryLabel[log.category]}
+                      </span>
+                      <span className="text-white text-sm">
+                        {actionLabel[`${log.category}.${log.action}`] ?? log.action}
+                      </span>
+                      <span className="text-zinc-400 text-sm truncate">{projectCol}</span>
+                      <span className="text-zinc-400 text-sm truncate">{deviceCol}</span>
+                      <span className="text-zinc-400 text-sm truncate">{log.performedBy.displayName}</span>
+                      <span className="text-zinc-500 text-xs tabular-nums">{formatDate(log.performedAt)}</span>
+                    </div>
+                  );
+                })}
               </div>
               <Pagination page={page} total={logs.length} pageSize={PAGE_SIZE} onChange={setPage} />
             </>
