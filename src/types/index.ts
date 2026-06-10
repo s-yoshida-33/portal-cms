@@ -96,6 +96,20 @@ export interface DeletionRequest {
   reviewNote:       string | null;
 }
 
+// Firestore /siteLogs/{logId}
+export type SiteLogCategory =
+  | 'screenshot' | 'log' | 'apiToken' | 'user' | 'deletionRequest' | 'project' | 'device';
+
+export interface SiteLog {
+  id:          string;
+  category:    SiteLogCategory;
+  action:      string;
+  targetId?:   string;
+  targetName:  string;
+  performedBy: { uid: string; email: string; displayName: string };
+  performedAt: string; // ISO
+}
+
 // Firestore /notifications/{notificationId}
 export interface PortalNotification {
   id:        string;
