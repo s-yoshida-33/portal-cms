@@ -387,7 +387,7 @@ export function Projects() {
       {modalOpen && (
         <ProjectModal
           initial={editTarget}
-          onClose={() => setModalOpen(false)}
+          onClose={() => { setModalOpen(false); setEditTarget(null); }}
           onSave={handleSave}
         />
       )}
