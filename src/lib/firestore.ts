@@ -624,7 +624,7 @@ export function subscribeScreenshotRequest(
 // ================================================================
 
 export async function addSiteLog(
-  log: Omit<SiteLog, 'id'>
+  log: Omit<SiteLog, 'id' | 'performedAt'>
 ): Promise<void> {
   await addDoc(col.siteLogs(), {
     ...log,
