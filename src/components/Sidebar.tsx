@@ -134,9 +134,9 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
       {/* ── Fixed top section (logo + user menu) ── */}
       <div className="shrink-0">
         {/* ロゴ */}
-        <div className="px-4 py-3 border-b border-zinc-800">
+        <div className="px-5 py-3 border-b border-zinc-800">
           <div className="flex items-center gap-2.5">
-            <img src="/logo.svg" alt="" className="w-7 h-7 shrink-0" />
+            <img src="/logo.svg" alt="" className="w-6 h-6 shrink-0" />
             <span className="text-zinc-100 font-semibold text-sm">Portal CMS</span>
           </div>
         </div>
