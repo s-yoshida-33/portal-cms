@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useParams } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../lib/firebase';
@@ -36,7 +36,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
     return subscribePendingDevices(devs => setPendingDevicesCount(devs.length));
   }, [role]);
 
-  const navItems = [
+  const navItems: { to: string; label: string; badge: number; icon?: React.ReactNode }[] = [
     { to: `${base}/home/overview`,    label: 'ホーム',            badge: 0 },
     { to: `${base}/projects`,         label: 'プロジェクト管理',  badge: 0 },
     ...(role === 'admin' || role === 'owner' ? [
@@ -48,7 +48,15 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
       { to: `${base}/users`,             label: 'ユーザー管理', badge: 0 },
     ] : []),
     { to: `${base}/logs`,     label: 'ログ', badge: 0 },
-    { to: `${base}/settings`, label: '設定', badge: 0 },
+    {
+      to: `${base}/settings`, label: '設定', badge: 0,
+      icon: (
+        <svg className="w-4 h-4 fill-current opacity-50 shrink-0" role="presentation" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path d="M8 5.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5zm0 4a1.5 1.5 0 110-3 1.5 1.5 0 010 3z" />
+          <path d="M12.475 8l1.86-1.798-1.62-2.804-2.435.697L9.627 1.5h-3.25L5.75 4.095 3.3 3.398 1.68 6.204l1.87 1.807-1.87 1.81 1.62 2.806 2.45-.7.637 2.572h3.25l.643-2.565 2.465.705 1.622-2.805L12.475 8zm-.225 3.453l-2.183-.628-.67.463-.55 2.212h-1.68l-.55-2.2-.647-.475-2.195.628L2.935 10 4.57 8.42v-.81L2.935 6.027l.84-1.455 2.197.63.648-.517.547-2.185h1.68l.55 2.195.645.518 2.208-.64.84 1.454-1.638 1.583.025.808L13.1 10l-.85 1.453z" />
+        </svg>
+      ),
+    },
   ];
 
   async function handleSignOut() {
@@ -135,23 +143,26 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
 
       {/* ── Scrollable navigation ── */}
       <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-0.5">
-        {navItems.map(({ to, label, badge }) => (
+        {navItems.map(({ to, label, badge, icon }) => (
           <NavLink
             key={to}
             to={to}
             end={to === '/'}
             onClick={onMobileClose}
             className={({ isActive }) =>
-              `flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
+              `flex items-center gap-2 justify-between px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
                 isActive
                   ? 'bg-zinc-800 text-zinc-100 font-medium'
                   : 'text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200'
               }`
             }
           >
-            {label}
+            <span className="flex items-center gap-2 min-w-0">
+              {icon}
+              <span className="truncate">{label}</span>
+            </span>
             {badge > 0 && (
-              <span className="flex items-center justify-center h-4 min-w-4 px-1 rounded-full bg-red-600 text-white text-[10px] font-semibold">
+              <span className="flex items-center justify-center h-4 min-w-4 px-1 rounded-full bg-red-600 text-white text-[10px] font-semibold shrink-0">
                 {badge}
               </span>
             )}
