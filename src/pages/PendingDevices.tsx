@@ -9,6 +9,7 @@ import {
 } from '../lib/firestore';
 import type { PendingDevice, ProjectDoc, AppName } from '../types';
 import { CustomSelect } from '../components/CustomSelect';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 // ── helpers ──────────────────────────────────────────────────────
 
@@ -257,6 +258,7 @@ function RejectConfirm({ pending, onClose, onDone }: RejectConfirmProps) {
 // ── メインページ ──────────────────────────────────────────────────
 
 export function PendingDevices() {
+  usePageTitle('承認待ちデバイス');
   const { user, role } = useAuth();
 
   function siteLogActor() {

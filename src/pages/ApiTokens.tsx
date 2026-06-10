@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { subscribeApiTokens, createApiToken, revokeApiToken, addSiteLog } from '../lib/firestore';
 import type { ApiToken, ApiTokenType } from '../types';
 import { CustomSelect } from '../components/CustomSelect';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 // ── helpers ──────────────────────────────────────────────────────
 
@@ -224,6 +225,7 @@ function RevokeConfirm({ token, onClose, onConfirm }: RevokeConfirmProps) {
 // ── メインページ ──────────────────────────────────────────────────
 
 export function ApiTokens() {
+  usePageTitle('APIトークン');
   const { user, role } = useAuth();
 
   function siteLogActor() {

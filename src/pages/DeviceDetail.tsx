@@ -6,6 +6,7 @@ import { ref as rtdbRef, onValue } from 'firebase/database';
 import { useAuth } from '../contexts/AuthContext';
 import { StatusBadge } from '../components/StatusBadge';
 import type { Device } from '../types';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 const WORKERS_BASE_URL = 'https://portal-cms-api.tti-ninja.workers.dev';
 
@@ -103,6 +104,7 @@ export function DeviceDetail() {
   const { user }     = useAuth();
 
   const [device,        setDevice]        = useState<Device | null>(null);
+  usePageTitle(device?.name ?? 'デバイス詳細');
   const [deviceLoading, setDeviceLoading] = useState(true);
   const projectNameRef = useRef('');
 

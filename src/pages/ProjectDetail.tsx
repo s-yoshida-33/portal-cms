@@ -16,6 +16,7 @@ import {
 import { CustomSelect } from '../components/CustomSelect';
 import { StatusBadge } from '../components/StatusBadge';
 import type { ProjectDoc, Device, AppName, DeviceGroup } from '../types';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 // ── helpers ──────────────────────────────────────────────────────
 
@@ -711,6 +712,7 @@ export function ProjectDetail() {
   const { uuid, id } = useParams<{ uuid: string; id: string }>();
 
   const [project,        setProject]        = useState<ProjectDoc | null>(null);
+  usePageTitle(project?.name ?? 'プロジェクト詳細');
   const [projects,       setProjects]       = useState<ProjectDoc[]>([]);
   const [devices,        setDevices]        = useState<Device[]>([]);
   const [groups,         setGroups]         = useState<DeviceGroup[]>([]);
