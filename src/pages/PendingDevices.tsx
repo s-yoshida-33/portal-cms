@@ -308,45 +308,79 @@ export function PendingDevices() {
             <p className="text-zinc-500 text-sm">承認待ちのデバイスはありません。</p>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-lg ring-1 ring-[#3d3d3d]">
-            <div className="grid grid-cols-[120px_1fr_140px_160px_160px] gap-4 px-4 py-3 bg-black border-b border-[#3d3d3d] text-xs font-medium text-zinc-500 uppercase tracking-wider">
-              <span>アプリ</span>
-              <span>ホスト名</span>
-              <span>IPアドレス</span>
-              <span>申請日時</span>
-              <span />
+          <>
+            {/* モバイルカード */}
+            <div className="sm:hidden space-y-4">
+              {devices.map(d => (
+                <div key={d.id} className="rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-4 space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className={`inline-flex items-center h-5 px-2 rounded-full text-xs font-medium ${appBadge[d.appName]}`}>
+                      {d.appName}
+                    </span>
+                    <span className="text-zinc-500 text-xs tabular-nums">{formatDate(d.requestedAt)}</span>
+                  </div>
+                  <div>
+                    <p className="text-white text-sm font-mono truncate">{d.hostname}</p>
+                    <p className="text-zinc-500 text-xs font-mono mt-0.5">{d.ip}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setApproveTarget(d)}
+                      className="h-7 px-3 rounded-md text-xs font-medium text-white bg-[#1a6aff] hover:bg-[#1558d4] transition-colors cursor-pointer"
+                    >
+                      承認
+                    </button>
+                    <button
+                      onClick={() => setRejectTarget(d)}
+                      className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
+                    >
+                      却下
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
 
-            {devices.map((d, i) => (
-              <div
-                key={d.id}
-                className={`grid grid-cols-[120px_1fr_140px_160px_160px] gap-4 px-4 py-4 items-center bg-[#111111] hover:bg-[#161616] transition-colors ${
-                  i < devices.length - 1 ? 'border-b border-[#3d3d3d]' : ''
-                }`}
-              >
-                <span className={`inline-flex items-center justify-center h-5 px-2 rounded-full text-xs font-medium ${appBadge[d.appName]}`}>
-                  {d.appName}
-                </span>
-                <span className="text-white text-sm font-mono truncate">{d.hostname}</span>
-                <span className="text-zinc-400 text-sm font-mono">{d.ip}</span>
-                <span className="text-zinc-400 text-sm tabular-nums">{formatDate(d.requestedAt)}</span>
-                <div className="flex items-center gap-2 justify-end">
-                  <button
-                    onClick={() => setApproveTarget(d)}
-                    className="h-7 px-3 rounded-md text-xs font-medium text-white bg-[#1a6aff] hover:bg-[#1558d4] transition-colors cursor-pointer"
-                  >
-                    承認
-                  </button>
-                  <button
-                    onClick={() => setRejectTarget(d)}
-                    className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
-                  >
-                    却下
-                  </button>
-                </div>
+            {/* デスクトップテーブル */}
+            <div className="hidden sm:block overflow-hidden rounded-lg ring-1 ring-[#3d3d3d]">
+              <div className="grid grid-cols-[120px_1fr_140px_160px_160px] gap-4 px-4 py-3 bg-black border-b border-[#3d3d3d] text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                <span>アプリ</span>
+                <span>ホスト名</span>
+                <span>IPアドレス</span>
+                <span>申請日時</span>
+                <span />
               </div>
-            ))}
-          </div>
+              {devices.map((d, i) => (
+                <div
+                  key={d.id}
+                  className={`grid grid-cols-[120px_1fr_140px_160px_160px] gap-4 px-4 py-4 items-center bg-[#111111] hover:bg-[#161616] transition-colors ${
+                    i < devices.length - 1 ? 'border-b border-[#3d3d3d]' : ''
+                  }`}
+                >
+                  <span className={`inline-flex items-center justify-center h-5 px-2 rounded-full text-xs font-medium ${appBadge[d.appName]}`}>
+                    {d.appName}
+                  </span>
+                  <span className="text-white text-sm font-mono truncate">{d.hostname}</span>
+                  <span className="text-zinc-400 text-sm font-mono">{d.ip}</span>
+                  <span className="text-zinc-400 text-sm tabular-nums">{formatDate(d.requestedAt)}</span>
+                  <div className="flex items-center gap-2 justify-end">
+                    <button
+                      onClick={() => setApproveTarget(d)}
+                      className="h-7 px-3 rounded-md text-xs font-medium text-white bg-[#1a6aff] hover:bg-[#1558d4] transition-colors cursor-pointer"
+                    >
+                      承認
+                    </button>
+                    <button
+                      onClick={() => setRejectTarget(d)}
+                      className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
+                    >
+                      却下
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
 
