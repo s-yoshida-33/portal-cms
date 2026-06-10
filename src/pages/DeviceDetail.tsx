@@ -516,8 +516,8 @@ export function DeviceDetail() {
                 ) : (
                   filteredLogs.map((log, i) => (
                     <div key={log._key} className="flex gap-2 whitespace-nowrap">
-                      <span className="shrink-0 select-none text-zinc-700 text-right tabular-nums pr-2" style={{ width: `${String(filteredLogs.length).length}ch` }}>
-                        {i + 1}
+                      <span className="shrink-0 select-none text-zinc-700 tabular-nums whitespace-pre pr-2">
+                        {String(i + 1).padStart(String(filteredLogs.length).length)}
                       </span>
                       <span className="shrink-0 text-zinc-600">{log.timestamp}</span>
                       <span className={`shrink-0 w-10 ${logLevelClass(log.level)}`}>{log.level || '----'}</span>
