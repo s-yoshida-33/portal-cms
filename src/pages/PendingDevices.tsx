@@ -38,7 +38,7 @@ interface ApproveModalProps {
   pending:  PendingDevice;
   projects: ProjectDoc[];
   onClose:  () => void;
-  onDone:   (deviceName: string) => void;
+  onDone:   (deviceName: string, projectName: string) => void;
 }
 
 function CopyField({ label, value }: { label: string; value: string }) {
@@ -84,7 +84,8 @@ function ApproveModal({ pending, projects, onClose, onDone }: ApproveModalProps)
     setRunning(true);
     try {
       const result = await approveDevice(pending.id, pending, projectId, deviceName.trim());
-      onDone(deviceName.trim());
+      const pName = projects.find(p => p.id === projectId)?.name ?? '';
+      onDone(deviceName.trim(), pName);
       setApprovalResult(result);
     } catch {
       setError('承認に失敗しました。');
@@ -389,9 +390,9 @@ export function PendingDevices() {
           pending={approveTarget}
           projects={projects}
           onClose={() => setApproveTarget(null)}
-          onDone={(deviceName) => {
+          onDone={(deviceName, projectName) => {
             setApproveTarget(null);
-            addSiteLog({ category: 'device', action: 'added', targetId: approveTarget?.id, targetName: deviceName, performedBy: siteLogActor() }).catch(() => {});
+            addSiteLog({ category: 'device', action: 'added', targetId: approveTarget?.id, targetName: deviceName, projectName, deviceName, performedBy: siteLogActor() }).catch(() => {});
           }}
         />
       )}

@@ -101,13 +101,15 @@ export type SiteLogCategory =
   | 'screenshot' | 'log' | 'apiToken' | 'user' | 'deletionRequest' | 'project' | 'device';
 
 export interface SiteLog {
-  id:          string;
-  category:    SiteLogCategory;
-  action:      string;
-  targetId?:   string;
-  targetName:  string;
-  performedBy: { uid: string; email: string; displayName: string };
-  performedAt: string; // ISO
+  id:           string;
+  category:     SiteLogCategory;
+  action:       string;
+  targetId?:    string;
+  targetName:   string;
+  projectName?: string;
+  deviceName?:  string;
+  performedBy:  { uid: string; email: string; displayName: string };
+  performedAt:  string; // ISO
 }
 
 // Firestore /notifications/{notificationId}

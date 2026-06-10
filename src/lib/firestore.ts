@@ -79,6 +79,16 @@ export function subscribeProjects(
   );
 }
 
+export function subscribeProject(
+  projectId: string,
+  onUpdate: (project: ProjectDoc | null) => void,
+): Unsubscribe {
+  return onSnapshot(
+    doc(col.projects(), projectId),
+    snap => onUpdate(snap.exists() ? fromDoc<ProjectDoc>(snap) : null),
+  );
+}
+
 export async function fetchProjects(): Promise<ProjectDoc[]> {
   const snap = await getDocs(query(col.projects(), orderBy('name')));
   return snap.docs.map(d => fromDoc<ProjectDoc>(d));

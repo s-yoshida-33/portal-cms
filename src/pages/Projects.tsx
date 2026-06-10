@@ -191,17 +191,17 @@ export function Projects() {
   async function handleSave(data: Pick<ProjectDoc, 'name' | 'prefecture' | 'address'>) {
     if (editTarget) {
       await updateProject(editTarget.id, data);
-      addSiteLog({ category: 'project', action: 'updated', targetId: editTarget.id, targetName: data.name, performedBy: siteLogActor() }).catch(() => {});
+      addSiteLog({ category: 'project', action: 'updated', targetId: editTarget.id, targetName: data.name, projectName: data.name, performedBy: siteLogActor() }).catch(() => {});
     } else {
       await addProject(data);
-      addSiteLog({ category: 'project', action: 'created', targetName: data.name, performedBy: siteLogActor() }).catch(() => {});
+      addSiteLog({ category: 'project', action: 'created', targetName: data.name, projectName: data.name, performedBy: siteLogActor() }).catch(() => {});
     }
   }
 
   async function handleDeleteRequest() {
     if (!deleteTarget || !user) return;
     await requestDeletion('project', deleteTarget.id, deleteTarget.name, user.uid, user.email ?? '');
-    addSiteLog({ category: 'project', action: 'deletionRequested', targetId: deleteTarget.id, targetName: deleteTarget.name, performedBy: siteLogActor() }).catch(() => {});
+    addSiteLog({ category: 'project', action: 'deletionRequested', targetId: deleteTarget.id, targetName: deleteTarget.name, projectName: deleteTarget.name, performedBy: siteLogActor() }).catch(() => {});
   }
 
   return (
