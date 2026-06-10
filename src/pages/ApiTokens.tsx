@@ -4,6 +4,7 @@ import { subscribeApiTokens, createApiToken, revokeApiToken, addSiteLog } from '
 import type { ApiToken, ApiTokenType } from '../types';
 import { CustomSelect } from '../components/CustomSelect';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { Pagination } from '../components/Pagination';
 
 // ── helpers ──────────────────────────────────────────────────────
 
@@ -41,35 +42,6 @@ function formatDate(iso: string | null) {
 
 // ── ページネーション ───────────────────────────────────────────────
 
-function Pagination({ page, total, onPage }: { page: number; total: number; onPage: (p: number) => void }) {
-  const pages = Math.ceil(total / PAGE_SIZE);
-  if (pages <= 1) return null;
-  return (
-    <div className="flex items-center justify-center gap-3 pt-3">
-      <button
-        onClick={() => onPage(page - 1)}
-        disabled={page === 1}
-        className="h-7 w-7 flex items-center justify-center rounded-md text-zinc-400 hover:text-white hover:bg-[#2a2a2a] disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
-        aria-label="前のページ"
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="15 18 9 12 15 6" />
-        </svg>
-      </button>
-      <span className="text-xs text-zinc-500 tabular-nums">{page} / {pages}</span>
-      <button
-        onClick={() => onPage(page + 1)}
-        disabled={page === pages}
-        className="h-7 w-7 flex items-center justify-center rounded-md text-zinc-400 hover:text-white hover:bg-[#2a2a2a] disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
-        aria-label="次のページ"
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="9 18 15 12 9 6" />
-        </svg>
-      </button>
-    </div>
-  );
-}
 
 // ── トークン発行モーダル ──────────────────────────────────────────
 
@@ -452,7 +424,7 @@ export function ApiTokens() {
                     </div>
                     {activeSlice.map(t => <TokenRow key={t.id} t={t} />)}
                   </div>
-                  <Pagination page={activePage} total={active.length} onPage={setActivePage} />
+                  <Pagination page={activePage} total={active.length} pageSize={PAGE_SIZE} onChange={setActivePage} />
                 </>
               )}
             </div>
@@ -473,7 +445,7 @@ export function ApiTokens() {
                     </div>
                     {revokedSlice.map(t => <TokenRow key={t.id} t={t} />)}
                   </div>
-                  <Pagination page={revokedPage} total={revoked.length} onPage={setRevokedPage} />
+                  <Pagination page={revokedPage} total={revoked.length} pageSize={PAGE_SIZE} onChange={setRevokedPage} />
                 </>
               </div>
             )}
