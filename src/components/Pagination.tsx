@@ -18,12 +18,11 @@ export function Pagination({ page, total, pageSize, onChange }: PaginationProps)
     </button>
   );
   return (
-    <div className="flex items-center justify-between mt-4">
-      <span className="text-zinc-500 text-xs">{total} 件中 {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, total)} 件</span>
-      <div className="flex gap-1">
+    <div className="flex items-center justify-center mt-4">
+      <div className="flex items-center gap-2">
         {btn('«', 1,        page === 1)}
         {btn('‹', page - 1, page === 1)}
-        <span className="h-7 px-2 flex items-center text-xs text-zinc-400">{page} / {last}</span>
+        <span className="h-7 px-3 flex items-center text-xs text-zinc-400">{page} / {last}</span>
         {btn('›', page + 1, page === last)}
         {btn('»', last,     page === last)}
       </div>
