@@ -6,8 +6,7 @@
 
 /* ログビューア用フォント */
 .font-log {
-  font-family: "Paper Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  font-feature-settings: "zero" 0;
+  font-family: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 /* 細いダークスクロールバー（ログビューア等） */
