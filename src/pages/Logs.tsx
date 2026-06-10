@@ -52,6 +52,17 @@ function formatDate(iso: string) {
   });
 }
 
+// デバイスレベルの操作カテゴリ（プロジェクト欄は projectName、デバイス欄は deviceName で表示）
+const DEVICE_CATEGORIES: SiteLogCategory[] = ['screenshot', 'log', 'device'];
+
+function resolveColumns(log: SiteLog) {
+  const isDevice = DEVICE_CATEGORIES.includes(log.category);
+  return {
+    projectCol: log.projectName || (isDevice ? '—' : log.targetName),
+    deviceCol:  log.deviceName  || (isDevice ? log.targetName : '—'),
+  };
+}
+
 // ── ページネーション ──────────────────────────────────────────────
 
 interface PaginationProps {
@@ -169,8 +180,7 @@ export function Logs() {
               {/* モバイルカード */}
               <div className="sm:hidden space-y-4">
                 {paged.map(log => {
-                  const projectCol = log.projectName ?? (log.deviceName ? '—' : log.targetName);
-                  const deviceCol  = log.deviceName  ?? '—';
+                  const { projectCol, deviceCol } = resolveColumns(log);
                   return (
                     <div key={log.id} className="rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-4 space-y-2.5">
                       <div className="flex items-center justify-between gap-2">
@@ -212,8 +222,7 @@ export function Logs() {
                   <span>日時</span>
                 </div>
                 {paged.map((log, i) => {
-                  const projectCol = log.projectName ?? (log.deviceName ? '—' : log.targetName);
-                  const deviceCol  = log.deviceName  ?? '—';
+                  const { projectCol, deviceCol } = resolveColumns(log);
                   return (
                     <div
                       key={log.id}

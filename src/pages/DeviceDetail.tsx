@@ -104,7 +104,7 @@ export function DeviceDetail() {
 
   const [device,        setDevice]        = useState<Device | null>(null);
   const [deviceLoading, setDeviceLoading] = useState(true);
-  const [projectName,   setProjectName]   = useState('');
+  const projectNameRef = useRef('');
 
   const [portalSsState,      setPortalSsState]      = useState<PortalSsState>('idle');
   const [portalSsBlobUrl,    setPortalSsBlobUrl]    = useState<string | null>(null);
@@ -134,7 +134,7 @@ export function DeviceDetail() {
 
   useEffect(() => {
     if (!device?.projectId) return;
-    return subscribeProject(device.projectId, p => setProjectName(p?.name ?? ''));
+    return subscribeProject(device.projectId, p => { projectNameRef.current = p?.name ?? ''; });
   }, [device?.projectId]);
 
   // Subscribe to RTDB logs/{deviceId} — updated by Bridge-Ground on demand.
@@ -166,7 +166,7 @@ export function DeviceDetail() {
     logRequestedAt.current = Date.now();
     try {
       await requestLogs(deviceId, selectedLogDate);
-      addSiteLog({ category: 'log', action: 'fetched', targetId: deviceId, targetName: device?.name ?? deviceId, projectName, deviceName: device?.name ?? deviceId, performedBy: siteLogActor() }).catch(() => {});
+      addSiteLog({ category: 'log', action: 'fetched', targetId: deviceId, targetName: device?.name ?? deviceId, projectName: projectNameRef.current, deviceName: device?.name ?? deviceId, performedBy: siteLogActor() }).catch(() => {});
     } catch {
       setLogsRefreshing(false);
     }
@@ -252,7 +252,7 @@ export function DeviceDetail() {
     // Keep the existing blob URL so the previous screenshot stays visible while fetching.
     try {
       await requestPortalScreenshot(deviceId);
-      addSiteLog({ category: 'screenshot', action: 'captured', targetId: deviceId, targetName: device?.name ?? deviceId, projectName, deviceName: device?.name ?? deviceId, performedBy: siteLogActor() }).catch(() => {});
+      addSiteLog({ category: 'screenshot', action: 'captured', targetId: deviceId, targetName: device?.name ?? deviceId, projectName: projectNameRef.current, deviceName: device?.name ?? deviceId, performedBy: siteLogActor() }).catch(() => {});
     } catch {
       setPortalSsState('error');
     }
@@ -407,7 +407,7 @@ export function DeviceDetail() {
                           a.href = portalSsBlobUrl;
                           a.download = `screenshot-${device.name}-${ts}.jpg`;
                           a.click();
-                          addSiteLog({ category: 'screenshot', action: 'downloaded', targetId: deviceId, targetName: device.name, projectName, deviceName: device.name, performedBy: siteLogActor() }).catch(() => {});
+                          addSiteLog({ category: 'screenshot', action: 'downloaded', targetId: deviceId, targetName: device.name, projectName: projectNameRef.current, deviceName: device.name, performedBy: siteLogActor() }).catch(() => {});
                         }}
                         className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
                       >
@@ -517,7 +517,7 @@ export function DeviceDetail() {
                     a.download = `${device?.name ?? deviceId}-${selectedLogDate}.log`;
                     a.click();
                     URL.revokeObjectURL(url);
-                    addSiteLog({ category: 'log', action: 'downloaded', targetId: deviceId, targetName: device?.name ?? deviceId ?? '', projectName, deviceName: device?.name ?? deviceId ?? '', performedBy: siteLogActor() }).catch(() => {});
+                    addSiteLog({ category: 'log', action: 'downloaded', targetId: deviceId, targetName: device?.name ?? deviceId ?? '', projectName: projectNameRef.current, deviceName: device?.name ?? deviceId ?? '', performedBy: siteLogActor() }).catch(() => {});
                   }}
                   disabled={filteredLogs.length === 0}
                   className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
