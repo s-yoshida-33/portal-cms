@@ -396,6 +396,7 @@ export default {
           temperature?: number;
           storage?:     number;
           uptime?:      number;
+          version?:     string;
         }>;
       };
 
@@ -421,7 +422,8 @@ export default {
               uptime:      d.uptime      ?? 0,
             },
           };
-          if (d.ip) fields.ip = d.ip;
+          if (d.ip)      fields.ip         = d.ip;
+          if (d.version) fields.appVersion = d.version;
           return { deviceId: d.deviceId, fields };
         });
 
