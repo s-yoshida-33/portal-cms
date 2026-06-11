@@ -483,7 +483,7 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
             </div>
             <div>
               <label className="block text-sm text-zinc-400 mb-1.5">デバイス</label>
-              <div className="bg-[#1a1a1a] ring-1 ring-[#3d3d3d] rounded-lg divide-y divide-[#2a2a2a] max-h-48 overflow-y-auto">
+              <div className="bg-[#1a1a1a] ring-1 ring-[#3d3d3d] rounded-lg divide-y divide-[#2a2a2a] max-h-48 overflow-y-auto scrollbar-subtle">
                 {devices.length === 0 ? (
                   <p className="px-3 py-2 text-sm text-zinc-600">デバイスがありません</p>
                 ) : devices.map(device => {
