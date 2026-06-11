@@ -151,6 +151,7 @@
       "rootOption": "— (Root group)",
       "devicesLabel": "Devices",
       "noDevices": "No devices",
+      "currentGroup": "Currently",
       "nameRequired": "Please enter a group name.",
       "saveFailed": "Failed to save."
     }
@@ -386,8 +387,15 @@
   "profile": {
     "title": "Profile",
     "memberSince": "Member since {{date}}",
+    "sidebar": {
+      "myProfile": "My Profile",
+      "back": "Go back",
+      "openMenu": "Open menu",
+      "comingSoon": "Coming soon"
+    },
     "tabs": {
       "settings": "Settings",
+      "accessControl": "Access Control",
       "notifications": "Notifications"
     },
     "notificationsWip": "Notification settings are coming soon.",

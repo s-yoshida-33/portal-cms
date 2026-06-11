@@ -66,7 +66,7 @@ function CreateModal({ onClose, onCreated }: CreateModalProps) {
           <div>
             <label className="block text-sm text-zinc-400 mb-1.5">{t('apiTokens.createModal.nameLabel')}</label>
             <input value={name} onChange={e => setName(e.target.value)}
-              placeholder="例: AM須坂 登録用" className={inputClass} />
+              className={inputClass} />
           </div>
           <div>
             <label className="block text-sm text-zinc-400 mb-1.5">{t('apiTokens.createModal.typeLabel')}</label>

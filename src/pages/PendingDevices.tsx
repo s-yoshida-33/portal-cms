@@ -176,7 +176,6 @@ function ApproveModal({ pending, projects, onClose, onDone }: ApproveModalProps)
               type="text"
               value={deviceName}
               onChange={e => setDeviceName(e.target.value)}
-              placeholder="例：1F エントランス"
               className={inputClass}
             />
           </div>

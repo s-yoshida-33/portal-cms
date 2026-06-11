@@ -466,7 +466,6 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
             <input
               value={name}
               onChange={e => setName(e.target.value)}
-              placeholder="グループ名を入力"
               className={inputClass}
             />
           </div>
@@ -504,7 +503,7 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
                     />
                     <span className="text-sm text-zinc-200 flex-1">{device.name}</span>
                     {otherGroupName && (
-                      <span className="text-xs text-yellow-400">現在: {otherGroupName}</span>
+                      <span className="text-xs text-yellow-400">{t('projectDetail.groupModal.currentGroup')}: {otherGroupName}</span>
                     )}
                   </label>
                 );
@@ -600,12 +599,12 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
           <div>
             <label className="block text-sm text-zinc-400 mb-1.5">{t('projectDetail.deviceModal.nameLabel')}</label>
             <input value={name} onChange={e => setName(e.target.value)}
-              placeholder="PC-200" className={inputClass} />
+              className={inputClass} />
           </div>
           <div>
             <label className="block text-sm text-zinc-400 mb-1.5">{t('projectDetail.deviceModal.ipLabel')}</label>
             <input value={ip} onChange={e => setIp(e.target.value)}
-              placeholder="192.168.1.100" className={inputClass} />
+              className={inputClass} />
           </div>
           <div>
             <label className="block text-sm text-zinc-400 mb-1.5">{t('projectDetail.deviceModal.portLabel')}</label>
@@ -613,7 +612,6 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
               type="number"
               value={port}
               onChange={e => setPort(Number(e.target.value))}
-              placeholder="8090"
               className={inputClass}
             />
           </div>
@@ -629,7 +627,7 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
           <div>
             <label className="block text-sm text-zinc-400 mb-1.5">{t('projectDetail.deviceModal.versionLabel')}</label>
             <input value={appVersion} onChange={e => setAppVersion(e.target.value)}
-              placeholder="1.2.0" className={inputClass} />
+              className={inputClass} />
           </div>
           {groups.length > 0 && (
             <div>
