@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import {
   fetchProject,
@@ -157,6 +158,7 @@ interface DeviceCardProps {
 
 function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: DeviceCardProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -191,14 +193,14 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
             onClick={e => { e.stopPropagation(); setMenuOpen(false); onEdit(device); }}
             className="w-full text-left px-3 py-2 text-sm text-zinc-300 hover:bg-[#2a2a2a] transition-colors cursor-pointer"
           >
-            編集
+            {t('projectDetail.deviceEdit')}
           </button>
           <button
             onTouchEnd={e => { e.preventDefault(); e.stopPropagation(); setMenuOpen(false); onDelete(device); }}
             onClick={e => { e.stopPropagation(); setMenuOpen(false); onDelete(device); }}
             className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-950/40 transition-colors cursor-pointer"
           >
-            削除依頼
+            {t('projectDetail.deviceDeleteRequest')}
           </button>
         </div>
       )}
@@ -230,9 +232,9 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
             <AppBadge app={device.app} />
             <span className="text-zinc-500 text-xs">v{device.appVersion}</span>
           </div>
-          <p className="text-xs text-zinc-500">最終確認: {formatLastSeen(device.lastSeen)}</p>
+          <p className="text-xs text-zinc-500">{t('projectDetail.deviceLastSeen', { time: formatLastSeen(device.lastSeen) })}</p>
           <p className="text-xs text-zinc-400">
-            稼働時間: <UptimeClock uptimeSecs={device.system.uptime} lastSeen={device.lastSeen} status={device.status} />
+            {t('projectDetail.deviceUptime')}: <UptimeClock uptimeSecs={device.system.uptime} lastSeen={device.lastSeen} status={device.status} />
           </p>
         </div>
       </div>
@@ -253,20 +255,20 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
                 <AppBadge app={device.app} />
                 <span className="text-zinc-500 text-xs">v{device.appVersion}</span>
               </div>
-              <p className="text-xs text-zinc-600 mt-0.5">最終確認: {formatLastSeen(device.lastSeen)}</p>
+              <p className="text-xs text-zinc-600 mt-0.5">{t('projectDetail.deviceLastSeen', { time: formatLastSeen(device.lastSeen) })}</p>
             </div>
             {menu}
           </div>
         </div>
         <div className="grid grid-cols-4 gap-6">
           <div className="col-span-3 grid grid-cols-2 gap-x-8 gap-y-3">
-            <MetricBar label="CPU"        value={device.system.cpu}         unit="%" />
-            <MetricBar label="メモリ"     value={device.system.memory}      unit="%" />
-            <MetricBar label="温度"       value={device.system.temperature} unit="°C" warn={65} danger={80} />
-            <MetricBar label="ストレージ" value={device.system.storage}     unit="%" warn={80} danger={90} />
+            <MetricBar label="CPU"                          value={device.system.cpu}         unit="%" />
+            <MetricBar label={t('deviceDetail.memory')}      value={device.system.memory}      unit="%" />
+            <MetricBar label={t('deviceDetail.temperature')} value={device.system.temperature} unit="°C" warn={65} danger={80} />
+            <MetricBar label={t('deviceDetail.storage')}     value={device.system.storage}     unit="%" warn={80} danger={90} />
           </div>
           <div className="flex flex-col justify-center pl-5 border-l border-zinc-800">
-            <p className="text-xs text-zinc-500 mb-1">稼働時間</p>
+            <p className="text-xs text-zinc-500 mb-1">{t('projectDetail.deviceUptime')}</p>
             <p className="text-lg font-semibold text-zinc-200">
               <UptimeClock uptimeSecs={device.system.uptime} lastSeen={device.lastSeen} status={device.status} />
             </p>
@@ -297,6 +299,7 @@ function GroupCard({
   node, uuid, projectId, canEdit, allGroups, collapsed,
   onToggle, onEditGroup, onDeleteGroup, onEditDevice, onDeleteDevice,
 }: GroupCardProps) {
+  const { t } = useTranslation();
   const isCollapsed = collapsed.has(node.group.id);
   const totalCount  = countDevicesRecursive(node);
   const hasChildGroups = node.children.length > 0;
@@ -329,7 +332,7 @@ function GroupCard({
               onClick={() => onEditGroup(node.group)}
               className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
             >
-              編集
+              {t('projectDetail.deviceEdit')}
             </button>
             <button
               disabled={!canDelete}
@@ -339,9 +342,9 @@ function GroupCard({
                   ? 'text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-red-900/50 cursor-pointer'
                   : 'text-zinc-600 bg-zinc-900/30 ring-zinc-800 cursor-not-allowed'
               }`}
-              title={!canDelete ? 'デバイスまたは子グループが存在する場合は削除依頼できません' : undefined}
+              title={!canDelete ? t('projectDetail.cantDelete') : undefined}
             >
-              削除依頼
+              {t('projectDetail.deviceDeleteRequest')}
             </button>
           </div>
         )}
@@ -403,6 +406,7 @@ interface GroupModalProps {
 }
 
 function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, onSave }: GroupModalProps) {
+  const { t } = useTranslation();
   const [name,          setName]          = useState(initial?.name ?? '');
   const [parentGroupId, setParentGroupId] = useState<string | null>(initial?.parentGroupId ?? null);
   const [selectedIds,   setSelectedIds]   = useState<string[]>(
@@ -429,13 +433,13 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim()) { setError('グループ名を入力してください。'); return; }
+    if (!name.trim()) { setError(t('projectDetail.groupModal.nameRequired')); return; }
     setSaving(true);
     try {
       await onSave({ name: name.trim(), parentGroupId }, selectedIds, previousIds);
       onClose();
     } catch {
-      setError('保存に失敗しました。');
+      setError(t('projectDetail.groupModal.saveFailed'));
       setSaving(false);
     }
   }
@@ -452,13 +456,13 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
       >
         <div className="shrink-0 px-6 pt-6 pb-4">
           <h2 className="text-white text-lg font-semibold">
-            {initial ? 'グループを編集' : 'グループを作成'}
+            {initial ? t('projectDetail.groupModal.editTitle') : t('projectDetail.groupModal.addTitle')}
           </h2>
         </div>
 
         <div className="shrink overflow-y-auto scrollbar-subtle px-6 pb-4 space-y-4">
           <div>
-            <label className="block text-sm text-zinc-400 mb-1.5">グループ名</label>
+            <label className="block text-sm text-zinc-400 mb-1.5">{t('projectDetail.groupModal.nameLabel')}</label>
             <input
               value={name}
               onChange={e => setName(e.target.value)}
@@ -467,12 +471,12 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
             />
           </div>
           <div>
-            <label className="block text-sm text-zinc-400 mb-1.5">親グループ</label>
+            <label className="block text-sm text-zinc-400 mb-1.5">{t('projectDetail.groupModal.parentLabel')}</label>
             <CustomSelect
               value={parentGroupId ?? ''}
               onChange={v => setParentGroupId(v || null)}
               options={[
-                { value: '', label: 'ー（ルートグループ）' },
+                { value: '', label: t('projectDetail.groupModal.rootOption') },
                 ...flattenGroups(availableRoots).map(({ group, depth }) => ({
                   value: group.id,
                   label: '　'.repeat(depth) + group.name,
@@ -482,10 +486,10 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
             />
           </div>
           <div>
-            <label className="block text-sm text-zinc-400 mb-1.5">デバイス</label>
+            <label className="block text-sm text-zinc-400 mb-1.5">{t('projectDetail.groupModal.devicesLabel')}</label>
             <div className="bg-[#1a1a1a] ring-1 ring-[#3d3d3d] rounded-lg divide-y divide-[#2a2a2a] max-h-64 overflow-y-auto scrollbar-subtle">
               {devices.length === 0 ? (
-                <p className="px-3 py-2 text-sm text-zinc-600">デバイスがありません</p>
+                <p className="px-3 py-2 text-sm text-zinc-600">{t('projectDetail.groupModal.noDevices')}</p>
               ) : devices.map(device => {
                 const isSelected = selectedIds.includes(device.id);
                 const otherGroupId = device.groupId && device.groupId !== initial?.id ? device.groupId : null;
@@ -509,15 +513,15 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
           </div>
           {error && <p className="text-red-400 text-sm">{error}</p>}
         </div>
-          
+
         <div className="shrink-0 px-6 py-4 border-t border-[#2a2a2a] bg-[#111111] flex justify-end gap-2">
           <button type="button" onClick={onClose}
             className="h-9 px-4 rounded-lg text-sm text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
-            キャンセル
+            {t('common.cancel')}
           </button>
           <button type="submit" disabled={saving}
             className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#4693ff] hover:bg-[#3a7fe0] disabled:opacity-50 transition-colors cursor-pointer">
-            {saving ? '保存中...' : '保存'}
+            {saving ? t('common.saving') : t('common.save')}
           </button>
         </div>
       </form>
@@ -537,6 +541,7 @@ interface DeviceModalProps {
 }
 
 function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: DeviceModalProps) {
+  const { t } = useTranslation();
   const [name,       setName]       = useState(initial?.name       ?? '');
   const [ip,         setIp]         = useState(initial?.ip         ?? '');
   const [port,       setPort]       = useState(initial?.port       ?? 8090);
@@ -550,7 +555,7 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim() || !ip.trim()) {
-      setError('名前とIPアドレスを入力してください。');
+      setError(t('projectDetail.deviceModal.requiredError'));
       return;
     }
     setSaving(true);
@@ -562,7 +567,7 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
       await onSave(data);
       onClose();
     } catch {
-      setError('保存に失敗しました。');
+      setError(t('projectDetail.deviceModal.saveFailed'));
       setSaving(false);
     }
   }
@@ -576,14 +581,14 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
       >
         <div className="shrink-0 px-6 pt-6 pb-4">
           <h2 className="text-white text-lg font-semibold">
-            {initial ? 'デバイスを編集' : 'デバイスを追加'}
+            {initial ? t('projectDetail.deviceModal.editTitle') : t('projectDetail.deviceModal.addTitle')}
           </h2>
         </div>
 
         <div className="shrink overflow-y-auto scrollbar-subtle px-6 pb-4 space-y-4">
           {initial && projects.length > 1 && (
             <div>
-              <label className="block text-sm text-zinc-400 mb-1.5">プロジェクト</label>
+              <label className="block text-sm text-zinc-400 mb-1.5">{t('projectDetail.deviceModal.projectLabel')}</label>
               <CustomSelect
                 value={projectId}
                 onChange={val => setProjectId(val)}
@@ -593,17 +598,17 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
             </div>
           )}
           <div>
-            <label className="block text-sm text-zinc-400 mb-1.5">デバイス名</label>
+            <label className="block text-sm text-zinc-400 mb-1.5">{t('projectDetail.deviceModal.nameLabel')}</label>
             <input value={name} onChange={e => setName(e.target.value)}
               placeholder="PC-200" className={inputClass} />
           </div>
           <div>
-            <label className="block text-sm text-zinc-400 mb-1.5">IPアドレス</label>
+            <label className="block text-sm text-zinc-400 mb-1.5">{t('projectDetail.deviceModal.ipLabel')}</label>
             <input value={ip} onChange={e => setIp(e.target.value)}
               placeholder="192.168.1.100" className={inputClass} />
           </div>
           <div>
-            <label className="block text-sm text-zinc-400 mb-1.5">ポート (Bridge-Ground)</label>
+            <label className="block text-sm text-zinc-400 mb-1.5">{t('projectDetail.deviceModal.portLabel')}</label>
             <input
               type="number"
               value={port}
@@ -613,7 +618,7 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
             />
           </div>
           <div>
-            <label className="block text-sm text-zinc-400 mb-1.5">アプリ</label>
+            <label className="block text-sm text-zinc-400 mb-1.5">{t('projectDetail.deviceModal.appLabel')}</label>
             <CustomSelect
               value={app}
               onChange={val => setApp(val as AppName)}
@@ -622,13 +627,13 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
             />
           </div>
           <div>
-            <label className="block text-sm text-zinc-400 mb-1.5">バージョン</label>
+            <label className="block text-sm text-zinc-400 mb-1.5">{t('projectDetail.deviceModal.versionLabel')}</label>
             <input value={appVersion} onChange={e => setAppVersion(e.target.value)}
               placeholder="1.2.0" className={inputClass} />
           </div>
           {groups.length > 0 && (
             <div>
-              <label className="block text-sm text-zinc-400 mb-1.5">グループを選択</label>
+              <label className="block text-sm text-zinc-400 mb-1.5">{t('projectDetail.deviceModal.groupLabel')}</label>
               <CustomSelect
                 value={groupId ?? ''}
                 onChange={val => setGroupId(val || null)}
@@ -649,11 +654,11 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
         <div className="shrink-0 px-6 py-4 border-t border-[#2a2a2a] bg-[#111111] flex justify-end gap-2">
           <button type="button" onClick={onClose}
             className="h-9 px-4 rounded-lg text-sm text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
-            キャンセル
+            {t('common.cancel')}
           </button>
           <button type="submit" disabled={saving}
             className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#4693ff] hover:bg-[#3a7fe0] disabled:opacity-50 transition-colors cursor-pointer">
-            {saving ? '保存中...' : '保存'}
+            {saving ? t('common.saving') : t('common.save')}
           </button>
         </div>
       </form>
@@ -670,6 +675,7 @@ interface DeleteConfirmProps {
 }
 
 function DeleteConfirm({ name, onClose, onConfirm }: DeleteConfirmProps) {
+  const { t } = useTranslation();
   const [sending, setSending] = useState(false);
 
   async function handleConfirm() {
@@ -688,19 +694,18 @@ function DeleteConfirm({ name, onClose, onConfirm }: DeleteConfirmProps) {
         className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl h-fit max-h-[calc(100dvh-2rem)] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
-        <h2 className="text-white text-lg font-semibold mb-2">削除依頼を送信</h2>
+        <h2 className="text-white text-lg font-semibold mb-2">{t('projectDetail.deleteRequest.title')}</h2>
         <p className="text-zinc-400 text-sm mb-5">
-          「{name}」の削除依頼をオーナーに送信します。<br />
-          オーナーが承認するまで削除は実行されません。
+          {t('projectDetail.deleteRequest.body', { name })}
         </p>
         <div className="flex justify-end gap-2">
           <button onClick={onClose}
             className="h-9 px-4 rounded-lg text-sm text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
-            キャンセル
+            {t('common.cancel')}
           </button>
           <button onClick={handleConfirm} disabled={sending}
             className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#e81403] hover:bg-[#b20f03] disabled:opacity-50 transition-colors cursor-pointer">
-            {sending ? '送信中...' : '依頼を送信'}
+            {sending ? t('projectDetail.deleteRequest.sending') : t('projectDetail.deleteRequest.send')}
           </button>
         </div>
       </div>
@@ -713,6 +718,7 @@ function DeleteConfirm({ name, onClose, onConfirm }: DeleteConfirmProps) {
 export function ProjectDetail() {
   const { user, role } = useAuth();
   const { uuid, id } = useParams<{ uuid: string; id: string }>();
+  const { t } = useTranslation();
 
   const [project,        setProject]        = useState<ProjectDoc | null>(null);
   usePageTitle(project?.name ?? 'プロジェクト詳細');
@@ -845,7 +851,7 @@ export function ProjectDetail() {
     return (
       <div className="flex flex-col min-h-full">
         <div className="flex items-center justify-center flex-1">
-          <p className="text-zinc-500 text-sm">読み込み中...</p>
+          <p className="text-zinc-500 text-sm">{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -855,7 +861,7 @@ export function ProjectDetail() {
     return (
       <div className="flex flex-col min-h-full">
         <div className="p-8">
-          <p className="text-zinc-400 mb-2">プロジェクトが見つかりません。</p>
+          <p className="text-zinc-400 mb-2">{t('projectDetail.notFound')}</p>
         </div>
       </div>
     );
@@ -877,7 +883,7 @@ export function ProjectDetail() {
               <button
                 onClick={() => setHeaderMenuOpen(o => !o)}
                 className="w-8 h-8 flex items-center justify-center rounded-md text-zinc-400 hover:text-zinc-200 hover:bg-[#2a2a2a] transition-colors cursor-pointer"
-                aria-label="メニュー"
+                aria-label={t('common.menu')}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                   <circle cx="12" cy="5"  r="2" />
@@ -895,7 +901,7 @@ export function ProjectDetail() {
                       stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
                     </svg>
-                    グループを作成
+                    {t('projectDetail.createGroup')}
                   </button>
                   <button
                     onClick={() => { setHeaderMenuOpen(false); setEditDevice(null); setDeviceModalOpen(true); }}
@@ -905,7 +911,7 @@ export function ProjectDetail() {
                       stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
                     </svg>
-                    デバイスを追加
+                    {t('projectDetail.addDevice')}
                   </button>
                 </div>
               )}
@@ -929,7 +935,7 @@ export function ProjectDetail() {
                   stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
-                グループを作成
+                {t('projectDetail.createGroup')}
               </button>
               <button
                 onClick={() => { setEditDevice(null); setDeviceModalOpen(true); }}
@@ -939,7 +945,7 @@ export function ProjectDetail() {
                   stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
-                デバイスを追加
+                {t('projectDetail.addDevice')}
               </button>
             </div>
           )}
@@ -969,7 +975,7 @@ export function ProjectDetail() {
               onClick={() => setFilterApps(new Set())}
               className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer underline-offset-2 hover:underline"
             >
-              クリア
+              {t('common.clear')}
             </button>
           )}
         </div>
@@ -980,7 +986,7 @@ export function ProjectDetail() {
         {filteredDevices.length === 0 && (!hasGroups || filterApps.size > 0) ? (
           <div className="overflow-hidden rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-12 text-center">
             <p className="text-zinc-500 text-sm">
-              {filterApps.size > 0 ? '該当するデバイスがありません。' : 'デバイスが登録されていません。'}
+              {filterApps.size > 0 ? t('projectDetail.noFilteredDevices') : t('projectDetail.noDevices')}
             </p>
           </div>
         ) : (
@@ -1007,7 +1013,7 @@ export function ProjectDetail() {
             {showDivider && (
               <div className="flex items-center gap-3 py-2">
                 <div className="flex-1 h-px bg-zinc-800" />
-                <span className="text-xs text-zinc-600 whitespace-nowrap">グループ未設定</span>
+                <span className="text-xs text-zinc-600 whitespace-nowrap">{t('projectDetail.ungrouped')}</span>
                 <div className="flex-1 h-px bg-zinc-800" />
               </div>
             )}

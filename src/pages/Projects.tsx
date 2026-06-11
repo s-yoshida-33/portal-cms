@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import {
   fetchProjects,
@@ -21,6 +22,7 @@ interface ModalProps {
 }
 
 function ProjectModal({ initial, onClose, onSave }: ModalProps) {
+  const { t } = useTranslation();
   const [name,       setName]       = useState(initial?.name       ?? '');
   const [prefecture, setPrefecture] = useState(initial?.prefecture ?? '');
   const [address,    setAddress]    = useState(initial?.address    ?? '');
@@ -30,7 +32,7 @@ function ProjectModal({ initial, onClose, onSave }: ModalProps) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim() || !prefecture.trim() || !address.trim()) {
-      setError('すべての項目を入力してください。');
+      setError(t('projects.form.requiredAll'));
       return;
     }
     setSaving(true);
@@ -39,7 +41,7 @@ function ProjectModal({ initial, onClose, onSave }: ModalProps) {
       onClose();
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      setError(`保存に失敗しました: ${msg}`);
+      setError(t('projects.form.saveFailed', { msg }));
       setSaving(false);
     }
   }
@@ -55,24 +57,24 @@ function ProjectModal({ initial, onClose, onSave }: ModalProps) {
       >
         <div className="shrink-0 px-6 pt-6 pb-4">
           <h2 className="text-white text-lg font-semibold mb-1">
-            {initial ? 'プロジェクトを編集' : 'プロジェクトを追加'}
+            {initial ? t('projects.form.editTitle') : t('projects.form.addTitle')}
           </h2>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col min-h-0 flex-1">
           <div className="flex-1 overflow-y-auto px-6 pb-4 space-y-4">
             <div>
-              <label className="block text-sm text-zinc-400 mb-1.5">プロジェクト名</label>
+              <label className="block text-sm text-zinc-400 mb-1.5">{t('projects.form.nameLabel')}</label>
               <input value={name} onChange={e => setName(e.target.value)}
                 placeholder="〇〇ショッピングセンター" className={inputClass} />
             </div>
             <div>
-              <label className="block text-sm text-zinc-400 mb-1.5">都道府県</label>
+              <label className="block text-sm text-zinc-400 mb-1.5">{t('projects.form.prefectureLabel')}</label>
               <input value={prefecture} onChange={e => setPrefecture(e.target.value)}
                 placeholder="宮城県" className={inputClass} />
             </div>
             <div>
-              <label className="block text-sm text-zinc-400 mb-1.5">住所</label>
+              <label className="block text-sm text-zinc-400 mb-1.5">{t('projects.form.addressLabel')}</label>
               <input value={address} onChange={e => setAddress(e.target.value)}
                 placeholder="宮城県仙台市青葉区..." className={inputClass} />
             </div>
@@ -81,11 +83,11 @@ function ProjectModal({ initial, onClose, onSave }: ModalProps) {
           <div className="shrink-0 px-6 py-4 border-t border-[#2a2a2a] bg-[#111111] rounded-b-xl flex justify-end gap-2">
             <button type="button" onClick={onClose}
               className="h-9 px-4 rounded-lg text-sm text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
-              キャンセル
+              {t('common.cancel')}
             </button>
             <button type="submit" disabled={saving}
               className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#4693ff] hover:bg-[#3a7fe0] disabled:opacity-50 transition-colors cursor-pointer">
-              {saving ? '保存中...' : '保存'}
+              {saving ? t('common.saving') : t('common.save')}
             </button>
           </div>
         </form>
@@ -103,6 +105,7 @@ interface DeleteConfirmProps {
 }
 
 function DeleteConfirm({ project, onClose, onConfirm }: DeleteConfirmProps) {
+  const { t } = useTranslation();
   const [sending, setSending] = useState(false);
 
   async function handleConfirm() {
@@ -121,19 +124,19 @@ function DeleteConfirm({ project, onClose, onConfirm }: DeleteConfirmProps) {
         className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl"
         onClick={e => e.stopPropagation()}
       >
-        <h2 className="text-white text-lg font-semibold mb-2">削除依頼を送信</h2>
+        <h2 className="text-white text-lg font-semibold mb-2">{t('projects.deleteRequest.title')}</h2>
         <p className="text-zinc-400 text-sm mb-5">
-          「{project.name}」の削除依頼をオーナーに送信します。<br />
-          オーナーが承認するまで削除は実行されません。
+          {t('projects.deleteRequest.bodyLine1', { name: project.name })}<br />
+          {t('projects.deleteRequest.bodyLine2')}
         </p>
         <div className="flex justify-end gap-2">
           <button onClick={onClose}
             className="h-9 px-4 rounded-lg text-sm text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
-            キャンセル
+            {t('common.cancel')}
           </button>
           <button onClick={handleConfirm} disabled={sending}
             className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#e81403] hover:bg-[#b20f03] disabled:opacity-50 transition-colors cursor-pointer">
-            {sending ? '送信中...' : '依頼を送信'}
+            {sending ? t('projects.deleteRequest.sending') : t('projects.deleteRequest.send')}
           </button>
         </div>
       </div>
@@ -144,7 +147,8 @@ function DeleteConfirm({ project, onClose, onConfirm }: DeleteConfirmProps) {
 // ── メインページ ──────────────────────────────────────────────────
 
 export function Projects() {
-  usePageTitle('プロジェクト管理');
+  const { t } = useTranslation();
+  usePageTitle(t('projects.title'));
   const { user, role } = useAuth();
 
   function siteLogActor() {
@@ -219,15 +223,15 @@ export function Projects() {
         {/* Mobile: タイトル + 3点メニュー */}
         <div className="flex items-start gap-2 min-w-0 sm:hidden">
           <div className="flex-1 min-w-0 flex flex-col gap-1">
-            <h1 className="text-white text-3xl font-semibold leading-tight">プロジェクト管理</h1>
-            <p className="text-[#999999] text-base">登録プロジェクトの確認・追加・編集</p>
+            <h1 className="text-white text-3xl font-semibold leading-tight">{t('projects.title')}</h1>
+            <p className="text-[#999999] text-base">{t('projects.description')}</p>
           </div>
           {canEdit && (
             <div ref={headerMenuRef} className="relative shrink-0 mt-2">
               <button
                 onClick={() => setHeaderMenuOpen(o => !o)}
                 className="w-8 h-8 flex items-center justify-center rounded-md text-zinc-400 hover:text-zinc-200 hover:bg-[#2a2a2a] transition-colors cursor-pointer"
-                aria-label="メニュー"
+                aria-label={t('common.menu')}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                   <circle cx="12" cy="5"  r="2" />
@@ -245,7 +249,7 @@ export function Projects() {
                       stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
                     </svg>
-                    プロジェクトを追加
+                    {t('projects.add')}
                   </button>
                 </div>
               )}
@@ -256,8 +260,8 @@ export function Projects() {
         {/* Desktop: タイトル + CTAボタン */}
         <div className="hidden sm:flex items-start justify-between gap-4">
           <div className="flex flex-col gap-2">
-            <h1 className="text-white text-3xl font-semibold">プロジェクト管理</h1>
-            <p className="text-[#999999] text-base">登録プロジェクトの確認・追加・編集</p>
+            <h1 className="text-white text-3xl font-semibold">{t('projects.title')}</h1>
+            <p className="text-[#999999] text-base">{t('projects.description')}</p>
           </div>
           {canEdit && (
             <button
@@ -268,7 +272,7 @@ export function Projects() {
                 stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
               </svg>
-              プロジェクトを追加
+              {t('projects.add')}
             </button>
           )}
         </div>
@@ -278,17 +282,17 @@ export function Projects() {
       <div className="px-4 sm:px-6 pt-8 pb-8">
         {loading ? (
           <div className="overflow-hidden rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-12 text-center">
-            <p className="text-zinc-500 text-sm">読み込み中...</p>
+            <p className="text-zinc-500 text-sm">{t('common.loading')}</p>
           </div>
         ) : projects.length === 0 ? (
           <div className="overflow-hidden rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-12 text-center">
-            <p className="text-zinc-500 text-sm">プロジェクトが登録されていません。</p>
+            <p className="text-zinc-500 text-sm">{t('projects.noProjects')}</p>
             {canEdit && (
               <button
                 onClick={() => { setEditTarget(null); setModalOpen(true); }}
                 className="mt-4 text-[#4693ff] text-sm hover:underline cursor-pointer"
               >
-                最初のプロジェクトを追加する
+                {t('projects.addFirst')}
               </button>
             )}
           </div>
@@ -321,13 +325,13 @@ export function Projects() {
                         onClick={() => { setEditTarget(p); setModalOpen(true); }}
                         className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
                       >
-                        編集
+                        {t('common.edit')}
                       </button>
                       <button
                         onClick={() => setDeleteTarget(p)}
                         className="h-7 px-3 rounded-md text-xs text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-1 ring-red-900/50 transition-colors cursor-pointer"
                       >
-                        削除依頼
+                        {t('projectDetail.deviceDeleteRequest')}
                       </button>
                     </div>
                   )}
@@ -339,10 +343,10 @@ export function Projects() {
             <div className="hidden sm:block overflow-hidden rounded-lg ring-1 ring-[#3d3d3d]">
               {/* テーブルヘッダー */}
               <div className="grid grid-cols-[1fr_110px_1.2fr_72px_160px] gap-4 px-4 py-3 bg-black border-b border-[#3d3d3d] text-xs font-medium text-zinc-500 uppercase tracking-wider">
-                <span>プロジェクト名</span>
-                <span>都道府県</span>
-                <span>住所</span>
-                <span>台数</span>
+                <span>{t('projects.table.name')}</span>
+                <span>{t('projects.table.prefecture')}</span>
+                <span>{t('projects.table.address')}</span>
+                <span>{t('projects.table.count')}</span>
                 <span />
               </div>
 
@@ -371,13 +375,13 @@ export function Projects() {
                         onClick={() => { setEditTarget(p); setModalOpen(true); }}
                         className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
                       >
-                        編集
+                        {t('common.edit')}
                       </button>
                       <button
                         onClick={() => setDeleteTarget(p)}
                         className="h-7 px-3 rounded-md text-xs text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-1 ring-red-900/50 transition-colors cursor-pointer"
                       >
-                        削除依頼
+                        {t('projectDetail.deviceDeleteRequest')}
                       </button>
                     </div>
                   ) : (

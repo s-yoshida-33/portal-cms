@@ -6,6 +6,7 @@ import {
 } from 'firebase/auth';
 import { auth, googleProvider } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 function GoogleIcon() {
   return (
@@ -21,6 +22,7 @@ function GoogleIcon() {
 export function Signup() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const { t } = useTranslation();
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm]   = useState('');
@@ -40,7 +42,7 @@ export function Signup() {
     try {
       await signInWithPopup(auth, googleProvider);
     } catch {
-      setError('Googleログインに失敗しました。');
+      setError(t('auth.error.googleSignupFailed'));
       setLoading(false);
     }
   }
@@ -49,11 +51,11 @@ export function Signup() {
     e.preventDefault();
     setError('');
     if (password !== confirm) {
-      setError('パスワードが一致しません。');
+      setError(t('auth.error.passwordMismatch'));
       return;
     }
     if (password.length < 8) {
-      setError('パスワードは8文字以上で設定してください。');
+      setError(t('auth.error.passwordTooShort'));
       return;
     }
     setLoading(true);
@@ -63,9 +65,9 @@ export function Signup() {
     } catch (e: unknown) {
       const code = (e as { code?: string }).code;
       if (code === 'auth/email-already-in-use') {
-        setError('このメールアドレスはすでに使用されています。');
+        setError(t('auth.error.emailInUse'));
       } else {
-        setError('アカウントの作成に失敗しました。');
+        setError(t('auth.error.createFailed'));
       }
     } finally {
       setLoading(false);
@@ -75,7 +77,7 @@ export function Signup() {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-        <p className="text-zinc-500 text-sm">認証中...</p>
+        <p className="text-zinc-500 text-sm">{t('auth.authenticating')}</p>
       </div>
     );
   }
@@ -94,7 +96,7 @@ export function Signup() {
         </div>
 
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
-          <h2 className="text-lg font-semibold text-zinc-100 mb-6">アカウントを作成</h2>
+          <h2 className="text-lg font-semibold text-zinc-100 mb-6">{t('auth.signupTitle')}</h2>
 
           {/* Google */}
           <button
@@ -103,7 +105,7 @@ export function Signup() {
             className="w-full flex items-center justify-center gap-3 px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-sm text-zinc-100 font-medium transition-colors disabled:opacity-50 mb-6"
           >
             <GoogleIcon />
-            Googleで登録
+            {t('auth.signupWithGoogle')}
           </button>
 
           {/* Divider */}
@@ -112,7 +114,7 @@ export function Signup() {
               <div className="w-full border-t border-zinc-800" />
             </div>
             <div className="relative flex justify-center">
-              <span className="px-3 bg-zinc-900 text-xs text-zinc-500">または</span>
+              <span className="px-3 bg-zinc-900 text-xs text-zinc-500">{t('auth.or')}</span>
             </div>
           </div>
 
@@ -120,7 +122,7 @@ export function Signup() {
           <form onSubmit={handleEmailSignup} className="space-y-4">
             <div>
               <label className="block text-xs font-medium text-zinc-400 mb-1.5">
-                メールアドレス
+                {t('auth.emailLabel')}
               </label>
               <input
                 type="email"
@@ -133,7 +135,7 @@ export function Signup() {
             </div>
             <div>
               <label className="block text-xs font-medium text-zinc-400 mb-1.5">
-                パスワード <span className="text-zinc-600 font-normal">（8文字以上）</span>
+                {t('auth.passwordLabel')} <span className="text-zinc-600 font-normal">{t('auth.passwordNote')}</span>
               </label>
               <input
                 type="password"
@@ -146,7 +148,7 @@ export function Signup() {
             </div>
             <div>
               <label className="block text-xs font-medium text-zinc-400 mb-1.5">
-                パスワード（確認）
+                {t('auth.passwordConfirm')}
               </label>
               <input
                 type="password"
@@ -169,15 +171,15 @@ export function Signup() {
               disabled={loading}
               className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
             >
-              {loading ? '作成中...' : 'アカウントを作成'}
+              {loading ? t('auth.creating') : t('auth.createAccount')}
             </button>
           </form>
         </div>
 
         <p className="text-center text-xs text-zinc-500 mt-6">
-          すでにアカウントをお持ちの方は{' '}
+          {t('auth.alreadyHaveAccount')}{' '}
           <Link to="/login" className="text-blue-400 hover:text-blue-300">
-            ログイン
+            {t('auth.login')}
           </Link>
         </p>
       </div>

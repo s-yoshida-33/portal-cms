@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { subscribeApiTokens, createApiToken, revokeApiToken, addSiteLog } from '../lib/firestore';
 import type { ApiToken, ApiTokenType } from '../types';
@@ -10,27 +11,10 @@ import { Pagination } from '../components/Pagination';
 
 const PAGE_SIZE = 20;
 
-const typeLabel: Record<ApiTokenType, string> = {
-  registration: '登録用',
-  device:       'デバイス用',
-};
-
 const typeBadge: Record<ApiTokenType, string> = {
   registration: 'text-green-400 bg-green-950/40 ring-1 ring-green-900/50',
   device:       'text-blue-400 bg-blue-950/40 ring-1 ring-blue-900/50',
 };
-
-const filterTypeOptions = [
-  { value: '',             label: 'すべて' },
-  { value: 'registration', label: '登録用' },
-  { value: 'device',       label: 'デバイス用' },
-];
-
-const filterStatusOptions = [
-  { value: '',        label: 'すべて' },
-  { value: 'active',  label: '有効' },
-  { value: 'revoked', label: '失効済み' },
-];
 
 function formatDate(iso: string | null) {
   if (!iso) return '-';
@@ -51,6 +35,7 @@ interface CreateModalProps {
 }
 
 function CreateModal({ onClose, onCreated }: CreateModalProps) {
+  const { t } = useTranslation();
   const [name,    setName]    = useState('');
   const [type,    setType]    = useState<ApiTokenType>('registration');
   const [saving,  setSaving]  = useState(false);
@@ -61,13 +46,13 @@ function CreateModal({ onClose, onCreated }: CreateModalProps) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim()) { setError('名前を入力してください。'); return; }
+    if (!name.trim()) { setError(t('apiTokens.createModal.nameRequired')); return; }
     setSaving(true);
     try {
       const { token } = await createApiToken(name.trim(), type);
       onCreated(token, name.trim(), type);
     } catch {
-      setError('発行に失敗しました。');
+      setError(t('apiTokens.createModal.failed'));
       setSaving(false);
     }
   }
@@ -76,21 +61,21 @@ function CreateModal({ onClose, onCreated }: CreateModalProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl"
         onClick={e => e.stopPropagation()}>
-        <h2 className="text-white text-lg font-semibold mb-5">トークンを発行</h2>
+        <h2 className="text-white text-lg font-semibold mb-5">{t('apiTokens.createModal.title')}</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm text-zinc-400 mb-1.5">名前</label>
+            <label className="block text-sm text-zinc-400 mb-1.5">{t('apiTokens.createModal.nameLabel')}</label>
             <input value={name} onChange={e => setName(e.target.value)}
               placeholder="例: AM須坂 登録用" className={inputClass} />
           </div>
           <div>
-            <label className="block text-sm text-zinc-400 mb-1.5">種別</label>
+            <label className="block text-sm text-zinc-400 mb-1.5">{t('apiTokens.createModal.typeLabel')}</label>
             <CustomSelect
               value={type}
               onChange={val => setType(val as ApiTokenType)}
               options={[
-                { value: 'registration', label: '登録用（新規デバイス登録）' },
-                { value: 'device',       label: 'デバイス用（ステータス送信）' },
+                { value: 'registration', label: t('apiTokens.createModal.registrationOption') },
+                { value: 'device',       label: t('apiTokens.createModal.deviceOption') },
               ]}
               className="w-full"
             />
@@ -99,11 +84,11 @@ function CreateModal({ onClose, onCreated }: CreateModalProps) {
           <div className="flex justify-end gap-2 pt-2">
             <button type="button" onClick={onClose}
               className="h-9 px-4 rounded-lg text-sm text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
-              キャンセル
+              {t('common.cancel')}
             </button>
             <button type="submit" disabled={saving}
               className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#4693ff] hover:bg-[#3a7fe0] disabled:opacity-50 transition-colors cursor-pointer">
-              {saving ? '発行中...' : '発行する'}
+              {saving ? t('apiTokens.createModal.issuing') : t('apiTokens.createModal.issueBtn')}
             </button>
           </div>
         </form>
@@ -120,6 +105,7 @@ interface TokenRevealProps {
 }
 
 function TokenReveal({ token, onClose }: TokenRevealProps) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
@@ -131,21 +117,21 @@ function TokenReveal({ token, onClose }: TokenRevealProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
       <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-lg p-6 shadow-2xl">
-        <h2 className="text-white text-lg font-semibold mb-2">トークンを保存してください</h2>
+        <h2 className="text-white text-lg font-semibold mb-2">{t('apiTokens.revealModal.title')}</h2>
         <p className="text-zinc-400 text-sm mb-4">
-          このトークンは今後二度と表示されません。必ずコピーして安全な場所に保管してください。
+          {t('apiTokens.revealModal.body')}
         </p>
         <div className="flex items-center gap-2 bg-[#0d0d0d] ring-1 ring-[#3d3d3d] rounded-lg px-3 py-2.5 mb-5">
           <code className="flex-1 text-xs text-green-400 font-mono break-all">{token}</code>
           <button onClick={handleCopy}
             className="shrink-0 h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
-            {copied ? 'コピー済み' : 'コピー'}
+            {copied ? t('common.copied') : t('common.copy')}
           </button>
         </div>
         <div className="flex justify-end">
           <button onClick={onClose}
             className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#4693ff] hover:bg-[#3a7fe0] transition-colors cursor-pointer">
-            保存しました
+            {t('apiTokens.revealModal.saved')}
           </button>
         </div>
       </div>
@@ -162,6 +148,7 @@ interface RevokeConfirmProps {
 }
 
 function RevokeConfirm({ token, onClose, onConfirm }: RevokeConfirmProps) {
+  const { t } = useTranslation();
   const [running, setRunning] = useState(false);
 
   async function handle() {
@@ -174,19 +161,18 @@ function RevokeConfirm({ token, onClose, onConfirm }: RevokeConfirmProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl"
         onClick={e => e.stopPropagation()}>
-        <h2 className="text-white text-lg font-semibold mb-2">トークンを失効</h2>
+        <h2 className="text-white text-lg font-semibold mb-2">{t('apiTokens.revokeModal.title')}</h2>
         <p className="text-zinc-400 text-sm mb-5">
-          「{token.name}」を失効します。<br />
-          このトークンを使用しているデバイスは認証できなくなります。
+          {t('apiTokens.revokeModal.body', { name: token.name })}
         </p>
         <div className="flex justify-end gap-2">
           <button onClick={onClose}
             className="h-9 px-4 rounded-lg text-sm text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
-            キャンセル
+            {t('common.cancel')}
           </button>
           <button onClick={handle} disabled={running}
             className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#e81403] hover:bg-[#b20f03] disabled:opacity-50 transition-colors cursor-pointer">
-            {running ? '処理中...' : '失効する'}
+            {running ? t('common.processing') : t('apiTokens.revokeModal.revoke')}
           </button>
         </div>
       </div>
@@ -197,7 +183,8 @@ function RevokeConfirm({ token, onClose, onConfirm }: RevokeConfirmProps) {
 // ── メインページ ──────────────────────────────────────────────────
 
 export function ApiTokens() {
-  usePageTitle('APIトークン');
+  const { t } = useTranslation();
+  usePageTitle(t('apiTokens.title'));
   const { user, role } = useAuth();
 
   function siteLogActor() {
@@ -246,7 +233,7 @@ export function ApiTokens() {
     return (
       <div className="flex flex-col min-h-full">
         <div className="p-8">
-          <p className="text-zinc-400 text-sm">このページは管理者以上のみアクセスできます。</p>
+          <p className="text-zinc-400 text-sm">{t('apiTokens.accessDenied')}</p>
         </div>
       </div>
     );
@@ -263,30 +250,30 @@ export function ApiTokens() {
   const revokedSlice = revoked.slice((revokedPage - 1) * PAGE_SIZE, revokedPage * PAGE_SIZE);
 
   // ── モバイルカード ────────────────────────────────────────────────
-  function TokenCard({ t }: { t: ApiToken }) {
-    const isRevoked = !!t.revokedAt;
+  function TokenCard({ t: tok }: { t: ApiToken }) {
+    const isRevoked = !!tok.revokedAt;
     return (
       <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl px-4 py-4">
         <div className="flex items-start justify-between gap-3 mb-2">
           <span className={`text-sm font-semibold leading-snug truncate flex-1 ${isRevoked ? 'text-zinc-500 line-through' : 'text-white'}`}>
-            {t.name}
+            {tok.name}
           </span>
-          <span className={`shrink-0 inline-flex items-center h-5 px-2 rounded-full text-xs font-medium ${typeBadge[t.type]}`}>
-            {typeLabel[t.type]}
+          <span className={`shrink-0 inline-flex items-center h-5 px-2 rounded-full text-xs font-medium ${typeBadge[tok.type]}`}>
+            {t(`apiTokens.typeLabel.${tok.type}`)}
           </span>
         </div>
         <div className="space-y-0.5 mb-3">
-          <p className="text-zinc-500 text-xs">発行: {formatDate(t.createdAt)}</p>
-          <p className="text-zinc-500 text-xs">最終使用: {formatDate(t.lastUsedAt)}</p>
+          <p className="text-zinc-500 text-xs">{t('apiTokens.table.issued')}: {formatDate(tok.createdAt)}</p>
+          <p className="text-zinc-500 text-xs">{t('apiTokens.table.lastUsed')}: {formatDate(tok.lastUsedAt)}</p>
         </div>
         <div className="flex items-center justify-between">
           <span className={`text-xs font-medium ${isRevoked ? 'text-zinc-600' : 'text-green-400'}`}>
-            {isRevoked ? '失効済み' : '有効'}
+            {isRevoked ? t('apiTokens.statusLabel.revoked') : t('apiTokens.statusLabel.active')}
           </span>
           {!isRevoked && (
-            <button onClick={() => setRevokeTarget(t)}
+            <button onClick={() => setRevokeTarget(tok)}
               className="h-7 px-3 rounded-md text-xs text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-1 ring-red-900/50 transition-colors cursor-pointer">
-              失効
+              {t('apiTokens.revokeBtn')}
             </button>
           )}
         </div>
@@ -295,26 +282,26 @@ export function ApiTokens() {
   }
 
   // ── デスクトップ行 ─────────────────────────────────────────────────
-  function TokenRow({ t }: { t: ApiToken }) {
-    const isRevoked = !!t.revokedAt;
+  function TokenRow({ t: tok }: { t: ApiToken }) {
+    const isRevoked = !!tok.revokedAt;
     return (
       <div className="grid grid-cols-[1fr_90px_160px_160px_100px_80px] gap-4 px-4 py-3.5 items-center bg-[#111111] hover:bg-[#161616] transition-colors border-b border-[#3d3d3d] last:border-b-0">
         <span className={`text-sm font-medium truncate ${isRevoked ? 'text-zinc-500 line-through' : 'text-white'}`}>
-          {t.name}
+          {tok.name}
         </span>
-        <span className={`inline-flex items-center justify-center h-5 px-2 rounded-full text-xs font-medium w-fit ${typeBadge[t.type]}`}>
-          {typeLabel[t.type]}
+        <span className={`inline-flex items-center justify-center h-5 px-2 rounded-full text-xs font-medium w-fit ${typeBadge[tok.type]}`}>
+          {t(`apiTokens.typeLabel.${tok.type}`)}
         </span>
-        <span className="text-zinc-400 text-xs tabular-nums">{formatDate(t.createdAt)}</span>
-        <span className="text-zinc-400 text-xs tabular-nums">{formatDate(t.lastUsedAt)}</span>
+        <span className="text-zinc-400 text-xs tabular-nums">{formatDate(tok.createdAt)}</span>
+        <span className="text-zinc-400 text-xs tabular-nums">{formatDate(tok.lastUsedAt)}</span>
         <span className={`text-xs font-medium ${isRevoked ? 'text-zinc-600' : 'text-green-400'}`}>
-          {isRevoked ? '失効済み' : '有効'}
+          {isRevoked ? t('apiTokens.statusLabel.revoked') : t('apiTokens.statusLabel.active')}
         </span>
         <div className="flex justify-end">
           {!isRevoked && (
-            <button onClick={() => setRevokeTarget(t)}
+            <button onClick={() => setRevokeTarget(tok)}
               className="h-7 px-3 rounded-md text-xs text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-1 ring-red-900/50 transition-colors cursor-pointer">
-              失効
+              {t('apiTokens.revokeBtn')}
             </button>
           )}
         </div>
@@ -328,15 +315,15 @@ export function ApiTokens() {
       {/* Mobile header */}
       <div className="flex items-start gap-2 min-w-0 py-6 px-4 sm:hidden">
         <div className="flex-1 min-w-0 flex flex-col gap-1">
-          <h1 className="text-white text-3xl font-semibold leading-tight">API トークン</h1>
-          <p className="text-[#999999] text-base">デバイス認証用トークンの発行・管理</p>
+          <h1 className="text-white text-3xl font-semibold leading-tight">{t('apiTokens.title')}</h1>
+          <p className="text-[#999999] text-base">{t('apiTokens.description')}</p>
         </div>
         {canEdit && (
           <div ref={headerMenuRef} className="relative shrink-0 mt-2">
             <button
               onClick={() => setHeaderMenuOpen(o => !o)}
               className="w-8 h-8 flex items-center justify-center rounded-md text-zinc-400 hover:text-zinc-200 hover:bg-[#2a2a2a] transition-colors cursor-pointer"
-              aria-label="メニュー"
+              aria-label={t('common.menu')}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                 <circle cx="12" cy="5" r="2" />
@@ -353,7 +340,7 @@ export function ApiTokens() {
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
                   </svg>
-                  トークンを発行
+                  {t('apiTokens.issue')}
                 </button>
               </div>
             )}
@@ -364,8 +351,8 @@ export function ApiTokens() {
       {/* Desktop header */}
       <div className="hidden sm:flex items-start justify-between gap-4 py-6 px-6">
         <div className="flex flex-col gap-2">
-          <h1 className="text-white text-3xl font-semibold">API トークン</h1>
-          <p className="text-[#999999] text-base">デバイス認証用トークンの発行・管理</p>
+          <h1 className="text-white text-3xl font-semibold">{t('apiTokens.title')}</h1>
+          <p className="text-[#999999] text-base">{t('apiTokens.description')}</p>
         </div>
         {canEdit && (
           <button
@@ -376,7 +363,7 @@ export function ApiTokens() {
               stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
             </svg>
-            トークンを発行
+            {t('apiTokens.issue')}
           </button>
         )}
       </div>
@@ -384,20 +371,28 @@ export function ApiTokens() {
       {/* フィルターバー */}
       <div className="px-4 sm:px-6 pb-2 flex flex-wrap items-end gap-2">
         <div className="flex flex-col gap-1">
-          <label className="text-zinc-500 text-xs">種別</label>
+          <label className="text-zinc-500 text-xs">{t('apiTokens.filterType')}</label>
           <CustomSelect
             value={filterType}
             onChange={v => setFilterType(v)}
-            options={filterTypeOptions}
+            options={[
+              { value: '',             label: t('common.all') },
+              { value: 'registration', label: t('apiTokens.typeLabel.registration') },
+              { value: 'device',       label: t('apiTokens.typeLabel.device') },
+            ]}
             className="w-32"
           />
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-zinc-500 text-xs">状態</label>
+          <label className="text-zinc-500 text-xs">{t('apiTokens.filterStatus')}</label>
           <CustomSelect
             value={filterStatus}
             onChange={v => setFilterStatus(v)}
-            options={filterStatusOptions}
+            options={[
+              { value: '',        label: t('common.all') },
+              { value: 'active',  label: t('apiTokens.statusLabel.active') },
+              { value: 'revoked', label: t('apiTokens.statusLabel.revoked') },
+            ]}
             className="w-32"
           />
         </div>
@@ -406,16 +401,16 @@ export function ApiTokens() {
       <div className="px-4 sm:px-6 pt-4 pb-8 space-y-6">
         {loading ? (
           <div className="rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-12 text-center">
-            <p className="text-zinc-500 text-sm">読み込み中...</p>
+            <p className="text-zinc-500 text-sm">{t('common.loading')}</p>
           </div>
         ) : (
           <>
             {/* 有効なトークン */}
             <div>
-              <p className="text-sm font-medium text-zinc-400 mb-2">有効 <span className="text-zinc-600">({active.length})</span></p>
+              <p className="text-sm font-medium text-zinc-400 mb-2">{t('apiTokens.active')} <span className="text-zinc-600">({active.length})</span></p>
               {active.length === 0 ? (
                 <div className="rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-8 text-center">
-                  <p className="text-zinc-500 text-sm">有効なトークンがありません。</p>
+                  <p className="text-zinc-500 text-sm">{t('apiTokens.noActive')}</p>
                 </div>
               ) : (
                 <>
@@ -426,7 +421,7 @@ export function ApiTokens() {
                   {/* Desktop table */}
                   <div className="hidden sm:block overflow-hidden rounded-lg ring-1 ring-[#3d3d3d]">
                     <div className="grid grid-cols-[1fr_90px_160px_160px_100px_80px] gap-4 px-4 py-3 bg-black border-b border-[#3d3d3d] text-xs font-medium text-zinc-500 uppercase tracking-wider">
-                      <span>名前</span><span>種別</span><span>発行日時</span><span>最終使用</span><span>状態</span><span />
+                      <span>{t('apiTokens.table.name')}</span><span>{t('apiTokens.table.type')}</span><span>{t('apiTokens.table.issued')}</span><span>{t('apiTokens.table.lastUsed')}</span><span>{t('apiTokens.table.status')}</span><span />
                     </div>
                     {activeSlice.map(t => <TokenRow key={t.id} t={t} />)}
                   </div>
@@ -438,7 +433,7 @@ export function ApiTokens() {
             {/* 失効済みトークン */}
             {revoked.length > 0 && (
               <div>
-                <p className="text-sm font-medium text-zinc-400 mb-2">失効済み <span className="text-zinc-600">({revoked.length})</span></p>
+                <p className="text-sm font-medium text-zinc-400 mb-2">{t('apiTokens.revoked')} <span className="text-zinc-600">({revoked.length})</span></p>
                 <>
                   {/* Mobile cards */}
                   <div className="sm:hidden space-y-4">
@@ -447,7 +442,7 @@ export function ApiTokens() {
                   {/* Desktop table */}
                   <div className="hidden sm:block overflow-hidden rounded-lg ring-1 ring-[#3d3d3d]">
                     <div className="grid grid-cols-[1fr_90px_160px_160px_100px_80px] gap-4 px-4 py-3 bg-black border-b border-[#3d3d3d] text-xs font-medium text-zinc-500 uppercase tracking-wider">
-                      <span>名前</span><span>種別</span><span>発行日時</span><span>最終使用</span><span>状態</span><span />
+                      <span>{t('apiTokens.table.name')}</span><span>{t('apiTokens.table.type')}</span><span>{t('apiTokens.table.issued')}</span><span>{t('apiTokens.table.lastUsed')}</span><span>{t('apiTokens.table.status')}</span><span />
                     </div>
                     {revokedSlice.map(t => <TokenRow key={t.id} t={t} />)}
                   </div>
