@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { subscribeSiteLogs } from '../lib/firestore';
-import type { SiteLog, SiteLogCategory } from '../types';
+import { useState, useEffect, useMemo } from 'react';
+import { subscribeSiteLogs, subscribeProjects } from '../lib/firestore';
+import type { SiteLog, SiteLogCategory, ProjectDoc } from '../types';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { Pagination } from '../components/Pagination';
 
@@ -44,6 +44,7 @@ const actionLabel: Record<string, string> = {
   'project.updated':              'プロジェクトを更新',
   'project.deletionRequested':    'プロジェクトの削除を依頼',
   'device.added':                 'デバイスを追加',
+  'device.rejected':              'デバイスを却下',
   'device.deletionRequested':     'デバイスの削除を依頼',
 };
 
@@ -54,7 +55,6 @@ function formatDate(iso: string) {
   });
 }
 
-// デバイスレベルの操作カテゴリ（プロジェクト欄は projectName、デバイス欄は deviceName で表示）
 const DEVICE_CATEGORIES: SiteLogCategory[] = ['screenshot', 'log', 'device'];
 
 function resolveColumns(log: SiteLog) {
@@ -65,6 +65,131 @@ function resolveColumns(log: SiteLog) {
   };
 }
 
+// ── フィルター ────────────────────────────────────────────────────
+
+interface FilterState {
+  category:  SiteLogCategory | '';
+  projectId: string;
+  dateFrom:  string;
+  dateTo:    string;
+}
+
+const EMPTY_FILTER: FilterState = { category: '', projectId: '', dateFrom: '', dateTo: '' };
+
+function hasActiveFilter(f: FilterState) {
+  return f.category !== '' || f.projectId !== '' || f.dateFrom !== '' || f.dateTo !== '';
+}
+
+interface FilterBarProps {
+  filter:   FilterState;
+  projects: ProjectDoc[];
+  onChange: (f: FilterState) => void;
+  onClear:  () => void;
+}
+
+const inputClass =
+  'h-8 bg-[#1a1a1a] ring-1 ring-[#3d3d3d] text-white text-sm rounded-lg px-3 outline-none focus:ring-[#4693ff] focus:ring-[1.5px] transition-all placeholder:text-zinc-600';
+
+function FilterBar({ filter, projects, onChange, onClear }: FilterBarProps) {
+  const set = <K extends keyof FilterState>(key: K, val: FilterState[K]) =>
+    onChange({ ...filter, [key]: val });
+
+  return (
+    <div className="flex flex-wrap items-end gap-2 mb-4">
+
+      {/* 種別 */}
+      <div className="flex flex-col gap-1">
+        <label className="text-zinc-500 text-xs">種別</label>
+        <select
+          value={filter.category}
+          onChange={e => set('category', e.target.value as SiteLogCategory | '')}
+          className={`${inputClass} pr-7 cursor-pointer`}
+        >
+          <option value="">すべて</option>
+          {(Object.keys(categoryLabel) as SiteLogCategory[]).map(c => (
+            <option key={c} value={c}>{categoryLabel[c]}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* プロジェクト */}
+      <div className="flex flex-col gap-1">
+        <label className="text-zinc-500 text-xs">プロジェクト</label>
+        <select
+          value={filter.projectId}
+          onChange={e => set('projectId', e.target.value)}
+          className={`${inputClass} pr-7 cursor-pointer`}
+        >
+          <option value="">すべて</option>
+          {projects.map(p => (
+            <option key={p.id} value={p.id}>{p.name}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* 開始日 */}
+      <div className="flex flex-col gap-1">
+        <label className="text-zinc-500 text-xs">開始日</label>
+        <input
+          type="date"
+          value={filter.dateFrom}
+          max={filter.dateTo || undefined}
+          onChange={e => set('dateFrom', e.target.value)}
+          className={`${inputClass} w-36`}
+        />
+      </div>
+
+      {/* 終了日 */}
+      <div className="flex flex-col gap-1">
+        <label className="text-zinc-500 text-xs">終了日</label>
+        <input
+          type="date"
+          value={filter.dateTo}
+          min={filter.dateFrom || undefined}
+          onChange={e => set('dateTo', e.target.value)}
+          className={`${inputClass} w-36`}
+        />
+      </div>
+
+      {/* クリア */}
+      {hasActiveFilter(filter) && (
+        <button
+          onClick={onClear}
+          className="h-8 px-3 rounded-lg text-xs text-zinc-400 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
+        >
+          クリア
+        </button>
+      )}
+    </div>
+  );
+}
+
+function applyFilter(logs: SiteLog[], filter: FilterState, projects: ProjectDoc[]): SiteLog[] {
+  let result = logs;
+
+  if (filter.category) {
+    result = result.filter(l => l.category === filter.category);
+  }
+
+  if (filter.projectId) {
+    const name = projects.find(p => p.id === filter.projectId)?.name ?? '';
+    result = result.filter(l => l.projectName === name);
+  }
+
+  if (filter.dateFrom) {
+    const from = new Date(filter.dateFrom).getTime();
+    result = result.filter(l => new Date(l.performedAt).getTime() >= from);
+  }
+
+  if (filter.dateTo) {
+    // 終了日の23:59:59まで含める
+    const to = new Date(filter.dateTo).getTime() + 86399999;
+    result = result.filter(l => new Date(l.performedAt).getTime() <= to);
+  }
+
+  return result;
+}
+
 // ── タブ ─────────────────────────────────────────────────────────
 
 type Tab = 'site' | 'device';
@@ -73,22 +198,29 @@ type Tab = 'site' | 'device';
 
 export function Logs() {
   usePageTitle('ログ');
-  const [tab,     setTab]     = useState<Tab>('site');
-  const [logs,    setLogs]    = useState<SiteLog[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [page,    setPage]    = useState(1);
+  const [tab,      setTab]      = useState<Tab>('site');
+  const [logs,     setLogs]     = useState<SiteLog[]>([]);
+  const [projects, setProjects] = useState<ProjectDoc[]>([]);
+  const [loading,  setLoading]  = useState(true);
+  const [page,     setPage]     = useState(1);
+  const [filter,   setFilter]   = useState<FilterState>(EMPTY_FILTER);
 
   useEffect(() => {
-    const unsub = subscribeSiteLogs(
-      data => { setLogs(data); setLoading(false); },
-      ()   => setLoading(false),
-    );
-    return unsub;
+    const unsubLogs     = subscribeSiteLogs(data => { setLogs(data); setLoading(false); }, () => setLoading(false));
+    const unsubProjects = subscribeProjects(setProjects);
+    return () => { unsubLogs(); unsubProjects(); };
   }, []);
 
-  useEffect(() => { setPage(1); }, [logs]);
+  const filtered = useMemo(() => applyFilter(logs, filter, projects), [logs, filter, projects]);
 
-  const paged = logs.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  // フィルターまたはログ変更でページを1に戻す
+  useEffect(() => { setPage(1); }, [filtered]);
+
+  const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  function handleFilterChange(f: FilterState) {
+    setFilter(f);
+  }
 
   return (
     <div className="flex flex-col min-h-full">
@@ -139,80 +271,100 @@ export function Logs() {
             <div className="overflow-hidden rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-12 text-center">
               <p className="text-zinc-500 text-sm">読み込み中...</p>
             </div>
-          ) : logs.length === 0 ? (
-            <div className="overflow-hidden rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-12 text-center">
-              <p className="text-zinc-500 text-sm">操作ログはまだありません。</p>
-            </div>
           ) : (
             <>
-              {/* モバイルカード */}
-              <div className="sm:hidden space-y-4">
-                {paged.map(log => {
-                  const { projectCol, deviceCol } = resolveColumns(log);
-                  return (
-                    <div key={log.id} className="rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-4 space-y-2.5">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className={`inline-flex items-center h-5 px-2 rounded-full text-xs font-medium ${categoryBadge[log.category]}`}>
-                          {categoryLabel[log.category]}
-                        </span>
-                        <span className="text-zinc-500 text-xs tabular-nums">{formatDate(log.performedAt)}</span>
-                      </div>
-                      <p className="text-white text-sm">{actionLabel[`${log.category}.${log.action}`] ?? log.action}</p>
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                        <div>
-                          <span className="text-zinc-600">プロジェクト</span>
-                          <p className="text-zinc-300 truncate mt-0.5">{projectCol}</p>
-                        </div>
-                        <div>
-                          <span className="text-zinc-600">デバイス</span>
-                          <p className="text-zinc-300 truncate mt-0.5">{deviceCol}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-5 h-5 rounded-full bg-blue-600 flex items-center justify-center shrink-0 text-white text-[10px] font-medium">
-                          {log.performedBy.displayName[0]?.toUpperCase() ?? '?'}
-                        </div>
-                        <span className="text-zinc-400 text-xs truncate">{log.performedBy.displayName}</span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+              <FilterBar
+                filter={filter}
+                projects={projects}
+                onChange={handleFilterChange}
+                onClear={() => setFilter(EMPTY_FILTER)}
+              />
 
-              {/* デスクトップテーブル */}
-              <div className="hidden sm:block overflow-hidden rounded-lg ring-1 ring-[#3d3d3d]">
-                <div className="grid grid-cols-[120px_1fr_1fr_1fr_1fr_160px] gap-4 px-4 py-3 bg-black border-b border-[#3d3d3d] text-xs font-medium text-zinc-500 uppercase tracking-wider">
-                  <span>種別</span>
-                  <span>操作</span>
-                  <span>プロジェクト</span>
-                  <span>デバイス</span>
-                  <span>実行者</span>
-                  <span>日時</span>
+              {filtered.length === 0 ? (
+                <div className="overflow-hidden rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-12 text-center">
+                  <p className="text-zinc-500 text-sm">
+                    {hasActiveFilter(filter) ? '条件に一致するログはありません。' : '操作ログはまだありません。'}
+                  </p>
                 </div>
-                {paged.map((log, i) => {
-                  const { projectCol, deviceCol } = resolveColumns(log);
-                  return (
-                    <div
-                      key={log.id}
-                      className={`grid grid-cols-[120px_1fr_1fr_1fr_1fr_160px] gap-4 px-4 py-3.5 items-center bg-[#111111] hover:bg-[#161616] transition-colors ${
-                        i < paged.length - 1 ? 'border-b border-[#3d3d3d]' : ''
-                      }`}
-                    >
-                      <span className={`inline-flex items-center justify-center h-5 px-2 rounded-full text-xs font-medium w-fit ${categoryBadge[log.category]}`}>
-                        {categoryLabel[log.category]}
-                      </span>
-                      <span className="text-white text-sm">
-                        {actionLabel[`${log.category}.${log.action}`] ?? log.action}
-                      </span>
-                      <span className="text-zinc-400 text-sm truncate">{projectCol}</span>
-                      <span className="text-zinc-400 text-sm truncate">{deviceCol}</span>
-                      <span className="text-zinc-400 text-sm truncate">{log.performedBy.displayName}</span>
-                      <span className="text-zinc-500 text-xs tabular-nums">{formatDate(log.performedAt)}</span>
+              ) : (
+                <>
+                  {/* 件数 */}
+                  {hasActiveFilter(filter) && (
+                    <p className="text-zinc-500 text-xs mb-3">
+                      {filtered.length} 件 / 全 {logs.length} 件
+                    </p>
+                  )}
+
+                  {/* モバイルカード */}
+                  <div className="sm:hidden space-y-4">
+                    {paged.map(log => {
+                      const { projectCol, deviceCol } = resolveColumns(log);
+                      return (
+                        <div key={log.id} className="rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-4 space-y-2.5">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className={`inline-flex items-center h-5 px-2 rounded-full text-xs font-medium ${categoryBadge[log.category]}`}>
+                              {categoryLabel[log.category]}
+                            </span>
+                            <span className="text-zinc-500 text-xs tabular-nums">{formatDate(log.performedAt)}</span>
+                          </div>
+                          <p className="text-white text-sm">{actionLabel[`${log.category}.${log.action}`] ?? log.action}</p>
+                          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                            <div>
+                              <span className="text-zinc-600">プロジェクト</span>
+                              <p className="text-zinc-300 truncate mt-0.5">{projectCol}</p>
+                            </div>
+                            <div>
+                              <span className="text-zinc-600">デバイス</span>
+                              <p className="text-zinc-300 truncate mt-0.5">{deviceCol}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-5 h-5 rounded-full bg-blue-600 flex items-center justify-center shrink-0 text-white text-[10px] font-medium">
+                              {log.performedBy.displayName[0]?.toUpperCase() ?? '?'}
+                            </div>
+                            <span className="text-zinc-400 text-xs truncate">{log.performedBy.displayName}</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* デスクトップテーブル */}
+                  <div className="hidden sm:block overflow-hidden rounded-lg ring-1 ring-[#3d3d3d]">
+                    <div className="grid grid-cols-[120px_1fr_1fr_1fr_1fr_160px] gap-4 px-4 py-3 bg-black border-b border-[#3d3d3d] text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                      <span>種別</span>
+                      <span>操作</span>
+                      <span>プロジェクト</span>
+                      <span>デバイス</span>
+                      <span>実行者</span>
+                      <span>日時</span>
                     </div>
-                  );
-                })}
-              </div>
-              <Pagination page={page} total={logs.length} pageSize={PAGE_SIZE} onChange={setPage} />
+                    {paged.map((log, i) => {
+                      const { projectCol, deviceCol } = resolveColumns(log);
+                      return (
+                        <div
+                          key={log.id}
+                          className={`grid grid-cols-[120px_1fr_1fr_1fr_1fr_160px] gap-4 px-4 py-3.5 items-center bg-[#111111] hover:bg-[#161616] transition-colors ${
+                            i < paged.length - 1 ? 'border-b border-[#3d3d3d]' : ''
+                          }`}
+                        >
+                          <span className={`inline-flex items-center justify-center h-5 px-2 rounded-full text-xs font-medium w-fit ${categoryBadge[log.category]}`}>
+                            {categoryLabel[log.category]}
+                          </span>
+                          <span className="text-white text-sm">
+                            {actionLabel[`${log.category}.${log.action}`] ?? log.action}
+                          </span>
+                          <span className="text-zinc-400 text-sm truncate">{projectCol}</span>
+                          <span className="text-zinc-400 text-sm truncate">{deviceCol}</span>
+                          <span className="text-zinc-400 text-sm truncate">{log.performedBy.displayName}</span>
+                          <span className="text-zinc-500 text-xs tabular-nums">{formatDate(log.performedAt)}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <Pagination page={page} total={filtered.length} pageSize={PAGE_SIZE} onChange={setPage} />
+                </>
+              )}
             </>
           )
         )}
