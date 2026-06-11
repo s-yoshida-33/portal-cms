@@ -144,9 +144,6 @@ function AppBadge({ app }: { app: string }) {
 const inputClass =
   'w-full bg-[#1a1a1a] ring-1 ring-[#3d3d3d] text-white rounded-lg px-3 h-9 text-sm outline-none focus:ring-[#4693ff] focus:ring-2 placeholder:text-zinc-600 transition-all';
 
-const selectClass =
-  'w-full bg-[#1a1a1a] ring-1 ring-[#3d3d3d] text-white rounded-lg px-3 h-9 text-sm outline-none focus:ring-[#4693ff] focus:ring-2 transition-all';
-
 // ── DeviceCard ────────────────────────────────────────────────────
 
 interface DeviceCardProps {
@@ -448,79 +445,82 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
-      <div
-        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md shadow-2xl h-fit max-h-[calc(100dvh-2rem)] overflow-y-auto"
+      <form
+        onSubmit={handleSubmit}
+        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-sm shadow-2xl flex flex-col h-fit max-h-full overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
-        <h2 className="text-white text-lg font-semibold px-6 pt-6 pb-5">
-          {initial ? 'グループを編集' : 'グループを作成'}
-        </h2>
-        <form onSubmit={handleSubmit}>
-          <div className="px-6 pb-6 space-y-4">
-            <div>
-              <label className="block text-sm text-zinc-400 mb-1.5">グループ名</label>
-              <input
-                value={name}
-                onChange={e => setName(e.target.value)}
-                placeholder="グループ名を入力"
-                className={inputClass}
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-zinc-400 mb-1.5">親グループ</label>
-              <CustomSelect
-                value={parentGroupId ?? ''}
-                onChange={v => setParentGroupId(v || null)}
-                options={[
-                  { value: '', label: 'ー（ルートグループ）' },
-                  ...flattenGroups(availableRoots).map(({ group, depth }) => ({
-                    value: group.id,
-                    label: '　'.repeat(depth) + group.name,
-                  })),
-                ]}
-                className="w-full"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-zinc-400 mb-1.5">デバイス</label>
-              <div className="bg-[#1a1a1a] ring-1 ring-[#3d3d3d] rounded-lg divide-y divide-[#2a2a2a] max-h-48 overflow-y-auto scrollbar-subtle">
-                {devices.length === 0 ? (
-                  <p className="px-3 py-2 text-sm text-zinc-600">デバイスがありません</p>
-                ) : devices.map(device => {
-                  const isSelected = selectedIds.includes(device.id);
-                  const otherGroupId = device.groupId && device.groupId !== initial?.id ? device.groupId : null;
-                  const otherGroupName = otherGroupId ? (groupNameMap.get(otherGroupId) ?? otherGroupId) : null;
-                  return (
-                    <label key={device.id} className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-[#222222] transition-colors">
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => toggleDevice(device.id)}
-                        className="w-4 h-4 accent-[#4693ff]"
-                      />
-                      <span className="text-sm text-zinc-200 flex-1">{device.name}</span>
-                      {otherGroupName && (
-                        <span className="text-xs text-yellow-400">現在: {otherGroupName}</span>
-                      )}
-                    </label>
-                  );
-                })}
-              </div>
-            </div>
-            {error && <p className="text-red-400 text-sm">{error}</p>}
+        <div className="shrink-0 px-6 pt-6 pb-4">
+          <h2 className="text-white text-lg font-semibold">
+            {initial ? 'グループを編集' : 'グループを作成'}
+          </h2>
+        </div>
+
+        <div className="shrink overflow-y-auto scrollbar-subtle px-6 pb-4 space-y-4">
+          <div>
+            <label className="block text-sm text-zinc-400 mb-1.5">グループ名</label>
+            <input
+              value={name}
+              onChange={e => setName(e.target.value)}
+              placeholder="グループ名を入力"
+              className={inputClass}
+            />
           </div>
-          <div className="sticky bottom-0 bg-[#111111] flex justify-end gap-2 px-6 py-4 border-t border-[#2a2a2a]">
-            <button type="button" onClick={onClose}
-              className="h-9 px-4 rounded-lg text-sm text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
-              キャンセル
-            </button>
-            <button type="submit" disabled={saving}
-              className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#4693ff] hover:bg-[#3a7fe0] disabled:opacity-50 transition-colors cursor-pointer">
-              {saving ? '保存中...' : '保存'}
-            </button>
+          <div>
+            <label className="block text-sm text-zinc-400 mb-1.5">親グループ</label>
+            <CustomSelect
+              value={parentGroupId ?? ''}
+              onChange={v => setParentGroupId(v || null)}
+              options={[
+                { value: '', label: 'ー（ルートグループ）' },
+                ...flattenGroups(availableRoots).map(({ group, depth }) => ({
+                  value: group.id,
+                  label: '　'.repeat(depth) + group.name,
+                })),
+              ]}
+              className="w-full"
+            />
           </div>
-        </form>
-      </div>
+          <div>
+            <label className="block text-sm text-zinc-400 mb-1.5">デバイス</label>
+            <div className="bg-[#1a1a1a] ring-1 ring-[#3d3d3d] rounded-lg divide-y divide-[#2a2a2a] max-h-48 overflow-y-auto scrollbar-subtle">
+              {devices.length === 0 ? (
+                <p className="px-3 py-2 text-sm text-zinc-600">デバイスがありません</p>
+              ) : devices.map(device => {
+                const isSelected = selectedIds.includes(device.id);
+                const otherGroupId = device.groupId && device.groupId !== initial?.id ? device.groupId : null;
+                const otherGroupName = otherGroupId ? (groupNameMap.get(otherGroupId) ?? otherGroupId) : null;
+                return (
+                  <label key={device.id} className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-[#222222] transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => toggleDevice(device.id)}
+                      className="w-4 h-4 accent-[#4693ff]"
+                    />
+                    <span className="text-sm text-zinc-200 flex-1">{device.name}</span>
+                    {otherGroupName && (
+                      <span className="text-xs text-yellow-400">現在: {otherGroupName}</span>
+                    )}
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+          {error && <p className="text-red-400 text-sm">{error}</p>}
+        </div>
+          
+        <div className="shrink-0 px-6 py-4 border-t border-[#2a2a2a] bg-[#111111] flex justify-end gap-2">
+          <button type="button" onClick={onClose}
+            className="h-9 px-4 rounded-lg text-sm text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
+            キャンセル
+          </button>
+          <button type="submit" disabled={saving}
+            className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#4693ff] hover:bg-[#3a7fe0] disabled:opacity-50 transition-colors cursor-pointer">
+            {saving ? '保存中...' : '保存'}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
