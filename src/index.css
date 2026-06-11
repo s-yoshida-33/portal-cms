@@ -22,6 +22,14 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
 }
 
+/* 空の date input の「年/月/日」format hint を非表示（フォーカス時は表示） */
+input[type="date"].date-empty::-webkit-datetime-edit {
+  color: transparent;
+}
+input[type="date"].date-empty:focus::-webkit-datetime-edit {
+  color: inherit;
+}
+
 @keyframes fade-slide-in {
   from { opacity: 0; transform: translateY(-4px); }
   to   { opacity: 1; transform: translateY(0); }
