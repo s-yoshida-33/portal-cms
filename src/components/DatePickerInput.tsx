@@ -13,7 +13,7 @@ interface DatePickerInputProps {
   size?: 'sm' | 'md';
 }
 
-function parseDate(str: string): Date | undefined {
+function parseDate(str: string | undefined): Date | undefined {
   if (!str) return undefined;
   const [y, m, d] = str.split('-').map(Number);
   if (!y || !m || !d) return undefined;
