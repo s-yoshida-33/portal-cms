@@ -92,5 +92,10 @@ service cloud.firestore {
       allow delete:        if false;
     }
 
+    match /pendingDeviceApprovals/{id} {
+      allow read, delete:   if true;
+      allow create, update: if isAdmin();
+    }
+
   }
 }
