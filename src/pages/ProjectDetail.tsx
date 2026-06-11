@@ -468,18 +468,18 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
             </div>
             <div>
               <label className="block text-sm text-zinc-400 mb-1.5">親グループ</label>
-              <select
+              <CustomSelect
                 value={parentGroupId ?? ''}
-                onChange={e => setParentGroupId(e.target.value || null)}
-                className={selectClass}
-              >
-                <option value="">ー（ルートグループ）</option>
-                {flattenGroups(availableRoots).map(({ group, depth }) => (
-                  <option key={group.id} value={group.id}>
-                    {'　'.repeat(depth)}{group.name}
-                  </option>
-                ))}
-              </select>
+                onChange={v => setParentGroupId(v || null)}
+                options={[
+                  { value: '', label: 'ー（ルートグループ）' },
+                  ...flattenGroups(availableRoots).map(({ group, depth }) => ({
+                    value: group.id,
+                    label: '　'.repeat(depth) + group.name,
+                  })),
+                ]}
+                className="w-full"
+              />
             </div>
             <div>
               <label className="block text-sm text-zinc-400 mb-1.5">デバイス</label>
