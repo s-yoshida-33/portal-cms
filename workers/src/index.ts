@@ -77,14 +77,12 @@ function fsBool(fields: Record<string, FsVal>, key: string): boolean {
 }
 
 class Firestore {
-  private base:   string;
-  private key:    string;
-  private bearer: string | null;
+  private base: string;
+  private key:  string;
 
-  constructor(projectId: string, apiKey: string, bearerToken: string | null = null) {
-    this.base   = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents`;
-    this.key    = apiKey;
-    this.bearer = bearerToken;
+  constructor(projectId: string, apiKey: string) {
+    this.base = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents`;
+    this.key  = apiKey;
   }
 
   private url(path: string, extraParams?: string): string {
@@ -92,14 +90,8 @@ class Firestore {
     return `${this.base}/${path}?${qs}`;
   }
 
-  private headers(extra: Record<string, string> = {}): Record<string, string> {
-    const h: Record<string, string> = { 'Content-Type': 'application/json', ...extra };
-    if (this.bearer) h['Authorization'] = `Bearer ${this.bearer}`;
-    return h;
-  }
-
   async get(collection: string, docId: string): Promise<{ fields: Record<string, FsVal> } | null> {
-    const resp = await fetch(this.url(`${collection}/${docId}`), { headers: this.headers() });
+    const resp = await fetch(this.url(`${collection}/${docId}`));
     if (!resp.ok) return null;
     return resp.json() as Promise<{ fields: Record<string, FsVal> }>;
   }
@@ -110,7 +102,7 @@ class Firestore {
     };
     const resp = await fetch(this.url(collection), {
       method:  'POST',
-      headers: this.headers(),
+      headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify(body),
     });
     const created = await resp.json() as { name: string };
@@ -124,7 +116,7 @@ class Firestore {
     };
     const resp = await fetch(this.url(`${collection}/${docId}`, mask), {
       method:  'PATCH',
-      headers: this.headers(),
+      headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify(body),
     });
     if (!resp.ok) {
@@ -134,7 +126,7 @@ class Firestore {
   }
 
   async delete(collection: string, docId: string): Promise<void> {
-    await fetch(this.url(`${collection}/${docId}`), { method: 'DELETE', headers: this.headers() });
+    await fetch(this.url(`${collection}/${docId}`), { method: 'DELETE' });
   }
 
   // patchDevicesAndCheckScreenshots updates multiple device docs concurrently
@@ -204,13 +196,13 @@ function base64url(data: ArrayBuffer | Uint8Array): string {
     .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 }
 
-async function getServiceAccountToken(scope: string, saEmail: string, saPrivateKey: string): Promise<string> {
+async function getGcsAccessToken(saEmail: string, saPrivateKey: string): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   const enc = (v: unknown) => base64url(new TextEncoder().encode(JSON.stringify(v)));
   const header  = enc({ alg: 'RS256', typ: 'JWT' });
   const payload = enc({
     iss:   saEmail,
-    scope,
+    scope: 'https://www.googleapis.com/auth/devstorage.read_write',
     aud:   'https://oauth2.googleapis.com/token',
     exp:   now + 3600,
     iat:   now,
@@ -232,7 +224,7 @@ async function getServiceAccountToken(scope: string, saEmail: string, saPrivateK
       assertion:  jwt,
     }),
   });
-  if (!tokenResp.ok) throw new Error(`SA token exchange failed (${scope}): ${tokenResp.status}`);
+  if (!tokenResp.ok) throw new Error(`GCS token exchange failed: ${tokenResp.status}`);
   const { access_token } = await tokenResp.json() as { access_token: string };
   return access_token;
 }
@@ -244,7 +236,7 @@ async function uploadScreenshotToStorage(
   bucket: string, deviceId: string, data: ArrayBuffer,
   saEmail: string, saPrivateKey: string,
 ): Promise<void> {
-  const access_token = await getServiceAccountToken('https://www.googleapis.com/auth/devstorage.read_write', saEmail, saPrivateKey);
+  const access_token = await getGcsAccessToken(saEmail, saPrivateKey);
 
   const uploadResp = await fetch(
     `https://storage.googleapis.com/upload/storage/v1/b/${encodeURIComponent(bucket)}/o` +
@@ -440,12 +432,7 @@ export default {
           return { deviceId: d.deviceId, fields };
         });
 
-      const fsToken = await getServiceAccountToken(
-        'https://www.googleapis.com/auth/datastore',
-        env.FIREBASE_SA_EMAIL, env.FIREBASE_SA_PRIVATE_KEY,
-      );
-      const fsAuth = new Firestore(env.FIREBASE_PROJECT_ID, env.FIREBASE_API_KEY, fsToken);
-      const screenshotFlags = await fsAuth.patchDevicesAndCheckScreenshots(updates);
+      const screenshotFlags = await fs.patchDevicesAndCheckScreenshots(updates);
 
       const commands: Record<string, { screenshot: true }> = {};
       for (const [id, requested] of Object.entries(screenshotFlags)) {
@@ -496,12 +483,7 @@ export default {
       };
       if (body.ip) patch.ip = body.ip;
 
-      const fsToken2 = await getServiceAccountToken(
-        'https://www.googleapis.com/auth/datastore',
-        env.FIREBASE_SA_EMAIL, env.FIREBASE_SA_PRIVATE_KEY,
-      );
-      const fsAuth2 = new Firestore(env.FIREBASE_PROJECT_ID, env.FIREBASE_API_KEY, fsToken2);
-      await fsAuth2.patch('devices', deviceId, patch);
+      await fs.patch('devices', deviceId, patch);
 
       return jsonRes({ success: true });
     }
