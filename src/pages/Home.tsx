@@ -149,8 +149,7 @@ export function Home() {
                   const warning = countByStatus(allDevs, 'warning');
 
                   return (
-                    <div key={project.id} className="overflow-hidden rounded-lg bg-[#111111] shadow-xs ring-1 ring-[#3d3d3d] w-full h-full flex flex-col transition-colors hover:ring-[#4693ff]">
-                      <Link to={`/${uuid}/projects/${project.id}`} className="flex-1 flex flex-col no-underline text-inherit group outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#4693ff] cursor-pointer">
+                    <Link key={project.id} to={`/${uuid}/projects/${project.id}`} className="overflow-hidden rounded-lg bg-[#111111] shadow-xs ring-1 ring-[#3d3d3d] w-full h-full flex flex-col transition-colors hover:ring-[#4693ff] no-underline text-inherit group outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#4693ff] cursor-pointer">
 
                         <header className="justify-between py-0 flex items-center gap-2 bg-black group-hover:bg-[#111111] transition-colors border-b border-[#3d3d3d] h-14 px-4 text-base font-medium text-[#999999]">
                           <div role="heading" aria-level={2} className="flex min-w-0 items-center gap-2">
@@ -185,8 +184,7 @@ export function Home() {
                           </div>
 
                         </div>
-                      </Link>
-                    </div>
+                    </Link>
                   );
                 })}
               </div>
