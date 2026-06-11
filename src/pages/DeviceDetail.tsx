@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { subscribeDevice, subscribeProject, requestScreenshot as requestPortalScreenshot, cancelScreenshotRequest, subscribeScreenshotRequest, requestLogs, addSiteLog } from '../lib/firestore';
 import { auth, rtdb } from '../lib/firebase';
@@ -100,11 +101,12 @@ function logLevelBadgeClass(level: string, active: boolean) {
 // ── Main page ─────────────────────────────────────────────────────
 
 export function DeviceDetail() {
+  const { t } = useTranslation();
   const { deviceId } = useParams<{ deviceId: string }>();
   const { user }     = useAuth();
 
   const [device,        setDevice]        = useState<Device | null>(null);
-  usePageTitle(device?.name ?? 'デバイス詳細');
+  usePageTitle(device?.name ?? t('deviceDetail.defaultTitle'));
   const [deviceLoading, setDeviceLoading] = useState(true);
   const projectNameRef = useRef('');
 
@@ -278,7 +280,7 @@ export function DeviceDetail() {
     return (
       <div className="flex flex-col min-h-full">
         <div className="flex items-center justify-center flex-1">
-          <p className="text-zinc-500 text-sm">読み込み中...</p>
+          <p className="text-zinc-500 text-sm">{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -288,7 +290,7 @@ export function DeviceDetail() {
     return (
       <div className="flex flex-col min-h-full">
         <div className="p-8">
-          <p className="text-zinc-400 mb-2">デバイスが見つかりません。</p>
+          <p className="text-zinc-400 mb-2">{t('deviceDetail.notFound')}</p>
         </div>
       </div>
     );
@@ -314,26 +316,26 @@ export function DeviceDetail() {
 
         {/* システム情報セクション */}
         <div>
-          <h2 className="text-white font-semibold text-base mb-3">システム情報</h2>
+          <h2 className="text-white font-semibold text-base mb-3">{t('deviceDetail.systemInfo')}</h2>
           <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-5">
             <div className="mb-1">
               <div className="flex items-center gap-1.5 mb-0.5">
                 <span className="text-sm text-zinc-300">{device.app}</span>
                 <span className="text-zinc-500 text-xs">v{device.appVersion}</span>
               </div>
-              <p className="text-xs text-zinc-500">最終確認: {formatLastSeen(device.lastSeen)}</p>
+              <p className="text-xs text-zinc-500">{t('deviceDetail.lastSeen', { time: formatLastSeen(device.lastSeen) })}</p>
             </div>
             <p className="text-xs text-zinc-500 mt-2 mb-4">
-              稼働時間:{' '}
+              {t('deviceDetail.uptime')}:{' '}
               <span className="text-sm font-semibold text-zinc-200">
                 <UptimeClock uptimeSecs={device.system.uptime} lastSeen={device.lastSeen} status={device.status} />
               </span>
             </p>
             <div className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-4 sm:gap-x-8">
               <MetricBar label="CPU"        value={device.system.cpu}         unit="%" />
-              <MetricBar label="メモリ"     value={device.system.memory}      unit="%" />
-              <MetricBar label="温度"       value={device.system.temperature} unit="°C" warn={65} danger={80} />
-              <MetricBar label="ストレージ" value={device.system.storage}     unit="%" warn={80} danger={90} />
+              <MetricBar label={t('deviceDetail.memory')}      value={device.system.memory}      unit="%" />
+              <MetricBar label={t('deviceDetail.temperature')} value={device.system.temperature} unit="°C" warn={65} danger={80} />
+              <MetricBar label={t('deviceDetail.storage')}     value={device.system.storage}     unit="%" warn={80} danger={90} />
             </div>
           </div>
         </div>
@@ -342,13 +344,13 @@ export function DeviceDetail() {
         {device.app !== 'Bridge-Ground' && (
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-white font-semibold text-base">スクリーンショット</h2>
+              <h2 className="text-white font-semibold text-base">{t('deviceDetail.screenshot')}</h2>
               <button
                 onClick={handlePortalScreenshotRequest}
                 disabled={portalSsState === 'pending'}
                 className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {portalSsState === 'pending' ? '取得中...' : 'スクリーンショットを取得'}
+                {portalSsState === 'pending' ? t('deviceDetail.requesting') : t('deviceDetail.requestScreenshot')}
               </button>
             </div>
 
@@ -356,13 +358,13 @@ export function DeviceDetail() {
               {/* 画像なし・idle */}
               {!portalSsBlobUrl && portalSsState === 'idle' && (
                 <div className="flex items-center justify-center h-28 text-zinc-600 text-sm">
-                  ボタンを押してスクリーンショットを要求してください。
+                  {t('deviceDetail.ssIdle')}
                 </div>
               )}
               {/* 画像なし・pending */}
               {!portalSsBlobUrl && portalSsState === 'pending' && (
                 <div className="flex flex-col items-center justify-center h-28 gap-3">
-                  <p className="text-zinc-500 text-sm">取得中...</p>
+                  <p className="text-zinc-500 text-sm">{t('deviceDetail.requesting')}</p>
                   <button
                     onClick={() => {
                       setPortalSsState('idle');
@@ -370,19 +372,19 @@ export function DeviceDetail() {
                     }}
                     className="h-6 px-3 rounded-md text-xs text-zinc-500 bg-zinc-800 hover:bg-zinc-700 ring-1 ring-zinc-700 transition-colors cursor-pointer"
                   >
-                    キャンセル
+                    {t('common.cancel')}
                   </button>
                 </div>
               )}
               {/* 画像なし・error */}
               {!portalSsBlobUrl && portalSsState === 'error' && (
                 <div className="flex flex-col items-center justify-center h-20 gap-2 rounded-lg bg-[#0a0a0a] ring-1 ring-red-900/30">
-                  <p className="text-red-400 text-sm">取得に失敗しました（タイムアウトまたはエラー）。</p>
+                  <p className="text-red-400 text-sm">{t('deviceDetail.ssError')}</p>
                   <button
                     onClick={handlePortalScreenshotRequest}
                     className="h-6 px-3 rounded-md text-xs text-zinc-300 bg-zinc-800 hover:bg-zinc-700 ring-1 ring-zinc-700 transition-colors cursor-pointer"
                   >
-                    再試行
+                    {t('common.retry')}
                   </button>
                 </div>
               )}
@@ -391,7 +393,7 @@ export function DeviceDetail() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <p className="text-xs text-zinc-500">
-                      {portalSsCapturedAt ? `最終取得時刻: ${portalSsCapturedAt}` : '最終取得時刻: —'}
+                      {portalSsCapturedAt ? t('deviceDetail.lastCaptured', { time: portalSsCapturedAt }) : t('deviceDetail.lastCapturedNone')}
                     </p>
                     <div className="flex items-center gap-2">
                       {portalSsState === 'error' && (
@@ -399,7 +401,7 @@ export function DeviceDetail() {
                           onClick={handlePortalScreenshotRequest}
                           className="h-7 px-3 rounded-md text-xs text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-1 ring-red-900/50 transition-colors cursor-pointer"
                         >
-                          再試行
+                          {t('common.retry')}
                         </button>
                       )}
                       <button
@@ -413,20 +415,20 @@ export function DeviceDetail() {
                         }}
                         className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
                       >
-                        ダウンロード
+                        {t('common.download')}
                       </button>
                     </div>
                   </div>
                   <div className="relative">
                     <img
                       src={portalSsBlobUrl}
-                      alt={`${device.name} のスクリーンショット`}
+                      alt={t('deviceDetail.ssAlt', { name: device.name })}
                       className="w-full rounded-lg ring-1 ring-[#3d3d3d] object-contain max-h-[600px]"
                     />
                     {/* 取得中オーバーレイ */}
                     {portalSsState === 'pending' && (
                       <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-lg bg-black/60">
-                        <p className="text-zinc-300 text-sm">取得中...</p>
+                        <p className="text-zinc-300 text-sm">{t('deviceDetail.requesting')}</p>
                         <button
                           onClick={() => {
                             setPortalSsState('ready');
@@ -434,7 +436,7 @@ export function DeviceDetail() {
                           }}
                           className="h-6 px-3 rounded-md text-xs text-zinc-400 bg-zinc-800 hover:bg-zinc-700 ring-1 ring-zinc-700 transition-colors cursor-pointer"
                         >
-                          キャンセル
+                          {t('common.cancel')}
                         </button>
                       </div>
                     )}
@@ -449,7 +451,7 @@ export function DeviceDetail() {
         <div>
           {/* 外枠の外: タイトル + ログレベル + 日付 + 更新（PC: 1行、スマホ: 折り返し） */}
           <div className="flex items-start sm:items-center justify-between gap-3 mb-3">
-            <h2 className="text-white font-semibold text-base shrink-0">ログ</h2>
+            <h2 className="text-white font-semibold text-base shrink-0">{t('deviceDetail.logs')}</h2>
             <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap justify-end">
               {LOG_LEVELS.map(level => (
                 <button
@@ -474,7 +476,7 @@ export function DeviceDetail() {
                 disabled={logsRefreshing}
                 className="h-6 px-2.5 rounded-md text-xs font-medium ring-1 transition-colors cursor-pointer text-zinc-400 bg-zinc-800 ring-zinc-700 hover:bg-zinc-700 disabled:opacity-50"
               >
-                {logsRefreshing ? '更新中...' : '更新'}
+                {logsRefreshing ? t('deviceDetail.refreshingLogs') : t('deviceDetail.refreshLogs')}
               </button>
             </div>
           </div>
@@ -485,9 +487,9 @@ export function DeviceDetail() {
             <div className="flex items-start sm:items-center justify-between mb-3">
               {/* スマホ: 2行 / PC: 1行 */}
               <div className="flex flex-col sm:flex-row sm:items-center gap-0 sm:gap-3">
-                <span className="text-xs text-zinc-600">{filteredLogs.length} 件表示（最大 200 件）</span>
+                <span className="text-xs text-zinc-600">{t('deviceDetail.logCount', { count: filteredLogs.length })}</span>
                 <span className="text-xs text-zinc-600">
-                  最終取得: {logsLastFetched ? logsLastFetched.toLocaleString('ja-JP') : '—'}
+                  {logsLastFetched ? t('deviceDetail.lastFetched', { time: logsLastFetched.toLocaleString() }) : t('deviceDetail.lastFetchedNone')}
                 </span>
               </div>
               <div className="flex items-center gap-2 shrink-0">
@@ -504,7 +506,7 @@ export function DeviceDetail() {
                   disabled={filteredLogs.length === 0}
                   className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                 >
-                  {logCopied ? 'コピー済み' : 'コピー'}
+                  {logCopied ? t('common.copied') : t('common.copy')}
                 </button>
                 <button
                   onClick={() => {
@@ -524,7 +526,7 @@ export function DeviceDetail() {
                   disabled={filteredLogs.length === 0}
                   className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                 >
-                  ダウンロード
+                  {t('common.download')}
                 </button>
               </div>
             </div>
@@ -534,7 +536,7 @@ export function DeviceDetail() {
               <div ref={logContainerRef} className="h-96 overflow-y-auto overflow-x-auto p-4 font-log text-xs leading-5 space-y-0.5 scrollbar-subtle">
                 {filteredLogs.length === 0 ? (
                   <p className="text-zinc-600 text-center py-8 whitespace-nowrap">
-                    {logs.length === 0 ? 'ログがありません。「更新」ボタンを押してログを取得してください。' : '表示対象のログがありません。'}
+                    {logs.length === 0 ? t('deviceDetail.noLogs') : t('deviceDetail.noFilteredLogs')}
                   </p>
                 ) : (
                   filteredLogs.map((log, i) => (

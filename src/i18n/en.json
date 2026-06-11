@@ -1,0 +1,422 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving...",
+    "close": "Close",
+    "copy": "Copy",
+    "copied": "Copied",
+    "download": "Download",
+    "processing": "Processing...",
+    "retry": "Retry",
+    "all": "All",
+    "edit": "Edit",
+    "clear": "Clear",
+    "menu": "Menu",
+    "send": "Sending...",
+    "sending": "Sending..."
+  },
+  "nav": {
+    "home": "Home",
+    "projects": "Projects",
+    "apiTokens": "API Tokens",
+    "pendingDevices": "Pending Devices",
+    "deletionRequests": "Deletion Requests",
+    "users": "User Management",
+    "logs": "Logs",
+    "settings": "Settings",
+    "profile": "Profile",
+    "appearance": "Appearance",
+    "language": "Language",
+    "logout": "Log out"
+  },
+  "auth": {
+    "authenticating": "Authenticating...",
+    "loginTitle": "Log in",
+    "loginWithGoogle": "Continue with Google",
+    "or": "or",
+    "emailLabel": "Email address",
+    "passwordLabel": "Password",
+    "forgotPassword": "Forgot password?",
+    "loggingIn": "Logging in...",
+    "login": "Log in",
+    "noAccount": "Don't have an account?",
+    "here": "Sign up",
+    "signupTitle": "Create an account",
+    "signupWithGoogle": "Continue with Google",
+    "passwordNote": "(min. 8 characters)",
+    "passwordConfirm": "Confirm password",
+    "creating": "Creating...",
+    "createAccount": "Create account",
+    "alreadyHaveAccount": "Already have an account?",
+    "error": {
+      "popupBlocked": "Popup was blocked. Please allow popups in your browser settings.",
+      "unauthorizedDomain": "This domain is not authorized in Firebase. ({{code}})",
+      "googleFailed": "Google sign-in failed. ({{code}})",
+      "invalidCredential": "Incorrect email address or password.",
+      "passwordMismatch": "Passwords do not match.",
+      "passwordTooShort": "Password must be at least 8 characters.",
+      "emailInUse": "This email address is already in use.",
+      "createFailed": "Failed to create account.",
+      "googleSignupFailed": "Google sign-in failed."
+    }
+  },
+  "status": {
+    "online": "Online",
+    "offline": "Offline",
+    "warning": "Warning"
+  },
+  "home": {
+    "title": "Home",
+    "statusSection": "Status",
+    "projectCount": "Projects",
+    "totalDevices": "Total Devices",
+    "connectionStatus": "Connection",
+    "online": "Online",
+    "offlineWarning": "Offline / Warning",
+    "projectList": "Projects",
+    "noProjects": "No projects have been registered.",
+    "cardDeviceCount": "Devices",
+    "cardOnline": "Online",
+    "cardWarning": "Warning",
+    "cardOffline": "Offline"
+  },
+  "projects": {
+    "title": "Projects",
+    "description": "View, add, and edit registered projects",
+    "add": "Add project",
+    "noProjects": "No projects have been registered.",
+    "addFirst": "Add your first project",
+    "table": {
+      "name": "Project name",
+      "prefecture": "Prefecture",
+      "address": "Address",
+      "count": "Devices"
+    },
+    "form": {
+      "addTitle": "Add project",
+      "editTitle": "Edit project",
+      "nameLabel": "Project name",
+      "prefectureLabel": "Prefecture",
+      "addressLabel": "Address",
+      "requiredAll": "Please fill in all fields.",
+      "saveFailed": "Failed to save: {{msg}}"
+    },
+    "deleteRequest": {
+      "title": "Send deletion request",
+      "body": "A deletion request for \"{{name}}\" will be sent to the owner.\nDeletion will not be performed until the owner approves.",
+      "bodyLine1": "A deletion request for \"{{name}}\" will be sent to the owner.",
+      "bodyLine2": "Deletion will not be performed until the owner approves.",
+      "send": "Send request",
+      "sending": "Sending..."
+    }
+  },
+  "projectDetail": {
+    "notFound": "Project not found.",
+    "createGroup": "Create group",
+    "addDevice": "Add device",
+    "noDevices": "No devices have been registered.",
+    "noFilteredDevices": "No matching devices found.",
+    "ungrouped": "Ungrouped",
+    "deviceLastSeen": "Last seen: {{time}}",
+    "deviceUptime": "Uptime",
+    "deviceEdit": "Edit",
+    "deviceDeleteRequest": "Delete request",
+    "cantDelete": "Cannot request deletion while devices or child groups exist",
+    "deleteRequest": {
+      "title": "Send deletion request",
+      "body": "A deletion request for \"{{name}}\" will be sent to the owner.\nDeletion will not be performed until the owner approves.",
+      "send": "Send request",
+      "sending": "Sending..."
+    },
+    "deviceModal": {
+      "addTitle": "Add device",
+      "editTitle": "Edit device",
+      "projectLabel": "Project",
+      "nameLabel": "Device name",
+      "ipLabel": "IP address",
+      "portLabel": "Port (Bridge-Ground)",
+      "appLabel": "App",
+      "versionLabel": "Version",
+      "groupLabel": "Select group",
+      "requiredError": "Please enter a name and IP address.",
+      "saveFailed": "Failed to save."
+    },
+    "groupModal": {
+      "addTitle": "Create group",
+      "editTitle": "Edit group",
+      "nameLabel": "Group name",
+      "parentLabel": "Parent group",
+      "rootOption": "— (Root group)",
+      "devicesLabel": "Devices",
+      "noDevices": "No devices",
+      "nameRequired": "Please enter a group name.",
+      "saveFailed": "Failed to save."
+    }
+  },
+  "deviceDetail": {
+    "notFound": "Device not found.",
+    "defaultTitle": "Device Detail",
+    "systemInfo": "System Info",
+    "lastSeen": "Last seen: {{time}}",
+    "uptime": "Uptime",
+    "memory": "Memory",
+    "temperature": "Temp",
+    "storage": "Storage",
+    "screenshot": "Screenshot",
+    "requestScreenshot": "Take screenshot",
+    "requesting": "Fetching...",
+    "ssIdle": "Press the button to request a screenshot.",
+    "ssError": "Failed to fetch (timeout or error).",
+    "lastCaptured": "Captured at: {{time}}",
+    "lastCapturedNone": "Captured at: —",
+    "ssAlt": "Screenshot of {{name}}",
+    "logs": "Logs",
+    "logCount": "{{count}} entries shown (max 200)",
+    "lastFetched": "Last fetched: {{time}}",
+    "lastFetchedNone": "Last fetched: —",
+    "noLogs": "No logs. Press the \"Refresh\" button to fetch logs.",
+    "noFilteredLogs": "No logs match the current filter.",
+    "refreshLogs": "Refresh",
+    "refreshingLogs": "Refreshing..."
+  },
+  "apiTokens": {
+    "title": "API Tokens",
+    "description": "Issue and manage device authentication tokens",
+    "issue": "Issue token",
+    "active": "Active",
+    "revoked": "Revoked",
+    "noActive": "No active tokens.",
+    "accessDenied": "This page is accessible to administrators and above only.",
+    "filterType": "Type",
+    "filterStatus": "Status",
+    "table": {
+      "name": "Name",
+      "type": "Type",
+      "issued": "Issued at",
+      "lastUsed": "Last used",
+      "status": "Status"
+    },
+    "typeLabel": {
+      "registration": "Registration",
+      "device": "Device"
+    },
+    "statusLabel": {
+      "active": "Active",
+      "revoked": "Revoked"
+    },
+    "revokeBtn": "Revoke",
+    "createModal": {
+      "title": "Issue token",
+      "nameLabel": "Name",
+      "typeLabel": "Type",
+      "nameRequired": "Please enter a name.",
+      "failed": "Failed to issue token.",
+      "issuing": "Issuing...",
+      "issueBtn": "Issue",
+      "registrationOption": "Registration (new device enrollment)",
+      "deviceOption": "Device (status reporting)"
+    },
+    "revealModal": {
+      "title": "Save your token",
+      "body": "This token will never be shown again. Copy it and store it in a safe place.",
+      "saved": "Saved"
+    },
+    "revokeModal": {
+      "title": "Revoke token",
+      "body": "\"{{name}}\" will be revoked.\nDevices using this token will no longer be able to authenticate.",
+      "revoke": "Revoke"
+    }
+  },
+  "logs": {
+    "title": "Logs",
+    "description": "View operation history and device logs",
+    "operationLogs": "Operation Logs",
+    "deviceLogs": "Device Logs",
+    "deviceLogsWip": "Device logs are coming soon.",
+    "filter": {
+      "type": "Type",
+      "project": "Project",
+      "from": "From",
+      "to": "To",
+      "clear": "Clear",
+      "noMatch": "No logs match the filter.",
+      "noLogs": "No operation logs yet.",
+      "resultCount": "{{filtered}} of {{total}} entries"
+    },
+    "category": {
+      "screenshot": "Screenshot",
+      "log": "Log",
+      "apiToken": "API Token",
+      "user": "User",
+      "deletionRequest": "Deletion Request",
+      "project": "Project",
+      "device": "Device"
+    },
+    "action": {
+      "screenshot.captured": "Took screenshot",
+      "screenshot.downloaded": "Downloaded screenshot",
+      "log.fetched": "Fetched logs",
+      "log.downloaded": "Downloaded logs",
+      "apiToken.issued": "Issued API token",
+      "apiToken.revoked": "Revoked API token",
+      "user.added": "Added user",
+      "user.roleChanged": "Changed role",
+      "user.removed": "Removed user",
+      "deletionRequest.approved": "Approved deletion request",
+      "deletionRequest.rejected": "Rejected deletion request",
+      "project.created": "Created project",
+      "project.updated": "Updated project",
+      "project.deletionRequested": "Requested project deletion",
+      "device.added": "Added device",
+      "device.rejected": "Rejected device",
+      "device.deletionRequested": "Requested device deletion"
+    },
+    "table": {
+      "type": "Type",
+      "action": "Action",
+      "project": "Project",
+      "device": "Device",
+      "performer": "Performed by",
+      "datetime": "Date / Time"
+    }
+  },
+  "users": {
+    "title": "User Management",
+    "description": "Manage user roles and remove users",
+    "accessDenied": "This page is accessible to owners only.",
+    "noUsers": "No users have been registered.",
+    "count": "{{count}} users",
+    "self": "(you)",
+    "registered": "Joined: {{date}}",
+    "removeBtn": "Remove",
+    "table": {
+      "displayName": "Display name",
+      "email": "Email",
+      "role": "Role",
+      "registeredAt": "Joined"
+    },
+    "roleLabel": {
+      "owner": "Owner",
+      "admin": "Admin",
+      "user": "Member"
+    },
+    "removeModal": {
+      "title": "Remove user",
+      "body": "\"{{name}}\" ({{email}}) will be removed from the system.\nTheir Firebase account will remain but they will be re-registered as a regular user on next login.",
+      "confirm": "Remove"
+    }
+  },
+  "pendingDevices": {
+    "title": "Pending Devices",
+    "description": "Review and approve device registration requests",
+    "noDevices": "No devices are pending approval.",
+    "accessDenied": "This page is accessible to administrators and above only.",
+    "approveBtn": "Approve",
+    "rejectBtn": "Reject",
+    "table": {
+      "app": "App",
+      "hostname": "Hostname",
+      "ip": "IP Address",
+      "requestedAt": "Requested at"
+    },
+    "approveModal": {
+      "title": "Approve device",
+      "description": "Set a device name and project.",
+      "appLabel": "App",
+      "hostnameLabel": "Hostname",
+      "ipLabel": "IP",
+      "nameLabel": "Device name",
+      "projectLabel": "Project",
+      "noProjects": "No projects available",
+      "nameRequired": "Please enter a device name.",
+      "projectRequired": "Please select a project.",
+      "failed": "Approval failed.",
+      "approving": "Approving...",
+      "approveBtn": "Approve",
+      "doneTitle": "Approved",
+      "doneBody": "Bridge-Ground will automatically retrieve credentials on its next polling cycle. Use the values below for manual configuration if needed.",
+      "deviceId": "Device ID",
+      "deviceToken": "Device Token",
+      "tokenWarning": "The device token cannot be viewed again after closing this dialog."
+    },
+    "rejectModal": {
+      "title": "Reject request",
+      "body": "The registration request from {{hostname}} ({{ip}}) will be rejected.\nThis action cannot be undone.",
+      "rejecting": "Processing...",
+      "rejectBtn": "Reject"
+    }
+  },
+  "deletionRequests": {
+    "title": "Deletion Requests",
+    "description": "Review and process pending deletion requests",
+    "noRequests": "No deletion requests are pending.",
+    "accessDenied": "This page is accessible to owners only.",
+    "approveDeleteBtn": "Approve & Delete",
+    "rejectBtn": "Reject",
+    "table": {
+      "type": "Type",
+      "target": "Target",
+      "requester": "Requested by",
+      "requestedAt": "Requested at"
+    },
+    "type": {
+      "project": "Project",
+      "device": "Device",
+      "apiToken": "API Token",
+      "group": "Group"
+    },
+    "approveModal": {
+      "title": "Approve deletion",
+      "body": "\"{{name}}\" ({{type}}) will be permanently deleted.\nThis action cannot be undone.",
+      "deleting": "Deleting...",
+      "deleteBtn": "Delete"
+    },
+    "rejectModal": {
+      "title": "Reject deletion request",
+      "body": "The deletion request for \"{{name}}\" will be rejected.\nPlease enter a reason for rejection.",
+      "placeholder": "Enter reason for rejection...",
+      "reasonRequired": "Please enter a reason.",
+      "failed": "Failed to process.",
+      "processing": "Processing...",
+      "rejectBtn": "Reject"
+    }
+  },
+  "profile": {
+    "title": "Profile",
+    "memberSince": "Member since {{date}}",
+    "tabs": {
+      "settings": "Settings",
+      "notifications": "Notifications"
+    },
+    "notificationsWip": "Notification settings are coming soon.",
+    "email": {
+      "title": "Email",
+      "verified": "Verified",
+      "googleNote": "Cannot be changed because you are signed in with Google.",
+      "updateBtn": "Update email"
+    },
+    "language": {
+      "title": "Language",
+      "description": "Select the display language for the UI."
+    },
+    "appearance": {
+      "title": "Appearance",
+      "description": "Select the color theme for the dashboard.",
+      "updated": "Appearance updated",
+      "failed": "Failed to update appearance",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "Use system setting"
+    },
+    "deleteProfile": {
+      "title": "Delete profile",
+      "description": "Delete user {{email}}.",
+      "deleteBtn": "Delete user",
+      "confirmTitle": "Are you sure?",
+      "confirmBody": "All data will be permanently deleted. This action cannot be undone.",
+      "deleteConfirmBtn": "Delete"
+    }
+  }
+}

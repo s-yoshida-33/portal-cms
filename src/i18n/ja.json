@@ -1,0 +1,422 @@
+{
+  "common": {
+    "loading": "読み込み中...",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "saving": "保存中...",
+    "close": "閉じる",
+    "copy": "コピー",
+    "copied": "コピー済み",
+    "download": "ダウンロード",
+    "processing": "処理中...",
+    "retry": "再試行",
+    "all": "すべて",
+    "edit": "編集",
+    "clear": "クリア",
+    "menu": "メニュー",
+    "send": "送信中...",
+    "sending": "送信中..."
+  },
+  "nav": {
+    "home": "ホーム",
+    "projects": "プロジェクト管理",
+    "apiTokens": "API トークン",
+    "pendingDevices": "承認待ちデバイス",
+    "deletionRequests": "削除依頼",
+    "users": "ユーザー管理",
+    "logs": "ログ",
+    "settings": "設定",
+    "profile": "プロフィール",
+    "appearance": "外観",
+    "language": "言語",
+    "logout": "ログアウト"
+  },
+  "auth": {
+    "authenticating": "認証中...",
+    "loginTitle": "ログイン",
+    "loginWithGoogle": "Googleでログイン",
+    "or": "または",
+    "emailLabel": "メールアドレス",
+    "passwordLabel": "パスワード",
+    "forgotPassword": "お忘れですか？",
+    "loggingIn": "ログイン中...",
+    "login": "ログイン",
+    "noAccount": "アカウントをお持ちでない方は",
+    "here": "こちら",
+    "signupTitle": "アカウントを作成",
+    "signupWithGoogle": "Googleで登録",
+    "passwordNote": "（8文字以上）",
+    "passwordConfirm": "パスワード（確認）",
+    "creating": "作成中...",
+    "createAccount": "アカウントを作成",
+    "alreadyHaveAccount": "すでにアカウントをお持ちの方は",
+    "error": {
+      "popupBlocked": "ポップアップがブロックされました。ブラウザのポップアップ許可設定を確認してください。",
+      "unauthorizedDomain": "このドメインはFirebaseで承認されていません。({{code}})",
+      "googleFailed": "Googleログインに失敗しました。({{code}})",
+      "invalidCredential": "メールアドレスまたはパスワードが正しくありません。",
+      "passwordMismatch": "パスワードが一致しません。",
+      "passwordTooShort": "パスワードは8文字以上で設定してください。",
+      "emailInUse": "このメールアドレスはすでに使用されています。",
+      "createFailed": "アカウントの作成に失敗しました。",
+      "googleSignupFailed": "Googleログインに失敗しました。"
+    }
+  },
+  "status": {
+    "online": "オンライン",
+    "offline": "オフライン",
+    "warning": "警告"
+  },
+  "home": {
+    "title": "ホーム",
+    "statusSection": "ステータス",
+    "projectCount": "プロジェクト数",
+    "totalDevices": "総デバイス数",
+    "connectionStatus": "接続状況",
+    "online": "オンライン",
+    "offlineWarning": "オフライン / 警告",
+    "projectList": "プロジェクト一覧",
+    "noProjects": "プロジェクトが登録されていません。",
+    "cardDeviceCount": "デバイス数",
+    "cardOnline": "オンライン",
+    "cardWarning": "警告",
+    "cardOffline": "オフライン"
+  },
+  "projects": {
+    "title": "プロジェクト管理",
+    "description": "登録プロジェクトの確認・追加・編集",
+    "add": "プロジェクトを追加",
+    "noProjects": "プロジェクトが登録されていません。",
+    "addFirst": "最初のプロジェクトを追加する",
+    "table": {
+      "name": "プロジェクト名",
+      "prefecture": "都道府県",
+      "address": "住所",
+      "count": "台数"
+    },
+    "form": {
+      "addTitle": "プロジェクトを追加",
+      "editTitle": "プロジェクトを編集",
+      "nameLabel": "プロジェクト名",
+      "prefectureLabel": "都道府県",
+      "addressLabel": "住所",
+      "requiredAll": "すべての項目を入力してください。",
+      "saveFailed": "保存に失敗しました: {{msg}}"
+    },
+    "deleteRequest": {
+      "title": "削除依頼を送信",
+      "body": "「{{name}}」の削除依頼をオーナーに送信します。\nオーナーが承認するまで削除は実行されません。",
+      "bodyLine1": "「{{name}}」の削除依頼をオーナーに送信します。",
+      "bodyLine2": "オーナーが承認するまで削除は実行されません。",
+      "send": "依頼を送信",
+      "sending": "送信中..."
+    }
+  },
+  "projectDetail": {
+    "notFound": "プロジェクトが見つかりません。",
+    "createGroup": "グループを作成",
+    "addDevice": "デバイスを追加",
+    "noDevices": "デバイスが登録されていません。",
+    "noFilteredDevices": "該当するデバイスがありません。",
+    "ungrouped": "グループ未設定",
+    "deviceLastSeen": "最終確認: {{time}}",
+    "deviceUptime": "稼働時間",
+    "deviceEdit": "編集",
+    "deviceDeleteRequest": "削除依頼",
+    "cantDelete": "デバイスまたは子グループが存在する場合は削除依頼できません",
+    "deleteRequest": {
+      "title": "削除依頼を送信",
+      "body": "「{{name}}」の削除依頼をオーナーに送信します。\nオーナーが承認するまで削除は実行されません。",
+      "send": "依頼を送信",
+      "sending": "送信中..."
+    },
+    "deviceModal": {
+      "addTitle": "デバイスを追加",
+      "editTitle": "デバイスを編集",
+      "projectLabel": "プロジェクト",
+      "nameLabel": "デバイス名",
+      "ipLabel": "IPアドレス",
+      "portLabel": "ポート (Bridge-Ground)",
+      "appLabel": "アプリ",
+      "versionLabel": "バージョン",
+      "groupLabel": "グループを選択",
+      "requiredError": "名前とIPアドレスを入力してください。",
+      "saveFailed": "保存に失敗しました。"
+    },
+    "groupModal": {
+      "addTitle": "グループを作成",
+      "editTitle": "グループを編集",
+      "nameLabel": "グループ名",
+      "parentLabel": "親グループ",
+      "rootOption": "ー（ルートグループ）",
+      "devicesLabel": "デバイス",
+      "noDevices": "デバイスがありません",
+      "nameRequired": "グループ名を入力してください。",
+      "saveFailed": "保存に失敗しました。"
+    }
+  },
+  "deviceDetail": {
+    "notFound": "デバイスが見つかりません。",
+    "defaultTitle": "デバイス詳細",
+    "systemInfo": "システム情報",
+    "lastSeen": "最終確認: {{time}}",
+    "uptime": "稼働時間",
+    "memory": "メモリ",
+    "temperature": "温度",
+    "storage": "ストレージ",
+    "screenshot": "スクリーンショット",
+    "requestScreenshot": "スクリーンショットを取得",
+    "requesting": "取得中...",
+    "ssIdle": "ボタンを押してスクリーンショットを要求してください。",
+    "ssError": "取得に失敗しました（タイムアウトまたはエラー）。",
+    "lastCaptured": "最終取得時刻: {{time}}",
+    "lastCapturedNone": "最終取得時刻: —",
+    "ssAlt": "{{name}} のスクリーンショット",
+    "logs": "ログ",
+    "logCount": "{{count}} 件表示（最大 200 件）",
+    "lastFetched": "最終取得: {{time}}",
+    "lastFetchedNone": "最終取得: —",
+    "noLogs": "ログがありません。「更新」ボタンを押してログを取得してください。",
+    "noFilteredLogs": "表示対象のログがありません。",
+    "refreshLogs": "更新",
+    "refreshingLogs": "更新中..."
+  },
+  "apiTokens": {
+    "title": "API トークン",
+    "description": "デバイス認証用トークンの発行・管理",
+    "issue": "トークンを発行",
+    "active": "有効",
+    "revoked": "失効済み",
+    "noActive": "有効なトークンがありません。",
+    "accessDenied": "このページは管理者以上のみアクセスできます。",
+    "filterType": "種別",
+    "filterStatus": "状態",
+    "table": {
+      "name": "名前",
+      "type": "種別",
+      "issued": "発行日時",
+      "lastUsed": "最終使用",
+      "status": "状態"
+    },
+    "typeLabel": {
+      "registration": "登録用",
+      "device": "デバイス用"
+    },
+    "statusLabel": {
+      "active": "有効",
+      "revoked": "失効済み"
+    },
+    "revokeBtn": "失効",
+    "createModal": {
+      "title": "トークンを発行",
+      "nameLabel": "名前",
+      "typeLabel": "種別",
+      "nameRequired": "名前を入力してください。",
+      "failed": "発行に失敗しました。",
+      "issuing": "発行中...",
+      "issueBtn": "発行する",
+      "registrationOption": "登録用（新規デバイス登録）",
+      "deviceOption": "デバイス用（ステータス送信）"
+    },
+    "revealModal": {
+      "title": "トークンを保存してください",
+      "body": "このトークンは今後二度と表示されません。必ずコピーして安全な場所に保管してください。",
+      "saved": "保存しました"
+    },
+    "revokeModal": {
+      "title": "トークンを失効",
+      "body": "「{{name}}」を失効します。\nこのトークンを使用しているデバイスは認証できなくなります。",
+      "revoke": "失効する"
+    }
+  },
+  "logs": {
+    "title": "ログ",
+    "description": "操作履歴とデバイスログの確認",
+    "operationLogs": "操作ログ",
+    "deviceLogs": "デバイスログ",
+    "deviceLogsWip": "デバイスログは準備中です。",
+    "filter": {
+      "type": "種別",
+      "project": "プロジェクト",
+      "from": "開始日",
+      "to": "終了日",
+      "clear": "クリア",
+      "noMatch": "条件に一致するログはありません。",
+      "noLogs": "操作ログはまだありません。",
+      "resultCount": "{{filtered}} 件 / 全 {{total}} 件"
+    },
+    "category": {
+      "screenshot": "スクリーンショット",
+      "log": "ログ",
+      "apiToken": "APIトークン",
+      "user": "ユーザー",
+      "deletionRequest": "削除依頼",
+      "project": "プロジェクト",
+      "device": "デバイス"
+    },
+    "action": {
+      "screenshot.captured": "スクリーンショットを取得",
+      "screenshot.downloaded": "スクリーンショットをダウンロード",
+      "log.fetched": "ログを取得",
+      "log.downloaded": "ログをダウンロード",
+      "apiToken.issued": "APIトークンを発行",
+      "apiToken.revoked": "APIトークンを失効",
+      "user.added": "ユーザーを追加",
+      "user.roleChanged": "ロールを変更",
+      "user.removed": "ユーザーを除名",
+      "deletionRequest.approved": "削除依頼を承認",
+      "deletionRequest.rejected": "削除依頼を却下",
+      "project.created": "プロジェクトを作成",
+      "project.updated": "プロジェクトを更新",
+      "project.deletionRequested": "プロジェクトの削除を依頼",
+      "device.added": "デバイスを追加",
+      "device.rejected": "デバイスを却下",
+      "device.deletionRequested": "デバイスの削除を依頼"
+    },
+    "table": {
+      "type": "種別",
+      "action": "操作",
+      "project": "プロジェクト",
+      "device": "デバイス",
+      "performer": "実行者",
+      "datetime": "日時"
+    }
+  },
+  "users": {
+    "title": "ユーザー管理",
+    "description": "ユーザーのロール管理・除名",
+    "accessDenied": "このページはオーナーのみアクセスできます。",
+    "noUsers": "ユーザーが登録されていません。",
+    "count": "{{count}} 名",
+    "self": "（自分）",
+    "registered": "登録: {{date}}",
+    "removeBtn": "除名",
+    "table": {
+      "displayName": "表示名",
+      "email": "メール",
+      "role": "ロール",
+      "registeredAt": "登録日"
+    },
+    "roleLabel": {
+      "owner": "オーナー",
+      "admin": "管理者",
+      "user": "一般"
+    },
+    "removeModal": {
+      "title": "ユーザーを除名",
+      "body": "「{{name}}」（{{email}}）をシステムから除名します。\nFirebase アカウントは残りますが、次回ログイン時に一般ユーザーとして自動再登録されます。",
+      "confirm": "除名する"
+    }
+  },
+  "pendingDevices": {
+    "title": "承認待ちデバイス",
+    "description": "登録申請されたデバイスを確認・承認",
+    "noDevices": "承認待ちのデバイスはありません。",
+    "accessDenied": "このページは管理者以上のみアクセスできます。",
+    "approveBtn": "承認",
+    "rejectBtn": "却下",
+    "table": {
+      "app": "アプリ",
+      "hostname": "ホスト名",
+      "ip": "IPアドレス",
+      "requestedAt": "申請日時"
+    },
+    "approveModal": {
+      "title": "デバイスを承認",
+      "description": "デバイス名とプロジェクトを設定してください。",
+      "appLabel": "アプリ",
+      "hostnameLabel": "ホスト名",
+      "ipLabel": "IP",
+      "nameLabel": "デバイス名",
+      "projectLabel": "プロジェクト",
+      "noProjects": "プロジェクトがありません",
+      "nameRequired": "デバイス名を入力してください。",
+      "projectRequired": "プロジェクトを選択してください。",
+      "failed": "承認に失敗しました。",
+      "approving": "承認中...",
+      "approveBtn": "承認する",
+      "doneTitle": "承認完了",
+      "doneBody": "Bridge-Ground は次回のポーリング時に自動で認証情報を取得します。手動設定が必要な場合は以下を使用してください。",
+      "deviceId": "デバイス ID",
+      "deviceToken": "デバイストークン",
+      "tokenWarning": "デバイストークンはこの画面を閉じると確認できなくなります。"
+    },
+    "rejectModal": {
+      "title": "申請を却下",
+      "body": "{{hostname}}（{{ip}}）の登録申請を却下します。\nこの操作は取り消せません。",
+      "rejecting": "処理中...",
+      "rejectBtn": "却下する"
+    }
+  },
+  "deletionRequests": {
+    "title": "削除依頼",
+    "description": "承認待ちの削除依頼を確認・処理",
+    "noRequests": "承認待ちの削除依頼はありません。",
+    "accessDenied": "このページはオーナーのみアクセスできます。",
+    "approveDeleteBtn": "承認・削除",
+    "rejectBtn": "却下",
+    "table": {
+      "type": "種別",
+      "target": "対象名",
+      "requester": "依頼者",
+      "requestedAt": "依頼日時"
+    },
+    "type": {
+      "project": "プロジェクト",
+      "device": "デバイス",
+      "apiToken": "APIトークン",
+      "group": "グループ"
+    },
+    "approveModal": {
+      "title": "削除を承認",
+      "body": "「{{name}}」（{{type}}）を完全に削除します。\nこの操作は取り消せません。",
+      "deleting": "削除中...",
+      "deleteBtn": "削除を実行"
+    },
+    "rejectModal": {
+      "title": "削除依頼を却下",
+      "body": "「{{name}}」の削除依頼を却下します。\n却下理由を入力してください。",
+      "placeholder": "却下理由を入力...",
+      "reasonRequired": "却下理由を入力してください。",
+      "failed": "処理に失敗しました。",
+      "processing": "処理中...",
+      "rejectBtn": "却下する"
+    }
+  },
+  "profile": {
+    "title": "プロフィール",
+    "memberSince": "アカウント登録日 {{date}}",
+    "tabs": {
+      "settings": "設定",
+      "notifications": "通知"
+    },
+    "notificationsWip": "通知設定は準備中です。",
+    "email": {
+      "title": "メール",
+      "verified": "確認済み",
+      "googleNote": "Googleアカウントで認証されているため変更できません。",
+      "updateBtn": "メールを更新"
+    },
+    "language": {
+      "title": "言語",
+      "description": "UIの表示言語を選択してください。"
+    },
+    "appearance": {
+      "title": "外観",
+      "description": "ダッシュボードのカラーテーマを選択してください。",
+      "updated": "外観が更新されました",
+      "failed": "外観の更新に失敗しました",
+      "light": "ライト",
+      "dark": "ダーク",
+      "system": "システム設定を使用"
+    },
+    "deleteProfile": {
+      "title": "プロフィールを削除",
+      "description": "ユーザー {{email}} を削除します。",
+      "deleteBtn": "ユーザーを削除",
+      "confirmTitle": "本当に削除しますか？",
+      "confirmBody": "すべてのデータが完全に削除されます。この操作は取り消せません。",
+      "deleteConfirmBtn": "削除する"
+    }
+  }
+}

@@ -6,6 +6,7 @@ import {
 } from 'firebase/auth';
 import { auth, googleProvider } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 function GoogleIcon() {
   return (
@@ -21,6 +22,7 @@ function GoogleIcon() {
 export function Login() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const { t } = useTranslation();
   const [email, setEmail]     = useState('');
   const [password, setPassword] = useState('');
   const [error, setError]     = useState('');
@@ -43,11 +45,11 @@ export function Login() {
       if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
         // ユーザーがポップアップを閉じた場合は何もしない
       } else if (code === 'auth/popup-blocked') {
-        setError('ポップアップがブロックされました。ブラウザのポップアップ許可設定を確認してください。');
+        setError(t('auth.error.popupBlocked'));
       } else if (code === 'auth/unauthorized-domain') {
-        setError(`このドメインはFirebaseで承認されていません。(${code})`);
+        setError(t('auth.error.unauthorizedDomain', { code }));
       } else {
-        setError(`Googleログインに失敗しました。(${code})`);
+        setError(t('auth.error.googleFailed', { code }));
       }
       setLoading(false);
     }
@@ -61,7 +63,7 @@ export function Login() {
       const result = await signInWithEmailAndPassword(auth, email, password);
       navigate(`/${result.user.uid}/home/overview`);
     } catch {
-      setError('メールアドレスまたはパスワードが正しくありません。');
+      setError(t('auth.error.invalidCredential'));
     } finally {
       setLoading(false);
     }
@@ -70,7 +72,7 @@ export function Login() {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-        <p className="text-zinc-500 text-sm">認証中...</p>
+        <p className="text-zinc-500 text-sm">{t('auth.authenticating')}</p>
       </div>
     );
   }
@@ -89,7 +91,7 @@ export function Login() {
         </div>
 
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
-          <h2 className="text-lg font-semibold text-zinc-100 mb-6">ログイン</h2>
+          <h2 className="text-lg font-semibold text-zinc-100 mb-6">{t('auth.loginTitle')}</h2>
 
           {/* Google */}
           <button
@@ -98,7 +100,7 @@ export function Login() {
             className="w-full flex items-center justify-center gap-3 px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-sm text-zinc-100 font-medium transition-colors disabled:opacity-50 mb-6"
           >
             <GoogleIcon />
-            Googleでログイン
+            {t('auth.loginWithGoogle')}
           </button>
 
           {/* Divider */}
@@ -107,7 +109,7 @@ export function Login() {
               <div className="w-full border-t border-zinc-800" />
             </div>
             <div className="relative flex justify-center">
-              <span className="px-3 bg-zinc-900 text-xs text-zinc-500">または</span>
+              <span className="px-3 bg-zinc-900 text-xs text-zinc-500">{t('auth.or')}</span>
             </div>
           </div>
 
@@ -115,7 +117,7 @@ export function Login() {
           <form onSubmit={handleEmailLogin} className="space-y-4">
             <div>
               <label className="block text-xs font-medium text-zinc-400 mb-1.5">
-                メールアドレス
+                {t('auth.emailLabel')}
               </label>
               <input
                 type="email"
@@ -129,10 +131,10 @@ export function Login() {
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="text-xs font-medium text-zinc-400">
-                  パスワード
+                  {t('auth.passwordLabel')}
                 </label>
                 <button type="button" className="text-xs text-blue-400 hover:text-blue-300">
-                  お忘れですか？
+                  {t('auth.forgotPassword')}
                 </button>
               </div>
               <input
@@ -156,15 +158,15 @@ export function Login() {
               disabled={loading}
               className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
             >
-              {loading ? 'ログイン中...' : 'ログイン'}
+              {loading ? t('auth.loggingIn') : t('auth.login')}
             </button>
           </form>
         </div>
 
         <p className="text-center text-xs text-zinc-500 mt-6">
-          アカウントをお持ちでない方は{' '}
+          {t('auth.noAccount')}{' '}
           <Link to="/signup" className="text-blue-400 hover:text-blue-300">
-            こちら
+            {t('auth.here')}
           </Link>
         </p>
       </div>
