@@ -1,41 +1,43 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { Footer } from '../components/Footer';
 
-const profileNav: { to?: string; label: string; icon: React.ReactNode }[] = [
-  {
-    to: '/profile/settings', label: '設定',
-    icon: (
-      <svg viewBox="0 0 16 16" className="w-4 h-4 fill-current opacity-50 shrink-0" role="presentation" aria-hidden="true">
-        <path d="M5.685 11.864l.254-.136 7.105-7.085v-.707l-2.48-2.48h-.707L2.753 8.54l-.138.258-.605 3.105.59.586 3.085-.625zM3.567 9.14l6.643-6.625 1.773 1.773-6.644 6.625-2.205.447.433-2.22zM14 13.5H2v1h12v-1z" />
-      </svg>
-    ),
-  },
-  {
-    label: 'アクセス管理',
-    icon: (
-      <svg viewBox="0 0 16 16" className="w-4 h-4 fill-current opacity-50 shrink-0" role="presentation" aria-hidden="true">
-        <path d="M12.39 6.902h-1.193V4.705a3.197 3.197 0 10-6.394 0v2.197H3.61l-.5.5V14l.5.5h8.78l.5-.5V7.402l-.5-.5zM5.803 4.705a2.197 2.197 0 014.394 0v2.197H5.803V4.705zM11.89 13.5H4.11V7.902h7.78V13.5z" />
-        <path d="M8 8.95a.965.965 0 00-.43 1.83v1.57h.86v-1.57A.965.965 0 008 8.95z" />
-      </svg>
-    ),
-  },
-  {
-    label: 'API トークン',
-    icon: (
-      <svg viewBox="0 0 16 16" className="w-4 h-4 fill-current opacity-50 shrink-0" role="presentation" aria-hidden="true">
-        <path d="M5.562 14.5v-.995c-1.15 0-1.506-.539-1.506-1.727V9.747c0-.828-.252-1.442-1.387-1.67v-.153c1.135-.229 1.387-.843 1.387-1.67V4.221c0-1.188.357-1.727 1.506-1.727V1.5c-1.942 0-2.576.853-2.576 2.722v1.625c0 1.112-.381 1.544-1.486 1.544v1.218c1.105 0 1.486.432 1.486 1.544v1.625c0 1.869.634 2.722 2.576 2.722zM10.438 1.5v.995c1.15 0 1.506.539 1.506 1.727v2.031c0 .828.252 1.442 1.387 1.67v.153c-1.134.229-1.387.843-1.387 1.67v2.032c0 1.188-.357 1.727-1.506 1.727v.995c1.942 0 2.576-.853 2.576-2.722v-1.625c0-1.112.381-1.544 1.486-1.544V7.391c-1.105 0-1.486-.432-1.486-1.544V4.222c0-1.869-.634-2.722-2.576-2.722z" />
-      </svg>
-    ),
-  },
-];
-
 export function ProfileLayout() {
+  const { t }          = useTranslation();
   const { user }       = useAuth();
   const navigate       = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const uuid = user?.uid ?? (import.meta.env.DEV ? 'dev' : '');
+
+  const profileNav: { to?: string; label: string; icon: React.ReactNode }[] = [
+    {
+      to: '/profile/settings', label: t('profile.tabs.settings'),
+      icon: (
+        <svg viewBox="0 0 16 16" className="w-4 h-4 fill-current opacity-50 shrink-0" role="presentation" aria-hidden="true">
+          <path d="M5.685 11.864l.254-.136 7.105-7.085v-.707l-2.48-2.48h-.707L2.753 8.54l-.138.258-.605 3.105.59.586 3.085-.625zM3.567 9.14l6.643-6.625 1.773 1.773-6.644 6.625-2.205.447.433-2.22zM14 13.5H2v1h12v-1z" />
+        </svg>
+      ),
+    },
+    {
+      label: t('profile.tabs.accessControl'),
+      icon: (
+        <svg viewBox="0 0 16 16" className="w-4 h-4 fill-current opacity-50 shrink-0" role="presentation" aria-hidden="true">
+          <path d="M12.39 6.902h-1.193V4.705a3.197 3.197 0 10-6.394 0v2.197H3.61l-.5.5V14l.5.5h8.78l.5-.5V7.402l-.5-.5zM5.803 4.705a2.197 2.197 0 014.394 0v2.197H5.803V4.705zM11.89 13.5H4.11V7.902h7.78V13.5z" />
+          <path d="M8 8.95a.965.965 0 00-.43 1.83v1.57h.86v-1.57A.965.965 0 008 8.95z" />
+        </svg>
+      ),
+    },
+    {
+      label: t('nav.apiTokens'),
+      icon: (
+        <svg viewBox="0 0 16 16" className="w-4 h-4 fill-current opacity-50 shrink-0" role="presentation" aria-hidden="true">
+          <path d="M5.562 14.5v-.995c-1.15 0-1.506-.539-1.506-1.727V9.747c0-.828-.252-1.442-1.387-1.67v-.153c1.135-.229 1.387-.843 1.387-1.67V4.221c0-1.188.357-1.727 1.506-1.727V1.5c-1.942 0-2.576.853-2.576 2.722v1.625c0 1.112-.381 1.544-1.486 1.544v1.218c1.105 0 1.486.432 1.486 1.544v1.625c0 1.869.634 2.722 2.576 2.722zM10.438 1.5v.995c1.15 0 1.506.539 1.506 1.727v2.031c0 .828.252 1.442 1.387 1.67v.153c-1.134.229-1.387.843-1.387 1.67v2.032c0 1.188-.357 1.727-1.506 1.727v.995c1.942 0 2.576-.853 2.576-2.722v-1.625c0-1.112.381-1.544 1.486-1.544V7.391c-1.105 0-1.486-.432-1.486-1.544V4.222c0-1.869-.634-2.722-2.576-2.722z" />
+        </svg>
+      ),
+    },
+  ];
 
   function closeMobile() { setMobileOpen(false); }
 
@@ -77,10 +79,10 @@ export function ProfileLayout() {
                   onClick={() => { closeMobile(); navigate(`/${uuid}/home/overview`); }}
                   style={{ cursor: 'pointer' }}
                   className="h-full flex items-center justify-center w-full text-[#4693ff] hover:text-[#3860be] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[#4693ff] rounded-sm"
-                  aria-label="戻る"
+                  aria-label={t('profile.sidebar.back')}
                 >
                   <svg
-                    aria-label="戻る"
+                    aria-label={t('profile.sidebar.back')}
                     role="img"
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 16 16"
@@ -96,7 +98,7 @@ export function ProfileLayout() {
               </div>
               <span className="flex-1 flex items-center justify-between relative">
                 <p className="w-full text-white max-w-[167px] whitespace-nowrap overflow-hidden text-ellipsis font-semibold text-sm cursor-default select-none m-0">
-                  <span>マイ プロフィール</span>
+                  <span>{t('profile.sidebar.myProfile')}</span>
                 </p>
               </span>
             </div>
@@ -131,7 +133,7 @@ export function ProfileLayout() {
                   {icon}
                   {label}
                 </span>
-                <span className="text-[10px] text-zinc-600 bg-zinc-800 ring-1 ring-zinc-700 px-1.5 py-0.5 rounded">準備中</span>
+                <span className="text-[10px] text-zinc-600 bg-zinc-800 ring-1 ring-zinc-700 px-1.5 py-0.5 rounded">{t('profile.sidebar.comingSoon')}</span>
               </div>
             )
           )}
@@ -146,7 +148,7 @@ export function ProfileLayout() {
             <button
               onClick={() => setMobileOpen(true)}
               className="p-1 -ml-1 rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60 transition-colors"
-              aria-label="メニューを開く"
+              aria-label={t('profile.sidebar.openMenu')}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                 <line x1="3" y1="6" x2="21" y2="6" />

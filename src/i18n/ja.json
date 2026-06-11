@@ -151,6 +151,7 @@
       "rootOption": "ー（ルートグループ）",
       "devicesLabel": "デバイス",
       "noDevices": "デバイスがありません",
+      "currentGroup": "現在",
       "nameRequired": "グループ名を入力してください。",
       "saveFailed": "保存に失敗しました。"
     }
@@ -386,8 +387,15 @@
   "profile": {
     "title": "プロフィール",
     "memberSince": "アカウント登録日 {{date}}",
+    "sidebar": {
+      "myProfile": "マイ プロフィール",
+      "back": "戻る",
+      "openMenu": "メニューを開く",
+      "comingSoon": "準備中"
+    },
     "tabs": {
       "settings": "設定",
+      "accessControl": "アクセス管理",
       "notifications": "通知"
     },
     "notificationsWip": "通知設定は準備中です。",

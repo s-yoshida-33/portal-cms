@@ -103,7 +103,7 @@ function RejectModal({ request, onClose, onConfirm }: RejectModalProps) {
         </p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <textarea value={note} onChange={e => setNote(e.target.value)}
-            placeholder={t('deletionRequests.rejectModal.placeholder')} rows={3} className={textareaClass} />
+            rows={3} className={textareaClass} />
           {error && <p className="text-red-400 text-sm">{error}</p>}
           <div className="flex justify-end gap-2">
             <button type="button" onClick={onClose}

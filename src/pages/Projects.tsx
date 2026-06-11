@@ -66,17 +66,17 @@ function ProjectModal({ initial, onClose, onSave }: ModalProps) {
             <div>
               <label className="block text-sm text-zinc-400 mb-1.5">{t('projects.form.nameLabel')}</label>
               <input value={name} onChange={e => setName(e.target.value)}
-                placeholder="〇〇ショッピングセンター" className={inputClass} />
+                className={inputClass} />
             </div>
             <div>
               <label className="block text-sm text-zinc-400 mb-1.5">{t('projects.form.prefectureLabel')}</label>
               <input value={prefecture} onChange={e => setPrefecture(e.target.value)}
-                placeholder="宮城県" className={inputClass} />
+                className={inputClass} />
             </div>
             <div>
               <label className="block text-sm text-zinc-400 mb-1.5">{t('projects.form.addressLabel')}</label>
               <input value={address} onChange={e => setAddress(e.target.value)}
-                placeholder="宮城県仙台市青葉区..." className={inputClass} />
+                className={inputClass} />
             </div>
             {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
           </div>
