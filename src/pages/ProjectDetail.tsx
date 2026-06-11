@@ -574,7 +574,7 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
         onClick={e => e.stopPropagation()}
       >
         <div className="shrink-0 px-6 pt-6 pb-4">
-          <h2 className="text-white text-lg font-semibold px-6 pt-6 pb-5">
+          <h2 className="text-white text-lg font-semibold">
             {initial ? 'デバイスを編集' : 'デバイスを追加'}
           </h2>
         </div>
