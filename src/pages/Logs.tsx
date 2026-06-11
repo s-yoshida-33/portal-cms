@@ -6,7 +6,7 @@ import { usePageTitle } from '../hooks/usePageTitle';
 import { Pagination } from '../components/Pagination';
 import { CustomSelect } from '../components/CustomSelect';
 import type { SelectOption } from '../components/CustomSelect';
-import { DatePickerInput } from '../components/DatePickerInput';
+import { DateRangePicker } from '../components/DateRangePicker';
 import { useFormatDate } from '../hooks/useFormatDate';
 
 // ── helpers ──────────────────────────────────────────────────────
@@ -101,25 +101,14 @@ function FilterBar({ filter, projects, onChange, onClear }: FilterBarProps) {
         />
       </div>
 
-      {/* 開始日 */}
+      {/* 日付範囲 */}
       <div className="flex flex-col gap-1">
-        <label className="text-zinc-500 text-xs">{t('logs.filter.from')}</label>
-        <DatePickerInput
-          value={filter.dateFrom}
-          onChange={v => set('dateFrom', v)}
-          max={filter.dateTo || undefined}
-          className="w-36"
-        />
-      </div>
-
-      {/* 終了日 */}
-      <div className="flex flex-col gap-1">
-        <label className="text-zinc-500 text-xs">{t('logs.filter.to')}</label>
-        <DatePickerInput
-          value={filter.dateTo}
-          onChange={v => set('dateTo', v)}
-          min={filter.dateFrom || undefined}
-          className="w-36"
+        <label className="text-zinc-500 text-xs">{t('logs.filter.date')}</label>
+        <DateRangePicker
+          mode="range"
+          from={filter.dateFrom}
+          to={filter.dateTo}
+          onApply={(from, to) => onChange({ ...filter, dateFrom: from, dateTo: to })}
         />
       </div>
 

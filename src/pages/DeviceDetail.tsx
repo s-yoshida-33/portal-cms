@@ -9,7 +9,7 @@ import { StatusBadge } from '../components/StatusBadge';
 import type { Device } from '../types';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useFormatDate } from '../hooks/useFormatDate';
-import { DatePickerInput } from '../components/DatePickerInput';
+import { DateRangePicker } from '../components/DateRangePicker';
 
 const WORKERS_BASE_URL = 'https://portal-cms-api.tti-ninja.workers.dev';
 
@@ -460,12 +460,13 @@ export function DeviceDetail() {
                 </button>
               ))}
               <div className="hidden sm:block w-px h-4 bg-zinc-700 mx-1" />
-              <DatePickerInput
-                value={selectedLogDate}
-                onChange={v => setSelectedLogDate(v)}
+              <DateRangePicker
+                mode="single"
+                from={selectedLogDate}
+                to=""
+                onApply={(date) => setSelectedLogDate(date)}
                 min={minLogDate}
                 max={todayStr}
-                clearable={false}
                 size="sm"
               />
               <button

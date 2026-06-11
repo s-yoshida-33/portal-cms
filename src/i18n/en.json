@@ -240,6 +240,7 @@
     "filter": {
       "type": "Type",
       "project": "Project",
+      "date": "Date",
       "from": "From",
       "to": "To",
       "clear": "Clear",
