@@ -570,14 +570,16 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div
-        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-sm shadow-2xl h-fit max-h-[calc(100dvh-2rem)] overflow-y-auto"
+        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-sm shadow-2xl flex flex-col max-h-[calc(100dvh-2rem)] overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
-        <h2 className="text-white text-lg font-semibold px-6 pt-6 pb-5">
-          {initial ? 'デバイスを編集' : 'デバイスを追加'}
-        </h2>
-        <form onSubmit={handleSubmit}>
-          <div className="px-6 pb-6 space-y-4">
+        <div className="shrink-0 px-6 pt-6 pb-4">
+          <h2 className="text-white text-lg font-semibold px-6 pt-6 pb-5">
+            {initial ? 'デバイスを編集' : 'デバイスを追加'}
+          </h2>
+        </div>
+        <form onSubmit={handleSubmit} className="flex flex-col min-h-0 flex-1">
+          <div className="flex-1 overflow-y-auto px-6 pb-4 space-y-4">
             {initial && projects.length > 1 && (
               <div>
                 <label className="block text-sm text-zinc-400 mb-1.5">プロジェクト</label>
@@ -642,7 +644,7 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
             )}
             {error && <p className="text-red-400 text-sm">{error}</p>}
           </div>
-          <div className="sticky bottom-0 bg-[#111111] flex justify-end gap-2 px-6 py-4 border-t border-[#2a2a2a]">
+          <div className="shrink-0 px-6 py-4 border-t border-[#2a2a2a] bg-[#111111] flex justify-end gap-2">
             <button type="button" onClick={onClose}
               className="h-9 px-4 rounded-lg text-sm text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
               キャンセル
