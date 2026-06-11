@@ -16,8 +16,8 @@ interface CustomSelectProps<T> {
 export function CustomSelect<T extends string>({
   value, onChange, options, disabled = false, className,
 }: CustomSelectProps<T>) {
-  const [isOpen,       setIsOpen]       = useState(false);
-  const [lockedIndex,  setLockedIndex]  = useState(0);
+  const [isOpen,    setIsOpen]    = useState(false);
+  const [direction, setDirection] = useState<'down' | 'up'>('down');
   const containerRef = useRef<HTMLDivElement>(null);
 
   const selectedIndex = options.findIndex(opt => opt.value === value);
@@ -33,20 +33,26 @@ export function CustomSelect<T extends string>({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const itemHeight  = 36;
-  const menuPadding = 6;
-  const topOffset   = -(lockedIndex * itemHeight + menuPadding);
-  const originY     = menuPadding + lockedIndex * itemHeight + itemHeight / 2;
+  function handleToggle() {
+    if (!isOpen && containerRef.current) {
+      const rect       = containerRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const menuHeight = Math.min(options.length * 36 + 12, 312);
+      setDirection(spaceBelow >= menuHeight + 8 ? 'down' : 'up');
+    }
+    setIsOpen(o => !o);
+  }
+
+  const dropdownStyle: React.CSSProperties = direction === 'down'
+    ? { top: 'calc(100% + 6px)', bottom: 'auto',           left: '-8px', minWidth: 'calc(100% + 16px)', width: 'max-content', transformOrigin: 'top center' }
+    : { bottom: 'calc(100% + 6px)', top: 'auto',           left: '-8px', minWidth: 'calc(100% + 16px)', width: 'max-content', transformOrigin: 'bottom center' };
 
   return (
     <div ref={containerRef} className={`relative ${className ?? 'min-w-[200px] w-full sm:w-max'}`}>
       <button
         type="button"
         disabled={disabled}
-        onClick={() => {
-          if (!isOpen) setLockedIndex(selectedIndex);
-          setIsOpen(o => !o);
-        }}
+        onClick={handleToggle}
         style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
         className="group flex w-full items-center select-none border-0 shadow-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4693ff] bg-[#111111] text-white ring-1 hover:bg-[#222222] ring-[#3d3d3d] h-9 rounded-lg pl-3 pr-10 text-base font-normal justify-between text-left transition-colors disabled:opacity-50"
       >
@@ -60,15 +66,7 @@ export function CustomSelect<T extends string>({
 
       {isOpen && (
         <div
-          style={{
-            top:           `${topOffset}px`,
-            left:          '-8px',
-            minWidth:      'calc(100% + 16px)',
-            width:         'max-content',
-            transformOrigin: `50% ${originY}px`,
-            visibility:    isOpen ? 'visible' : 'hidden',
-            transition:    'opacity 0.2s cubic-bezier(0.16,1,0.3,1), transform 0.2s cubic-bezier(0.16,1,0.3,1), visibility 0.2s cubic-bezier(0.16,1,0.3,1)',
-          }}
+          style={dropdownStyle}
           className={`absolute z-50 flex flex-col bg-[#111111] text-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.5)] ring-1 ring-[#3d3d3d] py-1.5 px-2 ${
             isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-[0.96] pointer-events-none'
           }`}

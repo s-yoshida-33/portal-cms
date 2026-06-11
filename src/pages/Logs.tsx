@@ -3,6 +3,8 @@ import { subscribeSiteLogs, subscribeProjects } from '../lib/firestore';
 import type { SiteLog, SiteLogCategory, ProjectDoc } from '../types';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { Pagination } from '../components/Pagination';
+import { CustomSelect } from '../components/CustomSelect';
+import type { SelectOption } from '../components/CustomSelect';
 
 // ── helpers ──────────────────────────────────────────────────────
 
@@ -87,12 +89,22 @@ interface FilterBarProps {
   onClear:  () => void;
 }
 
-const inputClass =
-  'h-8 bg-[#1a1a1a] ring-1 ring-[#3d3d3d] text-white text-sm rounded-lg px-3 outline-none focus:ring-[#4693ff] focus:ring-[1.5px] transition-all placeholder:text-zinc-600';
+const dateInputClass =
+  'h-9 bg-[#1a1a1a] ring-1 ring-[#3d3d3d] text-white text-sm rounded-lg px-3 outline-none focus:ring-[#4693ff] focus:ring-[1.5px] transition-all';
+
+const CATEGORY_OPTIONS: SelectOption<SiteLogCategory | ''>[] = [
+  { value: '', label: 'すべて' },
+  ...(Object.keys(categoryLabel) as SiteLogCategory[]).map(c => ({ value: c as SiteLogCategory | '', label: categoryLabel[c] })),
+];
 
 function FilterBar({ filter, projects, onChange, onClear }: FilterBarProps) {
   const set = <K extends keyof FilterState>(key: K, val: FilterState[K]) =>
     onChange({ ...filter, [key]: val });
+
+  const projectOptions: SelectOption<string>[] = [
+    { value: '', label: 'すべて' },
+    ...projects.map(p => ({ value: p.id, label: p.name })),
+  ];
 
   return (
     <div className="flex flex-wrap items-end gap-2 mb-4">
@@ -100,31 +112,23 @@ function FilterBar({ filter, projects, onChange, onClear }: FilterBarProps) {
       {/* 種別 */}
       <div className="flex flex-col gap-1">
         <label className="text-zinc-500 text-xs">種別</label>
-        <select
+        <CustomSelect
           value={filter.category}
-          onChange={e => set('category', e.target.value as SiteLogCategory | '')}
-          className={`${inputClass} pr-7 cursor-pointer`}
-        >
-          <option value="">すべて</option>
-          {(Object.keys(categoryLabel) as SiteLogCategory[]).map(c => (
-            <option key={c} value={c}>{categoryLabel[c]}</option>
-          ))}
-        </select>
+          onChange={v => set('category', v)}
+          options={CATEGORY_OPTIONS}
+          className="w-[130px]"
+        />
       </div>
 
       {/* プロジェクト */}
       <div className="flex flex-col gap-1">
         <label className="text-zinc-500 text-xs">プロジェクト</label>
-        <select
+        <CustomSelect
           value={filter.projectId}
-          onChange={e => set('projectId', e.target.value)}
-          className={`${inputClass} pr-7 cursor-pointer`}
-        >
-          <option value="">すべて</option>
-          {projects.map(p => (
-            <option key={p.id} value={p.id}>{p.name}</option>
-          ))}
-        </select>
+          onChange={v => set('projectId', v)}
+          options={projectOptions}
+          className="w-[160px]"
+        />
       </div>
 
       {/* 開始日 */}
@@ -135,7 +139,7 @@ function FilterBar({ filter, projects, onChange, onClear }: FilterBarProps) {
           value={filter.dateFrom}
           max={filter.dateTo || undefined}
           onChange={e => set('dateFrom', e.target.value)}
-          className={`${inputClass} w-36`}
+          className={`${dateInputClass} w-36`}
         />
       </div>
 
@@ -147,7 +151,7 @@ function FilterBar({ filter, projects, onChange, onClear }: FilterBarProps) {
           value={filter.dateTo}
           min={filter.dateFrom || undefined}
           onChange={e => set('dateTo', e.target.value)}
-          className={`${inputClass} w-36`}
+          className={`${dateInputClass} w-36`}
         />
       </div>
 
@@ -155,7 +159,7 @@ function FilterBar({ filter, projects, onChange, onClear }: FilterBarProps) {
       {hasActiveFilter(filter) && (
         <button
           onClick={onClear}
-          className="h-8 px-3 rounded-lg text-xs text-zinc-400 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
+          className="h-9 px-3 rounded-lg text-xs text-zinc-400 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
         >
           クリア
         </button>
