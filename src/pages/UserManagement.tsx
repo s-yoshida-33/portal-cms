@@ -43,7 +43,7 @@ function RemoveConfirm({ target, onClose, onConfirm }: RemoveConfirmProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl"
         onClick={e => e.stopPropagation()}>
         <h2 className="text-white text-lg font-semibold mb-2">ユーザーを除名</h2>
