@@ -50,7 +50,7 @@ function ProjectModal({ initial, onClose, onSave }: ModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div
-        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl flex flex-col max-h-[calc(100dvh-2rem)]"
+        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md shadow-2xl flex flex-col max-h-[calc(100dvh-2rem)] overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
         <div className="shrink-0 px-6 pt-6 pb-4">
@@ -59,8 +59,8 @@ function ProjectModal({ initial, onClose, onSave }: ModalProps) {
           </h2>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col min-h-0">
-          <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-4">
+        <form onSubmit={handleSubmit} className="flex flex-col min-h-0 flex-1">
+          <div className="flex-1 overflow-y-auto px-6 pb-4 space-y-4">
             <div>
               <label className="block text-sm text-zinc-400 mb-1.5">プロジェクト名</label>
               <input value={name} onChange={e => setName(e.target.value)}
@@ -76,8 +76,8 @@ function ProjectModal({ initial, onClose, onSave }: ModalProps) {
               <input value={address} onChange={e => setAddress(e.target.value)}
                 placeholder="宮城県仙台市青葉区..." className={inputClass} />
             </div>
+            {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
           </div>
-          {error && <p className="text-red-400 text-sm">{error}</p>}
           <div className="shrink-0 px-6 py-4 border-t border-[#2a2a2a] bg-[#111111] rounded-b-xl flex justify-end gap-2">
             <button type="button" onClick={onClose}
               className="h-9 px-4 rounded-lg text-sm text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
