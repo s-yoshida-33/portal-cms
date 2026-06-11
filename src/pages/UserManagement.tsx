@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { subscribeUserRoles, setUserRole, removeUserRole, addSiteLog } from '../lib/firestore';
 import type { UserRoleRecord, UserRole } from '../types';
@@ -6,12 +7,6 @@ import { CustomSelect } from '../components/CustomSelect';
 import { usePageTitle } from '../hooks/usePageTitle';
 
 // ── helpers ──────────────────────────────────────────────────────
-
-const roleLabel: Record<UserRole, string> = {
-  owner: 'オーナー',
-  admin: '管理者',
-  user:  '一般',
-};
 
 const roleBadge: Record<UserRole, string> = {
   owner: 'text-yellow-400 bg-yellow-950/40 ring-1 ring-yellow-900/50',
@@ -34,6 +29,7 @@ interface RemoveConfirmProps {
 }
 
 function RemoveConfirm({ target, onClose, onConfirm }: RemoveConfirmProps) {
+  const { t } = useTranslation();
   const [running, setRunning] = useState(false);
 
   async function handle() {
@@ -46,19 +42,18 @@ function RemoveConfirm({ target, onClose, onConfirm }: RemoveConfirmProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl"
         onClick={e => e.stopPropagation()}>
-        <h2 className="text-white text-lg font-semibold mb-2">ユーザーを除名</h2>
+        <h2 className="text-white text-lg font-semibold mb-2">{t('users.removeModal.title')}</h2>
         <p className="text-zinc-400 text-sm mb-5">
-          「{target.displayName}」（{target.email}）をシステムから除名します。<br />
-          Firebase アカウントは残りますが、次回ログイン時に一般ユーザーとして自動再登録されます。
+          {t('users.removeModal.body', { name: target.displayName, email: target.email })}
         </p>
         <div className="flex justify-end gap-2">
           <button onClick={onClose}
             className="h-9 px-4 rounded-lg text-sm text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
-            キャンセル
+            {t('common.cancel')}
           </button>
           <button onClick={handle} disabled={running}
             className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#e81403] hover:bg-[#b20f03] disabled:opacity-50 transition-colors cursor-pointer">
-            {running ? '処理中...' : '除名する'}
+            {running ? t('common.processing') : t('users.removeModal.confirm')}
           </button>
         </div>
       </div>
@@ -69,8 +64,15 @@ function RemoveConfirm({ target, onClose, onConfirm }: RemoveConfirmProps) {
 // ── メインページ ──────────────────────────────────────────────────
 
 export function UserManagement() {
-  usePageTitle('ユーザー管理');
+  const { t } = useTranslation();
+  usePageTitle(t('users.title'));
   const { user, role } = useAuth();
+
+  const roleLabel: Record<UserRole, string> = {
+    owner: t('users.roleLabel.owner'),
+    admin: t('users.roleLabel.admin'),
+    user:  t('users.roleLabel.user'),
+  };
 
   function siteLogActor() {
     return { uid: user?.uid ?? '', email: user?.email ?? '', displayName: user?.displayName ?? '' };
@@ -92,7 +94,7 @@ export function UserManagement() {
     return (
       <div className="flex flex-col min-h-full">
         <div className="p-8">
-          <p className="text-zinc-400 text-sm">このページはオーナーのみアクセスできます。</p>
+          <p className="text-zinc-400 text-sm">{t('users.accessDenied')}</p>
         </div>
       </div>
     );
@@ -119,11 +121,11 @@ export function UserManagement() {
       {/* ページヘッダー */}
       <div className="flex items-start justify-between gap-4 py-6 px-4 sm:px-6">
         <div className="flex flex-col gap-2">
-          <h1 className="text-white text-3xl font-semibold leading-tight">ユーザー管理</h1>
-          <p className="text-[#999999] text-base">ユーザーのロール管理・除名</p>
+          <h1 className="text-white text-3xl font-semibold leading-tight">{t('users.title')}</h1>
+          <p className="text-[#999999] text-base">{t('users.description')}</p>
         </div>
         {!loading && (
-          <span className="text-sm text-zinc-500 mt-1">{users.length} 名</span>
+          <span className="text-sm text-zinc-500 mt-1">{t('users.count', { count: users.length })}</span>
         )}
       </div>
 
@@ -131,11 +133,11 @@ export function UserManagement() {
       <div className="px-4 sm:px-6 pt-8 pb-8">
         {loading ? (
           <div className="overflow-hidden rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-12 text-center">
-            <p className="text-zinc-500 text-sm">読み込み中...</p>
+            <p className="text-zinc-500 text-sm">{t('common.loading')}</p>
           </div>
         ) : users.length === 0 ? (
           <div className="overflow-hidden rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-12 text-center">
-            <p className="text-zinc-500 text-sm">ユーザーが登録されていません。</p>
+            <p className="text-zinc-500 text-sm">{t('users.noUsers')}</p>
           </div>
         ) : (
           <>
@@ -155,7 +157,7 @@ export function UserManagement() {
                         <div className="min-w-0">
                           <div className="text-white text-sm font-medium truncate">
                             {u.displayName}
-                            {isSelf && <span className="ml-1.5 text-zinc-500 text-xs">（自分）</span>}
+                            {isSelf && <span className="ml-1.5 text-zinc-500 text-xs">{t('users.self')}</span>}
                           </div>
                           <div className="text-zinc-500 text-xs truncate mt-0.5">{u.email}</div>
                         </div>
@@ -170,9 +172,9 @@ export function UserManagement() {
                           disabled={isUpdating}
                           onChange={val => handleRoleChange(u, val as UserRole)}
                           options={[
-                            { value: 'owner', label: 'オーナー' },
-                            { value: 'admin', label: '管理者' },
-                            { value: 'user',  label: '一般' },
+                            { value: 'owner', label: t('users.roleLabel.owner') },
+                            { value: 'admin', label: t('users.roleLabel.admin') },
+                            { value: 'user',  label: t('users.roleLabel.user') },
                           ]}
                           className="w-28 shrink-0"
                         />
@@ -180,14 +182,14 @@ export function UserManagement() {
                     </div>
                     {/* 登録日 + 除名ボタン */}
                     <div className="flex items-center justify-between">
-                      <span className="text-zinc-500 text-xs tabular-nums">登録: {formatDate(u.assignedAt)}</span>
+                      <span className="text-zinc-500 text-xs tabular-nums">{t('users.registered', { date: formatDate(u.assignedAt) })}</span>
                       {!isSelf && (
                         <button
                           onClick={() => setRemoveTarget(u)}
                           disabled={isUpdating}
                           className="h-7 px-3 rounded-md text-xs text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-1 ring-red-900/50 transition-colors cursor-pointer disabled:opacity-50"
                         >
-                          除名
+                          {t('users.removeBtn')}
                         </button>
                       )}
                     </div>
@@ -200,10 +202,10 @@ export function UserManagement() {
             <div className="hidden sm:block rounded-lg ring-1 ring-[#3d3d3d]">
               {/* テーブルヘッダー */}
               <div className="grid grid-cols-[1fr_1fr_160px_120px_120px] gap-4 px-4 py-3 bg-black rounded-t-lg border-b border-[#3d3d3d] text-xs font-medium text-zinc-500 uppercase tracking-wider">
-                <span>表示名</span>
-                <span>メール</span>
-                <span>ロール</span>
-                <span>登録日</span>
+                <span>{t('users.table.displayName')}</span>
+                <span>{t('users.table.email')}</span>
+                <span>{t('users.table.role')}</span>
+                <span>{t('users.table.registeredAt')}</span>
                 <span />
               </div>
 
@@ -225,7 +227,7 @@ export function UserManagement() {
                       </div>
                       <span className="text-white text-sm truncate">
                         {u.displayName}
-                        {isSelf && <span className="ml-1.5 text-zinc-500 text-xs">（自分）</span>}
+                        {isSelf && <span className="ml-1.5 text-zinc-500 text-xs">{t('users.self')}</span>}
                       </span>
                     </div>
                     {/* メール */}
@@ -241,9 +243,9 @@ export function UserManagement() {
                         disabled={isUpdating}
                         onChange={val => handleRoleChange(u, val as UserRole)}
                         options={[
-                          { value: 'owner', label: 'オーナー' },
-                          { value: 'admin', label: '管理者' },
-                          { value: 'user',  label: '一般' },
+                          { value: 'owner', label: t('users.roleLabel.owner') },
+                          { value: 'admin', label: t('users.roleLabel.admin') },
+                          { value: 'user',  label: t('users.roleLabel.user') },
                         ]}
                         className="w-36"
                       />
@@ -258,7 +260,7 @@ export function UserManagement() {
                           disabled={isUpdating}
                           className="h-7 px-3 rounded-md text-xs text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-1 ring-red-900/50 transition-colors cursor-pointer disabled:opacity-50"
                         >
-                          除名
+                          {t('users.removeBtn')}
                         </button>
                       )}
                     </div>

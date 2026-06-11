@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import { CustomSelect } from '../../components/CustomSelect';
 import type { SelectOption } from '../../components/CustomSelect';
 import { usePageTitle } from '../../hooks/usePageTitle';
+import i18n from '../../i18n';
 
 type Appearance = 'light' | 'dark' | 'system';
 type Language   = 'ja' | 'en';
@@ -35,12 +37,13 @@ function applyAppearance(value: Appearance) {
 
 
 export function ProfileSettings() {
-  usePageTitle('プロフィール設定');
+  const { t } = useTranslation();
+  usePageTitle(t('profile.title'));
   const { user } = useAuth();
 
   const [tab, setTab] = useState<Tab>('settings');
   const [language, setLanguage] = useState<Language>(
-    () => (localStorage.getItem(LANGUAGE_KEY) as Language | null) ?? 'ja'
+    () => (i18n.language as Language | null) ?? (localStorage.getItem(LANGUAGE_KEY) as Language | null) ?? 'ja'
   );
   const [appearance, setAppearance] = useState<Appearance>(
     () => (localStorage.getItem(APPEARANCE_KEY) as Appearance | null) ?? 'dark'
@@ -54,15 +57,16 @@ export function ProfileSettings() {
 
   useEffect(() => {
     localStorage.setItem(LANGUAGE_KEY, language);
+    i18n.changeLanguage(language);
   }, [language]);
 
   function handleAppearanceChange(val: Appearance) {
     try {
       setAppearance(val);
       applyAppearance(val);
-      showAppearanceToast('外観が更新されました', true);
+      showAppearanceToast(t('profile.appearance.updated'), true);
     } catch {
-      showAppearanceToast('外観の更新に失敗しました', false);
+      showAppearanceToast(t('profile.appearance.failed'), false);
     }
   }
 
@@ -80,9 +84,9 @@ export function ProfileSettings() {
   ];
 
   const appearanceOptions: SelectOption<Appearance>[] = [
-    { value: 'light',  label: 'ライト' },
-    { value: 'dark',   label: 'ダーク' },
-    { value: 'system', label: 'システム設定を使用' },
+    { value: 'light',  label: t('profile.appearance.light') },
+    { value: 'dark',   label: t('profile.appearance.dark') },
+    { value: 'system', label: t('profile.appearance.system') },
   ];
 
   return (
@@ -96,10 +100,10 @@ export function ProfileSettings() {
       {/* Header */}
       <div className="flex items-center justify-between gap-4 py-6 px-4 sm:px-6 border-b border-[#3d3d3d] bg-black">
         <div className="flex flex-col gap-2">
-          <h1 className="text-white text-3xl font-semibold">プロフィール</h1>
+          <h1 className="text-white text-3xl font-semibold">{t('profile.title')}</h1>
           <div className="hidden md:block">
             <p className="text-[#999999] text-base">
-              {email} {memberSince && `· アカウント登録日 ${memberSince}`}
+              {email} {memberSince && `· ${t('profile.memberSince', { date: memberSince })}`}
             </p>
           </div>
         </div>
@@ -119,7 +123,7 @@ export function ProfileSettings() {
                   : 'bg-transparent text-[#999999] hover:text-white'
               }`}
             >
-              設定
+              {t('profile.tabs.settings')}
             </button>
             <button
               onClick={() => setTab('notifications')}
@@ -130,7 +134,7 @@ export function ProfileSettings() {
                   : 'bg-transparent text-[#999999] hover:text-white'
               }`}
             >
-              通知
+              {t('profile.tabs.notifications')}
             </button>
           </div>
         </div>
@@ -150,16 +154,16 @@ export function ProfileSettings() {
                     <div className="flex flex-col gap-2">
                       <div className="flex flex-wrap items-start justify-between gap-2">
                         <h3 className="text-white text-lg font-semibold flex items-center gap-2">
-                          <span>メール</span>
+                          <span>{t('profile.email.title')}</span>
                           {!isGoogleUser && (
                             <span className="inline-flex w-fit flex-none shrink-0 items-center justify-self-start rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap bg-white text-black">
-                              <span>確認済み</span>
+                              <span>{t('profile.email.verified')}</span>
                             </span>
                           )}
                         </h3>
                       </div>
                       {isGoogleUser && (
-                        <span className="text-[#999999] text-base">Googleアカウントで認証されているため変更できません。</span>
+                        <span className="text-[#999999] text-base">{t('profile.email.googleNote')}</span>
                       )}
                     </div>
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-3">
@@ -176,7 +180,7 @@ export function ProfileSettings() {
                             style={{ cursor: 'pointer' }}
                             className={btnClasses}
                           >
-                            <span>メールを更新</span>
+                            <span>{t('profile.email.updateBtn')}</span>
                           </button>
                         </div>
                       )}
@@ -190,9 +194,9 @@ export function ProfileSettings() {
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                       <div className="flex flex-col gap-2">
                         <div className="flex flex-wrap items-start justify-between gap-2">
-                          <h3 className="text-white text-lg font-semibold">言語</h3>
+                          <h3 className="text-white text-lg font-semibold">{t('profile.language.title')}</h3>
                         </div>
-                        <span className="text-[#999999] text-base">UIの表示言語を選択してください。</span>
+                        <span className="text-[#999999] text-base">{t('profile.language.description')}</span>
                       </div>
                       <div className="shrink-0">
                         <CustomSelect
@@ -211,9 +215,9 @@ export function ProfileSettings() {
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                       <div className="flex flex-col gap-2">
                         <div className="flex flex-wrap items-start justify-between gap-2">
-                          <h3 className="text-white text-lg font-semibold">外観</h3>
+                          <h3 className="text-white text-lg font-semibold">{t('profile.appearance.title')}</h3>
                         </div>
-                        <span className="text-[#999999] text-base">ダッシュボードのカラーテーマを選択してください。</span>
+                        <span className="text-[#999999] text-base">{t('profile.appearance.description')}</span>
                       </div>
                       <div className="shrink-0">
                         <CustomSelect
@@ -232,9 +236,9 @@ export function ProfileSettings() {
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                       <div className="flex flex-col gap-2">
                         <div className="flex flex-wrap items-start justify-between gap-2">
-                          <h3 className="text-white text-lg font-semibold">プロフィールを削除</h3>
+                          <h3 className="text-white text-lg font-semibold">{t('profile.deleteProfile.title')}</h3>
                         </div>
-                        <span className="text-[#999999] text-base">ユーザー {email} を削除します。</span>
+                        <span className="text-[#999999] text-base">{t('profile.deleteProfile.description', { email })}</span>
                       </div>
                       <div className="shrink-0">
                         {!showDeleteConfirm ? (
@@ -243,13 +247,13 @@ export function ProfileSettings() {
                             style={{ cursor: 'pointer' }}
                             className="group flex w-max shrink-0 items-center font-medium select-none border-0 shadow-xs focus:outline-none focus:ring-[#fc574a]/50 focus-visible:ring-2 focus-visible:ring-[#fc574a] cursor-pointer disabled:cursor-not-allowed bg-[#111111] text-[#fc574a] ring-1 ring-[#fc574a] hover:bg-[#fc574a]/10 h-9 gap-1.5 rounded-lg px-3 text-base transition-colors"
                           >
-                            <span>ユーザーを削除</span>
+                            <span>{t('profile.deleteProfile.deleteBtn')}</span>
                           </button>
                         ) : (
                           <div className="p-4 border rounded-lg bg-[#3c0501]/50 border-[#970d02]/50 space-y-3 mt-4 sm:mt-0">
-                            <p className="text-sm text-[#fc574a] font-semibold">本当に削除しますか？</p>
+                            <p className="text-sm text-[#fc574a] font-semibold">{t('profile.deleteProfile.confirmTitle')}</p>
                             <p className="text-sm text-[#fc574a]/80">
-                              すべてのデータが完全に削除されます。この操作は取り消せません。
+                              {t('profile.deleteProfile.confirmBody')}
                             </p>
                             <div className="flex gap-2 mt-4">
                               <button
@@ -257,13 +261,13 @@ export function ProfileSettings() {
                                 style={{ cursor: 'pointer' }}
                                 className="group flex w-max shrink-0 items-center font-medium select-none border-0 shadow-xs focus:outline-none focus:ring-[#4693ff]/50 focus-visible:ring-2 focus-visible:ring-[#4693ff] bg-[#111111] text-white ring-1 hover:bg-[#222222] ring-[#3d3d3d] h-9 gap-1.5 rounded-lg px-3 text-base transition-colors"
                               >
-                                キャンセル
+                                {t('common.cancel')}
                               </button>
-                              <button 
+                              <button
                                 style={{ cursor: 'pointer' }}
                                 className={btnDangerClasses}
                               >
-                                削除する
+                                {t('profile.deleteProfile.deleteConfirmBtn')}
                               </button>
                             </div>
                           </div>
@@ -276,7 +280,7 @@ export function ProfileSettings() {
               </div>
             ) : (
               <div className="py-16 text-center text-[#999999] text-base">
-                通知設定は準備中です。
+                {t('profile.notificationsWip')}
               </div>
             )}
 

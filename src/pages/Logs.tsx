@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { subscribeSiteLogs, subscribeProjects } from '../lib/firestore';
 import type { SiteLog, SiteLogCategory, ProjectDoc } from '../types';
 import { usePageTitle } from '../hooks/usePageTitle';
@@ -10,16 +11,6 @@ import type { SelectOption } from '../components/CustomSelect';
 
 const PAGE_SIZE = 20;
 
-const categoryLabel: Record<SiteLogCategory, string> = {
-  screenshot:      'スクリーンショット',
-  log:             'ログ',
-  apiToken:        'APIトークン',
-  user:            'ユーザー',
-  deletionRequest: '削除依頼',
-  project:         'プロジェクト',
-  device:          'デバイス',
-};
-
 const categoryBadge: Record<SiteLogCategory, string> = {
   screenshot:      'text-cyan-400 bg-cyan-950/40 ring-1 ring-cyan-900/50',
   log:             'text-indigo-400 bg-indigo-950/40 ring-1 ring-indigo-900/50',
@@ -28,26 +19,6 @@ const categoryBadge: Record<SiteLogCategory, string> = {
   deletionRequest: 'text-red-400 bg-red-950/40 ring-1 ring-red-900/50',
   project:         'text-orange-400 bg-orange-950/40 ring-1 ring-orange-900/50',
   device:          'text-blue-400 bg-blue-950/40 ring-1 ring-blue-900/50',
-};
-
-const actionLabel: Record<string, string> = {
-  'screenshot.captured':          'スクリーンショットを取得',
-  'screenshot.downloaded':        'スクリーンショットをダウンロード',
-  'log.fetched':                  'ログを取得',
-  'log.downloaded':               'ログをダウンロード',
-  'apiToken.issued':              'APIトークンを発行',
-  'apiToken.revoked':             'APIトークンを失効',
-  'user.added':                   'ユーザーを追加',
-  'user.roleChanged':             'ロールを変更',
-  'user.removed':                 'ユーザーを除名',
-  'deletionRequest.approved':     '削除依頼を承認',
-  'deletionRequest.rejected':     '削除依頼を却下',
-  'project.created':              'プロジェクトを作成',
-  'project.updated':              'プロジェクトを更新',
-  'project.deletionRequested':    'プロジェクトの削除を依頼',
-  'device.added':                 'デバイスを追加',
-  'device.rejected':              'デバイスを却下',
-  'device.deletionRequested':     'デバイスの削除を依頼',
 };
 
 function formatDate(iso: string) {
@@ -92,17 +63,24 @@ interface FilterBarProps {
 const dateInputClass =
   'h-9 bg-[#1a1a1a] ring-1 ring-[#3d3d3d] text-white text-sm rounded-lg px-3 outline-none focus:ring-[#4693ff] focus:ring-[1.5px] transition-all';
 
-const CATEGORY_OPTIONS: SelectOption<SiteLogCategory | ''>[] = [
-  { value: '', label: 'すべて' },
-  ...(Object.keys(categoryLabel) as SiteLogCategory[]).map(c => ({ value: c as SiteLogCategory | '', label: categoryLabel[c] })),
-];
-
 function FilterBar({ filter, projects, onChange, onClear }: FilterBarProps) {
+  const { t } = useTranslation();
   const set = <K extends keyof FilterState>(key: K, val: FilterState[K]) =>
     onChange({ ...filter, [key]: val });
 
+  const categoryOptions: SelectOption<SiteLogCategory | ''>[] = [
+    { value: '', label: t('common.all') },
+    { value: 'screenshot', label: t('logs.category.screenshot') },
+    { value: 'log', label: t('logs.category.log') },
+    { value: 'apiToken', label: t('logs.category.apiToken') },
+    { value: 'user', label: t('logs.category.user') },
+    { value: 'deletionRequest', label: t('logs.category.deletionRequest') },
+    { value: 'project', label: t('logs.category.project') },
+    { value: 'device', label: t('logs.category.device') },
+  ];
+
   const projectOptions: SelectOption<string>[] = [
-    { value: '', label: 'すべて' },
+    { value: '', label: t('common.all') },
     ...projects.map(p => ({ value: p.id, label: p.name })),
   ];
 
@@ -111,18 +89,18 @@ function FilterBar({ filter, projects, onChange, onClear }: FilterBarProps) {
 
       {/* 種別 */}
       <div className="flex flex-col gap-1">
-        <label className="text-zinc-500 text-xs">種別</label>
+        <label className="text-zinc-500 text-xs">{t('logs.filter.type')}</label>
         <CustomSelect
           value={filter.category}
           onChange={v => set('category', v)}
-          options={CATEGORY_OPTIONS}
+          options={categoryOptions}
           className="w-[130px]"
         />
       </div>
 
       {/* プロジェクト */}
       <div className="flex flex-col gap-1">
-        <label className="text-zinc-500 text-xs">プロジェクト</label>
+        <label className="text-zinc-500 text-xs">{t('logs.filter.project')}</label>
         <CustomSelect
           value={filter.projectId}
           onChange={v => set('projectId', v)}
@@ -133,7 +111,7 @@ function FilterBar({ filter, projects, onChange, onClear }: FilterBarProps) {
 
       {/* 開始日 */}
       <div className="flex flex-col gap-1">
-        <label className="text-zinc-500 text-xs">開始日</label>
+        <label className="text-zinc-500 text-xs">{t('logs.filter.from')}</label>
         <input
           type="date"
           value={filter.dateFrom}
@@ -145,7 +123,7 @@ function FilterBar({ filter, projects, onChange, onClear }: FilterBarProps) {
 
       {/* 終了日 */}
       <div className="flex flex-col gap-1">
-        <label className="text-zinc-500 text-xs">終了日</label>
+        <label className="text-zinc-500 text-xs">{t('logs.filter.to')}</label>
         <input
           type="date"
           value={filter.dateTo}
@@ -161,7 +139,7 @@ function FilterBar({ filter, projects, onChange, onClear }: FilterBarProps) {
           onClick={onClear}
           className="h-9 px-3 rounded-lg text-xs text-zinc-400 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
         >
-          クリア
+          {t('logs.filter.clear')}
         </button>
       )}
     </div>
@@ -201,7 +179,8 @@ type Tab = 'site' | 'device';
 // ── メインページ ──────────────────────────────────────────────────
 
 export function Logs() {
-  usePageTitle('ログ');
+  const { t, i18n } = useTranslation();
+  usePageTitle(t('logs.title'));
   const [tab,      setTab]      = useState<Tab>('site');
   const [logs,     setLogs]     = useState<SiteLog[]>([]);
   const [projects, setProjects] = useState<ProjectDoc[]>([]);
@@ -226,14 +205,30 @@ export function Logs() {
     setFilter(f);
   }
 
+  const categoryLabel: Record<SiteLogCategory, string> = {
+    screenshot:      t('logs.category.screenshot'),
+    log:             t('logs.category.log'),
+    apiToken:        t('logs.category.apiToken'),
+    user:            t('logs.category.user'),
+    deletionRequest: t('logs.category.deletionRequest'),
+    project:         t('logs.category.project'),
+    device:          t('logs.category.device'),
+  };
+
+  function tAction(category: string, action: string): string {
+    const key = `${category}.${action}`;
+    const bundle = i18n.getResourceBundle(i18n.language, 'translation') as { logs?: { action?: Record<string, string> } } | null;
+    return bundle?.logs?.action?.[key] ?? key;
+  }
+
   return (
     <div className="flex flex-col min-h-full">
 
       {/* ページヘッダー */}
       <div className="flex items-start justify-between gap-4 py-6 px-4 sm:px-6 border-b border-[#3d3d3d]">
         <div className="flex flex-col gap-2">
-          <h1 className="text-white text-3xl font-semibold leading-tight">ログ</h1>
-          <p className="text-[#999999] text-base">操作履歴とデバイスログの確認</p>
+          <h1 className="text-white text-3xl font-semibold leading-tight">{t('logs.title')}</h1>
+          <p className="text-[#999999] text-base">{t('logs.description')}</p>
         </div>
       </div>
 
@@ -250,7 +245,7 @@ export function Logs() {
                   : 'bg-transparent text-[#999999] hover:text-white'
               }`}
             >
-              操作ログ
+              {t('logs.operationLogs')}
             </button>
             <button
               onClick={() => setTab('device')}
@@ -261,7 +256,7 @@ export function Logs() {
                   : 'bg-transparent text-[#999999] hover:text-white'
               }`}
             >
-              デバイスログ
+              {t('logs.deviceLogs')}
             </button>
           </div>
         </div>
@@ -273,7 +268,7 @@ export function Logs() {
         {tab === 'site' && (
           loading ? (
             <div className="overflow-hidden rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-12 text-center">
-              <p className="text-zinc-500 text-sm">読み込み中...</p>
+              <p className="text-zinc-500 text-sm">{t('common.loading')}</p>
             </div>
           ) : (
             <>
@@ -287,7 +282,7 @@ export function Logs() {
               {filtered.length === 0 ? (
                 <div className="overflow-hidden rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-12 text-center">
                   <p className="text-zinc-500 text-sm">
-                    {hasActiveFilter(filter) ? '条件に一致するログはありません。' : '操作ログはまだありません。'}
+                    {hasActiveFilter(filter) ? t('logs.filter.noMatch') : t('logs.filter.noLogs')}
                   </p>
                 </div>
               ) : (
@@ -295,7 +290,7 @@ export function Logs() {
                   {/* 件数 */}
                   {hasActiveFilter(filter) && (
                     <p className="text-zinc-500 text-xs mb-3">
-                      {filtered.length} 件 / 全 {logs.length} 件
+                      {t('logs.filter.resultCount', { filtered: filtered.length, total: logs.length })}
                     </p>
                   )}
 
@@ -311,14 +306,14 @@ export function Logs() {
                             </span>
                             <span className="text-zinc-500 text-xs tabular-nums">{formatDate(log.performedAt)}</span>
                           </div>
-                          <p className="text-white text-sm">{actionLabel[`${log.category}.${log.action}`] ?? log.action}</p>
+                          <p className="text-white text-sm">{tAction(log.category, log.action)}</p>
                           <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                             <div>
-                              <span className="text-zinc-600">プロジェクト</span>
+                              <span className="text-zinc-600">{t('logs.table.project')}</span>
                               <p className="text-zinc-300 truncate mt-0.5">{projectCol}</p>
                             </div>
                             <div>
-                              <span className="text-zinc-600">デバイス</span>
+                              <span className="text-zinc-600">{t('logs.table.device')}</span>
                               <p className="text-zinc-300 truncate mt-0.5">{deviceCol}</p>
                             </div>
                           </div>
@@ -336,12 +331,12 @@ export function Logs() {
                   {/* デスクトップテーブル */}
                   <div className="hidden sm:block overflow-hidden rounded-lg ring-1 ring-[#3d3d3d]">
                     <div className="grid grid-cols-[120px_1fr_1fr_1fr_1fr_160px] gap-4 px-4 py-3 bg-black border-b border-[#3d3d3d] text-xs font-medium text-zinc-500 uppercase tracking-wider">
-                      <span>種別</span>
-                      <span>操作</span>
-                      <span>プロジェクト</span>
-                      <span>デバイス</span>
-                      <span>実行者</span>
-                      <span>日時</span>
+                      <span>{t('logs.table.type')}</span>
+                      <span>{t('logs.table.action')}</span>
+                      <span>{t('logs.table.project')}</span>
+                      <span>{t('logs.table.device')}</span>
+                      <span>{t('logs.table.performer')}</span>
+                      <span>{t('logs.table.datetime')}</span>
                     </div>
                     {paged.map((log, i) => {
                       const { projectCol, deviceCol } = resolveColumns(log);
@@ -356,7 +351,7 @@ export function Logs() {
                             {categoryLabel[log.category]}
                           </span>
                           <span className="text-white text-sm">
-                            {actionLabel[`${log.category}.${log.action}`] ?? log.action}
+                            {tAction(log.category, log.action)}
                           </span>
                           <span className="text-zinc-400 text-sm truncate">{projectCol}</span>
                           <span className="text-zinc-400 text-sm truncate">{deviceCol}</span>
@@ -375,7 +370,7 @@ export function Logs() {
 
         {tab === 'device' && (
           <div className="overflow-hidden rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-12 text-center">
-            <p className="text-zinc-500 text-sm">デバイスログは準備中です。</p>
+            <p className="text-zinc-500 text-sm">{t('logs.deviceLogsWip')}</p>
           </div>
         )}
       </div>

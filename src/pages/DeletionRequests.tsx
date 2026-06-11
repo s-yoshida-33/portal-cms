@@ -1,17 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { subscribeDeletionRequests, approveDeletion, rejectDeletion, addSiteLog } from '../lib/firestore';
 import type { DeletionRequest, DeletionTargetType } from '../types';
 import { usePageTitle } from '../hooks/usePageTitle';
 
 // ── helpers ──────────────────────────────────────────────────────
-
-const typeLabel: Record<DeletionTargetType, string> = {
-  project:  'プロジェクト',
-  device:   'デバイス',
-  apiToken: 'APIトークン',
-  group:    'グループ',
-};
 
 const typeBadge: Record<DeletionTargetType, string> = {
   project:  'text-orange-400 bg-orange-950/40 ring-1 ring-orange-900/50',
@@ -36,6 +30,13 @@ interface ApproveConfirmProps {
 }
 
 function ApproveConfirm({ request, onClose, onConfirm }: ApproveConfirmProps) {
+  const { t } = useTranslation();
+  const typeLabel: Record<DeletionTargetType, string> = {
+    project:  t('deletionRequests.type.project'),
+    device:   t('deletionRequests.type.device'),
+    apiToken: t('deletionRequests.type.apiToken'),
+    group:    t('deletionRequests.type.group'),
+  };
   const [running, setRunning] = useState(false);
 
   async function handle() {
@@ -48,19 +49,18 @@ function ApproveConfirm({ request, onClose, onConfirm }: ApproveConfirmProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl"
         onClick={e => e.stopPropagation()}>
-        <h2 className="text-white text-lg font-semibold mb-2">削除を承認</h2>
+        <h2 className="text-white text-lg font-semibold mb-2">{t('deletionRequests.approveModal.title')}</h2>
         <p className="text-zinc-400 text-sm mb-5">
-          「{request.targetName}」（{typeLabel[request.type]}）を完全に削除します。<br />
-          この操作は取り消せません。
+          {t('deletionRequests.approveModal.body', { name: request.targetName, type: typeLabel[request.type] })}
         </p>
         <div className="flex justify-end gap-2">
           <button onClick={onClose}
             className="h-9 px-4 rounded-lg text-sm text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
-            キャンセル
+            {t('common.cancel')}
           </button>
           <button onClick={handle} disabled={running}
             className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#e81403] hover:bg-[#b20f03] disabled:opacity-50 transition-colors cursor-pointer">
-            {running ? '削除中...' : '削除を実行'}
+            {running ? t('deletionRequests.approveModal.deleting') : t('deletionRequests.approveModal.deleteBtn')}
           </button>
         </div>
       </div>
@@ -77,16 +77,17 @@ interface RejectModalProps {
 }
 
 function RejectModal({ request, onClose, onConfirm }: RejectModalProps) {
+  const { t } = useTranslation();
   const [note,    setNote]    = useState('');
   const [running, setRunning] = useState(false);
   const [error,   setError]   = useState('');
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!note.trim()) { setError('却下理由を入力してください。'); return; }
+    if (!note.trim()) { setError(t('deletionRequests.rejectModal.reasonRequired')); return; }
     setRunning(true);
     try { await onConfirm(note.trim()); onClose(); }
-    catch { setError('処理に失敗しました。'); setRunning(false); }
+    catch { setError(t('deletionRequests.rejectModal.failed')); setRunning(false); }
   }
 
   const textareaClass =
@@ -96,23 +97,22 @@ function RejectModal({ request, onClose, onConfirm }: RejectModalProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl"
         onClick={e => e.stopPropagation()}>
-        <h2 className="text-white text-lg font-semibold mb-2">削除依頼を却下</h2>
+        <h2 className="text-white text-lg font-semibold mb-2">{t('deletionRequests.rejectModal.title')}</h2>
         <p className="text-zinc-400 text-sm mb-4">
-          「{request.targetName}」の削除依頼を却下します。<br />
-          却下理由を入力してください。
+          {t('deletionRequests.rejectModal.body', { name: request.targetName })}
         </p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <textarea value={note} onChange={e => setNote(e.target.value)}
-            placeholder="却下理由を入力..." rows={3} className={textareaClass} />
+            placeholder={t('deletionRequests.rejectModal.placeholder')} rows={3} className={textareaClass} />
           {error && <p className="text-red-400 text-sm">{error}</p>}
           <div className="flex justify-end gap-2">
             <button type="button" onClick={onClose}
               className="h-9 px-4 rounded-lg text-sm text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
-              キャンセル
+              {t('common.cancel')}
             </button>
             <button type="submit" disabled={running}
               className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#e81403] hover:bg-[#b20f03] disabled:opacity-50 transition-colors cursor-pointer">
-              {running ? '処理中...' : '却下する'}
+              {running ? t('deletionRequests.rejectModal.processing') : t('deletionRequests.rejectModal.rejectBtn')}
             </button>
           </div>
         </form>
@@ -124,7 +124,14 @@ function RejectModal({ request, onClose, onConfirm }: RejectModalProps) {
 // ── メインページ ──────────────────────────────────────────────────
 
 export function DeletionRequests() {
-  usePageTitle('削除依頼');
+  const { t } = useTranslation();
+  const typeLabel: Record<DeletionTargetType, string> = {
+    project:  t('deletionRequests.type.project'),
+    device:   t('deletionRequests.type.device'),
+    apiToken: t('deletionRequests.type.apiToken'),
+    group:    t('deletionRequests.type.group'),
+  };
+  usePageTitle(t('deletionRequests.title'));
   const { user, role } = useAuth();
 
   function siteLogActor() {
@@ -147,7 +154,7 @@ export function DeletionRequests() {
     return (
       <div className="flex flex-col min-h-full">
         <div className="p-8">
-          <p className="text-zinc-400 text-sm">このページはオーナーのみアクセスできます。</p>
+          <p className="text-zinc-400 text-sm">{t('deletionRequests.accessDenied')}</p>
         </div>
       </div>
     );
@@ -159,8 +166,8 @@ export function DeletionRequests() {
       {/* ページヘッダー */}
       <div className="flex items-start justify-between gap-4 py-6 px-4 sm:px-6">
         <div className="flex flex-col gap-2">
-          <h1 className="text-white text-3xl font-semibold leading-tight">削除依頼</h1>
-          <p className="text-[#999999] text-base">承認待ちの削除依頼を確認・処理</p>
+          <h1 className="text-white text-3xl font-semibold leading-tight">{t('deletionRequests.title')}</h1>
+          <p className="text-[#999999] text-base">{t('deletionRequests.description')}</p>
         </div>
         {!loading && requests.length > 0 && (
           <span className="flex items-center justify-center h-6 min-w-6 px-2 rounded-full bg-red-600 text-white text-xs font-semibold mt-1">
@@ -173,11 +180,11 @@ export function DeletionRequests() {
       <div className="px-4 sm:px-6 pt-8 pb-8">
         {loading ? (
           <div className="overflow-hidden rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-12 text-center">
-            <p className="text-zinc-500 text-sm">読み込み中...</p>
+            <p className="text-zinc-500 text-sm">{t('common.loading')}</p>
           </div>
         ) : requests.length === 0 ? (
           <div className="overflow-hidden rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-12 text-center">
-            <p className="text-zinc-500 text-sm">承認待ちの削除依頼はありません。</p>
+            <p className="text-zinc-500 text-sm">{t('deletionRequests.noRequests')}</p>
           </div>
         ) : (
           <>
@@ -200,13 +207,13 @@ export function DeletionRequests() {
                       onClick={() => setApproveTarget(req)}
                       className="h-7 px-3 rounded-md text-xs font-medium text-white bg-[#e81403] hover:bg-[#b20f03] transition-colors cursor-pointer"
                     >
-                      承認・削除
+                      {t('deletionRequests.approveDeleteBtn')}
                     </button>
                     <button
                       onClick={() => setRejectTarget(req)}
                       className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
                     >
-                      却下
+                      {t('deletionRequests.rejectBtn')}
                     </button>
                   </div>
                 </div>
@@ -216,10 +223,10 @@ export function DeletionRequests() {
             {/* デスクトップテーブル */}
             <div className="hidden sm:block overflow-hidden rounded-lg ring-1 ring-[#3d3d3d]">
               <div className="grid grid-cols-[88px_1fr_1fr_160px_176px] gap-4 px-4 py-3 bg-black border-b border-[#3d3d3d] text-xs font-medium text-zinc-500 uppercase tracking-wider">
-                <span>種別</span>
-                <span>対象名</span>
-                <span>依頼者</span>
-                <span>依頼日時</span>
+                <span>{t('deletionRequests.table.type')}</span>
+                <span>{t('deletionRequests.table.target')}</span>
+                <span>{t('deletionRequests.table.requester')}</span>
+                <span>{t('deletionRequests.table.requestedAt')}</span>
                 <span />
               </div>
               {requests.map((req, i) => (
@@ -240,13 +247,13 @@ export function DeletionRequests() {
                       onClick={() => setApproveTarget(req)}
                       className="h-7 px-3 rounded-md text-xs font-medium text-white bg-[#e81403] hover:bg-[#b20f03] transition-colors cursor-pointer"
                     >
-                      承認・削除
+                      {t('deletionRequests.approveDeleteBtn')}
                     </button>
                     <button
                       onClick={() => setRejectTarget(req)}
                       className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
                     >
-                      却下
+                      {t('deletionRequests.rejectBtn')}
                     </button>
                   </div>
                 </div>

@@ -4,12 +4,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { subscribeDeletionRequests, subscribePendingDevices } from '../lib/firestore';
-
-const userMenuItems = [
-  { label: 'プロフィール', to: '/profile/settings' },
-  { label: '外観',         to: '/profile/settings' },
-  { label: '言語',         to: '/profile/settings' },
-];
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   mobileOpen:    boolean;
@@ -20,11 +15,18 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
   const { user, role } = useAuth();
   const navigate = useNavigate();
   const { uuid } = useParams<{ uuid: string }>();
+  const { t } = useTranslation();
   const [userOpen,            setUserOpen]            = useState(false);
   const [pendingCount,        setPendingCount]        = useState(0);
   const [pendingDevicesCount, setPendingDevicesCount] = useState(0);
 
   const base = uuid ? `/${uuid}` : '';
+
+  const userMenuItems = [
+    { label: t('nav.profile'),    to: '/profile/settings' },
+    { label: t('nav.appearance'), to: '/profile/settings' },
+    { label: t('nav.language'),   to: '/profile/settings' },
+  ];
 
   useEffect(() => {
     if (role !== 'owner') return;
@@ -38,7 +40,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
 
   const navItems: { to: string; label: string; badge: number; icon?: React.ReactNode }[] = [
     {
-      to: `${base}/home/overview`, label: 'ホーム', badge: 0,
+      to: `${base}/home/overview`, label: t('nav.home'), badge: 0,
       icon: (
         <svg viewBox="0 0 16 16" className="w-4 h-4 fill-current opacity-50 shrink-0" role="presentation" aria-hidden="true">
           <path d="M14.172 7.878 8 2.52 1.828 7.878l-.656-.756 6.5-5.641h.656l6.5 5.641-.656.756Z" />
@@ -47,7 +49,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
       ),
     },
     {
-      to: `${base}/projects`, label: 'プロジェクト管理', badge: 0,
+      to: `${base}/projects`, label: t('nav.projects'), badge: 0,
       icon: (
         <svg viewBox="0 0 16 16" className="w-4 h-4 fill-current opacity-50 shrink-0" role="presentation" aria-hidden="true">
           <path d="M5.5 11.238H3.75v-1H5.5v1zM3.75 9.237H5.5v-1H3.75v1zM5.5 7.237H3.75v-1H5.5v1zM6.5 11.238h5.75v-1H6.5v1zM12.25 9.237H6.5v-1h5.75v1zM6.5 7.237h5.75v-1H6.5v1z" />
@@ -57,7 +59,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
     },
     ...(role === 'admin' || role === 'owner' ? [
       {
-        to: `${base}/api-tokens`, label: 'API トークン', badge: 0,
+        to: `${base}/api-tokens`, label: t('nav.apiTokens'), badge: 0,
         icon: (
           <svg viewBox="0 0 16 16" className="w-4 h-4 fill-current opacity-50 shrink-0" role="presentation" aria-hidden="true">
             <path d="M5.562 14.5v-.995c-1.15 0-1.506-.539-1.506-1.727V9.747c0-.828-.252-1.442-1.387-1.67v-.153c1.135-.229 1.387-.843 1.387-1.67V4.221c0-1.188.357-1.727 1.506-1.727V1.5c-1.942 0-2.576.853-2.576 2.722v1.625c0 1.112-.381 1.544-1.486 1.544v1.218c1.105 0 1.486.432 1.486 1.544v1.625c0 1.869.634 2.722 2.576 2.722zM10.438 1.5v.995c1.15 0 1.506.539 1.506 1.727v2.031c0 .828.252 1.442 1.387 1.67v.153c-1.134.229-1.387.843-1.387 1.67v2.032c0 1.188-.357 1.727-1.506 1.727v.995c1.942 0 2.576-.853 2.576-2.722v-1.625c0-1.112.381-1.544 1.486-1.544V7.391c-1.105 0-1.486-.432-1.486-1.544V4.222c0-1.869-.634-2.722-2.576-2.722z" />
@@ -65,7 +67,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
         ),
       },
       {
-        to: `${base}/pending-devices`, label: '承認待ちデバイス', badge: pendingDevicesCount,
+        to: `${base}/pending-devices`, label: t('nav.pendingDevices'), badge: pendingDevicesCount,
         icon: (
           <svg viewBox="0 0 256 256" className="w-4 h-4 fill-current opacity-50 shrink-0" role="presentation" aria-hidden="true">
             <path d="M208,36H48A20,20,0,0,0,28,56v56c0,54.29,26.32,87.22,48.4,105.29,23.71,19.39,47.44,26,48.44,26.29a12.1,12.1,0,0,0,6.32,0c1-.28,24.73-6.9,48.44-26.29,22.08-18.07,48.4-51,48.4-105.29V56A20,20,0,0,0,208,36Zm-4,76c0,35.71-13.09,64.69-38.91,86.15A126.28,126.28,0,0,1,128,219.38a126.14,126.14,0,0,1-37.09-21.23C65.09,176.69,52,147.71,52,112V60H204ZM79.51,144.49a12,12,0,1,1,17-17L112,143l47.51-47.52a12,12,0,0,1,17,17l-56,56a12,12,0,0,1-17,0Z" />
@@ -75,7 +77,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
     ] : []),
     ...(role === 'owner' ? [
       {
-        to: `${base}/deletion-requests`, label: '削除依頼', badge: pendingCount,
+        to: `${base}/deletion-requests`, label: t('nav.deletionRequests'), badge: pendingCount,
         icon: (
           <svg viewBox="0 0 256 256" className="w-4 h-4 fill-current opacity-50 shrink-0" role="presentation" aria-hidden="true">
             <path d="M42.76,50A8,8,0,0,0,40,56V224a8,8,0,0,0,16,0V179.77c26.79-21.16,49.87-9.75,76.45,3.41,16.4,8.11,34.06,16.85,53,16.85,13.93,0,28.54-4.75,43.82-18a8,8,0,0,0,2.76-6V56A8,8,0,0,0,218.76,50c-28,24.23-51.72,12.49-79.21-1.12C111.07,34.76,78.78,18.79,42.76,50ZM216,172.25c-26.79,21.16-49.87,9.74-76.45-3.41-25-12.35-52.81-26.13-83.55-8.4V59.79c26.79-21.16,49.87-9.75,76.45,3.4,25,12.35,52.82,26.13,83.55,8.4Z" />
@@ -83,7 +85,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
         ),
       },
       {
-        to: `${base}/users`, label: 'ユーザー管理', badge: 0,
+        to: `${base}/users`, label: t('nav.users'), badge: 0,
         icon: (
           <svg viewBox="0 0 256 256" className="w-4 h-4 fill-current opacity-50 shrink-0" role="presentation" aria-hidden="true">
             <path d="M244.8,150.4a8,8,0,0,1-11.2-1.6A51.6,51.6,0,0,0,192,128a8,8,0,0,1-7.37-4.89,8,8,0,0,1,0-6.22A8,8,0,0,1,192,112a24,24,0,1,0-23.24-30,8,8,0,1,1-15.5-4A40,40,0,1,1,219,117.51a67.94,67.94,0,0,1,27.43,21.68A8,8,0,0,1,244.8,150.4ZM190.92,212a8,8,0,1,1-13.84,8,57,57,0,0,0-98.16,0,8,8,0,1,1-13.84-8,72.06,72.06,0,0,1,33.74-29.92,48,48,0,1,1,58.36,0A72.06,72.06,0,0,1,190.92,212ZM128,176a32,32,0,1,0-32-32A32,32,0,0,0,128,176ZM72,120a8,8,0,0,0-8-8A24,24,0,1,1,87.24,82a8,8,0,1,0,15.5-4A40,40,0,1,0,37,117.51,67.94,67.94,0,0,0,9.6,139.19a8,8,0,1,0,12.8,9.61A51.6,51.6,0,0,1,64,128,8,8,0,0,0,72,120Z" />
@@ -92,7 +94,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
       },
     ] : []),
     {
-      to: `${base}/logs`, label: 'ログ', badge: 0,
+      to: `${base}/logs`, label: t('nav.logs'), badge: 0,
       icon: (
         <svg viewBox="0 0 16 16" className="w-4 h-4 fill-current opacity-50 shrink-0" role="presentation" aria-hidden="true">
           <path d="M14 7.523h-2.027V6.02l-.146-.352-3.982-4.012h-.002L7.49 1.51H2.51l-.5.5v12l.5.5h8.963l.5-.5v-1.487H14l.5-.5v-4l-.5-.5Zm-6.01-4.3 2.281 2.297H7.99V3.223Zm2.982 10.287H3.01v-11h3.98v3.51l.5.5h3.482v1.003h-5.98l-.5.5v4l.5.5h5.98v.987Zm2.528-1.987H5.492v-3H13.5v3Z" />
@@ -101,7 +103,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
       ),
     },
     {
-      to: `${base}/settings`, label: '設定', badge: 0,
+      to: `${base}/settings`, label: t('nav.settings'), badge: 0,
       icon: (
         <svg className="w-4 h-4 fill-current opacity-50 shrink-0" role="presentation" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
           <path d="M8 5.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5zm0 4a1.5 1.5 0 110-3 1.5 1.5 0 010 3z" />
@@ -116,7 +118,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
     navigate('/login');
   }
 
-  const displayName = user?.displayName ?? user?.email?.split('@')[0] ?? 'ユーザー';
+  const displayName = user?.displayName ?? user?.email?.split('@')[0] ?? t('nav.profile');
 
   return (
     <aside
@@ -186,7 +188,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
                 onClick={handleSignOut}
                 className="w-full flex items-center pl-11 pr-3 py-2 rounded-lg text-sm text-red-400 hover:bg-red-950/40 hover:text-red-300 transition-colors cursor-pointer"
               >
-                ログアウト
+                {t('nav.logout')}
               </button>
             </div>
           </div>
