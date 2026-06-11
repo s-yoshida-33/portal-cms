@@ -569,7 +569,8 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
-      <div
+      <form
+        onSubmit={handleSubmit}
         className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-sm shadow-2xl flex flex-col max-h-full overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
@@ -578,84 +579,84 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
             {initial ? 'デバイスを編集' : 'デバイスを追加'}
           </h2>
         </div>
-        <form onSubmit={handleSubmit} className="flex flex-col min-h-0">
-          <div className="overflow-y-auto px-6 pb-4 space-y-4">
-            {initial && projects.length > 1 && (
-              <div>
-                <label className="block text-sm text-zinc-400 mb-1.5">プロジェクト</label>
-                <CustomSelect
-                  value={projectId}
-                  onChange={val => setProjectId(val)}
-                  options={projects.map(p => ({ value: p.id, label: p.name }))}
-                  className="w-full"
-                />
-              </div>
-            )}
+
+        <div className="flex-1 min-h-0 overflow-y-auto scrollbar-subtle px-6 pb-4 space-y-4">
+          {initial && projects.length > 1 && (
             <div>
-              <label className="block text-sm text-zinc-400 mb-1.5">デバイス名</label>
-              <input value={name} onChange={e => setName(e.target.value)}
-                placeholder="PC-200" className={inputClass} />
-            </div>
-            <div>
-              <label className="block text-sm text-zinc-400 mb-1.5">IPアドレス</label>
-              <input value={ip} onChange={e => setIp(e.target.value)}
-                placeholder="192.168.1.100" className={inputClass} />
-            </div>
-            <div>
-              <label className="block text-sm text-zinc-400 mb-1.5">ポート (Bridge-Ground)</label>
-              <input
-                type="number"
-                value={port}
-                onChange={e => setPort(Number(e.target.value))}
-                placeholder="8090"
-                className={inputClass}
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-zinc-400 mb-1.5">アプリ</label>
+              <label className="block text-sm text-zinc-400 mb-1.5">プロジェクト</label>
               <CustomSelect
-                value={app}
-                onChange={val => setApp(val as AppName)}
-                options={APP_OPTIONS.map(o => ({ value: o, label: o }))}
+                value={projectId}
+                onChange={val => setProjectId(val)}
+                options={projects.map(p => ({ value: p.id, label: p.name }))}
                 className="w-full"
               />
             </div>
+          )}
+          <div>
+            <label className="block text-sm text-zinc-400 mb-1.5">デバイス名</label>
+            <input value={name} onChange={e => setName(e.target.value)}
+              placeholder="PC-200" className={inputClass} />
+          </div>
+          <div>
+            <label className="block text-sm text-zinc-400 mb-1.5">IPアドレス</label>
+            <input value={ip} onChange={e => setIp(e.target.value)}
+              placeholder="192.168.1.100" className={inputClass} />
+          </div>
+          <div>
+            <label className="block text-sm text-zinc-400 mb-1.5">ポート (Bridge-Ground)</label>
+            <input
+              type="number"
+              value={port}
+              onChange={e => setPort(Number(e.target.value))}
+              placeholder="8090"
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-zinc-400 mb-1.5">アプリ</label>
+            <CustomSelect
+              value={app}
+              onChange={val => setApp(val as AppName)}
+              options={APP_OPTIONS.map(o => ({ value: o, label: o }))}
+              className="w-full"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-zinc-400 mb-1.5">バージョン</label>
+            <input value={appVersion} onChange={e => setAppVersion(e.target.value)}
+              placeholder="1.2.0" className={inputClass} />
+          </div>
+          {groups.length > 0 && (
             <div>
-              <label className="block text-sm text-zinc-400 mb-1.5">バージョン</label>
-              <input value={appVersion} onChange={e => setAppVersion(e.target.value)}
-                placeholder="1.2.0" className={inputClass} />
+              <label className="block text-sm text-zinc-400 mb-1.5">グループを選択</label>
+              <CustomSelect
+                value={groupId ?? ''}
+                onChange={val => setGroupId(val || null)}
+                options={[
+                  { value: '', label: 'ー' },
+                  ...flattenGroups(groupTree).map(({ group, depth }) => ({
+                    value: group.id,
+                    label: ' '.repeat(depth) + group.name,
+                  })),
+                ]}
+                className="w-full"
+              />
             </div>
-            {groups.length > 0 && (
-              <div>
-                <label className="block text-sm text-zinc-400 mb-1.5">グループを選択</label>
-                <CustomSelect
-                  value={groupId ?? ''}
-                  onChange={val => setGroupId(val || null)}
-                  options={[
-                    { value: '', label: 'ー' },
-                    ...flattenGroups(groupTree).map(({ group, depth }) => ({
-                      value: group.id,
-                      label: '　'.repeat(depth) + group.name,
-                    })),
-                  ]}
-                  className="w-full"
-                />
-              </div>
-            )}
-            {error && <p className="text-red-400 text-sm">{error}</p>}
-          </div>
-          <div className="shrink-0 px-6 py-4 border-t border-[#2a2a2a] bg-[#111111] flex justify-end gap-2">
-            <button type="button" onClick={onClose}
-              className="h-9 px-4 rounded-lg text-sm text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
-              キャンセル
-            </button>
-            <button type="submit" disabled={saving}
-              className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#4693ff] hover:bg-[#3a7fe0] disabled:opacity-50 transition-colors cursor-pointer">
-              {saving ? '保存中...' : '保存'}
-            </button>
-          </div>
-        </form>
-      </div>
+          )}
+          {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
+        </div>
+
+        <div className="shrink-0 px-6 py-4 border-t border-[#2a2a2a] bg-[#111111] flex justify-end gap-2">
+          <button type="button" onClick={onClose}
+            className="h-9 px-4 rounded-lg text-sm text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
+            キャンセル
+          </button>
+          <button type="submit" disabled={saving}
+            className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#4693ff] hover:bg-[#3a7fe0] disabled:opacity-50 transition-colors cursor-pointer">
+            {saving ? '保存中...' : '保存'}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
