@@ -29,6 +29,7 @@
     "profile": "プロフィール",
     "appearance": "外観",
     "language": "言語",
+    "timezone": "タイムゾーン",
     "logout": "ログアウト"
   },
   "auth": {
@@ -408,6 +409,12 @@
     "language": {
       "title": "言語",
       "description": "UIの表示言語を選択してください。"
+    },
+    "timezone": {
+      "title": "タイムゾーン",
+      "description": "日時の表示タイムゾーンを選択してください。",
+      "utc": "標準（UTC）",
+      "local": "ローカル（GMT+9）"
     },
     "appearance": {
       "title": "外観",

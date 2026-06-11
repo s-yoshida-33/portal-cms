@@ -29,6 +29,7 @@
     "profile": "Profile",
     "appearance": "Appearance",
     "language": "Language",
+    "timezone": "Timezone",
     "logout": "Log out"
   },
   "auth": {
@@ -408,6 +409,12 @@
     "language": {
       "title": "Language",
       "description": "Select the display language for the UI."
+    },
+    "timezone": {
+      "title": "Timezone",
+      "description": "Select the timezone for displaying dates and times.",
+      "utc": "Standard (UTC)",
+      "local": "Local (GMT+9)"
     },
     "appearance": {
       "title": "Appearance",

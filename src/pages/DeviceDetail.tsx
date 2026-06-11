@@ -8,6 +8,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { StatusBadge } from '../components/StatusBadge';
 import type { Device } from '../types';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { useFormatDate } from '../hooks/useFormatDate';
+import { DatePickerInput } from '../components/DatePickerInput';
 
 const WORKERS_BASE_URL = 'https://portal-cms-api.tti-ninja.workers.dev';
 
@@ -63,12 +65,6 @@ function UptimeClock({ uptimeSecs, lastSeen, status }: { uptimeSecs: number; las
   );
 }
 
-function formatLastSeen(iso: string) {
-  return new Date(iso).toLocaleString('ja-JP', {
-    month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit',
-  });
-}
-
 // ── Log helpers ──────────────────────────────────────────────────
 
 function localDateStr(d: Date): string {
@@ -102,6 +98,7 @@ function logLevelBadgeClass(level: string, active: boolean) {
 
 export function DeviceDetail() {
   const { t } = useTranslation();
+  const formatDate = useFormatDate();
   const { deviceId } = useParams<{ deviceId: string }>();
   const { user }     = useAuth();
 
@@ -218,7 +215,7 @@ export function DeviceDetail() {
       portalBlobRef.current = url;
       setPortalSsBlobUrl(url);
       const capturedDate = completedAt?.toDate() ?? null;
-      setPortalSsCapturedAt(capturedDate ? capturedDate.toLocaleString('ja-JP') : null);
+      setPortalSsCapturedAt(capturedDate ? formatDate(capturedDate.toISOString()) : null);
       setPortalSsState('ready');
     } catch {
       setPortalSsState('error');
@@ -323,7 +320,7 @@ export function DeviceDetail() {
                 <span className="text-sm text-zinc-300">{device.app}</span>
                 <span className="text-zinc-500 text-xs">v{device.appVersion}</span>
               </div>
-              <p className="text-xs text-zinc-500">{t('deviceDetail.lastSeen', { time: formatLastSeen(device.lastSeen) })}</p>
+              <p className="text-xs text-zinc-500">{t('deviceDetail.lastSeen', { time: formatDate(device.lastSeen) })}</p>
             </div>
             <p className="text-xs text-zinc-500 mt-2 mb-4">
               {t('deviceDetail.uptime')}:{' '}
@@ -463,13 +460,13 @@ export function DeviceDetail() {
                 </button>
               ))}
               <div className="hidden sm:block w-px h-4 bg-zinc-700 mx-1" />
-              <input
-                type="date"
+              <DatePickerInput
                 value={selectedLogDate}
+                onChange={v => setSelectedLogDate(v)}
                 min={minLogDate}
                 max={todayStr}
-                onChange={e => setSelectedLogDate(e.target.value)}
-                className={`h-6 px-2 rounded-md text-xs text-zinc-300 bg-zinc-800 ring-1 ring-zinc-700 focus:outline-none focus:ring-zinc-500 cursor-pointer${!selectedLogDate ? ' date-empty' : ''}`}
+                clearable={false}
+                size="sm"
               />
               <button
                 onClick={handleRefreshLogs}
@@ -489,7 +486,7 @@ export function DeviceDetail() {
               <div className="flex flex-col sm:flex-row sm:items-center gap-0 sm:gap-3">
                 <span className="text-xs text-zinc-600">{t('deviceDetail.logCount', { count: filteredLogs.length })}</span>
                 <span className="text-xs text-zinc-600">
-                  {logsLastFetched ? t('deviceDetail.lastFetched', { time: logsLastFetched.toLocaleString() }) : t('deviceDetail.lastFetchedNone')}
+                  {logsLastFetched ? t('deviceDetail.lastFetched', { time: formatDate(logsLastFetched.toISOString()) }) : t('deviceDetail.lastFetchedNone')}
                 </span>
               </div>
               <div className="flex items-center gap-2 shrink-0">

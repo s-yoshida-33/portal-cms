@@ -30,6 +30,67 @@ input[type="date"].date-empty:focus::-webkit-datetime-edit {
   color: inherit;
 }
 
+/* ── react-day-picker dark theme overrides ────────────────────── */
+.rdp-root {
+  --rdp-accent-color: #4693ff;
+  --rdp-accent-background-color: rgba(70, 147, 255, 0.15);
+  --rdp-day_button-height: 32px;
+  --rdp-day_button-width: 32px;
+  --rdp-range_start-date-background-color: #4693ff;
+  --rdp-range_end-date-background-color: #4693ff;
+  color: white;
+}
+
+.rdp-popover {
+  background-color: #1a1a1a;
+  border: 1px solid #3d3d3d;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+.rdp-root .rdp-day_button {
+  color: #d4d4d8;
+  border-radius: 6px;
+}
+.rdp-root .rdp-day_button:hover {
+  background-color: rgba(70, 147, 255, 0.15);
+  color: white;
+}
+.rdp-root [aria-selected="true"] .rdp-day_button,
+.rdp-root .rdp-selected .rdp-day_button {
+  background-color: #4693ff;
+  color: white;
+  border-radius: 6px;
+}
+.rdp-root .rdp-day_button:disabled {
+  color: #3d3d3d;
+}
+.rdp-root .rdp-outside .rdp-day_button {
+  color: #555555;
+}
+.rdp-root .rdp-nav button {
+  color: #999999;
+  cursor: pointer;
+}
+.rdp-root .rdp-nav button:hover {
+  background-color: #2a2a2a;
+  color: white;
+}
+.rdp-root .rdp-caption_label,
+.rdp-root .rdp-month_caption {
+  color: white;
+  font-weight: 600;
+}
+.rdp-root .rdp-weekday {
+  color: #666666;
+  font-size: 0.75rem;
+}
+.rdp-root .rdp-today .rdp-day_button {
+  color: #4693ff;
+  font-weight: 700;
+}
+
 @keyframes fade-slide-in {
   from { opacity: 0; transform: translateY(-4px); }
   to   { opacity: 1; transform: translateY(0); }

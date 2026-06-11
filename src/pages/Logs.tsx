@@ -6,6 +6,8 @@ import { usePageTitle } from '../hooks/usePageTitle';
 import { Pagination } from '../components/Pagination';
 import { CustomSelect } from '../components/CustomSelect';
 import type { SelectOption } from '../components/CustomSelect';
+import { DatePickerInput } from '../components/DatePickerInput';
+import { useFormatDate } from '../hooks/useFormatDate';
 
 // ── helpers ──────────────────────────────────────────────────────
 
@@ -20,13 +22,6 @@ const categoryBadge: Record<SiteLogCategory, string> = {
   project:         'text-orange-400 bg-orange-950/40 ring-1 ring-orange-900/50',
   device:          'text-blue-400 bg-blue-950/40 ring-1 ring-blue-900/50',
 };
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleString('ja-JP', {
-    year: 'numeric', month: 'numeric', day: 'numeric',
-    hour: '2-digit', minute: '2-digit', second: '2-digit',
-  });
-}
 
 const DEVICE_CATEGORIES: SiteLogCategory[] = ['screenshot', 'log', 'device'];
 
@@ -59,9 +54,6 @@ interface FilterBarProps {
   onChange: (f: FilterState) => void;
   onClear:  () => void;
 }
-
-const dateInputClass =
-  'h-9 bg-[#1a1a1a] ring-1 ring-[#3d3d3d] text-white text-sm rounded-lg px-3 outline-none focus:ring-[#4693ff] focus:ring-[1.5px] transition-all';
 
 function FilterBar({ filter, projects, onChange, onClear }: FilterBarProps) {
   const { t } = useTranslation();
@@ -112,24 +104,22 @@ function FilterBar({ filter, projects, onChange, onClear }: FilterBarProps) {
       {/* 開始日 */}
       <div className="flex flex-col gap-1">
         <label className="text-zinc-500 text-xs">{t('logs.filter.from')}</label>
-        <input
-          type="date"
+        <DatePickerInput
           value={filter.dateFrom}
+          onChange={v => set('dateFrom', v)}
           max={filter.dateTo || undefined}
-          onChange={e => set('dateFrom', e.target.value)}
-          className={`${dateInputClass} w-36${!filter.dateFrom ? ' date-empty' : ''}`}
+          className="w-36"
         />
       </div>
 
       {/* 終了日 */}
       <div className="flex flex-col gap-1">
         <label className="text-zinc-500 text-xs">{t('logs.filter.to')}</label>
-        <input
-          type="date"
+        <DatePickerInput
           value={filter.dateTo}
+          onChange={v => set('dateTo', v)}
           min={filter.dateFrom || undefined}
-          onChange={e => set('dateTo', e.target.value)}
-          className={`${dateInputClass} w-36${!filter.dateTo ? ' date-empty' : ''}`}
+          className="w-36"
         />
       </div>
 
@@ -180,6 +170,7 @@ type Tab = 'site' | 'device';
 
 export function Logs() {
   const { t, i18n } = useTranslation();
+  const formatDate = useFormatDate();
   usePageTitle(t('logs.title'));
   const [tab,      setTab]      = useState<Tab>('site');
   const [logs,     setLogs]     = useState<SiteLog[]>([]);

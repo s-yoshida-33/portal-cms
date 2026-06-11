@@ -11,6 +11,7 @@ import {
 import type { PendingDevice, ProjectDoc, AppName } from '../types';
 import { CustomSelect } from '../components/CustomSelect';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { useFormatDate } from '../hooks/useFormatDate';
 
 // ── helpers ──────────────────────────────────────────────────────
 
@@ -21,13 +22,6 @@ const appBadge: Record<AppName, string> = {
   'Grain-Link':     'text-orange-400 bg-orange-950/40 ring-1 ring-orange-900/50',
   'Bridge-Ground':  'text-purple-400 bg-purple-950/40 ring-1 ring-purple-900/50',
 };
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleString('ja-JP', {
-    year: 'numeric', month: 'numeric', day: 'numeric',
-    hour: '2-digit', minute: '2-digit',
-  });
-}
 
 // ── 承認モーダル ──────────────────────────────────────────────────
 
@@ -261,6 +255,7 @@ function RejectConfirm({ pending, onClose, onDone }: RejectConfirmProps) {
 
 export function PendingDevices() {
   const { t } = useTranslation();
+  const formatDate = useFormatDate();
   usePageTitle(t('pendingDevices.title'));
   const { user, role } = useAuth();
 

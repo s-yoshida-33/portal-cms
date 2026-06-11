@@ -18,6 +18,7 @@ import { CustomSelect } from '../components/CustomSelect';
 import { StatusBadge } from '../components/StatusBadge';
 import type { ProjectDoc, Device, AppName, DeviceGroup } from '../types';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { useFormatDate } from '../hooks/useFormatDate';
 
 // ── helpers ──────────────────────────────────────────────────────
 
@@ -115,11 +116,6 @@ function UptimeClock({ uptimeSecs, lastSeen, status }: { uptimeSecs: number; las
   );
 }
 
-function formatLastSeen(iso: string) {
-  return new Date(iso).toLocaleString('ja-JP', {
-    month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit',
-  });
-}
 
 const APP_OPTIONS: AppName[] = ['Gido', 'Gido-Touch', 'Gido-Touch-Mini', 'Grain-Link', 'Bridge-Ground'];
 
@@ -159,6 +155,7 @@ interface DeviceCardProps {
 function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: DeviceCardProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const formatDate = useFormatDate();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -232,7 +229,7 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
             <AppBadge app={device.app} />
             <span className="text-zinc-500 text-xs">v{device.appVersion}</span>
           </div>
-          <p className="text-xs text-zinc-500">{t('projectDetail.deviceLastSeen', { time: formatLastSeen(device.lastSeen) })}</p>
+          <p className="text-xs text-zinc-500">{t('projectDetail.deviceLastSeen', { time: formatDate(device.lastSeen) })}</p>
           <p className="text-xs text-zinc-400">
             {t('projectDetail.deviceUptime')}: <UptimeClock uptimeSecs={device.system.uptime} lastSeen={device.lastSeen} status={device.status} />
           </p>
@@ -255,7 +252,7 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
                 <AppBadge app={device.app} />
                 <span className="text-zinc-500 text-xs">v{device.appVersion}</span>
               </div>
-              <p className="text-xs text-zinc-600 mt-0.5">{t('projectDetail.deviceLastSeen', { time: formatLastSeen(device.lastSeen) })}</p>
+              <p className="text-xs text-zinc-600 mt-0.5">{t('projectDetail.deviceLastSeen', { time: formatDate(device.lastSeen) })}</p>
             </div>
             {menu}
           </div>

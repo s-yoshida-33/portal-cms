@@ -26,6 +26,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
     { label: t('nav.profile'),    to: '/profile/settings' },
     { label: t('nav.appearance'), to: '/profile/settings' },
     { label: t('nav.language'),   to: '/profile/settings' },
+    { label: t('nav.timezone'),   to: '/profile/settings' },
   ];
 
   useEffect(() => {
