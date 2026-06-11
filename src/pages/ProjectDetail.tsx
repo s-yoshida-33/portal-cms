@@ -571,7 +571,7 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <form
         onSubmit={handleSubmit}
-        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-sm shadow-2xl flex flex-col max-h-full overflow-hidden"
+        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-sm shadow-2xl flex flex-col max-h-[calc(100dvh-2rem)] overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
         <div className="shrink-0 px-6 pt-6 pb-4">
@@ -580,7 +580,7 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
           </h2>
         </div>
 
-        <div className="flex-1 min-h-0 overflow-y-auto scrollbar-subtle px-6 pb-4 space-y-4">
+        <div className="overflow-y-auto min-h-0 scrollbar-subtle px-6 pb-4 space-y-4">
           {initial && projects.length > 1 && (
             <div>
               <label className="block text-sm text-zinc-400 mb-1.5">プロジェクト</label>
