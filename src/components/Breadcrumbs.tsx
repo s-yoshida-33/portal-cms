@@ -2,28 +2,30 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { useTranslation } from 'react-i18next';
 
 interface Crumb {
   label: string;
   to?: string;
 }
 
-const SECTION_LABELS: Record<string, string> = {
-  home:                'ホーム',
-  projects:            'プロジェクト管理',
-  'deletion-requests': '削除依頼',
-  users:               'ユーザー管理',
-  'api-tokens':        'API トークン',
-  'pending-devices':   '承認待ちデバイス',
-  logs:                'ログ',
-  settings:            '設定',
-};
-
 export function Breadcrumbs({ onMenuOpen }: { onMenuOpen?: () => void }) {
   const location = useLocation();
+  const { t } = useTranslation();
   const [crumbs, setCrumbs] = useState<Crumb[]>([]);
 
   useEffect(() => {
+    const SECTION_LABELS: Record<string, string> = {
+      home:                t('nav.home'),
+      projects:            t('nav.projects'),
+      'deletion-requests': t('nav.deletionRequests'),
+      users:               t('nav.users'),
+      'api-tokens':        t('nav.apiTokens'),
+      'pending-devices':   t('nav.pendingDevices'),
+      logs:                t('nav.logs'),
+      settings:            t('nav.settings'),
+    };
+
     async function build() {
       const parts = location.pathname.split('/').filter(Boolean);
       if (parts.length < 2) { setCrumbs([]); return; }
@@ -69,7 +71,7 @@ export function Breadcrumbs({ onMenuOpen }: { onMenuOpen?: () => void }) {
     }
 
     build();
-  }, [location.pathname]);
+  }, [location.pathname, t]);
 
   return (
     <div className="shrink-0 border-b border-zinc-800 bg-black py-3 px-4 sm:px-6">
@@ -78,7 +80,7 @@ export function Breadcrumbs({ onMenuOpen }: { onMenuOpen?: () => void }) {
         <button
           onClick={onMenuOpen}
           className="sm:hidden p-1 -ml-1 rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60 transition-colors shrink-0"
-          aria-label="メニューを開く"
+          aria-label={t('profile.sidebar.openMenu')}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
             <line x1="3" y1="6" x2="21" y2="6" />
@@ -90,7 +92,7 @@ export function Breadcrumbs({ onMenuOpen }: { onMenuOpen?: () => void }) {
         {crumbs.length >= 2 && (
           /* Mobile: horizontal scroll; Desktop: unchanged */
           <div className="sm:contents overflow-x-auto min-w-0 flex-1">
-            <nav aria-label="パンくずリスト" className="flex items-center gap-1.5 text-sm whitespace-nowrap">
+            <nav aria-label="breadcrumb" className="flex items-center gap-1.5 text-sm whitespace-nowrap">
               {crumbs.map((crumb, i) => {
                 const isLast = i === crumbs.length - 1;
                 return (

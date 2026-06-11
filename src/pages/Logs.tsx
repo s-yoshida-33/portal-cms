@@ -117,7 +117,7 @@ function FilterBar({ filter, projects, onChange, onClear }: FilterBarProps) {
           value={filter.dateFrom}
           max={filter.dateTo || undefined}
           onChange={e => set('dateFrom', e.target.value)}
-          className={`${dateInputClass} w-36`}
+          className={`${dateInputClass} w-36${!filter.dateFrom ? ' date-empty' : ''}`}
         />
       </div>
 
@@ -129,7 +129,7 @@ function FilterBar({ filter, projects, onChange, onClear }: FilterBarProps) {
           value={filter.dateTo}
           min={filter.dateFrom || undefined}
           onChange={e => set('dateTo', e.target.value)}
-          className={`${dateInputClass} w-36`}
+          className={`${dateInputClass} w-36${!filter.dateTo ? ' date-empty' : ''}`}
         />
       </div>
 

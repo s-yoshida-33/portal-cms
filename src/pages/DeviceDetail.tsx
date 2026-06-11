@@ -469,7 +469,7 @@ export function DeviceDetail() {
                 min={minLogDate}
                 max={todayStr}
                 onChange={e => setSelectedLogDate(e.target.value)}
-                className="h-6 px-2 rounded-md text-xs text-zinc-300 bg-zinc-800 ring-1 ring-zinc-700 focus:outline-none focus:ring-zinc-500 cursor-pointer"
+                className={`h-6 px-2 rounded-md text-xs text-zinc-300 bg-zinc-800 ring-1 ring-zinc-700 focus:outline-none focus:ring-zinc-500 cursor-pointer${!selectedLogDate ? ' date-empty' : ''}`}
               />
               <button
                 onClick={handleRefreshLogs}
