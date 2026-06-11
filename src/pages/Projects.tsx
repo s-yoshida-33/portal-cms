@@ -50,30 +50,35 @@ function ProjectModal({ initial, onClose, onSave }: ModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div
-        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl"
+        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl flex flex-col max-h-[calc(100dvh-2rem)]"
         onClick={e => e.stopPropagation()}
       >
-        <h2 className="text-white text-lg font-semibold mb-5">
-          {initial ? 'プロジェクトを編集' : 'プロジェクトを追加'}
-        </h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm text-zinc-400 mb-1.5">プロジェクト名</label>
-            <input value={name} onChange={e => setName(e.target.value)}
-              placeholder="〇〇ショッピングセンター" className={inputClass} />
-          </div>
-          <div>
-            <label className="block text-sm text-zinc-400 mb-1.5">都道府県</label>
-            <input value={prefecture} onChange={e => setPrefecture(e.target.value)}
-              placeholder="宮城県" className={inputClass} />
-          </div>
-          <div>
-            <label className="block text-sm text-zinc-400 mb-1.5">住所</label>
-            <input value={address} onChange={e => setAddress(e.target.value)}
-              placeholder="宮城県仙台市青葉区..." className={inputClass} />
+        <div className="shrink-0 px-6 pt-6 pb-4">
+          <h2 className="text-white text-lg font-semibold mb-1">
+            {initial ? 'プロジェクトを編集' : 'プロジェクトを追加'}
+          </h2>
+        </div>
+
+        <form onSubmit={handleSubmit} className="flex flex-col min-h-0">
+          <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-4">
+            <div>
+              <label className="block text-sm text-zinc-400 mb-1.5">プロジェクト名</label>
+              <input value={name} onChange={e => setName(e.target.value)}
+                placeholder="〇〇ショッピングセンター" className={inputClass} />
+            </div>
+            <div>
+              <label className="block text-sm text-zinc-400 mb-1.5">都道府県</label>
+              <input value={prefecture} onChange={e => setPrefecture(e.target.value)}
+                placeholder="宮城県" className={inputClass} />
+            </div>
+            <div>
+              <label className="block text-sm text-zinc-400 mb-1.5">住所</label>
+              <input value={address} onChange={e => setAddress(e.target.value)}
+                placeholder="宮城県仙台市青葉区..." className={inputClass} />
+            </div>
           </div>
           {error && <p className="text-red-400 text-sm">{error}</p>}
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="shrink-0 px-6 py-4 border-t border-[#2a2a2a] bg-[#111111] rounded-b-xl flex justify-end gap-2">
             <button type="button" onClick={onClose}
               className="h-9 px-4 rounded-lg text-sm text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
               キャンセル
@@ -111,7 +116,7 @@ function DeleteConfirm({ project, onClose, onConfirm }: DeleteConfirmProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div
         className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl"
         onClick={e => e.stopPropagation()}
