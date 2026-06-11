@@ -21,13 +21,13 @@ const typeBadge: Record<ApiTokenType, string> = {
 };
 
 const filterTypeOptions = [
-  { value: '',             label: '種別' },
+  { value: '',             label: 'すべて' },
   { value: 'registration', label: '登録用' },
   { value: 'device',       label: 'デバイス用' },
 ];
 
 const filterStatusOptions = [
-  { value: '',        label: '状態' },
+  { value: '',        label: 'すべて' },
   { value: 'active',  label: '有効' },
   { value: 'revoked', label: '失効済み' },
 ];
@@ -382,19 +382,25 @@ export function ApiTokens() {
       </div>
 
       {/* フィルターバー */}
-      <div className="px-4 sm:px-6 pb-2 flex gap-2">
-        <CustomSelect
-          value={filterType}
-          onChange={v => setFilterType(v)}
-          options={filterTypeOptions}
-          className="w-32"
-        />
-        <CustomSelect
-          value={filterStatus}
-          onChange={v => setFilterStatus(v)}
-          options={filterStatusOptions}
-          className="w-32"
-        />
+      <div className="px-4 sm:px-6 pb-2 flex flex-wrap items-end gap-2">
+        <div className="flex flex-col gap-1">
+          <label className="text-zinc-500 text-xs">種別</label>
+          <CustomSelect
+            value={filterType}
+            onChange={v => setFilterType(v)}
+            options={filterTypeOptions}
+            className="w-32"
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-zinc-500 text-xs">状態</label>
+          <CustomSelect
+            value={filterStatus}
+            onChange={v => setFilterStatus(v)}
+            options={filterStatusOptions}
+            className="w-32"
+          />
+        </div>
       </div>
 
       <div className="px-4 sm:px-6 pt-4 pb-8 space-y-6">
