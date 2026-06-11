@@ -73,7 +73,7 @@ function CreateModal({ onClose, onCreated }: CreateModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl"
         onClick={e => e.stopPropagation()}>
         <h2 className="text-white text-lg font-semibold mb-5">トークンを発行</h2>
@@ -129,7 +129,7 @@ function TokenReveal({ token, onClose }: TokenRevealProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
       <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-lg p-6 shadow-2xl">
         <h2 className="text-white text-lg font-semibold mb-2">トークンを保存してください</h2>
         <p className="text-zinc-400 text-sm mb-4">
@@ -171,7 +171,7 @@ function RevokeConfirm({ token, onClose, onConfirm }: RevokeConfirmProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl"
         onClick={e => e.stopPropagation()}>
         <h2 className="text-white text-lg font-semibold mb-2">トークンを失効</h2>

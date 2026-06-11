@@ -100,7 +100,7 @@ function ApproveModal({ pending, projects, onClose, onDone }: ApproveModalProps)
   // 承認完了 → 認証情報表示画面
   if (approvalResult) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
         <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl">
           <div className="flex items-center gap-2 mb-1">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -139,7 +139,7 @@ function ApproveModal({ pending, projects, onClose, onDone }: ApproveModalProps)
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl"
         onClick={e => e.stopPropagation()}>
         <h2 className="text-white text-lg font-semibold mb-1">デバイスを承認</h2>
@@ -232,7 +232,7 @@ function RejectConfirm({ pending, onClose, onDone }: RejectConfirmProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl"
         onClick={e => e.stopPropagation()}>
         <h2 className="text-white text-lg font-semibold mb-2">申請を却下</h2>
