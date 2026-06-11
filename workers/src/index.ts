@@ -114,11 +114,15 @@ class Firestore {
     const body = {
       fields: Object.fromEntries(Object.entries(fields).map(([k, v]) => [k, toFsValue(v)])),
     };
-    await fetch(this.url(`${collection}/${docId}`, mask), {
+    const resp = await fetch(this.url(`${collection}/${docId}`, mask), {
       method:  'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify(body),
     });
+    if (!resp.ok) {
+      const text = await resp.text().catch(() => '(no body)');
+      console.error(`[Firestore] PATCH ${collection}/${docId} failed ${resp.status}: ${text}`);
+    }
   }
 
   async delete(collection: string, docId: string): Promise<void> {
@@ -424,6 +428,7 @@ export default {
           };
           if (d.ip)      fields.ip         = d.ip;
           if (d.version) fields.appVersion = d.version;
+          console.log(`[heartbeat] device=${d.deviceId} uptime=${d.uptime ?? 0} version=${d.version ?? ''}`);
           return { deviceId: d.deviceId, fields };
         });
 
