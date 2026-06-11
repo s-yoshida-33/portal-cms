@@ -570,7 +570,7 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div
-        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md shadow-2xl h-fit max-h-[calc(100dvh-2rem)] overflow-y-auto"
+        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-sm shadow-2xl flex flex-col max-h-full overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
         <div className="shrink-0 px-6 pt-6 pb-4">
@@ -578,8 +578,8 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
             {initial ? 'デバイスを編集' : 'デバイスを追加'}
           </h2>
         </div>
-        <form onSubmit={handleSubmit} className="flex flex-col min-h-0 flex-1">
-          <div className="flex-1 overflow-y-auto px-6 pb-4 space-y-4">
+        <form onSubmit={handleSubmit} className="flex flex-col min-h-0">
+          <div className="overflow-y-auto px-6 pb-4 space-y-4">
             {initial && projects.length > 1 && (
               <div>
                 <label className="block text-sm text-zinc-400 mb-1.5">プロジェクト</label>
