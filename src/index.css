@@ -134,15 +134,25 @@ input[type="date"].date-empty:focus::-webkit-datetime-edit {
 .rdp-root .rdp-range_end {
   background: transparent !important;
 }
-
 /* Fill the button itself with a white background and black text */
 .rdp-root .rdp-range_start .rdp-day_button,
 .rdp-root .rdp-range_middle .rdp-day_button,
 .rdp-root .rdp-range_end .rdp-day_button {
   background-color: white !important;
   color: black !important;
+  border-color: white !important;
+  box-shadow: none !important;
 }
-
+/* Remove the blue outline that appears when clicking or focusing on a button while a selection is active */
+.rdp-root .rdp-range_start .rdp-day_button:focus,
+.rdp-root .rdp-range_middle .rdp-day_button:focus,
+.rdp-root .rdp-range_end .rdp-day_button:focus,
+.rdp-root .rdp-range_start .rdp-day_button:focus-visible,
+.rdp-root .rdp-range_middle .rdp-day_button:focus-visible,
+.rdp-root .rdp-range_end .rdp-day_button:focus-visible {
+  border-color: white !important;
+  outline: none !important;
+}
 /* Middle button: transparent bg, flat (cell provides the white) */
 .rdp-root .rdp-range_middle .rdp-day_button {
   border-radius: 0;
