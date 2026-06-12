@@ -175,12 +175,18 @@ input[type="date"].date-empty:focus::-webkit-datetime-edit {
   outline: 2px solid white !important;
   outline-offset: -2px;
 }
-/* To display a "white border" instead of a blue background in single-select mode (mode="single") */
+/* Styles for single-select mode (mode="single") */
 .rdp-root .rdp-selected:not(.rdp-range_start):not(.rdp-range_middle):not(.rdp-range_end) .rdp-day_button {
-  background-color: transparent !important;
-  border: 2px solid white !important;
-  color: white !important;
+  background-color: white !important;
+  color: black !important;
+  border: none !important;
+  box-shadow: none !important;
   border-radius: 6px;
+}
+/* Hide the outline when the selected button is clicked or focused (for single selection) */
+.rdp-root .rdp-selected:not(.rdp-range_start):not(.rdp-range_middle):not(.rdp-range_end) .rdp-day_button:focus,
+.rdp-root .rdp-selected:not(.rdp-range_start):not(.rdp-range_middle):not(.rdp-range_end) .rdp-day_button:focus-visible {
+  outline: none !important;
 }
 
 @keyframes fade-slide-in {
