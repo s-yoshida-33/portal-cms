@@ -1,33 +1,178 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, useNavigate, useParams } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { subscribeDeletionRequests, subscribePendingDevices } from '../lib/firestore';
 import { useTranslation } from 'react-i18next';
+import { useTimezone } from '../contexts/TimezoneContext';
+import type { Timezone } from '../contexts/TimezoneContext';
+import i18n from '../i18n/index';
+
+type Appearance = 'light' | 'dark' | 'system';
+type Language   = 'ja' | 'en';
+
+const APPEARANCE_KEY = 'portal-appearance';
+const LANGUAGE_KEY   = 'portal-language';
+
+function applyAppearance(value: Appearance) {
+  const root = document.documentElement;
+  root.classList.remove('light', 'dark');
+  if (value === 'system') {
+    root.classList.add(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  } else {
+    root.classList.add(value);
+  }
+  localStorage.setItem(APPEARANCE_KEY, value);
+}
+
+// ── Sidebar flyout select ─────────────────────────────────────────
+
+interface FlyoutOption<T> { value: T; label: string; }
+
+function SidebarFlyout<T extends string>({
+  label,
+  value,
+  options,
+  isOpen,
+  onOpen,
+  onClose,
+  onChange,
+}: {
+  label: string;
+  value: T;
+  options: FlyoutOption<T>[];
+  isOpen: boolean;
+  onOpen: () => void;
+  onClose: () => void;
+  onChange: (val: T) => void;
+}) {
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelRef   = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  const [pos, setPos] = useState({ top: 0, left: 0 });
+
+  useEffect(() => {
+    if (isOpen && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      setPos({ top: rect.top, left: rect.right + 8 });
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    function onDown(e: MouseEvent) {
+      const t = e.target as Node;
+      if (!triggerRef.current?.contains(t) && !panelRef.current?.contains(t)) {
+        onCloseRef.current();
+      }
+    }
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, [isOpen]);
+
+  const currentLabel = options.find(o => o.value === value)?.label ?? '';
+
+  return (
+    <>
+      <button
+        ref={triggerRef}
+        type="button"
+        onClick={() => isOpen ? onClose() : onOpen()}
+        className={`w-full flex items-center pl-11 pr-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
+          isOpen
+            ? 'bg-zinc-800 text-zinc-200'
+            : 'text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200'
+        }`}
+      >
+        <span className="flex-1 text-left">{label}</span>
+        <span className="text-zinc-500 text-xs mr-1 shrink-0">{currentLabel}</span>
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+          className="text-zinc-600 shrink-0">
+          <polyline points="9 18 15 12 9 6" />
+        </svg>
+      </button>
+
+      {isOpen && (
+        <div
+          ref={panelRef}
+          style={{ position: 'fixed', top: pos.top, left: pos.left, zIndex: 9999 }}
+          className="bg-[#111111] text-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.5)] ring-1 ring-[#3d3d3d] py-1.5 px-2 min-w-[160px]"
+        >
+          {options.map(opt => {
+            const isSelected = opt.value === value;
+            return (
+              <div
+                key={String(opt.value)}
+                role="option"
+                aria-selected={isSelected}
+                onClick={() => { onChange(opt.value); onClose(); }}
+                className={`flex w-full h-9 shrink-0 items-center justify-between gap-6 rounded-md pl-3 pr-4 text-base outline-none transition-colors hover:bg-[#222222]/60 hover:text-white cursor-pointer ${
+                  isSelected ? 'text-white' : 'text-[#d9d9d9]'
+                }`}
+              >
+                <div className="whitespace-nowrap">{opt.label}</div>
+                {isSelected && (
+                  <span className="text-[#4693ff] shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
+                      <path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z" />
+                    </svg>
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </>
+  );
+}
+
+// ── Sidebar ───────────────────────────────────────────────────────
 
 interface Props {
   mobileOpen:    boolean;
   onMobileClose: () => void;
 }
 
+type OpenFlyout = 'language' | 'appearance' | 'timezone' | null;
+
 export function Sidebar({ mobileOpen, onMobileClose }: Props) {
   const { user, role } = useAuth();
   const navigate = useNavigate();
   const { uuid } = useParams<{ uuid: string }>();
   const { t } = useTranslation();
+  const { timezone, setTimezone } = useTimezone();
+
   const [userOpen,            setUserOpen]            = useState(false);
+  const [openFlyout,          setOpenFlyout]          = useState<OpenFlyout>(null);
   const [pendingCount,        setPendingCount]        = useState(0);
   const [pendingDevicesCount, setPendingDevicesCount] = useState(0);
+  const [language,    setLanguageState]  = useState<Language>(
+    () => (i18n.language as Language | null) ?? (localStorage.getItem(LANGUAGE_KEY) as Language | null) ?? 'ja'
+  );
+  const [appearance, setAppearanceState] = useState<Appearance>(
+    () => (localStorage.getItem(APPEARANCE_KEY) as Appearance | null) ?? 'dark'
+  );
 
   const base = uuid ? `/${uuid}` : '';
 
-  const userMenuItems = [
-    { label: t('nav.profile'),    to: '/profile/settings' },
-    { label: t('nav.appearance'), to: '/profile/settings' },
-    { label: t('nav.language'),   to: '/profile/settings' },
-    { label: t('nav.timezone'),   to: '/profile/settings' },
-  ];
+  function handleLanguageChange(val: Language) {
+    setLanguageState(val);
+    localStorage.setItem(LANGUAGE_KEY, val);
+    i18n.changeLanguage(val);
+  }
+
+  function handleAppearanceChange(val: Appearance) {
+    setAppearanceState(val);
+    applyAppearance(val);
+  }
+
+  function openFlyoutFor(name: OpenFlyout) { setOpenFlyout(name); }
+  function closeFlyout() { setOpenFlyout(null); }
 
   useEffect(() => {
     if (role !== 'owner') return;
@@ -121,16 +266,27 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
 
   const displayName = user?.displayName ?? user?.email?.split('@')[0] ?? t('nav.profile');
 
+  const languageOptions = [
+    { value: 'ja' as Language, label: '日本語' },
+    { value: 'en' as Language, label: 'English' },
+  ];
+  const appearanceOptions = [
+    { value: 'light'  as Appearance, label: t('profile.appearance.light') },
+    { value: 'dark'   as Appearance, label: t('profile.appearance.dark') },
+    { value: 'system' as Appearance, label: t('profile.appearance.system') },
+  ];
+  const timezoneOptions = [
+    { value: 'local' as Timezone, label: t('profile.timezone.local') },
+    { value: 'utc'   as Timezone, label: t('profile.timezone.utc') },
+  ];
+
   return (
     <aside
       className={[
-        // Mobile: fixed drawer sliding in from left
         'fixed inset-y-0 left-0 z-50 w-2/3',
         'transform transition-transform duration-300 ease-in-out',
         mobileOpen ? 'translate-x-0' : '-translate-x-full',
-        // Desktop: normal sidebar in flex flow
         'sm:static sm:inset-auto sm:z-auto sm:translate-x-0 sm:w-56 sm:shrink-0',
-        // Common
         'bg-black border-r border-zinc-800 flex flex-col',
       ].join(' ')}
     >
@@ -147,7 +303,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
         {/* ユーザーメニュー */}
         <div className="px-2 py-3 border-b border-zinc-800">
           <button
-            onClick={() => setUserOpen(o => !o)}
+            onClick={() => { setUserOpen(o => !o); setOpenFlyout(null); }}
             className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-zinc-800/60 transition-colors group cursor-pointer"
           >
             <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center shrink-0 text-white text-xs font-medium">
@@ -165,26 +321,59 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
 
           <div
             className={`overflow-hidden transition-all duration-200 ease-in-out ${
-              userOpen ? 'max-h-48 opacity-100 mt-1' : 'max-h-0 opacity-0'
+              userOpen ? 'max-h-56 opacity-100 mt-1' : 'max-h-0 opacity-0'
             }`}
           >
             <div className="space-y-0.5 pb-1">
-              {userMenuItems.map(({ label, to }) => (
-                <NavLink
-                  key={to}
-                  to={to}
-                  onClick={onMobileClose}
-                  className={({ isActive }) =>
-                    `flex items-center pl-11 pr-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
-                      isActive
-                        ? 'bg-zinc-800 text-zinc-100'
-                        : 'text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200'
-                    }`
-                  }
-                >
-                  {label}
-                </NavLink>
-              ))}
+              {/* Profile */}
+              <NavLink
+                to="/profile/settings"
+                onClick={onMobileClose}
+                className={({ isActive }) =>
+                  `flex items-center pl-11 pr-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
+                    isActive
+                      ? 'bg-zinc-800 text-zinc-100'
+                      : 'text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200'
+                  }`
+                }
+              >
+                {t('nav.profile')}
+              </NavLink>
+
+              {/* Language flyout */}
+              <SidebarFlyout
+                label={t('nav.language')}
+                value={language}
+                options={languageOptions}
+                isOpen={openFlyout === 'language'}
+                onOpen={() => openFlyoutFor('language')}
+                onClose={closeFlyout}
+                onChange={handleLanguageChange}
+              />
+
+              {/* Timezone flyout */}
+              <SidebarFlyout
+                label={t('nav.timezone')}
+                value={timezone}
+                options={timezoneOptions}
+                isOpen={openFlyout === 'timezone'}
+                onOpen={() => openFlyoutFor('timezone')}
+                onClose={closeFlyout}
+                onChange={setTimezone}
+              />
+
+              {/* Appearance flyout */}
+              <SidebarFlyout
+                label={t('nav.appearance')}
+                value={appearance}
+                options={appearanceOptions}
+                isOpen={openFlyout === 'appearance'}
+                onOpen={() => openFlyoutFor('appearance')}
+                onClose={closeFlyout}
+                onChange={handleAppearanceChange}
+              />
+
+              {/* Logout */}
               <button
                 onClick={handleSignOut}
                 className="w-full flex items-center pl-11 pr-3 py-2 rounded-lg text-sm text-red-400 hover:bg-red-950/40 hover:text-red-300 transition-colors cursor-pointer"
