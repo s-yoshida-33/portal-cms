@@ -5,6 +5,7 @@ import { subscribeUserRoles, setUserRole, removeUserRole, addSiteLog } from '../
 import type { UserRoleRecord, UserRole } from '../types';
 import { CustomSelect } from '../components/CustomSelect';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { useFormatDate } from '../hooks/useFormatDate';
 
 // ── helpers ──────────────────────────────────────────────────────
 
@@ -13,12 +14,6 @@ const roleBadge: Record<UserRole, string> = {
   admin: 'text-blue-400 bg-blue-950/40 ring-1 ring-blue-900/50',
   user:  'text-zinc-400 bg-zinc-800/60 ring-1 ring-zinc-700/50',
 };
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('ja-JP', {
-    year: 'numeric', month: 'numeric', day: 'numeric',
-  });
-}
 
 // ── 除名確認モーダル ──────────────────────────────────────────────
 
@@ -65,6 +60,7 @@ function RemoveConfirm({ target, onClose, onConfirm }: RemoveConfirmProps) {
 
 export function UserManagement() {
   const { t } = useTranslation();
+  const formatDate = useFormatDate();
   usePageTitle(t('users.title'));
   const { user, role } = useAuth();
 
@@ -182,7 +178,7 @@ export function UserManagement() {
                     </div>
                     {/* 登録日 + 除名ボタン */}
                     <div className="flex items-center justify-between">
-                      <span className="text-zinc-500 text-xs tabular-nums">{t('users.registered', { date: formatDate(u.assignedAt) })}</span>
+                      <span className="text-zinc-500 text-xs tabular-nums">{t('users.registered', { date: formatDate(u.assignedAt, true) })}</span>
                       {!isSelf && (
                         <button
                           onClick={() => setRemoveTarget(u)}
@@ -251,7 +247,7 @@ export function UserManagement() {
                       />
                     )}
                     {/* 登録日 */}
-                    <span className="text-zinc-500 text-xs tabular-nums">{formatDate(u.assignedAt)}</span>
+                    <span className="text-zinc-500 text-xs tabular-nums">{formatDate(u.assignedAt, true)}</span>
                     {/* 操作 */}
                     <div className="flex justify-end">
                       {!isSelf && (

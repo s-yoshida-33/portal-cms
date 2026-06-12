@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { subscribeDeletionRequests, approveDeletion, rejectDeletion, addSiteLog } from '../lib/firestore';
 import type { DeletionRequest, DeletionTargetType } from '../types';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { useFormatDate } from '../hooks/useFormatDate';
 
 // ── helpers ──────────────────────────────────────────────────────
 
@@ -13,13 +14,6 @@ const typeBadge: Record<DeletionTargetType, string> = {
   apiToken: 'text-purple-400 bg-purple-950/40 ring-1 ring-purple-900/50',
   group:    'text-green-400 bg-green-950/40 ring-1 ring-green-900/50',
 };
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleString('ja-JP', {
-    year: 'numeric', month: 'numeric', day: 'numeric',
-    hour: '2-digit', minute: '2-digit',
-  });
-}
 
 // ── 承認確認モーダル ──────────────────────────────────────────────
 
@@ -125,6 +119,7 @@ function RejectModal({ request, onClose, onConfirm }: RejectModalProps) {
 
 export function DeletionRequests() {
   const { t } = useTranslation();
+  const formatDate = useFormatDate();
   const typeLabel: Record<DeletionTargetType, string> = {
     project:  t('deletionRequests.type.project'),
     device:   t('deletionRequests.type.device'),

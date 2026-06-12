@@ -6,6 +6,7 @@ import type { ApiToken, ApiTokenType } from '../types';
 import { CustomSelect } from '../components/CustomSelect';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { Pagination } from '../components/Pagination';
+import { useFormatDate } from '../hooks/useFormatDate';
 
 // ── helpers ──────────────────────────────────────────────────────
 
@@ -15,14 +16,6 @@ const typeBadge: Record<ApiTokenType, string> = {
   registration: 'text-green-400 bg-green-950/40 ring-1 ring-green-900/50',
   device:       'text-blue-400 bg-blue-950/40 ring-1 ring-blue-900/50',
 };
-
-function formatDate(iso: string | null) {
-  if (!iso) return '-';
-  return new Date(iso).toLocaleString('ja-JP', {
-    year: 'numeric', month: 'numeric', day: 'numeric',
-    hour: '2-digit', minute: '2-digit',
-  });
-}
 
 // ── ページネーション ───────────────────────────────────────────────
 
@@ -184,6 +177,7 @@ function RevokeConfirm({ token, onClose, onConfirm }: RevokeConfirmProps) {
 
 export function ApiTokens() {
   const { t } = useTranslation();
+  const formatDate = useFormatDate();
   usePageTitle(t('apiTokens.title'));
   const { user, role } = useAuth();
 

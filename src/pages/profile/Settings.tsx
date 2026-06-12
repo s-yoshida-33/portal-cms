@@ -5,6 +5,8 @@ import { CustomSelect } from '../../components/CustomSelect';
 import type { SelectOption } from '../../components/CustomSelect';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import i18n from '../../i18n';
+import { useTimezone } from '../../contexts/TimezoneContext';
+import type { Timezone } from '../../contexts/TimezoneContext';
 
 type Appearance = 'light' | 'dark' | 'system';
 type Language   = 'ja' | 'en';
@@ -48,6 +50,7 @@ export function ProfileSettings() {
   const [appearance, setAppearance] = useState<Appearance>(
     () => (localStorage.getItem(APPEARANCE_KEY) as Appearance | null) ?? 'dark'
   );
+  const { timezone, setTimezone } = useTimezone();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
 
@@ -87,6 +90,11 @@ export function ProfileSettings() {
     { value: 'light',  label: t('profile.appearance.light') },
     { value: 'dark',   label: t('profile.appearance.dark') },
     { value: 'system', label: t('profile.appearance.system') },
+  ];
+
+  const timezoneOptions: SelectOption<Timezone>[] = [
+    { value: 'local', label: t('profile.timezone.local') },
+    { value: 'utc',   label: t('profile.timezone.utc') },
   ];
 
   return (
@@ -203,6 +211,27 @@ export function ProfileSettings() {
                           value={language}
                           onChange={(val) => setLanguage(val)}
                           options={languageOptions}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Timezone Section */}
+                <div className="bg-[#111111] shadow-xs ring-1 ring-[#3d3d3d] overflow-visible rounded-lg p-6">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="flex flex-col gap-2">
+                        <div className="flex flex-wrap items-start justify-between gap-2">
+                          <h3 className="text-white text-lg font-semibold">{t('profile.timezone.title')}</h3>
+                        </div>
+                        <span className="text-[#999999] text-base">{t('profile.timezone.description')}</span>
+                      </div>
+                      <div className="shrink-0">
+                        <CustomSelect
+                          value={timezone}
+                          onChange={(val) => setTimezone(val)}
+                          options={timezoneOptions}
                         />
                       </div>
                     </div>

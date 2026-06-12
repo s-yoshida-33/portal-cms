@@ -30,6 +30,165 @@ input[type="date"].date-empty:focus::-webkit-datetime-edit {
   color: inherit;
 }
 
+/* ── react-day-picker dark theme overrides ────────────────────── */
+.rdp-root {
+  /* Colors */
+  --rdp-accent-color: #4693ff;
+  --rdp-accent-background-color: rgba(70, 147, 255, 0.15);
+  --rdp-today-color: #4693ff;
+  /* Day button sizing / shape */
+  --rdp-day_button-height: 32px;
+  --rdp-day_button-width: 100%;
+  --rdp-day_button-border: none;
+  --rdp-day_button-border-radius: 6px;
+  /* Remove blue outline on selected dates */
+  --rdp-selected-border: none;
+  /* Range: white connected bar */
+  --rdp-range_middle-background-color: white;
+  --rdp-range_start-date-background-color: white;
+  --rdp-range_end-date-background-color: white;
+  --rdp-range_start-color: black;
+  --rdp-range_end-color: black;
+  --rdp-range_middle-color: black;
+  color: white;
+}
+
+.rdp-root table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  width: 100%;
+}
+.rdp-root td, 
+.rdp-root th {
+  padding: 0;
+  min-width: 32px;
+}
+
+.rdp-popover {
+  background-color: #1a1a1a;
+  border: 1px solid #3d3d3d;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+/* Nav chevrons: white fill (RDP uses fill, not color) */
+.rdp-root .rdp-chevron {
+  fill: white;
+}
+.rdp-root .rdp-button_previous:hover,
+.rdp-root .rdp-button_next:hover {
+  background-color: #2a2a2a;
+  border-radius: 6px;
+}
+
+/* Day button defaults */
+.rdp-root .rdp-day_button {
+  color: #d4d4d8;
+}
+.rdp-root .rdp-day_button:hover {
+  background-color: rgba(70, 147, 255, 0.15);
+  color: white;
+}
+.rdp-root .rdp-day_button:disabled {
+  color: #3d3d3d;
+}
+.rdp-root .rdp-outside .rdp-day_button {
+  color: #555555;
+}
+
+/* Non-range selected (single mode): white bg, black text */
+.rdp-root .rdp-selected:not(.rdp-range_start):not(.rdp-range_middle):not(.rdp-range_end) .rdp-day_button {
+  background-color: white;
+  color: black;
+}
+/* Today unselected: blue */
+.rdp-root .rdp-today:not(.rdp-selected) .rdp-day_button {
+  color: #4693ff;
+  font-weight: 700;
+}
+/* Today selected: black text */
+.rdp-root .rdp-today.rdp-selected .rdp-day_button {
+  color: black;
+  font-weight: 700;
+}
+
+/* Month caption */
+.rdp-root .rdp-caption_label,
+.rdp-root .rdp-month_caption {
+  color: white;
+  font-weight: 600;
+}
+.rdp-root .rdp-weekday {
+  color: #666666;
+  font-size: 0.75rem;
+}
+
+/* ── Range: connected white bar ─────────────────────────────── */
+/* Cell backgrounds come from CSS variables (gradients for start/end, solid for middle). */
+/* Only need to fix border-radius on the buttons. */
+
+/* Disable the default cell background */
+.rdp-root .rdp-range_start,
+.rdp-root .rdp-range_middle,
+.rdp-root .rdp-range_end {
+  background: transparent !important;
+}
+/* Fill the button itself with a white background and black text */
+.rdp-root .rdp-range_start .rdp-day_button,
+.rdp-root .rdp-range_middle .rdp-day_button,
+.rdp-root .rdp-range_end .rdp-day_button {
+  background-color: white !important;
+  color: black !important;
+  border-color: white !important;
+  box-shadow: none !important;
+}
+/* Remove the blue outline that appears when clicking or focusing on a button while a selection is active */
+.rdp-root .rdp-range_start .rdp-day_button:focus,
+.rdp-root .rdp-range_middle .rdp-day_button:focus,
+.rdp-root .rdp-range_end .rdp-day_button:focus,
+.rdp-root .rdp-range_start .rdp-day_button:focus-visible,
+.rdp-root .rdp-range_middle .rdp-day_button:focus-visible,
+.rdp-root .rdp-range_end .rdp-day_button:focus-visible {
+  border-color: white !important;
+  outline: none !important;
+}
+/* Middle button: transparent bg, flat (cell provides the white) */
+.rdp-root .rdp-range_middle .rdp-day_button {
+  border-radius: 0;
+}
+/* Start button: rounded left only */
+.rdp-root .rdp-range_start:not(.rdp-range_end) .rdp-day_button {
+  border-radius: 6px 0 0 6px;
+}
+/* End button: rounded right only */
+.rdp-root .rdp-range_end:not(.rdp-range_start) .rdp-day_button {
+  border-radius: 0 6px 6px 0;
+}
+/* Single day (start = end): fully rounded */
+.rdp-root .rdp-range_start.rdp-range_end .rdp-day_button {
+  border-radius: 6px;
+}
+/* Change the blue border to white when a date is selected (upon click or focus) */
+.rdp-root .rdp-day_button:focus-visible,
+.rdp-root .rdp-day_button:focus {
+  outline: 2px solid white !important;
+  outline-offset: -2px;
+}
+/* Styles for single-select mode (mode="single") */
+.rdp-root .rdp-selected:not(.rdp-range_start):not(.rdp-range_middle):not(.rdp-range_end) .rdp-day_button {
+  background-color: white !important;
+  color: black !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 6px;
+}
+/* Hide the outline when the selected button is clicked or focused (for single selection) */
+.rdp-root .rdp-selected:not(.rdp-range_start):not(.rdp-range_middle):not(.rdp-range_end) .rdp-day_button:focus,
+.rdp-root .rdp-selected:not(.rdp-range_start):not(.rdp-range_middle):not(.rdp-range_end) .rdp-day_button:focus-visible {
+  outline: none !important;
+}
+
 @keyframes fade-slide-in {
   from { opacity: 0; transform: translateY(-4px); }
   to   { opacity: 1; transform: translateY(0); }
