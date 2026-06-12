@@ -468,7 +468,6 @@ export function DeviceDetail() {
                 min={minLogDate}
                 max={todayStr}
                 size="sm"
-                hideTimezone
               />
               <button
                 onClick={handleRefreshLogs}

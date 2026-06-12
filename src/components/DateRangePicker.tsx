@@ -3,7 +3,6 @@ import { DayPicker } from 'react-day-picker';
 import type { DateRange } from 'react-day-picker';
 import { enUS } from 'react-day-picker/locale';
 import 'react-day-picker/style.css';
-import { useTimezone } from '../contexts/TimezoneContext';
 
 // ── helpers ───────────────────────────────────────────────────────
 
@@ -47,7 +46,6 @@ export interface DateRangePickerProps {
   min?: string;
   max?: string;
   size?: 'sm' | 'md';
-  hideTimezone?: boolean;
   className?: string;
 }
 
@@ -61,10 +59,8 @@ export function DateRangePicker({
   min,
   max,
   size = 'md',
-  hideTimezone = false,
   className = '',
 }: DateRangePickerProps) {
-  const { timezone, setTimezone } = useTimezone();
   const [open, setOpen]             = useState(false);
   const [draftFrom, setDraftFrom]   = useState(from);
   const [draftTo,   setDraftTo]     = useState(to);
@@ -150,8 +146,6 @@ export function DateRangePicker({
     ? 'h-6 px-2 rounded-md text-xs bg-zinc-800 ring-1 ring-zinc-700 focus:outline-none focus:ring-zinc-500'
     : 'h-9 px-3 rounded-lg text-sm bg-[#1a1a1a] ring-1 ring-[#3d3d3d] focus:ring-[#4693ff] focus:ring-[1.5px]';
 
-  const tzLabel = timezone === 'utc' ? 'UTC (UTC+0)' : 'GMT+09:00 (GMT+9)';
-
   return (
     <div ref={containerRef} className={`relative inline-block ${className}`}>
 
@@ -208,7 +202,7 @@ export function DateRangePicker({
               <div className="flex items-center gap-2 h-9 bg-[#1a1a1a] ring-1 ring-[#3d3d3d] rounded-lg px-3 text-sm">
                 <span className="text-zinc-500"><CalIcon size={13} /></span>
                 <span className={draftFrom ? 'text-white' : 'text-zinc-500'}>
-                  {draftFrom ? `${draftFrom}${mode === 'range' ? ' 00:00' : ''}` : '—'}
+                  {draftFrom || '—'}
                 </span>
               </div>
             </div>
@@ -218,29 +212,15 @@ export function DateRangePicker({
                 <div className="flex items-center gap-2 h-9 bg-[#1a1a1a] ring-1 ring-[#3d3d3d] rounded-lg px-3 text-sm">
                   <span className="text-zinc-500"><CalIcon size={13} /></span>
                   <span className={draftTo ? 'text-white' : 'text-zinc-500'}>
-                    {draftTo ? `${draftTo} 23:59` : '—'}
+                    {draftTo || '—'}
                   </span>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Footer: timezone + buttons */}
+          {/* Footer: buttons */}
           <div className="px-3 py-2.5 flex items-center gap-3">
-            {!hideTimezone && (
-              <button
-                type="button"
-                onClick={() => setTimezone(timezone === 'utc' ? 'local' : 'utc')}
-                className="flex items-center gap-1 text-xs text-zinc-400 hover:text-zinc-200 transition-colors cursor-pointer"
-              >
-                {tzLabel}
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="7 15 12 20 17 15" />
-                  <polyline points="7 9 12 4 17 9" />
-                </svg>
-              </button>
-            )}
             <div className="flex-1" />
             {(draftFrom || draftTo) && (
               <button
