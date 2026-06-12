@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { DayPicker } from 'react-day-picker';
 import type { DateRange } from 'react-day-picker';
 import { enUS } from 'react-day-picker/locale';
@@ -63,10 +63,25 @@ export function DateRangePicker({
   className = '',
 }: DateRangePickerProps) {
   const { timezone, setTimezone } = useTimezone();
-  const [open, setOpen]         = useState(false);
-  const [draftFrom, setDraftFrom] = useState(from);
-  const [draftTo,   setDraftTo]   = useState(to);
+  const [open, setOpen]             = useState(false);
+  const [draftFrom, setDraftFrom]   = useState(from);
+  const [draftTo,   setDraftTo]     = useState(to);
+  const [popupPos, setPopupPos]     = useState({ up: false, right: false });
   const containerRef = useRef<HTMLDivElement>(null);
+  const popupRef     = useRef<HTMLDivElement>(null);
+
+  // Flip popup direction so it stays within the viewport
+  useLayoutEffect(() => {
+    if (!open || !popupRef.current) {
+      setPopupPos({ up: false, right: false });
+      return;
+    }
+    const rect = popupRef.current.getBoundingClientRect();
+    setPopupPos({
+      up:    rect.bottom > window.innerHeight - 8,
+      right: rect.right  > window.innerWidth  - 8,
+    });
+  }, [open]);
 
   // Reset draft to current props every time popup opens
   useEffect(() => {
@@ -153,7 +168,14 @@ export function DateRangePicker({
 
       {/* ── Popup ── */}
       {open && (
-        <div className="absolute z-50 mt-1 left-0 bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl shadow-2xl overflow-hidden">
+        <div
+          ref={popupRef}
+          className={[
+            'absolute z-50 bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl shadow-2xl overflow-hidden',
+            popupPos.up    ? 'bottom-full mb-1' : 'top-full mt-1',
+            popupPos.right ? 'right-0'          : 'left-0',
+          ].join(' ')}
+        >
 
           {/* Calendar */}
           <div className="p-3 border-b border-[#2a2a2a]">
