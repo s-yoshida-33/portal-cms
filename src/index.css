@@ -36,8 +36,8 @@ input[type="date"].date-empty:focus::-webkit-datetime-edit {
   --rdp-accent-background-color: rgba(70, 147, 255, 0.15);
   --rdp-day_button-height: 32px;
   --rdp-day_button-width: 32px;
-  --rdp-range_start-date-background-color: #4693ff;
-  --rdp-range_end-date-background-color: #4693ff;
+  --rdp-range_start-date-background-color: white;
+  --rdp-range_end-date-background-color: white;
   color: white;
 }
 
@@ -57,11 +57,22 @@ input[type="date"].date-empty:focus::-webkit-datetime-edit {
   background-color: rgba(70, 147, 255, 0.15);
   color: white;
 }
+/* Selected: white background, black text */
 .rdp-root [aria-selected="true"] .rdp-day_button,
 .rdp-root .rdp-selected .rdp-day_button {
-  background-color: #4693ff;
-  color: white;
+  background-color: white;
+  color: black;
   border-radius: 6px;
+}
+/* Today unselected: blue highlight */
+.rdp-root .rdp-today .rdp-day_button {
+  color: #4693ff;
+  font-weight: 700;
+}
+/* Today selected: black text (same as other selected dates) */
+.rdp-root .rdp-today.rdp-selected .rdp-day_button,
+.rdp-root .rdp-today [aria-selected="true"].rdp-day_button {
+  color: black;
 }
 .rdp-root .rdp-day_button:disabled {
   color: #3d3d3d;
@@ -69,8 +80,9 @@ input[type="date"].date-empty:focus::-webkit-datetime-edit {
 .rdp-root .rdp-outside .rdp-day_button {
   color: #555555;
 }
+/* Nav arrows: white */
 .rdp-root .rdp-nav button {
-  color: #999999;
+  color: white;
   cursor: pointer;
 }
 .rdp-root .rdp-nav button:hover {
@@ -86,9 +98,34 @@ input[type="date"].date-empty:focus::-webkit-datetime-edit {
   color: #666666;
   font-size: 0.75rem;
 }
-.rdp-root .rdp-today .rdp-day_button {
-  color: #4693ff;
-  font-weight: 700;
+
+/* Range selection: connected bar style */
+/* Middle days: full-width blue bar, white text */
+.rdp-root .rdp-range_middle {
+  background-color: rgba(70, 147, 255, 0.25);
+  border-radius: 0;
+}
+.rdp-root .rdp-range_middle .rdp-day_button {
+  background-color: transparent;
+  color: white;
+  border-radius: 0;
+}
+/* Start: bar extends right from center */
+.rdp-root .rdp-range_start:not(.rdp-range_end) {
+  background: linear-gradient(to right, transparent 50%, rgba(70, 147, 255, 0.25) 50%);
+  border-radius: 0;
+}
+/* End: bar extends left from center */
+.rdp-root .rdp-range_end:not(.rdp-range_start) {
+  background: linear-gradient(to left, transparent 50%, rgba(70, 147, 255, 0.25) 50%);
+  border-radius: 0;
+}
+/* Start/end buttons keep white circle */
+.rdp-root .rdp-range_start .rdp-day_button,
+.rdp-root .rdp-range_end .rdp-day_button {
+  background-color: white;
+  color: black;
+  border-radius: 6px;
 }
 
 @keyframes fade-slide-in {

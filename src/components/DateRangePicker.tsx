@@ -70,7 +70,7 @@ export function DateRangePicker({
   const containerRef = useRef<HTMLDivElement>(null);
   const popupRef     = useRef<HTMLDivElement>(null);
 
-  // Flip popup direction so it stays within the viewport
+  // Flip popup horizontally if it overflows the right edge
   useLayoutEffect(() => {
     if (!open || !popupRef.current) {
       setPopupPos({ up: false, right: false });
@@ -78,8 +78,8 @@ export function DateRangePicker({
     }
     const rect = popupRef.current.getBoundingClientRect();
     setPopupPos({
-      up:    rect.bottom > window.innerHeight - 8,
-      right: rect.right  > window.innerWidth  - 8,
+      up:    false,
+      right: rect.right > window.innerWidth - 8,
     });
   }, [open]);
 
@@ -119,7 +119,6 @@ export function DateRangePicker({
     setDraftFrom('');
     setDraftTo('');
     onApply('', '');
-    setOpen(false);
   }
 
   // Dates for DayPicker
