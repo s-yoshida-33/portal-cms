@@ -47,6 +47,7 @@ export interface DateRangePickerProps {
   min?: string;
   max?: string;
   size?: 'sm' | 'md';
+  hideTimezone?: boolean;
   className?: string;
 }
 
@@ -60,6 +61,7 @@ export function DateRangePicker({
   min,
   max,
   size = 'md',
+  hideTimezone = false,
   className = '',
 }: DateRangePickerProps) {
   const { timezone, setTimezone } = useTimezone();
@@ -225,18 +227,20 @@ export function DateRangePicker({
 
           {/* Footer: timezone + buttons */}
           <div className="px-3 py-2.5 flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setTimezone(timezone === 'utc' ? 'local' : 'utc')}
-              className="flex items-center gap-1 text-xs text-zinc-400 hover:text-zinc-200 transition-colors cursor-pointer"
-            >
-              {tzLabel}
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="7 15 12 20 17 15" />
-                <polyline points="7 9 12 4 17 9" />
-              </svg>
-            </button>
+            {!hideTimezone && (
+              <button
+                type="button"
+                onClick={() => setTimezone(timezone === 'utc' ? 'local' : 'utc')}
+                className="flex items-center gap-1 text-xs text-zinc-400 hover:text-zinc-200 transition-colors cursor-pointer"
+              >
+                {tzLabel}
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="7 15 12 20 17 15" />
+                  <polyline points="7 9 12 4 17 9" />
+                </svg>
+              </button>
+            )}
             <div className="flex-1" />
             {(draftFrom || draftTo) && (
               <button

@@ -80,14 +80,15 @@ input[type="date"].date-empty:focus::-webkit-datetime-edit {
 .rdp-root .rdp-outside .rdp-day_button {
   color: #555555;
 }
-/* Nav arrows: white */
-.rdp-root .rdp-nav button {
-  color: white;
+/* Nav arrows: white (override RDP accent-color default) */
+.rdp-root .rdp-nav button,
+.rdp-root .rdp-nav button svg {
+  color: white !important;
+  stroke: white !important;
   cursor: pointer;
 }
 .rdp-root .rdp-nav button:hover {
   background-color: #2a2a2a;
-  color: white;
 }
 .rdp-root .rdp-caption_label,
 .rdp-root .rdp-month_caption {
@@ -99,32 +100,41 @@ input[type="date"].date-empty:focus::-webkit-datetime-edit {
   font-size: 0.75rem;
 }
 
-/* Range selection: connected bar style */
-/* Middle days: full-width blue bar, white text */
+/* Range selection: connected white bar */
+/* Middle days: full-width white strip, no rounding */
 .rdp-root .rdp-range_middle {
-  background-color: rgba(70, 147, 255, 0.25);
+  background-color: white;
   border-radius: 0;
 }
 .rdp-root .rdp-range_middle .rdp-day_button {
-  background-color: transparent;
-  color: white;
-  border-radius: 0;
-}
-/* Start: bar extends right from center */
-.rdp-root .rdp-range_start:not(.rdp-range_end) {
-  background: linear-gradient(to right, transparent 50%, rgba(70, 147, 255, 0.25) 50%);
-  border-radius: 0;
-}
-/* End: bar extends left from center */
-.rdp-root .rdp-range_end:not(.rdp-range_start) {
-  background: linear-gradient(to left, transparent 50%, rgba(70, 147, 255, 0.25) 50%);
-  border-radius: 0;
-}
-/* Start/end buttons keep white circle */
-.rdp-root .rdp-range_start .rdp-day_button,
-.rdp-root .rdp-range_end .rdp-day_button {
-  background-color: white;
+  background-color: transparent !important;
   color: black;
+  border-radius: 0;
+}
+/* Start: right half white to connect, button rounded left only */
+.rdp-root .rdp-range_start:not(.rdp-range_end) {
+  background: linear-gradient(to right, transparent 50%, white 50%);
+  border-radius: 0;
+}
+.rdp-root .rdp-range_start:not(.rdp-range_end) .rdp-day_button {
+  background-color: white !important;
+  color: black !important;
+  border-radius: 6px 0 0 6px;
+}
+/* End: left half white to connect, button rounded right only */
+.rdp-root .rdp-range_end:not(.rdp-range_start) {
+  background: linear-gradient(to left, transparent 50%, white 50%);
+  border-radius: 0;
+}
+.rdp-root .rdp-range_end:not(.rdp-range_start) .rdp-day_button {
+  background-color: white !important;
+  color: black !important;
+  border-radius: 0 6px 6px 0;
+}
+/* Single day (start = end): fully rounded */
+.rdp-root .rdp-range_start.rdp-range_end .rdp-day_button {
+  background-color: white !important;
+  color: black !important;
   border-radius: 6px;
 }
 
