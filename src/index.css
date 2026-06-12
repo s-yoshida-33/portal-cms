@@ -128,12 +128,14 @@ input[type="date"].date-empty:focus::-webkit-datetime-edit {
 /* Cell backgrounds come from CSS variables (gradients for start/end, solid for middle). */
 /* Only need to fix border-radius on the buttons. */
 
+/* Disable the default cell background */
 .rdp-root .rdp-range_start,
 .rdp-root .rdp-range_middle,
 .rdp-root .rdp-range_end {
   background: transparent !important;
 }
 
+/* Fill the button itself with a white background and black text */
 .rdp-root .rdp-range_start .rdp-day_button,
 .rdp-root .rdp-range_middle .rdp-day_button,
 .rdp-root .rdp-range_end .rdp-day_button {
@@ -155,6 +157,19 @@ input[type="date"].date-empty:focus::-webkit-datetime-edit {
 }
 /* Single day (start = end): fully rounded */
 .rdp-root .rdp-range_start.rdp-range_end .rdp-day_button {
+  border-radius: 6px;
+}
+/* Change the blue border to white when a date is selected (upon click or focus) */
+.rdp-root .rdp-day_button:focus-visible,
+.rdp-root .rdp-day_button:focus {
+  outline: 2px solid white !important;
+  outline-offset: -2px;
+}
+/* To display a "white border" instead of a blue background in single-select mode (mode="single") */
+.rdp-root .rdp-selected:not(.rdp-range_start):not(.rdp-range_middle):not(.rdp-range_end) .rdp-day_button {
+  background-color: transparent !important;
+  border: 2px solid white !important;
+  color: white !important;
   border-radius: 6px;
 }
 
