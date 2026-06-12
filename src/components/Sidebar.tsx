@@ -47,10 +47,11 @@ function SidebarFlyout<T extends string>({
   onClose: () => void;
   onChange: (val: T) => void;
 }) {
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const panelRef   = useRef<HTMLDivElement>(null);
-  const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
+  const triggerRef    = useRef<HTMLButtonElement>(null);
+  const panelRef      = useRef<HTMLDivElement>(null);
+  const onCloseRef    = useRef(onClose);
+  const closeTimer    = useRef<ReturnType<typeof setTimeout> | null>(null);
+  onCloseRef.current  = onClose;
 
   const [pos, setPos] = useState({ top: 0, left: 0 });
 
@@ -61,6 +62,7 @@ function SidebarFlyout<T extends string>({
     }
   }, [isOpen]);
 
+  // Close on outside click
   useEffect(() => {
     if (!isOpen) return;
     function onDown(e: MouseEvent) {
@@ -73,7 +75,12 @@ function SidebarFlyout<T extends string>({
     return () => document.removeEventListener('mousedown', onDown);
   }, [isOpen]);
 
-  const currentLabel = options.find(o => o.value === value)?.label ?? '';
+  function scheduleClose() {
+    closeTimer.current = setTimeout(() => onCloseRef.current(), 120);
+  }
+  function cancelClose() {
+    if (closeTimer.current) { clearTimeout(closeTimer.current); closeTimer.current = null; }
+  }
 
   return (
     <>
@@ -81,6 +88,8 @@ function SidebarFlyout<T extends string>({
         ref={triggerRef}
         type="button"
         onClick={() => isOpen ? onClose() : onOpen()}
+        onMouseEnter={() => { cancelClose(); onOpen(); }}
+        onMouseLeave={scheduleClose}
         className={`w-full flex items-center pl-11 pr-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
           isOpen
             ? 'bg-zinc-800 text-zinc-200'
@@ -88,7 +97,6 @@ function SidebarFlyout<T extends string>({
         }`}
       >
         <span className="flex-1 text-left">{label}</span>
-        <span className="text-zinc-500 text-xs mr-1 shrink-0">{currentLabel}</span>
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
           strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
           className="text-zinc-600 shrink-0">
@@ -100,6 +108,8 @@ function SidebarFlyout<T extends string>({
         <div
           ref={panelRef}
           style={{ position: 'fixed', top: pos.top, left: pos.left, zIndex: 9999 }}
+          onMouseEnter={cancelClose}
+          onMouseLeave={scheduleClose}
           className="bg-[#111111] text-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.5)] ring-1 ring-[#3d3d3d] py-1.5 px-2 min-w-[160px]"
         >
           {options.map(opt => {
