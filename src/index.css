@@ -38,7 +38,7 @@ input[type="date"].date-empty:focus::-webkit-datetime-edit {
   --rdp-today-color: #4693ff;
   /* Day button sizing / shape */
   --rdp-day_button-height: 32px;
-  --rdp-day_button-width: 32px;
+  --rdp-day_button-width: 100%;
   --rdp-day_button-border: none;
   --rdp-day_button-border-radius: 6px;
   /* Remove blue outline on selected dates */
@@ -51,6 +51,17 @@ input[type="date"].date-empty:focus::-webkit-datetime-edit {
   --rdp-range_end-color: black;
   --rdp-range_middle-color: black;
   color: white;
+}
+
+.rdp-root table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  width: 100%;
+}
+.rdp-root td, 
+.rdp-root th {
+  padding: 0;
+  min-width: 32px;
 }
 
 .rdp-popover {
@@ -117,11 +128,22 @@ input[type="date"].date-empty:focus::-webkit-datetime-edit {
 /* Cell backgrounds come from CSS variables (gradients for start/end, solid for middle). */
 /* Only need to fix border-radius on the buttons. */
 
+.rdp-root .rdp-range_start,
+.rdp-root .rdp-range_middle,
+.rdp-root .rdp-range_end {
+  background: transparent !important;
+}
+
+.rdp-root .rdp-range_start .rdp-day_button,
+.rdp-root .rdp-range_middle .rdp-day_button,
+.rdp-root .rdp-range_end .rdp-day_button {
+  background-color: white !important;
+  color: black !important;
+}
+
 /* Middle button: transparent bg, flat (cell provides the white) */
 .rdp-root .rdp-range_middle .rdp-day_button {
-  background-color: transparent;
   border-radius: 0;
-  border: none;
 }
 /* Start button: rounded left only */
 .rdp-root .rdp-range_start:not(.rdp-range_end) .rdp-day_button {
