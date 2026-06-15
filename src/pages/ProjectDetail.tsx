@@ -327,7 +327,7 @@ function GroupCard({
           <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
             <button
               onClick={() => onEditGroup(node.group)}
-              className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer"
+              className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer"
             >
               {t('projectDetail.deviceEdit')}
             </button>
@@ -512,11 +512,11 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
 
         <div className="shrink-0 px-6 py-4 border-t border-[var(--bg-hover)] bg-[var(--bg-surface)] flex justify-end gap-2">
           <button type="button" onClick={onClose}
-            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer">
             {t('common.cancel')}
           </button>
           <button type="submit" disabled={saving}
-            className="h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-50 transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-50 transition-colors cursor-pointer">
             {saving ? t('common.saving') : t('common.save')}
           </button>
         </div>
@@ -648,11 +648,11 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
 
         <div className="shrink-0 px-6 py-4 border-t border-[var(--bg-hover)] bg-[var(--bg-surface)] flex justify-end gap-2">
           <button type="button" onClick={onClose}
-            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer">
             {t('common.cancel')}
           </button>
           <button type="submit" disabled={saving}
-            className="h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-50 transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-50 transition-colors cursor-pointer">
             {saving ? t('common.saving') : t('common.save')}
           </button>
         </div>
@@ -695,7 +695,7 @@ function DeleteConfirm({ name, onClose, onConfirm }: DeleteConfirmProps) {
         </p>
         <div className="flex justify-end gap-2">
           <button onClick={onClose}
-            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer">
             {t('common.cancel')}
           </button>
           <button onClick={handleConfirm} disabled={sending}
@@ -924,7 +924,7 @@ export function ProjectDetail() {
             <div className="flex items-center gap-2 mt-7">
               <button
                 onClick={() => { setEditGroup(null); setGroupModalOpen(true); }}
-                className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer"
+                className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer"
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -934,7 +934,7 @@ export function ProjectDetail() {
               </button>
               <button
                 onClick={() => { setEditDevice(null); setDeviceModalOpen(true); }}
-                className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer"
+                className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer"
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

@@ -49,7 +49,7 @@ function ApproveConfirm({ request, onClose, onConfirm }: ApproveConfirmProps) {
         </p>
         <div className="flex justify-end gap-2">
           <button onClick={onClose}
-            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer">
             {t('common.cancel')}
           </button>
           <button onClick={handle} disabled={running}
@@ -101,7 +101,7 @@ function RejectModal({ request, onClose, onConfirm }: RejectModalProps) {
           {error && <p className="text-red-400 text-sm">{error}</p>}
           <div className="flex justify-end gap-2">
             <button type="button" onClick={onClose}
-              className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer">
+              className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer">
               {t('common.cancel')}
             </button>
             <button type="submit" disabled={running}
@@ -206,7 +206,7 @@ export function DeletionRequests() {
                     </button>
                     <button
                       onClick={() => setRejectTarget(req)}
-                      className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer"
+                      className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer"
                     >
                       {t('deletionRequests.rejectBtn')}
                     </button>
@@ -246,7 +246,7 @@ export function DeletionRequests() {
                     </button>
                     <button
                       onClick={() => setRejectTarget(req)}
-                      className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer"
+                      className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer"
                     >
                       {t('deletionRequests.rejectBtn')}
                     </button>

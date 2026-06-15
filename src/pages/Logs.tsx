@@ -116,7 +116,7 @@ function FilterBar({ filter, projects, onChange, onClear }: FilterBarProps) {
       {hasActiveFilter(filter) && (
         <button
           onClick={onClear}
-          className="h-9 px-3 rounded-lg text-xs text-[var(--text-dim)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer"
+          className="h-9 px-3 rounded-lg text-xs text-[var(--text-dim)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer"
         >
           {t('logs.filter.clear')}
         </button>

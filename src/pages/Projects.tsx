@@ -82,11 +82,11 @@ function ProjectModal({ initial, onClose, onSave }: ModalProps) {
           </div>
           <div className="shrink-0 px-6 py-4 border-t border-[var(--bg-hover)] bg-[var(--bg-surface)] rounded-b-xl flex justify-end gap-2">
             <button type="button" onClick={onClose}
-              className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer">
+              className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer">
               {t('common.cancel')}
             </button>
             <button type="submit" disabled={saving}
-              className="h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-50 transition-colors cursor-pointer">
+              className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-50 transition-colors cursor-pointer">
               {saving ? t('common.saving') : t('common.save')}
             </button>
           </div>
@@ -131,7 +131,7 @@ function DeleteConfirm({ project, onClose, onConfirm }: DeleteConfirmProps) {
         </p>
         <div className="flex justify-end gap-2">
           <button onClick={onClose}
-            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer">
             {t('common.cancel')}
           </button>
           <button onClick={handleConfirm} disabled={sending}
@@ -266,7 +266,7 @@ export function Projects() {
           {canEdit && (
             <button
               onClick={() => { setEditTarget(null); setModalOpen(true); }}
-              className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer mt-1"
+              className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer mt-1"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -323,7 +323,7 @@ export function Projects() {
                     <div className="relative z-10 flex gap-2">
                       <button
                         onClick={() => { setEditTarget(p); setModalOpen(true); }}
-                        className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer"
+                        className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer"
                       >
                         {t('common.edit')}
                       </button>
@@ -373,7 +373,7 @@ export function Projects() {
                     <div className="flex items-center gap-2 justify-end">
                       <button
                         onClick={() => { setEditTarget(p); setModalOpen(true); }}
-                        className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer"
+                        className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer"
                       >
                         {t('common.edit')}
                       </button>

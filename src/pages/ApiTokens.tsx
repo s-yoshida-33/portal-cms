@@ -76,11 +76,11 @@ function CreateModal({ onClose, onCreated }: CreateModalProps) {
           {error && <p className="text-red-400 text-sm">{error}</p>}
           <div className="flex justify-end gap-2 pt-2">
             <button type="button" onClick={onClose}
-              className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer">
+              className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer">
               {t('common.cancel')}
             </button>
             <button type="submit" disabled={saving}
-              className="h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-50 transition-colors cursor-pointer">
+              className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-50 transition-colors cursor-pointer">
               {saving ? t('apiTokens.createModal.issuing') : t('apiTokens.createModal.issueBtn')}
             </button>
           </div>
@@ -117,13 +117,13 @@ function TokenReveal({ token, onClose }: TokenRevealProps) {
         <div className="flex items-center gap-2 bg-[var(--bg-base)] ring-1 ring-[var(--border)] rounded-lg px-3 py-2.5 mb-5">
           <code className="flex-1 text-xs text-green-400 font-mono break-all">{token}</code>
           <button onClick={handleCopy}
-            className="shrink-0 h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer">
+            className="shrink-0 h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer">
             {copied ? t('common.copied') : t('common.copy')}
           </button>
         </div>
         <div className="flex justify-end">
           <button onClick={onClose}
-            className="h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer">
             {t('apiTokens.revealModal.saved')}
           </button>
         </div>
@@ -160,7 +160,7 @@ function RevokeConfirm({ token, onClose, onConfirm }: RevokeConfirmProps) {
         </p>
         <div className="flex justify-end gap-2">
           <button onClick={onClose}
-            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer">
             {t('common.cancel')}
           </button>
           <button onClick={handle} disabled={running}
@@ -351,7 +351,7 @@ export function ApiTokens() {
         {canEdit && (
           <button
             onClick={() => setCreateOpen(true)}
-            className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer"
+            className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

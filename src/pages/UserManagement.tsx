@@ -43,7 +43,7 @@ function RemoveConfirm({ target, onClose, onConfirm }: RemoveConfirmProps) {
         </p>
         <div className="flex justify-end gap-2">
           <button onClick={onClose}
-            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer">
             {t('common.cancel')}
           </button>
           <button onClick={handle} disabled={running}

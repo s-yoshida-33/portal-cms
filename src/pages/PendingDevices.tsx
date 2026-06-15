@@ -58,7 +58,7 @@ function CopyField({ label, value }: { label: string; value: string }) {
         />
         <button
           onClick={copy}
-          className="h-9 px-3 rounded-lg text-xs font-medium text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer shrink-0"
+          className="h-9 px-3 rounded-lg text-xs font-medium text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer shrink-0"
         >
           {copied ? t('common.copied') : t('common.copy')}
         </button>
@@ -126,7 +126,7 @@ function ApproveModal({ pending, projects, onClose, onDone }: ApproveModalProps)
 
           <div className="flex justify-end pt-5">
             <button onClick={onClose}
-              className="h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer">
+              className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer">
               {t('common.close')}
             </button>
           </div>
@@ -193,11 +193,11 @@ function ApproveModal({ pending, projects, onClose, onDone }: ApproveModalProps)
 
           <div className="flex justify-end gap-2 pt-1">
             <button type="button" onClick={onClose}
-              className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer">
+              className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer">
               {t('common.cancel')}
             </button>
             <button type="submit" disabled={running || projects.length === 0}
-              className="h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-50 transition-colors cursor-pointer">
+              className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-50 transition-colors cursor-pointer">
               {running ? t('pendingDevices.approveModal.approving') : t('pendingDevices.approveModal.approveBtn')}
             </button>
           </div>
@@ -238,7 +238,7 @@ function RejectConfirm({ pending, onClose, onDone }: RejectConfirmProps) {
         </p>
         <div className="flex justify-end gap-2">
           <button onClick={onClose}
-            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer">
             {t('common.cancel')}
           </button>
           <button onClick={handle} disabled={running}
@@ -293,7 +293,7 @@ export function PendingDevices() {
           <p className="text-[var(--text-muted)] text-base">{t('pendingDevices.description')}</p>
         </div>
         {!loading && devices.length > 0 && (
-          <span className="flex items-center justify-center h-6 min-w-6 px-2 rounded-full bg-[var(--accent)] text-[var(--text)] text-xs font-semibold mt-1">
+          <span className="flex items-center justify-center h-6 min-w-6 px-2 rounded-full bg-[var(--accent)] text-white text-xs font-semibold mt-1">
             {devices.length}
           </span>
         )}
@@ -327,13 +327,13 @@ export function PendingDevices() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setApproveTarget(d)}
-                      className="h-7 px-3 rounded-md text-xs font-medium text-[var(--text)] bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer"
+                      className="h-7 px-3 rounded-md text-xs font-medium text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer"
                     >
                       {t('pendingDevices.approveBtn')}
                     </button>
                     <button
                       onClick={() => setRejectTarget(d)}
-                      className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer"
+                      className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer"
                     >
                       {t('pendingDevices.rejectBtn')}
                     </button>
@@ -367,13 +367,13 @@ export function PendingDevices() {
                   <div className="flex items-center gap-2 justify-end">
                     <button
                       onClick={() => setApproveTarget(d)}
-                      className="h-7 px-3 rounded-md text-xs font-medium text-[var(--text)] bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer"
+                      className="h-7 px-3 rounded-md text-xs font-medium text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer"
                     >
                       {t('pendingDevices.approveBtn')}
                     </button>
                     <button
                       onClick={() => setRejectTarget(d)}
-                      className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer"
+                      className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer"
                     >
                       {t('pendingDevices.rejectBtn')}
                     </button>
