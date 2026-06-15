@@ -54,7 +54,7 @@ export function ProfileLayout() {
       {/* Sidebar */}
       <aside
         className={[
-          'fixed inset-y-0 left-0 z-50 w-2/3',
+          'fixed inset-y-0 left-0 z-50 w-3/5',
           'transform transition-transform duration-300 ease-in-out',
           mobileOpen ? 'translate-x-0' : '-translate-x-full',
           'sm:static sm:inset-auto sm:z-auto sm:translate-x-0 sm:w-56 sm:shrink-0',
