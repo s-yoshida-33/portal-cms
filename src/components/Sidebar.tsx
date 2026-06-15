@@ -277,8 +277,8 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
     { value: 'system' as Appearance, label: t('nav.appearanceSystem') },
   ];
   const timezoneOptions = [
-    { value: 'local' as Timezone, label: t('nav.timezoneLocal') },
-    { value: 'utc'   as Timezone, label: t('nav.timezoneUtc') },
+    { value: 'local' as Timezone, label: t('profile.timezone.local') },
+    { value: 'utc'   as Timezone, label: t('profile.timezone.utc') },
   ];
 
   return (
