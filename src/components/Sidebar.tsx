@@ -330,6 +330,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
               <NavLink
                 to="/profile/settings"
                 onClick={onMobileClose}
+                onMouseEnter={closeFlyout}
                 className={({ isActive }) =>
                   `flex items-center pl-11 pr-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
                     isActive
@@ -377,6 +378,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
               {/* Logout */}
               <button
                 onClick={handleSignOut}
+                onMouseEnter={closeFlyout}
                 className="w-full flex items-center pl-11 pr-3 py-2 rounded-lg text-sm text-red-400 hover:bg-red-950/40 hover:text-red-300 transition-colors cursor-pointer"
               >
                 {t('nav.logout')}
