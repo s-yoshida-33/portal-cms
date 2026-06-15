@@ -54,7 +54,7 @@ function CopyField({ label, value }: { label: string; value: string }) {
           type="text"
           value={value}
           readOnly
-          className="flex-1 h-9 bg-[var(--bg-raised)] ring-1 ring-[var(--border)] text-[var(--text)] rounded-lg px-3 text-sm font-mono outline-none"
+          className="flex-1 h-9 bg-[var(--bg-surface)] ring-1 ring-[var(--border)] text-[var(--text)] rounded-lg px-3 text-sm font-mono outline-none"
         />
         <button
           onClick={copy}
@@ -92,7 +92,7 @@ function ApproveModal({ pending, projects, onClose, onDone }: ApproveModalProps)
   }
 
   const inputClass =
-    'w-full h-9 bg-[var(--bg-raised)] ring-1 ring-[var(--border)] text-[var(--text)] rounded-lg px-3 text-sm outline-none focus:ring-[var(--accent)] focus:ring-2 placeholder:text-[var(--text-faint)] transition-all';
+    'w-full h-9 bg-[var(--bg-surface)] ring-1 ring-[var(--border)] text-[var(--text)] rounded-lg px-3 text-sm outline-none focus:ring-[var(--accent)] focus:ring-2 placeholder:text-[var(--text-faint)] transition-all';
 
   // 承認完了 → 認証情報表示画面
   if (approvalResult) {

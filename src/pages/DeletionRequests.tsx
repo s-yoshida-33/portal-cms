@@ -85,7 +85,7 @@ function RejectModal({ request, onClose, onConfirm }: RejectModalProps) {
   }
 
   const textareaClass =
-    'w-full bg-[var(--bg-raised)] ring-1 ring-[var(--border)] text-[var(--text)] rounded-lg px-3 py-2 text-sm outline-none focus:ring-[var(--accent)] focus:ring-2 placeholder:text-[var(--text-faint)] transition-all resize-none';
+    'w-full bg-[var(--bg-surface)] ring-1 ring-[var(--border)] text-[var(--text)] rounded-lg px-3 py-2 text-sm outline-none focus:ring-[var(--accent)] focus:ring-2 placeholder:text-[var(--text-faint)] transition-all resize-none';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>

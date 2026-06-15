@@ -35,7 +35,7 @@ function CreateModal({ onClose, onCreated }: CreateModalProps) {
   const [error,   setError]   = useState('');
 
   const inputClass =
-    'w-full bg-[var(--bg-raised)] ring-1 ring-[var(--border)] text-[var(--text)] rounded-lg px-3 h-9 text-sm outline-none focus:ring-[var(--accent)] focus:ring-2 placeholder:text-[var(--text-faint)] transition-all';
+    'w-full bg-[var(--bg-surface)] ring-1 ring-[var(--border)] text-[var(--text)] rounded-lg px-3 h-9 text-sm outline-none focus:ring-[var(--accent)] focus:ring-2 placeholder:text-[var(--text-faint)] transition-all';
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
