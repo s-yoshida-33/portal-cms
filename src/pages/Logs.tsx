@@ -298,7 +298,7 @@ export function Logs() {
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <div className="w-5 h-5 rounded-full bg-[var(--accent)] flex items-center justify-center shrink-0 text-[var(--text)] text-[10px] font-medium">
+                            <div className="w-5 h-5 rounded-full bg-[var(--accent)] flex items-center justify-center shrink-0 text-white text-[10px] font-medium">
                               {log.performedBy.displayName[0]?.toUpperCase() ?? '?'}
                             </div>
                             <span className="text-[var(--text-dim)] text-xs truncate">{log.performedBy.displayName}</span>
