@@ -100,7 +100,7 @@ function SidebarFlyout<T extends string>({
         <div
           ref={panelRef}
           style={{ position: 'fixed', top: pos.top, left: pos.left, zIndex: 99999 }}
-          className="bg-[var(--bg-surface)] text-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.5)] ring-1 ring-[var(--border)] py-1.5 px-2 min-w-[160px]"
+          className="bg-[var(--bg-surface)] text-[var(--text)] rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.5)] ring-1 ring-[var(--border)] py-1.5 px-2 min-w-[160px]"
         >
           {options.map(opt => {
             const isSelected = opt.value === value;
