@@ -530,7 +530,7 @@ export function DeviceDetail() {
             </div>
 
             {/* 内枠: ログビューア */}
-            <div className="bg-[var(--bg-raised)] ring-1 ring-[var(--border)] rounded-xl overflow-hidden">
+            <div className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl overflow-hidden">
               <div ref={logContainerRef} className="h-96 overflow-y-auto overflow-x-auto p-4 font-log text-xs leading-5 space-y-0.5 scrollbar-subtle">
                 {filteredLogs.length === 0 ? (
                   <p className="text-[var(--text-faint)] text-center py-8 whitespace-nowrap">

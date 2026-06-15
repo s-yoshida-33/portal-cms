@@ -143,7 +143,7 @@ export function DateRangePicker({
     : (from || '—');
 
   const btnBase = isSmall
-    ? 'h-6 px-2 rounded-md text-xs bg-zinc-800 ring-1 ring-zinc-700 focus:outline-none focus:ring-zinc-500'
+    ? 'h-6 px-2 rounded-md text-xs bg-[var(--bg-subtle)] ring-1 ring-[var(--border)] focus:outline-none focus:ring-[var(--accent)]'
     : 'h-9 px-3 rounded-lg text-sm bg-[var(--bg-raised)] ring-1 ring-[var(--border)] focus:ring-[#4693ff] focus:ring-[1.5px]';
 
   return (
