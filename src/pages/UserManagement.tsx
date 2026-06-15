@@ -120,9 +120,6 @@ export function UserManagement() {
           <h1 className="text-[var(--text)] text-3xl font-semibold leading-tight">{t('users.title')}</h1>
           <p className="text-[var(--text-muted)] text-base">{t('users.description')}</p>
         </div>
-        {!loading && (
-          <span className="text-sm text-[var(--text-faint)] mt-1">{t('users.count', { count: users.length })}</span>
-        )}
       </div>
 
       {/* コンテンツ */}
@@ -137,6 +134,7 @@ export function UserManagement() {
           </div>
         ) : (
           <>
+            <p className="text-sm font-medium text-[var(--text-dim)] mb-4">{t('common.all')} <span className="text-[var(--text-faint)]">({users.length})</span></p>
             {/* ── モバイルカード ── */}
             <div className="sm:hidden space-y-4">
               {users.map(u => {
@@ -147,7 +145,7 @@ export function UserManagement() {
                     {/* アバター + 表示名 + ロール */}
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-8 h-8 rounded-full bg-[var(--accent)] flex items-center justify-center shrink-0 text-[var(--text)] text-sm font-medium">
+                        <div className="w-8 h-8 rounded-full bg-[var(--accent)] flex items-center justify-center shrink-0 text-white text-sm font-medium">
                           {u.displayName[0]?.toUpperCase() ?? '?'}
                         </div>
                         <div className="min-w-0">
@@ -212,13 +210,13 @@ export function UserManagement() {
                 return (
                   <div
                     key={u.uid}
-                    className={`grid grid-cols-[1fr_1fr_160px_120px_120px] gap-4 px-4 py-3.5 items-center bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 transition-colors ${
+                    className={`grid grid-cols-[1fr_1fr_160px_120px_120px] gap-4 px-4 py-3.5 items-center bg-[var(--bg-surface)] transition-colors ${
                       i < users.length - 1 ? 'border-b border-[var(--border)]' : 'rounded-b-lg'
                     }`}
                   >
                     {/* 表示名 */}
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-7 h-7 rounded-full bg-[var(--accent)] flex items-center justify-center shrink-0 text-[var(--text)] text-xs font-medium">
+                      <div className="w-7 h-7 rounded-full bg-[var(--accent)] flex items-center justify-center shrink-0 text-white text-xs font-medium">
                         {u.displayName[0]?.toUpperCase() ?? '?'}
                       </div>
                       <span className="text-[var(--text)] text-sm truncate">
@@ -279,3 +277,4 @@ export function UserManagement() {
     </div>
   );
 }
+

@@ -323,7 +323,7 @@ export function Logs() {
                       return (
                         <div
                           key={log.id}
-                          className={`grid grid-cols-[120px_1fr_1fr_1fr_1fr_160px] gap-4 px-4 py-3.5 items-center bg-[var(--bg-surface)] hover:bg-[var(--bg-active)] transition-colors ${
+                          className={`grid grid-cols-[120px_1fr_1fr_1fr_1fr_160px] gap-4 px-4 py-3.5 items-center bg-[var(--bg-surface)] transition-colors ${
                             i < paged.length - 1 ? 'border-b border-[var(--border)]' : ''
                           }`}
                         >
@@ -357,3 +357,4 @@ export function Logs() {
     </div>
   );
 }
+
