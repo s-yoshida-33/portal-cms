@@ -20,6 +20,9 @@ body {
 .scrollbar-subtle::-webkit-scrollbar-track { background: transparent; }
 .scrollbar-subtle::-webkit-scrollbar-thumb { background: #3d3d3d; border-radius: 9999px; }
 .scrollbar-subtle::-webkit-scrollbar-thumb:hover { background: #555555; }
+.light .scrollbar-subtle { scrollbar-color: #c4c4c4 transparent; }
+.light .scrollbar-subtle::-webkit-scrollbar-thumb { background: #c4c4c4; }
+.light .scrollbar-subtle::-webkit-scrollbar-thumb:hover { background: #a0a0a0; }
 
 /* date input のカレンダーアイコンを白色に */
 input[type="date"]::-webkit-calendar-picker-indicator {
