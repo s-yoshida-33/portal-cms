@@ -354,7 +354,7 @@ export function PendingDevices() {
               {devices.map((d, i) => (
                 <div
                   key={d.id}
-                  className={`grid grid-cols-[120px_1fr_140px_160px_160px] gap-4 px-4 py-4 items-center bg-[var(--bg-surface)] hover:bg-[var(--bg-active)] transition-colors ${
+                  className={`grid grid-cols-[120px_1fr_140px_160px_160px] gap-4 px-4 py-4 items-center bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 transition-colors ${
                     i < devices.length - 1 ? 'border-b border-[var(--border)]' : ''
                   }`}
                 >

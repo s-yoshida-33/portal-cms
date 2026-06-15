@@ -183,7 +183,7 @@ export function UserManagement() {
                         <button
                           onClick={() => setRemoveTarget(u)}
                           disabled={isUpdating}
-                          className="h-7 px-3 rounded-md text-xs text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-1 ring-red-900/50 transition-colors cursor-pointer disabled:opacity-50"
+                          className="h-7 px-3 rounded-md text-xs text-[var(--danger-text)] bg-[var(--danger-text)]/5 hover:bg-[var(--danger-text)]/10 ring-1 ring-[var(--danger-text)]/20 transition-colors cursor-pointer disabled:opacity-50"
                         >
                           {t('users.removeBtn')}
                         </button>
@@ -212,7 +212,7 @@ export function UserManagement() {
                 return (
                   <div
                     key={u.uid}
-                    className={`grid grid-cols-[1fr_1fr_160px_120px_120px] gap-4 px-4 py-3.5 items-center bg-[var(--bg-surface)] hover:bg-[var(--bg-active)] transition-colors ${
+                    className={`grid grid-cols-[1fr_1fr_160px_120px_120px] gap-4 px-4 py-3.5 items-center bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 transition-colors ${
                       i < users.length - 1 ? 'border-b border-[var(--border)]' : 'rounded-b-lg'
                     }`}
                   >
@@ -254,7 +254,7 @@ export function UserManagement() {
                         <button
                           onClick={() => setRemoveTarget(u)}
                           disabled={isUpdating}
-                          className="h-7 px-3 rounded-md text-xs text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-1 ring-red-900/50 transition-colors cursor-pointer disabled:opacity-50"
+                          className="h-7 px-3 rounded-md text-xs text-[var(--danger-text)] bg-[var(--danger-text)]/5 hover:bg-[var(--danger-text)]/10 ring-1 ring-[var(--danger-text)]/20 transition-colors cursor-pointer disabled:opacity-50"
                         >
                           {t('users.removeBtn')}
                         </button>

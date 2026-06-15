@@ -175,7 +175,7 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
       <button
         onTouchEnd={e => { e.preventDefault(); e.stopPropagation(); setMenuOpen(o => !o); }}
         onClick={e => { e.stopPropagation(); setMenuOpen(o => !o); }}
-        className="w-7 h-7 flex items-center justify-center rounded-md text-[var(--text-dim)] hover:text-[var(--text)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
+        className="w-7 h-7 flex items-center justify-center rounded-md text-[var(--text-dim)] hover:text-[var(--text)] hover:bg-[var(--bg-subtle)]/60 transition-colors cursor-pointer"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
           <circle cx="12" cy="5"  r="2" />
@@ -188,14 +188,14 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
           <button
             onTouchEnd={e => { e.preventDefault(); e.stopPropagation(); setMenuOpen(false); onEdit(device); }}
             onClick={e => { e.stopPropagation(); setMenuOpen(false); onEdit(device); }}
-            className="w-full text-left px-3 py-2 text-sm text-[var(--text-muted)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
+            className="w-full text-left px-3 py-2 text-sm text-[var(--text-muted)] hover:bg-[var(--bg-subtle)]/60 transition-colors cursor-pointer"
           >
             {t('projectDetail.deviceEdit')}
           </button>
           <button
             onTouchEnd={e => { e.preventDefault(); e.stopPropagation(); setMenuOpen(false); onDelete(device); }}
             onClick={e => { e.stopPropagation(); setMenuOpen(false); onDelete(device); }}
-            className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-950/40 transition-colors cursor-pointer"
+            className="w-full text-left px-3 py-2 text-sm text-[var(--danger-text)] hover:bg-[var(--danger-text)]/10 transition-colors cursor-pointer"
           >
             {t('projectDetail.deviceDeleteRequest')}
           </button>
@@ -877,7 +877,7 @@ export function ProjectDetail() {
             <div ref={headerMenuRef} className="relative shrink-0 mt-2">
               <button
                 onClick={() => setHeaderMenuOpen(o => !o)}
-                className="w-8 h-8 flex items-center justify-center rounded-md text-[var(--text-dim)] hover:text-[var(--text)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
+                className="w-8 h-8 flex items-center justify-center rounded-md text-[var(--text-dim)] hover:text-[var(--text)] hover:bg-[var(--bg-subtle)]/60 transition-colors cursor-pointer"
                 aria-label={t('common.menu')}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -890,7 +890,7 @@ export function ProjectDetail() {
                 <div className="absolute right-0 top-full mt-1 w-40 bg-[var(--bg-raised)] ring-1 ring-[var(--border)] rounded-lg shadow-xl overflow-hidden z-10">
                   <button
                     onClick={() => { setHeaderMenuOpen(false); setEditGroup(null); setGroupModalOpen(true); }}
-                    className="w-full text-left px-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer flex items-center gap-2"
+                    className="w-full text-left px-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--bg-subtle)]/60 transition-colors cursor-pointer flex items-center gap-2"
                   >
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
                       stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -900,7 +900,7 @@ export function ProjectDetail() {
                   </button>
                   <button
                     onClick={() => { setHeaderMenuOpen(false); setEditDevice(null); setDeviceModalOpen(true); }}
-                    className="w-full text-left px-4 py-2.5 text-sm text-[var(--text)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer flex items-center gap-2"
+                    className="w-full text-left px-4 py-2.5 text-sm text-[var(--text)] hover:bg-[var(--bg-subtle)]/60 transition-colors cursor-pointer flex items-center gap-2"
                   >
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
                       stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

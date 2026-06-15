@@ -230,7 +230,7 @@ export function Projects() {
             <div ref={headerMenuRef} className="relative shrink-0 mt-2">
               <button
                 onClick={() => setHeaderMenuOpen(o => !o)}
-                className="w-8 h-8 flex items-center justify-center rounded-md text-[var(--text-dim)] hover:text-[var(--text)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
+                className="w-8 h-8 flex items-center justify-center rounded-md text-[var(--text-dim)] hover:text-[var(--text)] hover:bg-[var(--bg-subtle)]/60 transition-colors cursor-pointer"
                 aria-label={t('common.menu')}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -243,7 +243,7 @@ export function Projects() {
                 <div className="absolute right-0 top-full mt-1 w-44 bg-[var(--bg-raised)] ring-1 ring-[var(--border)] rounded-lg shadow-xl overflow-hidden z-10">
                   <button
                     onClick={() => { setHeaderMenuOpen(false); setEditTarget(null); setModalOpen(true); }}
-                    className="w-full text-left px-4 py-2.5 text-sm text-[var(--text)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer flex items-center gap-2"
+                    className="w-full text-left px-4 py-2.5 text-sm text-[var(--text)] hover:bg-[var(--bg-subtle)]/60 transition-colors cursor-pointer flex items-center gap-2"
                   >
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
                       stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -329,7 +329,7 @@ export function Projects() {
                       </button>
                       <button
                         onClick={() => setDeleteTarget(p)}
-                        className="h-7 px-3 rounded-md text-xs text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-1 ring-red-900/50 transition-colors cursor-pointer"
+                        className="h-7 px-3 rounded-md text-xs text-[var(--danger-text)] bg-[var(--danger-text)]/5 hover:bg-[var(--danger-text)]/10 ring-1 ring-[var(--danger-text)]/20 transition-colors cursor-pointer"
                       >
                         {t('projectDetail.deviceDeleteRequest')}
                       </button>
@@ -354,7 +354,7 @@ export function Projects() {
               {projects.map((p, i) => (
                 <div
                   key={p.id}
-                  className={`grid grid-cols-[1fr_110px_1.2fr_72px_160px] gap-4 px-4 py-4 items-center bg-[var(--bg-surface)] hover:bg-[var(--bg-active)] transition-colors ${
+                  className={`grid grid-cols-[1fr_110px_1.2fr_72px_160px] gap-4 px-4 py-4 items-center bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 transition-colors ${
                     i < projects.length - 1 ? 'border-b border-[var(--border)]' : ''
                   }`}
                 >
@@ -379,7 +379,7 @@ export function Projects() {
                       </button>
                       <button
                         onClick={() => setDeleteTarget(p)}
-                        className="h-7 px-3 rounded-md text-xs text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-1 ring-red-900/50 transition-colors cursor-pointer"
+                        className="h-7 px-3 rounded-md text-xs text-[var(--danger-text)] bg-[var(--danger-text)]/5 hover:bg-[var(--danger-text)]/10 ring-1 ring-[var(--danger-text)]/20 transition-colors cursor-pointer"
                       >
                         {t('projectDetail.deviceDeleteRequest')}
                       </button>

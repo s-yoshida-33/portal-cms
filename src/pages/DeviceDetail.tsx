@@ -396,7 +396,7 @@ export function DeviceDetail() {
                       {portalSsState === 'error' && (
                         <button
                           onClick={handlePortalScreenshotRequest}
-                          className="h-7 px-3 rounded-md text-xs text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-1 ring-red-900/50 transition-colors cursor-pointer"
+                          className="h-7 px-3 rounded-md text-xs text-[var(--danger-text)] bg-[var(--danger-text)]/5 hover:bg-[var(--danger-text)]/10 ring-1 ring-[var(--danger-text)]/20 transition-colors cursor-pointer"
                         >
                           {t('common.retry')}
                         </button>

@@ -227,7 +227,7 @@ export function DeletionRequests() {
               {requests.map((req, i) => (
                 <div
                   key={req.id}
-                  className={`grid grid-cols-[88px_1fr_1fr_160px_176px] gap-4 px-4 py-4 items-center bg-[var(--bg-surface)] hover:bg-[var(--bg-active)] transition-colors ${
+                  className={`grid grid-cols-[88px_1fr_1fr_160px_176px] gap-4 px-4 py-4 items-center bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 transition-colors ${
                     i < requests.length - 1 ? 'border-b border-[var(--border)]' : ''
                   }`}
                 >
