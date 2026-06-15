@@ -97,7 +97,7 @@ export function Login() {
           <button
             onClick={handleGoogleLogin}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-3 px-4 py-2.5 bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] font-medium transition-colors disabled:opacity-50 mb-6"
+            className="w-full flex items-center justify-center gap-3 px-4 py-2.5 bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] font-medium transition-colors disabled:opacity-50 mb-6 cursor-pointer"
           >
             <GoogleIcon />
             {t('auth.loginWithGoogle')}
@@ -154,7 +154,7 @@ export function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--text)] text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+              className="w-full py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--text)] text-sm font-medium rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
             >
               {loading ? t('auth.loggingIn') : t('auth.login')}
             </button>
