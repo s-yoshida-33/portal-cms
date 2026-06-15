@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+body {
+  background-color: var(--bg-base);
+  color: var(--text);
+}
+
 /* スクロールバー非表示 */
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
