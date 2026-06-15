@@ -9,10 +9,10 @@ import { useFormatDate } from '../hooks/useFormatDate';
 // ── helpers ──────────────────────────────────────────────────────
 
 const typeBadge: Record<DeletionTargetType, string> = {
-  project:  'text-orange-400 bg-orange-950/40 ring-1 ring-orange-900/50',
-  device:   'text-blue-400 bg-blue-950/40 ring-1 ring-blue-900/50',
-  apiToken: 'text-purple-400 bg-purple-950/40 ring-1 ring-purple-900/50',
-  group:    'text-green-400 bg-green-950/40 ring-1 ring-green-900/50',
+  project:  'text-orange-400 bg-orange-500/10 ring-1 ring-orange-500/20',
+  device:   'text-blue-400 bg-blue-500/10 ring-1 ring-blue-500/20',
+  apiToken: 'text-purple-400 bg-purple-500/10 ring-1 ring-purple-500/20',
+  group:    'text-green-400 bg-green-500/10 ring-1 ring-green-500/20',
 };
 
 // ── 承認確認モーダル ──────────────────────────────────────────────
@@ -49,11 +49,11 @@ function ApproveConfirm({ request, onClose, onConfirm }: ApproveConfirmProps) {
         </p>
         <div className="flex justify-end gap-2">
           <button onClick={onClose}
-            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer">
             {t('common.cancel')}
           </button>
           <button onClick={handle} disabled={running}
-            className="h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--danger)] hover:bg-[var(--danger-hover)] disabled:opacity-50 transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[var(--danger)] hover:bg-[var(--danger-hover)] disabled:opacity-50 transition-colors cursor-pointer">
             {running ? t('deletionRequests.approveModal.deleting') : t('deletionRequests.approveModal.deleteBtn')}
           </button>
         </div>
@@ -85,7 +85,7 @@ function RejectModal({ request, onClose, onConfirm }: RejectModalProps) {
   }
 
   const textareaClass =
-    'w-full bg-[var(--bg-raised)] ring-1 ring-[var(--border)] text-[var(--text)] rounded-lg px-3 py-2 text-sm outline-none focus:ring-[var(--accent)] focus:ring-2 placeholder:text-[var(--text-faint)] transition-all resize-none';
+    'w-full bg-[var(--bg-surface)] ring-1 ring-[var(--border)] text-[var(--text)] rounded-lg px-3 py-2 text-sm outline-none focus:ring-[var(--accent)] focus:ring-2 placeholder:text-[var(--text-faint)] transition-all resize-none';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
@@ -101,11 +101,11 @@ function RejectModal({ request, onClose, onConfirm }: RejectModalProps) {
           {error && <p className="text-red-400 text-sm">{error}</p>}
           <div className="flex justify-end gap-2">
             <button type="button" onClick={onClose}
-              className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer">
+              className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer">
               {t('common.cancel')}
             </button>
             <button type="submit" disabled={running}
-              className="h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--danger)] hover:bg-[var(--danger-hover)] disabled:opacity-50 transition-colors cursor-pointer">
+              className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[var(--danger)] hover:bg-[var(--danger-hover)] disabled:opacity-50 transition-colors cursor-pointer">
               {running ? t('deletionRequests.rejectModal.processing') : t('deletionRequests.rejectModal.rejectBtn')}
             </button>
           </div>
@@ -200,13 +200,13 @@ export function DeletionRequests() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setApproveTarget(req)}
-                      className="h-7 px-3 rounded-md text-xs font-medium text-[var(--text)] bg-[var(--danger)] hover:bg-[var(--danger-hover)] transition-colors cursor-pointer"
+                      className="h-7 px-3 rounded-md text-xs font-medium text-white bg-[var(--danger)] hover:bg-[var(--danger-hover)] transition-colors cursor-pointer"
                     >
                       {t('deletionRequests.approveDeleteBtn')}
                     </button>
                     <button
                       onClick={() => setRejectTarget(req)}
-                      className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer"
+                      className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer"
                     >
                       {t('deletionRequests.rejectBtn')}
                     </button>
@@ -227,7 +227,7 @@ export function DeletionRequests() {
               {requests.map((req, i) => (
                 <div
                   key={req.id}
-                  className={`grid grid-cols-[88px_1fr_1fr_160px_176px] gap-4 px-4 py-4 items-center bg-[var(--bg-surface)] hover:bg-[var(--bg-active)] transition-colors ${
+                  className={`grid grid-cols-[88px_1fr_1fr_160px_176px] gap-4 px-4 py-4 items-center bg-[var(--bg-surface)] transition-colors ${
                     i < requests.length - 1 ? 'border-b border-[var(--border)]' : ''
                   }`}
                 >
@@ -240,13 +240,13 @@ export function DeletionRequests() {
                   <div className="flex items-center gap-2 justify-end">
                     <button
                       onClick={() => setApproveTarget(req)}
-                      className="h-7 px-3 rounded-md text-xs font-medium text-[var(--text)] bg-[var(--danger)] hover:bg-[var(--danger-hover)] transition-colors cursor-pointer"
+                      className="h-7 px-3 rounded-md text-xs font-medium text-white bg-[var(--danger)] hover:bg-[var(--danger-hover)] transition-colors cursor-pointer"
                     >
                       {t('deletionRequests.approveDeleteBtn')}
                     </button>
                     <button
                       onClick={() => setRejectTarget(req)}
-                      className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer"
+                      className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer"
                     >
                       {t('deletionRequests.rejectBtn')}
                     </button>
@@ -282,3 +282,4 @@ export function DeletionRequests() {
     </div>
   );
 }
+

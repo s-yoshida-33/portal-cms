@@ -4,9 +4,9 @@ import type { DeviceStatus } from '../types';
 export function StatusBadge({ status }: { status: DeviceStatus }) {
   const { t } = useTranslation();
   const config: Record<DeviceStatus, { label: string; dot: string; className: string }> = {
-    online:  { label: t('status.online'),  dot: 'bg-green-400',  className: 'bg-green-950/60  text-green-400  border-green-900/50' },
-    offline: { label: t('status.offline'), dot: 'bg-red-400',    className: 'bg-red-950/60    text-red-400    border-red-900/50' },
-    warning: { label: t('status.warning'), dot: 'bg-yellow-400', className: 'bg-yellow-950/60 text-yellow-400 border-yellow-900/50' },
+    online:  { label: t('status.online'),  dot: 'bg-green-400',  className: 'bg-green-500/10  text-green-400  border-green-500/20' },
+    offline: { label: t('status.offline'), dot: 'bg-red-400',    className: 'bg-red-500/10    text-red-400    border-red-500/20' },
+    warning: { label: t('status.warning'), dot: 'bg-yellow-400', className: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },
   };
   const { label, dot, className } = config[status];
   return (

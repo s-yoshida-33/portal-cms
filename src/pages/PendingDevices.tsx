@@ -16,11 +16,11 @@ import { useFormatDate } from '../hooks/useFormatDate';
 // ── helpers ──────────────────────────────────────────────────────
 
 const appBadge: Record<AppName, string> = {
-  'Gido':           'text-blue-400   bg-blue-950/40   ring-1 ring-blue-900/50',
-  'Gido-Touch':     'text-red-400    bg-red-950/40    ring-1 ring-red-900/50',
-  'Gido-Touch-Mini':'text-green-400  bg-green-950/40  ring-1 ring-green-900/50',
-  'Grain-Link':     'text-orange-400 bg-orange-950/40 ring-1 ring-orange-900/50',
-  'Bridge-Ground':  'text-purple-400 bg-purple-950/40 ring-1 ring-purple-900/50',
+  'Gido':           'text-blue-400   bg-blue-500/10   ring-1 ring-blue-500/20',
+  'Gido-Touch':     'text-red-400    bg-red-500/10    ring-1 ring-red-500/20',
+  'Gido-Touch-Mini':'text-green-400  bg-green-500/10  ring-1 ring-green-500/20',
+  'Grain-Link':     'text-orange-400 bg-orange-500/10 ring-1 ring-orange-500/20',
+  'Bridge-Ground':  'text-purple-400 bg-purple-500/10 ring-1 ring-purple-500/20',
 };
 
 // ── 承認モーダル ──────────────────────────────────────────────────
@@ -54,11 +54,11 @@ function CopyField({ label, value }: { label: string; value: string }) {
           type="text"
           value={value}
           readOnly
-          className="flex-1 h-9 bg-[var(--bg-raised)] ring-1 ring-[var(--border)] text-[var(--text)] rounded-lg px-3 text-sm font-mono outline-none"
+          className="flex-1 h-9 bg-[var(--bg-surface)] ring-1 ring-[var(--border)] text-[var(--text)] rounded-lg px-3 text-sm font-mono outline-none"
         />
         <button
           onClick={copy}
-          className="h-9 px-3 rounded-lg text-xs font-medium text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer shrink-0"
+          className="h-9 px-3 rounded-lg text-xs font-medium text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer shrink-0"
         >
           {copied ? t('common.copied') : t('common.copy')}
         </button>
@@ -92,7 +92,7 @@ function ApproveModal({ pending, projects, onClose, onDone }: ApproveModalProps)
   }
 
   const inputClass =
-    'w-full h-9 bg-[var(--bg-raised)] ring-1 ring-[var(--border)] text-[var(--text)] rounded-lg px-3 text-sm outline-none focus:ring-[var(--accent)] focus:ring-2 placeholder:text-[var(--text-faint)] transition-all';
+    'w-full h-9 bg-[var(--bg-surface)] ring-1 ring-[var(--border)] text-[var(--text)] rounded-lg px-3 text-sm outline-none focus:ring-[var(--accent)] focus:ring-2 placeholder:text-[var(--text-faint)] transition-all';
 
   // 承認完了 → 認証情報表示画面
   if (approvalResult) {
@@ -126,7 +126,7 @@ function ApproveModal({ pending, projects, onClose, onDone }: ApproveModalProps)
 
           <div className="flex justify-end pt-5">
             <button onClick={onClose}
-              className="h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer">
+              className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer">
               {t('common.close')}
             </button>
           </div>
@@ -193,11 +193,11 @@ function ApproveModal({ pending, projects, onClose, onDone }: ApproveModalProps)
 
           <div className="flex justify-end gap-2 pt-1">
             <button type="button" onClick={onClose}
-              className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer">
+              className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer">
               {t('common.cancel')}
             </button>
             <button type="submit" disabled={running || projects.length === 0}
-              className="h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-50 transition-colors cursor-pointer">
+              className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-50 transition-colors cursor-pointer">
               {running ? t('pendingDevices.approveModal.approving') : t('pendingDevices.approveModal.approveBtn')}
             </button>
           </div>
@@ -238,11 +238,11 @@ function RejectConfirm({ pending, onClose, onDone }: RejectConfirmProps) {
         </p>
         <div className="flex justify-end gap-2">
           <button onClick={onClose}
-            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer">
             {t('common.cancel')}
           </button>
           <button onClick={handle} disabled={running}
-            className="h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--danger)] hover:bg-[var(--danger-hover)] disabled:opacity-50 transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[var(--danger)] hover:bg-[var(--danger-hover)] disabled:opacity-50 transition-colors cursor-pointer">
             {running ? t('pendingDevices.rejectModal.rejecting') : t('pendingDevices.rejectModal.rejectBtn')}
           </button>
         </div>
@@ -293,7 +293,7 @@ export function PendingDevices() {
           <p className="text-[var(--text-muted)] text-base">{t('pendingDevices.description')}</p>
         </div>
         {!loading && devices.length > 0 && (
-          <span className="flex items-center justify-center h-6 min-w-6 px-2 rounded-full bg-[var(--accent)] text-[var(--text)] text-xs font-semibold mt-1">
+          <span className="flex items-center justify-center h-6 min-w-6 px-2 rounded-full bg-[var(--accent)] text-white text-xs font-semibold mt-1">
             {devices.length}
           </span>
         )}
@@ -327,13 +327,13 @@ export function PendingDevices() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setApproveTarget(d)}
-                      className="h-7 px-3 rounded-md text-xs font-medium text-[var(--text)] bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer"
+                      className="h-7 px-3 rounded-md text-xs font-medium text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer"
                     >
                       {t('pendingDevices.approveBtn')}
                     </button>
                     <button
                       onClick={() => setRejectTarget(d)}
-                      className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer"
+                      className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer"
                     >
                       {t('pendingDevices.rejectBtn')}
                     </button>
@@ -354,7 +354,7 @@ export function PendingDevices() {
               {devices.map((d, i) => (
                 <div
                   key={d.id}
-                  className={`grid grid-cols-[120px_1fr_140px_160px_160px] gap-4 px-4 py-4 items-center bg-[var(--bg-surface)] hover:bg-[var(--bg-active)] transition-colors ${
+                  className={`grid grid-cols-[120px_1fr_140px_160px_160px] gap-4 px-4 py-4 items-center bg-[var(--bg-surface)] transition-colors ${
                     i < devices.length - 1 ? 'border-b border-[var(--border)]' : ''
                   }`}
                 >
@@ -367,13 +367,13 @@ export function PendingDevices() {
                   <div className="flex items-center gap-2 justify-end">
                     <button
                       onClick={() => setApproveTarget(d)}
-                      className="h-7 px-3 rounded-md text-xs font-medium text-[var(--text)] bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer"
+                      className="h-7 px-3 rounded-md text-xs font-medium text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer"
                     >
                       {t('pendingDevices.approveBtn')}
                     </button>
                     <button
                       onClick={() => setRejectTarget(d)}
-                      className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer"
+                      className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer"
                     >
                       {t('pendingDevices.rejectBtn')}
                     </button>
@@ -409,3 +409,4 @@ export function PendingDevices() {
     </div>
   );
 }
+

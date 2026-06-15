@@ -152,7 +152,7 @@ export function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--text)] text-sm font-medium rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
+              className="w-full py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
             >
               {loading ? t('auth.loggingIn') : t('auth.login')}
             </button>

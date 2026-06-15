@@ -14,13 +14,13 @@ import { useFormatDate } from '../hooks/useFormatDate';
 const PAGE_SIZE = 20;
 
 const categoryBadge: Record<SiteLogCategory, string> = {
-  screenshot:      'text-cyan-400 bg-cyan-950/40 ring-1 ring-cyan-900/50',
-  log:             'text-indigo-400 bg-indigo-950/40 ring-1 ring-indigo-900/50',
-  apiToken:        'text-purple-400 bg-purple-950/40 ring-1 ring-purple-900/50',
-  user:            'text-yellow-400 bg-yellow-950/40 ring-1 ring-yellow-900/50',
-  deletionRequest: 'text-red-400 bg-red-950/40 ring-1 ring-red-900/50',
-  project:         'text-orange-400 bg-orange-950/40 ring-1 ring-orange-900/50',
-  device:          'text-blue-400 bg-blue-950/40 ring-1 ring-blue-900/50',
+  screenshot:      'text-cyan-400 bg-cyan-500/10 ring-1 ring-cyan-500/20',
+  log:             'text-indigo-400 bg-indigo-500/10 ring-1 ring-indigo-500/20',
+  apiToken:        'text-purple-400 bg-purple-500/10 ring-1 ring-purple-500/20',
+  user:            'text-yellow-400 bg-yellow-500/10 ring-1 ring-yellow-500/20',
+  deletionRequest: 'text-red-400 bg-red-500/10 ring-1 ring-red-500/20',
+  project:         'text-orange-400 bg-orange-500/10 ring-1 ring-orange-500/20',
+  device:          'text-blue-400 bg-blue-500/10 ring-1 ring-blue-500/20',
 };
 
 const DEVICE_CATEGORIES: SiteLogCategory[] = ['screenshot', 'log', 'device'];
@@ -116,7 +116,7 @@ function FilterBar({ filter, projects, onChange, onClear }: FilterBarProps) {
       {hasActiveFilter(filter) && (
         <button
           onClick={onClear}
-          className="h-9 px-3 rounded-lg text-xs text-[var(--text-dim)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer"
+          className="h-9 px-3 rounded-lg text-xs text-[var(--text-dim)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer"
         >
           {t('logs.filter.clear')}
         </button>
@@ -323,7 +323,7 @@ export function Logs() {
                       return (
                         <div
                           key={log.id}
-                          className={`grid grid-cols-[120px_1fr_1fr_1fr_1fr_160px] gap-4 px-4 py-3.5 items-center bg-[var(--bg-surface)] hover:bg-[var(--bg-active)] transition-colors ${
+                          className={`grid grid-cols-[120px_1fr_1fr_1fr_1fr_160px] gap-4 px-4 py-3.5 items-center bg-[var(--bg-surface)] transition-colors ${
                             i < paged.length - 1 ? 'border-b border-[var(--border)]' : ''
                           }`}
                         >
@@ -357,3 +357,4 @@ export function Logs() {
     </div>
   );
 }
+

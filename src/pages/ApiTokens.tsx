@@ -13,8 +13,8 @@ import { useFormatDate } from '../hooks/useFormatDate';
 const PAGE_SIZE = 20;
 
 const typeBadge: Record<ApiTokenType, string> = {
-  registration: 'text-green-400 bg-green-950/40 ring-1 ring-green-900/50',
-  device:       'text-blue-400 bg-blue-950/40 ring-1 ring-blue-900/50',
+  registration: 'text-green-400 bg-green-500/10 ring-1 ring-green-500/20',
+  device:       'text-blue-400 bg-blue-500/10 ring-1 ring-blue-500/20',
 };
 
 // ── ページネーション ───────────────────────────────────────────────
@@ -35,7 +35,7 @@ function CreateModal({ onClose, onCreated }: CreateModalProps) {
   const [error,   setError]   = useState('');
 
   const inputClass =
-    'w-full bg-[var(--bg-raised)] ring-1 ring-[var(--border)] text-[var(--text)] rounded-lg px-3 h-9 text-sm outline-none focus:ring-[var(--accent)] focus:ring-2 placeholder:text-[var(--text-faint)] transition-all';
+    'w-full bg-[var(--bg-surface)] ring-1 ring-[var(--border)] text-[var(--text)] rounded-lg px-3 h-9 text-sm outline-none focus:ring-[var(--accent)] focus:ring-2 placeholder:text-[var(--text-faint)] transition-all';
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -76,11 +76,11 @@ function CreateModal({ onClose, onCreated }: CreateModalProps) {
           {error && <p className="text-red-400 text-sm">{error}</p>}
           <div className="flex justify-end gap-2 pt-2">
             <button type="button" onClick={onClose}
-              className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer">
+              className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer">
               {t('common.cancel')}
             </button>
             <button type="submit" disabled={saving}
-              className="h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-50 transition-colors cursor-pointer">
+              className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-50 transition-colors cursor-pointer">
               {saving ? t('apiTokens.createModal.issuing') : t('apiTokens.createModal.issueBtn')}
             </button>
           </div>
@@ -117,13 +117,13 @@ function TokenReveal({ token, onClose }: TokenRevealProps) {
         <div className="flex items-center gap-2 bg-[var(--bg-base)] ring-1 ring-[var(--border)] rounded-lg px-3 py-2.5 mb-5">
           <code className="flex-1 text-xs text-green-400 font-mono break-all">{token}</code>
           <button onClick={handleCopy}
-            className="shrink-0 h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer">
+            className="shrink-0 h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer">
             {copied ? t('common.copied') : t('common.copy')}
           </button>
         </div>
         <div className="flex justify-end">
           <button onClick={onClose}
-            className="h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer">
             {t('apiTokens.revealModal.saved')}
           </button>
         </div>
@@ -160,11 +160,11 @@ function RevokeConfirm({ token, onClose, onConfirm }: RevokeConfirmProps) {
         </p>
         <div className="flex justify-end gap-2">
           <button onClick={onClose}
-            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer">
             {t('common.cancel')}
           </button>
           <button onClick={handle} disabled={running}
-            className="h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--danger)] hover:bg-[var(--danger-hover)] disabled:opacity-50 transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[var(--danger)] hover:bg-[var(--danger-hover)] disabled:opacity-50 transition-colors cursor-pointer">
             {running ? t('common.processing') : t('apiTokens.revokeModal.revoke')}
           </button>
         </div>
@@ -266,7 +266,7 @@ export function ApiTokens() {
           </span>
           {!isRevoked && (
             <button onClick={() => setRevokeTarget(tok)}
-              className="h-7 px-3 rounded-md text-xs text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-1 ring-red-900/50 transition-colors cursor-pointer">
+              className="h-7 px-3 rounded-md text-xs text-[var(--danger-text)] bg-[var(--danger-text)]/5 hover:bg-[var(--danger-text)]/10 ring-1 ring-[var(--danger-text)]/20 transition-colors cursor-pointer">
               {t('apiTokens.revokeBtn')}
             </button>
           )}
@@ -279,7 +279,7 @@ export function ApiTokens() {
   function TokenRow({ t: tok }: { t: ApiToken }) {
     const isRevoked = !!tok.revokedAt;
     return (
-      <div className="grid grid-cols-[1fr_90px_160px_160px_100px_80px] gap-4 px-4 py-3.5 items-center bg-[var(--bg-surface)] hover:bg-[var(--bg-active)] transition-colors border-b border-[var(--border)] last:border-b-0">
+      <div className="grid grid-cols-[1fr_90px_160px_160px_100px_80px] gap-4 px-4 py-3.5 items-center bg-[var(--bg-surface)] transition-colors border-b border-[var(--border)] last:border-b-0">
         <span className={`text-sm font-medium truncate ${isRevoked ? 'text-[var(--text-faint)] line-through' : 'text-[var(--text)]'}`}>
           {tok.name}
         </span>
@@ -294,7 +294,7 @@ export function ApiTokens() {
         <div className="flex justify-end">
           {!isRevoked && (
             <button onClick={() => setRevokeTarget(tok)}
-              className="h-7 px-3 rounded-md text-xs text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-1 ring-red-900/50 transition-colors cursor-pointer">
+              className="h-7 px-3 rounded-md text-xs text-[var(--danger-text)] bg-[var(--danger-text)]/5 hover:bg-[var(--danger-text)]/10 ring-1 ring-[var(--danger-text)]/20 transition-colors cursor-pointer">
               {t('apiTokens.revokeBtn')}
             </button>
           )}
@@ -351,7 +351,7 @@ export function ApiTokens() {
         {canEdit && (
           <button
             onClick={() => setCreateOpen(true)}
-            className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer"
+            className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -474,3 +474,4 @@ export function ApiTokens() {
     </div>
   );
 }
+

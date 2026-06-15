@@ -10,8 +10,8 @@ import { useFormatDate } from '../hooks/useFormatDate';
 // ── helpers ──────────────────────────────────────────────────────
 
 const roleBadge: Record<UserRole, string> = {
-  owner: 'text-yellow-400 bg-yellow-950/40 ring-1 ring-yellow-900/50',
-  admin: 'text-blue-400 bg-blue-950/40 ring-1 ring-blue-900/50',
+  owner: 'text-yellow-400 bg-yellow-500/10 ring-1 ring-yellow-500/20',
+  admin: 'text-blue-400 bg-blue-500/10 ring-1 ring-blue-500/20',
   user:  'text-[var(--text-dim)] bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)]/50',
 };
 
@@ -43,11 +43,11 @@ function RemoveConfirm({ target, onClose, onConfirm }: RemoveConfirmProps) {
         </p>
         <div className="flex justify-end gap-2">
           <button onClick={onClose}
-            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer">
             {t('common.cancel')}
           </button>
           <button onClick={handle} disabled={running}
-            className="h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--danger)] hover:bg-[var(--danger-hover)] disabled:opacity-50 transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[var(--danger)] hover:bg-[var(--danger-hover)] disabled:opacity-50 transition-colors cursor-pointer">
             {running ? t('common.processing') : t('users.removeModal.confirm')}
           </button>
         </div>
@@ -120,9 +120,6 @@ export function UserManagement() {
           <h1 className="text-[var(--text)] text-3xl font-semibold leading-tight">{t('users.title')}</h1>
           <p className="text-[var(--text-muted)] text-base">{t('users.description')}</p>
         </div>
-        {!loading && (
-          <span className="text-sm text-[var(--text-faint)] mt-1">{t('users.count', { count: users.length })}</span>
-        )}
       </div>
 
       {/* コンテンツ */}
@@ -137,6 +134,7 @@ export function UserManagement() {
           </div>
         ) : (
           <>
+            <p className="text-sm font-medium text-[var(--text-dim)] mb-4">{t('common.all')} <span className="text-[var(--text-faint)]">({users.length})</span></p>
             {/* ── モバイルカード ── */}
             <div className="sm:hidden space-y-4">
               {users.map(u => {
@@ -147,7 +145,7 @@ export function UserManagement() {
                     {/* アバター + 表示名 + ロール */}
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-8 h-8 rounded-full bg-[var(--accent)] flex items-center justify-center shrink-0 text-[var(--text)] text-sm font-medium">
+                        <div className="w-8 h-8 rounded-full bg-[var(--accent)] flex items-center justify-center shrink-0 text-white text-sm font-medium">
                           {u.displayName[0]?.toUpperCase() ?? '?'}
                         </div>
                         <div className="min-w-0">
@@ -183,7 +181,7 @@ export function UserManagement() {
                         <button
                           onClick={() => setRemoveTarget(u)}
                           disabled={isUpdating}
-                          className="h-7 px-3 rounded-md text-xs text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-1 ring-red-900/50 transition-colors cursor-pointer disabled:opacity-50"
+                          className="h-7 px-3 rounded-md text-xs text-[var(--danger-text)] bg-[var(--danger-text)]/5 hover:bg-[var(--danger-text)]/10 ring-1 ring-[var(--danger-text)]/20 transition-colors cursor-pointer disabled:opacity-50"
                         >
                           {t('users.removeBtn')}
                         </button>
@@ -212,13 +210,13 @@ export function UserManagement() {
                 return (
                   <div
                     key={u.uid}
-                    className={`grid grid-cols-[1fr_1fr_160px_120px_120px] gap-4 px-4 py-3.5 items-center bg-[var(--bg-surface)] hover:bg-[var(--bg-active)] transition-colors ${
+                    className={`grid grid-cols-[1fr_1fr_160px_120px_120px] gap-4 px-4 py-3.5 items-center bg-[var(--bg-surface)] transition-colors ${
                       i < users.length - 1 ? 'border-b border-[var(--border)]' : 'rounded-b-lg'
                     }`}
                   >
                     {/* 表示名 */}
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-7 h-7 rounded-full bg-[var(--accent)] flex items-center justify-center shrink-0 text-[var(--text)] text-xs font-medium">
+                      <div className="w-7 h-7 rounded-full bg-[var(--accent)] flex items-center justify-center shrink-0 text-white text-xs font-medium">
                         {u.displayName[0]?.toUpperCase() ?? '?'}
                       </div>
                       <span className="text-[var(--text)] text-sm truncate">
@@ -254,7 +252,7 @@ export function UserManagement() {
                         <button
                           onClick={() => setRemoveTarget(u)}
                           disabled={isUpdating}
-                          className="h-7 px-3 rounded-md text-xs text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-1 ring-red-900/50 transition-colors cursor-pointer disabled:opacity-50"
+                          className="h-7 px-3 rounded-md text-xs text-[var(--danger-text)] bg-[var(--danger-text)]/5 hover:bg-[var(--danger-text)]/10 ring-1 ring-[var(--danger-text)]/20 transition-colors cursor-pointer disabled:opacity-50"
                         >
                           {t('users.removeBtn')}
                         </button>
@@ -279,3 +277,4 @@ export function UserManagement() {
     </div>
   );
 }
+
