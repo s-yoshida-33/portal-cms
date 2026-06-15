@@ -279,7 +279,7 @@ export function ApiTokens() {
   function TokenRow({ t: tok }: { t: ApiToken }) {
     const isRevoked = !!tok.revokedAt;
     return (
-      <div className="grid grid-cols-[1fr_90px_160px_160px_100px_80px] gap-4 px-4 py-3.5 items-center bg-[var(--bg-surface)] hover:bg-[var(--bg-active)] transition-colors border-b border-[var(--border)] last:border-b-0">
+      <div className="grid grid-cols-[1fr_90px_160px_160px_100px_80px] gap-4 px-4 py-3.5 items-center bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 transition-colors border-b border-[var(--border)] last:border-b-0">
         <span className={`text-sm font-medium truncate ${isRevoked ? 'text-[var(--text-faint)] line-through' : 'text-[var(--text)]'}`}>
           {tok.name}
         </span>
