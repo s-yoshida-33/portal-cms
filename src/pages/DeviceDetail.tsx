@@ -530,7 +530,7 @@ export function DeviceDetail() {
             </div>
 
             {/* 内枠: ログビューア */}
-            <div className="bg-[#0a0a0a] ring-1 ring-[var(--border)] rounded-xl overflow-hidden">
+            <div className="bg-[var(--bg-raised)] ring-1 ring-[var(--border)] rounded-xl overflow-hidden">
               <div ref={logContainerRef} className="h-96 overflow-y-auto overflow-x-auto p-4 font-log text-xs leading-5 space-y-0.5 scrollbar-subtle">
                 {filteredLogs.length === 0 ? (
                   <p className="text-[var(--text-faint)] text-center py-8 whitespace-nowrap">
@@ -542,7 +542,7 @@ export function DeviceDetail() {
                       <span className="shrink-0 select-none text-[var(--text-faint)] tabular-nums whitespace-pre pr-2">
                         {String(i + 1).padStart(String(filteredLogs.length).length)}
                       </span>
-                      <span className="shrink-0 text-[var(--text-faint)]">{log.timestamp}</span>
+                      <span className="shrink-0 text-[var(--text-faint)] bg-[var(--bg-subtle)] rounded px-1">{log.timestamp}</span>
                       <span className={`shrink-0 w-10 ${logLevelClass(log.level)}`}>{log.level || '----'}</span>
                       {log.tag && <span className="shrink-0 text-[var(--text-faint)]">[{log.tag}]</span>}
                       <span className="text-[var(--text-muted)]">{log.message}</span>
