@@ -77,7 +77,7 @@ function flattenGroups(roots: GroupNode[], depth = 0): Array<{ group: DeviceGrou
 function MetricBar({ label, value, unit, warn = 70, danger = 90 }: {
   label: string; value: number; unit: string; warn?: number; danger?: number;
 }) {
-  const color = value === 0 ? 'bg-zinc-700'
+  const color = value === 0 ? 'bg-[var(--bg-subtle)]'
     : value >= danger ? 'bg-red-500'
     : value >= warn   ? 'bg-yellow-400'
     : 'bg-green-500';
@@ -337,7 +337,7 @@ function GroupCard({
               className={`h-7 px-3 rounded-md text-xs ring-1 transition-colors ${
                 canDelete
                   ? 'text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-red-900/50 cursor-pointer'
-                  : 'text-[var(--text-faint)] bg-[var(--bg-surface)]/30 ring-zinc-800 cursor-not-allowed'
+                  : 'text-[var(--text-faint)] bg-[var(--bg-surface)]/30 ring-[var(--border)] cursor-not-allowed'
               }`}
               title={!canDelete ? t('projectDetail.cantDelete') : undefined}
             >
@@ -483,7 +483,7 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
           </div>
           <div>
             <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projectDetail.groupModal.devicesLabel')}</label>
-            <div className="bg-[var(--bg-raised)] ring-1 ring-[var(--border)] rounded-lg divide-y divide-[var(--border)] max-h-64 overflow-y-auto scrollbar-subtle">
+            <div className="bg-[var(--bg-raised)] ring-1 ring-[var(--border)] rounded-lg divide-y divide-[var(--bg-hover)] max-h-64 overflow-y-auto scrollbar-subtle">
               {devices.length === 0 ? (
                 <p className="px-3 py-2 text-sm text-[var(--text-faint)]">{t('projectDetail.groupModal.noDevices')}</p>
               ) : devices.map(device => {
@@ -496,7 +496,7 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
                       type="checkbox"
                       checked={isSelected}
                       onChange={() => toggleDevice(device.id)}
-                      className="w-4 h-4 accent-[#4693ff]"
+                      className="w-4 h-4 accent-[var(--accent)]"
                     />
                     <span className="text-sm text-[var(--text)] flex-1">{device.name}</span>
                     {otherGroupName && (
@@ -510,7 +510,7 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
           {error && <p className="text-red-400 text-sm">{error}</p>}
         </div>
 
-        <div className="shrink-0 px-6 py-4 border-t border-[var(--border)] bg-[var(--bg-surface)] flex justify-end gap-2">
+        <div className="shrink-0 px-6 py-4 border-t border-[var(--bg-hover)] bg-[var(--bg-surface)] flex justify-end gap-2">
           <button type="button" onClick={onClose}
             className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer">
             {t('common.cancel')}
@@ -646,7 +646,7 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
           {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
         </div>
 
-        <div className="shrink-0 px-6 py-4 border-t border-[var(--border)] bg-[var(--bg-surface)] flex justify-end gap-2">
+        <div className="shrink-0 px-6 py-4 border-t border-[var(--bg-hover)] bg-[var(--bg-surface)] flex justify-end gap-2">
           <button type="button" onClick={onClose}
             className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer">
             {t('common.cancel')}
@@ -952,13 +952,13 @@ export function ProjectDetail() {
         <div className="px-4 sm:px-6 pb-2 flex flex-wrap items-center gap-2">
           {visibleApps.map(app => {
             const active      = filterApps.has(app) || filterApps.size === 0;
-            const activeStyle = APP_BADGE_STYLE[app] ?? 'bg-zinc-500/15 text-[var(--text-dim)] ring-zinc-500/30';
+            const activeStyle = APP_BADGE_STYLE[app] ?? 'bg-zinc-500/15 text-zinc-400 ring-zinc-500/30';
             return (
               <button
                 key={app}
                 onClick={() => toggleFilterApp(app)}
                 className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ring-1 transition-colors cursor-pointer ${
-                  active ? activeStyle : 'text-[var(--text-faint)] bg-[var(--bg-subtle)] ring-zinc-700'
+                  active ? activeStyle : 'text-[var(--text-faint)] bg-[var(--bg-subtle)] ring-[var(--border)]'
                 }`}
               >
                 {app}

@@ -27,7 +27,7 @@ type PortalSsState = 'idle' | 'pending' | 'ready' | 'error';
 function MetricBar({ label, value, unit, warn = 70, danger = 90 }: {
   label: string; value: number; unit: string; warn?: number; danger?: number;
 }) {
-  const color = value === 0 ? 'bg-zinc-700'
+  const color = value === 0 ? 'bg-[var(--bg-subtle)]'
     : value >= danger ? 'bg-red-500'
     : value >= warn   ? 'bg-yellow-400'
     : 'bg-green-500';
@@ -90,7 +90,7 @@ function logLevelBadgeClass(level: string, active: boolean) {
     case 'FATAL': return 'text-red-400 bg-red-950/40 ring-red-800/50';
     case 'WARN':  return 'text-yellow-400 bg-yellow-950/40 ring-yellow-800/50';
     case 'INFO':  return 'text-green-400 bg-green-950/40 ring-green-800/50';
-    default:      return 'text-[var(--text-dim)] bg-zinc-800/40 ring-zinc-700/50';
+    default:      return 'text-[var(--text-dim)] bg-[var(--bg-subtle)]/40 ring-[var(--border)]/50';
   }
 }
 
@@ -459,7 +459,7 @@ export function DeviceDetail() {
                   {level}
                 </button>
               ))}
-              <div className="hidden sm:block w-px h-4 bg-zinc-700 mx-1" />
+              <div className="hidden sm:block w-px h-4 bg-[var(--border)] mx-1" />
               <DateRangePicker
                 mode="single"
                 from={selectedLogDate}
@@ -530,7 +530,7 @@ export function DeviceDetail() {
             </div>
 
             {/* 内枠: ログビューア */}
-            <div className="bg-[var(--bg-base)] ring-1 ring-[var(--border)] rounded-xl overflow-hidden">
+            <div className="bg-[#0a0a0a] ring-1 ring-[var(--border)] rounded-xl overflow-hidden">
               <div ref={logContainerRef} className="h-96 overflow-y-auto overflow-x-auto p-4 font-log text-xs leading-5 space-y-0.5 scrollbar-subtle">
                 {filteredLogs.length === 0 ? (
                   <p className="text-[var(--text-faint)] text-center py-8 whitespace-nowrap">
@@ -539,7 +539,7 @@ export function DeviceDetail() {
                 ) : (
                   filteredLogs.map((log, i) => (
                     <div key={log._key} className="flex gap-2 whitespace-nowrap">
-                      <span className="shrink-0 select-none text-zinc-700 tabular-nums whitespace-pre pr-2">
+                      <span className="shrink-0 select-none text-[var(--text-faint)] tabular-nums whitespace-pre pr-2">
                         {String(i + 1).padStart(String(filteredLogs.length).length)}
                       </span>
                       <span className="shrink-0 text-[var(--text-faint)]">{log.timestamp}</span>

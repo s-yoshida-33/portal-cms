@@ -125,7 +125,7 @@ export function Home() {
               <StatCard label={t('home.totalDevices')}   value={loading ? '…' : physicalDevices.length} />
               <SplitStatCard
                 leftLabel={t('home.online')}        leftValue={loading ? '…' : totalOnline}               leftColor="text-[#2db35e]"
-                rightLabel={t('home.offlineWarning')} rightValue={loading ? '…' : totalOffline + totalWarning} rightColor="text-[#fc574a]"
+                rightLabel={t('home.offlineWarning')} rightValue={loading ? '…' : totalOffline + totalWarning} rightColor="text-[var(--danger-text)]"
               />
             </div>
           </div>
@@ -182,7 +182,7 @@ export function Home() {
                             </div>
                             <div className="flex min-h-22 flex-col gap-2 px-4 pt-4 pb-4 justify-center">
                               <div className="text-xs font-medium text-[var(--text-muted)]">{t('home.cardOffline')}</div>
-                              <span className="text-xl leading-none font-semibold text-[#fc574a]">{offline}</span>
+                              <span className="text-xl leading-none font-semibold text-[var(--danger-text)]">{offline}</span>
                             </div>
                           </div>
 

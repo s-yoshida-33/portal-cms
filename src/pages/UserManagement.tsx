@@ -12,7 +12,7 @@ import { useFormatDate } from '../hooks/useFormatDate';
 const roleBadge: Record<UserRole, string> = {
   owner: 'text-yellow-400 bg-yellow-950/40 ring-1 ring-yellow-900/50',
   admin: 'text-blue-400 bg-blue-950/40 ring-1 ring-blue-900/50',
-  user:  'text-[var(--text-dim)] bg-[var(--bg-subtle)]/60 ring-1 ring-zinc-700/50',
+  user:  'text-[var(--text-dim)] bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)]/50',
 };
 
 // ── 除名確認モーダル ──────────────────────────────────────────────
