@@ -65,8 +65,8 @@ export function ProfileLayout() {
         <div className="shrink-0">
           {/* ロゴ */}
           <div className="px-5 py-3 border-b border-[var(--border)]">
-            <div className="flex items-center gap-2.5">
-              <img src="/logo.svg" alt="" className="w-7 h-7 shrink-0" />
+            <div className="h-7 flex items-center gap-2.5">
+              <img src="/logo.svg" alt="" className="w-6 h-6 shrink-0" />
               <span className="text-[var(--text)] font-semibold text-sm">Portal CMS</span>
             </div>
           </div>
