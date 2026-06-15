@@ -85,10 +85,10 @@ function MetricBar({ label, value, unit, warn = 70, danger = 90 }: {
   return (
     <div>
       <div className="flex justify-between text-xs mb-1">
-        <span className="text-zinc-500">{label}</span>
-        <span className="text-zinc-300 font-medium tabular-nums">{value}{unit}</span>
+        <span className="text-[var(--text-faint)]">{label}</span>
+        <span className="text-[var(--text-muted)] font-medium tabular-nums">{value}{unit}</span>
       </div>
-      <div className="h-1 bg-zinc-800 rounded-full overflow-hidden">
+      <div className="h-1 bg-[var(--bg-subtle)] rounded-full overflow-hidden">
         <div className={`h-full rounded-full ${color}`} style={{ width: `${Math.min(value, 100)}%` }} />
       </div>
     </div>
@@ -139,7 +139,7 @@ function AppBadge({ app }: { app: string }) {
 }
 
 const inputClass =
-  'w-full bg-[#1a1a1a] ring-1 ring-[#3d3d3d] text-white rounded-lg px-3 h-9 text-sm outline-none focus:ring-[#4693ff] focus:ring-2 placeholder:text-zinc-600 transition-all';
+  'w-full bg-[var(--bg-raised)] ring-1 ring-[var(--border)] text-[var(--text)] rounded-lg px-3 h-9 text-sm outline-none focus:ring-[var(--accent)] focus:ring-2 placeholder:text-[var(--text-faint)] transition-all';
 
 // ── DeviceCard ────────────────────────────────────────────────────
 
@@ -175,7 +175,7 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
       <button
         onTouchEnd={e => { e.preventDefault(); e.stopPropagation(); setMenuOpen(o => !o); }}
         onClick={e => { e.stopPropagation(); setMenuOpen(o => !o); }}
-        className="w-7 h-7 flex items-center justify-center rounded-md text-zinc-400 hover:text-zinc-200 hover:bg-[#2a2a2a] transition-colors cursor-pointer"
+        className="w-7 h-7 flex items-center justify-center rounded-md text-[var(--text-dim)] hover:text-[var(--text)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
           <circle cx="12" cy="5"  r="2" />
@@ -184,11 +184,11 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
         </svg>
       </button>
       {menuOpen && (
-        <div className="absolute right-0 top-full mt-1 w-32 bg-[#1a1a1a] ring-1 ring-[#3d3d3d] rounded-lg shadow-xl overflow-hidden">
+        <div className="absolute right-0 top-full mt-1 w-32 bg-[var(--bg-raised)] ring-1 ring-[var(--border)] rounded-lg shadow-xl overflow-hidden">
           <button
             onTouchEnd={e => { e.preventDefault(); e.stopPropagation(); setMenuOpen(false); onEdit(device); }}
             onClick={e => { e.stopPropagation(); setMenuOpen(false); onEdit(device); }}
-            className="w-full text-left px-3 py-2 text-sm text-zinc-300 hover:bg-[#2a2a2a] transition-colors cursor-pointer"
+            className="w-full text-left px-3 py-2 text-sm text-[var(--text-muted)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
           >
             {t('projectDetail.deviceEdit')}
           </button>
@@ -206,7 +206,7 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
 
   return (
     <div
-      className="relative bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-5 hover:ring-[#4693ff] transition-colors cursor-pointer"
+      className="relative bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl p-5 hover:ring-[var(--accent)] transition-colors cursor-pointer"
       onClick={(e) => {
         if (menuRef.current?.contains(e.target as Node)) return;
         navigate(`/${uuid}/projects/${projectId}/devices/${device.id}`);
@@ -217,20 +217,20 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
       <div className="sm:hidden">
         {/* Row 1: name (truncated) + status + menu */}
         <div className="flex items-center gap-2 min-w-0 mb-0.5">
-          <p className="font-medium text-zinc-100 text-sm truncate flex-1 min-w-0">{device.name}</p>
+          <p className="font-medium text-[var(--text)] text-sm truncate flex-1 min-w-0">{device.name}</p>
           <StatusBadge status={device.status} />
           {menu}
         </div>
         {/* Row 2: IP */}
-        <p className="text-xs text-zinc-500 font-mono mb-4">{device.ip}</p>
+        <p className="text-xs text-[var(--text-faint)] font-mono mb-4">{device.ip}</p>
         {/* Info section: app / last seen / uptime */}
         <div className="space-y-1.5">
           <div className="flex items-center gap-1.5">
             <AppBadge app={device.app} />
-            <span className="text-zinc-500 text-xs">v{device.appVersion}</span>
+            <span className="text-[var(--text-faint)] text-xs">v{device.appVersion}</span>
           </div>
-          <p className="text-xs text-zinc-500">{t('projectDetail.deviceLastSeen', { time: formatDate(device.lastSeen) })}</p>
-          <p className="text-xs text-zinc-400">
+          <p className="text-xs text-[var(--text-faint)]">{t('projectDetail.deviceLastSeen', { time: formatDate(device.lastSeen) })}</p>
+          <p className="text-xs text-[var(--text-dim)]">
             {t('projectDetail.deviceUptime')}: <UptimeClock uptimeSecs={device.system.uptime} lastSeen={device.lastSeen} status={device.status} />
           </p>
         </div>
@@ -241,8 +241,8 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
             <div>
-              <p className="font-medium text-zinc-100 text-sm">{device.name}</p>
-              <p className="text-xs text-zinc-500 font-mono mt-0.5">{device.ip}</p>
+              <p className="font-medium text-[var(--text)] text-sm">{device.name}</p>
+              <p className="text-xs text-[var(--text-faint)] font-mono mt-0.5">{device.ip}</p>
             </div>
             <StatusBadge status={device.status} />
           </div>
@@ -250,9 +250,9 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
             <div className="text-right">
               <div className="flex items-center justify-end gap-1.5">
                 <AppBadge app={device.app} />
-                <span className="text-zinc-500 text-xs">v{device.appVersion}</span>
+                <span className="text-[var(--text-faint)] text-xs">v{device.appVersion}</span>
               </div>
-              <p className="text-xs text-zinc-600 mt-0.5">{t('projectDetail.deviceLastSeen', { time: formatDate(device.lastSeen) })}</p>
+              <p className="text-xs text-[var(--text-faint)] mt-0.5">{t('projectDetail.deviceLastSeen', { time: formatDate(device.lastSeen) })}</p>
             </div>
             {menu}
           </div>
@@ -264,9 +264,9 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
             <MetricBar label={t('deviceDetail.temperature')} value={device.system.temperature} unit="°C" warn={65} danger={80} />
             <MetricBar label={t('deviceDetail.storage')}     value={device.system.storage}     unit="%" warn={80} danger={90} />
           </div>
-          <div className="flex flex-col justify-center pl-5 border-l border-zinc-800">
-            <p className="text-xs text-zinc-500 mb-1">{t('projectDetail.deviceUptime')}</p>
-            <p className="text-lg font-semibold text-zinc-200">
+          <div className="flex flex-col justify-center pl-5 border-l border-[var(--border)]">
+            <p className="text-xs text-[var(--text-faint)] mb-1">{t('projectDetail.deviceUptime')}</p>
+            <p className="text-lg font-semibold text-[var(--text)]">
               <UptimeClock uptimeSecs={device.system.uptime} lastSeen={device.lastSeen} status={device.status} />
             </p>
           </div>
@@ -304,22 +304,22 @@ function GroupCard({
   const canDelete      = totalCount === 0 && !hasChildGroups;
 
   return (
-    <div className="bg-[#111111] ring-1 ring-zinc-700 rounded-xl overflow-hidden">
+    <div className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl overflow-hidden">
       {/* Group header */}
       <div
-        className="flex items-center justify-between px-5 py-3 cursor-pointer select-none hover:bg-[#161616] transition-colors"
+        className="flex items-center justify-between px-5 py-3 cursor-pointer select-none hover:bg-[var(--bg-active)] transition-colors"
         onClick={() => onToggle(node.group.id)}
       >
         <div className="flex items-center gap-3">
           <svg
             width="12" height="12" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-            className={`text-zinc-500 transition-transform ${isCollapsed ? '-rotate-90' : ''}`}
+            className={`text-[var(--text-faint)] transition-transform ${isCollapsed ? '-rotate-90' : ''}`}
           >
             <polyline points="6 9 12 15 18 9" />
           </svg>
-          <span className="text-white font-medium text-sm">{node.group.name}</span>
-          <span className="inline-flex items-center justify-center h-5 min-w-5 px-1.5 rounded-full bg-zinc-800 text-zinc-400 text-xs font-medium">
+          <span className="text-[var(--text)] font-medium text-sm">{node.group.name}</span>
+          <span className="inline-flex items-center justify-center h-5 min-w-5 px-1.5 rounded-full bg-[var(--bg-subtle)] text-[var(--text-dim)] text-xs font-medium">
             {totalCount}
           </span>
         </div>
@@ -327,7 +327,7 @@ function GroupCard({
           <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
             <button
               onClick={() => onEditGroup(node.group)}
-              className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
+              className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer"
             >
               {t('projectDetail.deviceEdit')}
             </button>
@@ -337,7 +337,7 @@ function GroupCard({
               className={`h-7 px-3 rounded-md text-xs ring-1 transition-colors ${
                 canDelete
                   ? 'text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-red-900/50 cursor-pointer'
-                  : 'text-zinc-600 bg-zinc-900/30 ring-zinc-800 cursor-not-allowed'
+                  : 'text-[var(--text-faint)] bg-[var(--bg-surface)]/30 ring-zinc-800 cursor-not-allowed'
               }`}
               title={!canDelete ? t('projectDetail.cantDelete') : undefined}
             >
@@ -448,18 +448,18 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <form
         onSubmit={handleSubmit}
-        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-sm shadow-2xl flex flex-col h-fit max-h-full overflow-hidden"
+        className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl w-full max-w-sm shadow-2xl flex flex-col h-fit max-h-full overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
         <div className="shrink-0 px-6 pt-6 pb-4">
-          <h2 className="text-white text-lg font-semibold">
+          <h2 className="text-[var(--text)] text-lg font-semibold">
             {initial ? t('projectDetail.groupModal.editTitle') : t('projectDetail.groupModal.addTitle')}
           </h2>
         </div>
 
         <div className="shrink overflow-y-auto scrollbar-subtle px-6 pb-4 space-y-4">
           <div>
-            <label className="block text-sm text-zinc-400 mb-1.5">{t('projectDetail.groupModal.nameLabel')}</label>
+            <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projectDetail.groupModal.nameLabel')}</label>
             <input
               value={name}
               onChange={e => setName(e.target.value)}
@@ -467,7 +467,7 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
             />
           </div>
           <div>
-            <label className="block text-sm text-zinc-400 mb-1.5">{t('projectDetail.groupModal.parentLabel')}</label>
+            <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projectDetail.groupModal.parentLabel')}</label>
             <CustomSelect
               value={parentGroupId ?? ''}
               onChange={v => setParentGroupId(v || null)}
@@ -482,23 +482,23 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
             />
           </div>
           <div>
-            <label className="block text-sm text-zinc-400 mb-1.5">{t('projectDetail.groupModal.devicesLabel')}</label>
-            <div className="bg-[#1a1a1a] ring-1 ring-[#3d3d3d] rounded-lg divide-y divide-[#2a2a2a] max-h-64 overflow-y-auto scrollbar-subtle">
+            <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projectDetail.groupModal.devicesLabel')}</label>
+            <div className="bg-[var(--bg-raised)] ring-1 ring-[var(--border)] rounded-lg divide-y divide-[var(--border)] max-h-64 overflow-y-auto scrollbar-subtle">
               {devices.length === 0 ? (
-                <p className="px-3 py-2 text-sm text-zinc-600">{t('projectDetail.groupModal.noDevices')}</p>
+                <p className="px-3 py-2 text-sm text-[var(--text-faint)]">{t('projectDetail.groupModal.noDevices')}</p>
               ) : devices.map(device => {
                 const isSelected = selectedIds.includes(device.id);
                 const otherGroupId = device.groupId && device.groupId !== initial?.id ? device.groupId : null;
                 const otherGroupName = otherGroupId ? (groupNameMap.get(otherGroupId) ?? otherGroupId) : null;
                 return (
-                  <label key={device.id} className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-[#222222] transition-colors">
+                  <label key={device.id} className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-[var(--bg-subtle)] transition-colors">
                     <input
                       type="checkbox"
                       checked={isSelected}
                       onChange={() => toggleDevice(device.id)}
                       className="w-4 h-4 accent-[#4693ff]"
                     />
-                    <span className="text-sm text-zinc-200 flex-1">{device.name}</span>
+                    <span className="text-sm text-[var(--text)] flex-1">{device.name}</span>
                     {otherGroupName && (
                       <span className="text-xs text-yellow-400">{t('projectDetail.groupModal.currentGroup')}: {otherGroupName}</span>
                     )}
@@ -510,13 +510,13 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
           {error && <p className="text-red-400 text-sm">{error}</p>}
         </div>
 
-        <div className="shrink-0 px-6 py-4 border-t border-[#2a2a2a] bg-[#111111] flex justify-end gap-2">
+        <div className="shrink-0 px-6 py-4 border-t border-[var(--border)] bg-[var(--bg-surface)] flex justify-end gap-2">
           <button type="button" onClick={onClose}
-            className="h-9 px-4 rounded-lg text-sm text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer">
             {t('common.cancel')}
           </button>
           <button type="submit" disabled={saving}
-            className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#4693ff] hover:bg-[#3a7fe0] disabled:opacity-50 transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-50 transition-colors cursor-pointer">
             {saving ? t('common.saving') : t('common.save')}
           </button>
         </div>
@@ -572,11 +572,11 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <form
         onSubmit={handleSubmit}
-        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-sm shadow-2xl flex flex-col h-fit max-h-full overflow-hidden"
+        className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl w-full max-w-sm shadow-2xl flex flex-col h-fit max-h-full overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
         <div className="shrink-0 px-6 pt-6 pb-4">
-          <h2 className="text-white text-lg font-semibold">
+          <h2 className="text-[var(--text)] text-lg font-semibold">
             {initial ? t('projectDetail.deviceModal.editTitle') : t('projectDetail.deviceModal.addTitle')}
           </h2>
         </div>
@@ -584,7 +584,7 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
         <div className="shrink overflow-y-auto scrollbar-subtle px-6 pb-4 space-y-4">
           {initial && projects.length > 1 && (
             <div>
-              <label className="block text-sm text-zinc-400 mb-1.5">{t('projectDetail.deviceModal.projectLabel')}</label>
+              <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projectDetail.deviceModal.projectLabel')}</label>
               <CustomSelect
                 value={projectId}
                 onChange={val => setProjectId(val)}
@@ -594,17 +594,17 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
             </div>
           )}
           <div>
-            <label className="block text-sm text-zinc-400 mb-1.5">{t('projectDetail.deviceModal.nameLabel')}</label>
+            <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projectDetail.deviceModal.nameLabel')}</label>
             <input value={name} onChange={e => setName(e.target.value)}
               className={inputClass} />
           </div>
           <div>
-            <label className="block text-sm text-zinc-400 mb-1.5">{t('projectDetail.deviceModal.ipLabel')}</label>
+            <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projectDetail.deviceModal.ipLabel')}</label>
             <input value={ip} onChange={e => setIp(e.target.value)}
               className={inputClass} />
           </div>
           <div>
-            <label className="block text-sm text-zinc-400 mb-1.5">{t('projectDetail.deviceModal.portLabel')}</label>
+            <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projectDetail.deviceModal.portLabel')}</label>
             <input
               type="number"
               value={port}
@@ -613,7 +613,7 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
             />
           </div>
           <div>
-            <label className="block text-sm text-zinc-400 mb-1.5">{t('projectDetail.deviceModal.appLabel')}</label>
+            <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projectDetail.deviceModal.appLabel')}</label>
             <CustomSelect
               value={app}
               onChange={val => setApp(val as AppName)}
@@ -622,13 +622,13 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
             />
           </div>
           <div>
-            <label className="block text-sm text-zinc-400 mb-1.5">{t('projectDetail.deviceModal.versionLabel')}</label>
+            <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projectDetail.deviceModal.versionLabel')}</label>
             <input value={appVersion} onChange={e => setAppVersion(e.target.value)}
               className={inputClass} />
           </div>
           {groups.length > 0 && (
             <div>
-              <label className="block text-sm text-zinc-400 mb-1.5">{t('projectDetail.deviceModal.groupLabel')}</label>
+              <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projectDetail.deviceModal.groupLabel')}</label>
               <CustomSelect
                 value={groupId ?? ''}
                 onChange={val => setGroupId(val || null)}
@@ -646,13 +646,13 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
           {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
         </div>
 
-        <div className="shrink-0 px-6 py-4 border-t border-[#2a2a2a] bg-[#111111] flex justify-end gap-2">
+        <div className="shrink-0 px-6 py-4 border-t border-[var(--border)] bg-[var(--bg-surface)] flex justify-end gap-2">
           <button type="button" onClick={onClose}
-            className="h-9 px-4 rounded-lg text-sm text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer">
             {t('common.cancel')}
           </button>
           <button type="submit" disabled={saving}
-            className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#4693ff] hover:bg-[#3a7fe0] disabled:opacity-50 transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-50 transition-colors cursor-pointer">
             {saving ? t('common.saving') : t('common.save')}
           </button>
         </div>
@@ -686,20 +686,20 @@ function DeleteConfirm({ name, onClose, onConfirm }: DeleteConfirmProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div
-        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl h-fit max-h-[calc(100dvh-2rem)] overflow-y-auto"
+        className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl w-full max-w-md p-6 shadow-2xl h-fit max-h-[calc(100dvh-2rem)] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
-        <h2 className="text-white text-lg font-semibold mb-2">{t('projectDetail.deleteRequest.title')}</h2>
-        <p className="text-zinc-400 text-sm mb-5">
+        <h2 className="text-[var(--text)] text-lg font-semibold mb-2">{t('projectDetail.deleteRequest.title')}</h2>
+        <p className="text-[var(--text-dim)] text-sm mb-5">
           {t('projectDetail.deleteRequest.body', { name })}
         </p>
         <div className="flex justify-end gap-2">
           <button onClick={onClose}
-            className="h-9 px-4 rounded-lg text-sm text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer">
             {t('common.cancel')}
           </button>
           <button onClick={handleConfirm} disabled={sending}
-            className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#e81403] hover:bg-[#b20f03] disabled:opacity-50 transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--danger)] hover:bg-[var(--danger-hover)] disabled:opacity-50 transition-colors cursor-pointer">
             {sending ? t('projectDetail.deleteRequest.sending') : t('projectDetail.deleteRequest.send')}
           </button>
         </div>
@@ -846,7 +846,7 @@ export function ProjectDetail() {
     return (
       <div className="flex flex-col min-h-full">
         <div className="flex items-center justify-center flex-1">
-          <p className="text-zinc-500 text-sm">{t('common.loading')}</p>
+          <p className="text-[var(--text-faint)] text-sm">{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -856,7 +856,7 @@ export function ProjectDetail() {
     return (
       <div className="flex flex-col min-h-full">
         <div className="p-8">
-          <p className="text-zinc-400 mb-2">{t('projectDetail.notFound')}</p>
+          <p className="text-[var(--text-dim)] mb-2">{t('projectDetail.notFound')}</p>
         </div>
       </div>
     );
@@ -870,14 +870,14 @@ export function ProjectDetail() {
         {/* Mobile: truncated text + 3-dot menu */}
         <div className="flex items-start gap-2 min-w-0 sm:hidden">
           <div className="flex-1 min-w-0 flex flex-col gap-1">
-            <h1 className="text-white text-3xl font-semibold truncate leading-tight">{project.name}</h1>
-            <p className="text-[#999999] text-base truncate">{project.address}</p>
+            <h1 className="text-[var(--text)] text-3xl font-semibold truncate leading-tight">{project.name}</h1>
+            <p className="text-[var(--text-muted)] text-base truncate">{project.address}</p>
           </div>
           {canEdit && (
             <div ref={headerMenuRef} className="relative shrink-0 mt-2">
               <button
                 onClick={() => setHeaderMenuOpen(o => !o)}
-                className="w-8 h-8 flex items-center justify-center rounded-md text-zinc-400 hover:text-zinc-200 hover:bg-[#2a2a2a] transition-colors cursor-pointer"
+                className="w-8 h-8 flex items-center justify-center rounded-md text-[var(--text-dim)] hover:text-[var(--text)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
                 aria-label={t('common.menu')}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -887,10 +887,10 @@ export function ProjectDetail() {
                 </svg>
               </button>
               {headerMenuOpen && (
-                <div className="absolute right-0 top-full mt-1 w-40 bg-[#1a1a1a] ring-1 ring-[#3d3d3d] rounded-lg shadow-xl overflow-hidden z-10">
+                <div className="absolute right-0 top-full mt-1 w-40 bg-[var(--bg-raised)] ring-1 ring-[var(--border)] rounded-lg shadow-xl overflow-hidden z-10">
                   <button
                     onClick={() => { setHeaderMenuOpen(false); setEditGroup(null); setGroupModalOpen(true); }}
-                    className="w-full text-left px-4 py-2.5 text-sm text-zinc-300 hover:bg-[#2a2a2a] transition-colors cursor-pointer flex items-center gap-2"
+                    className="w-full text-left px-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer flex items-center gap-2"
                   >
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
                       stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -900,7 +900,7 @@ export function ProjectDetail() {
                   </button>
                   <button
                     onClick={() => { setHeaderMenuOpen(false); setEditDevice(null); setDeviceModalOpen(true); }}
-                    className="w-full text-left px-4 py-2.5 text-sm text-white hover:bg-[#2a2a2a] transition-colors cursor-pointer flex items-center gap-2"
+                    className="w-full text-left px-4 py-2.5 text-sm text-[var(--text)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer flex items-center gap-2"
                   >
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
                       stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -917,14 +917,14 @@ export function ProjectDetail() {
         {/* Desktop: original layout */}
         <div className="hidden sm:flex items-start justify-between gap-4">
           <div className="flex flex-col gap-1">
-            <h1 className="text-white text-3xl font-semibold">{project.name}</h1>
-            <p className="text-[#999999] text-base">{project.address}</p>
+            <h1 className="text-[var(--text)] text-3xl font-semibold">{project.name}</h1>
+            <p className="text-[var(--text-muted)] text-base">{project.address}</p>
           </div>
           {canEdit && (
             <div className="flex items-center gap-2 mt-7">
               <button
                 onClick={() => { setEditGroup(null); setGroupModalOpen(true); }}
-                className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
+                className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer"
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -934,7 +934,7 @@ export function ProjectDetail() {
               </button>
               <button
                 onClick={() => { setEditDevice(null); setDeviceModalOpen(true); }}
-                className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#4693ff] hover:bg-[#3a7fe0] transition-colors cursor-pointer"
+                className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer"
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -952,13 +952,13 @@ export function ProjectDetail() {
         <div className="px-4 sm:px-6 pb-2 flex flex-wrap items-center gap-2">
           {visibleApps.map(app => {
             const active      = filterApps.has(app) || filterApps.size === 0;
-            const activeStyle = APP_BADGE_STYLE[app] ?? 'bg-zinc-500/15 text-zinc-400 ring-zinc-500/30';
+            const activeStyle = APP_BADGE_STYLE[app] ?? 'bg-zinc-500/15 text-[var(--text-dim)] ring-zinc-500/30';
             return (
               <button
                 key={app}
                 onClick={() => toggleFilterApp(app)}
                 className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ring-1 transition-colors cursor-pointer ${
-                  active ? activeStyle : 'text-zinc-600 bg-zinc-800 ring-zinc-700'
+                  active ? activeStyle : 'text-[var(--text-faint)] bg-[var(--bg-subtle)] ring-zinc-700'
                 }`}
               >
                 {app}
@@ -968,7 +968,7 @@ export function ProjectDetail() {
           {filterApps.size > 0 && (
             <button
               onClick={() => setFilterApps(new Set())}
-              className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer underline-offset-2 hover:underline"
+              className="text-xs text-[var(--text-faint)] hover:text-[var(--text-muted)] transition-colors cursor-pointer underline-offset-2 hover:underline"
             >
               {t('common.clear')}
             </button>
@@ -979,8 +979,8 @@ export function ProjectDetail() {
       {/* デバイス・グループ一覧 */}
       <div className="px-4 sm:px-6 pt-4 pb-8 space-y-4 md:space-y-5">
         {filteredDevices.length === 0 && (!hasGroups || filterApps.size > 0) ? (
-          <div className="overflow-hidden rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-12 text-center">
-            <p className="text-zinc-500 text-sm">
+          <div className="overflow-hidden rounded-lg bg-[var(--bg-surface)] ring-1 ring-[var(--border)] p-12 text-center">
+            <p className="text-[var(--text-faint)] text-sm">
               {filterApps.size > 0 ? t('projectDetail.noFilteredDevices') : t('projectDetail.noDevices')}
             </p>
           </div>
@@ -1007,9 +1007,9 @@ export function ProjectDetail() {
             {/* グループ未設定の区切り */}
             {showDivider && (
               <div className="flex items-center gap-3 py-2">
-                <div className="flex-1 h-px bg-zinc-800" />
-                <span className="text-xs text-zinc-600 whitespace-nowrap">{t('projectDetail.ungrouped')}</span>
-                <div className="flex-1 h-px bg-zinc-800" />
+                <div className="flex-1 h-px bg-[var(--bg-subtle)]" />
+                <span className="text-xs text-[var(--text-faint)] whitespace-nowrap">{t('projectDetail.ungrouped')}</span>
+                <div className="flex-1 h-px bg-[var(--bg-subtle)]" />
               </div>
             )}
 

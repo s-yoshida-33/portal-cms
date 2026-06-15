@@ -34,10 +34,10 @@ function MetricBar({ label, value, unit, warn = 70, danger = 90 }: {
   return (
     <div>
       <div className="flex justify-between text-xs mb-1">
-        <span className="text-zinc-500">{label}</span>
-        <span className="text-zinc-300 font-medium tabular-nums">{value}{unit}</span>
+        <span className="text-[var(--text-faint)]">{label}</span>
+        <span className="text-[var(--text-muted)] font-medium tabular-nums">{value}{unit}</span>
       </div>
-      <div className="h-1 bg-zinc-800 rounded-full overflow-hidden">
+      <div className="h-1 bg-[var(--bg-subtle)] rounded-full overflow-hidden">
         <div className={`h-full rounded-full ${color}`} style={{ width: `${Math.min(value, 100)}%` }} />
       </div>
     </div>
@@ -79,18 +79,18 @@ function logLevelClass(level: string) {
     case 'FATAL': return 'text-red-400';
     case 'WARN':  return 'text-yellow-400';
     case 'INFO':  return 'text-green-400';
-    default:      return 'text-zinc-500';
+    default:      return 'text-[var(--text-faint)]';
   }
 }
 
 function logLevelBadgeClass(level: string, active: boolean) {
-  if (!active) return 'text-zinc-600 bg-zinc-800 ring-zinc-700';
+  if (!active) return 'text-[var(--text-faint)] bg-[var(--bg-subtle)] ring-[var(--border)]';
   switch (level) {
     case 'ERROR':
     case 'FATAL': return 'text-red-400 bg-red-950/40 ring-red-800/50';
     case 'WARN':  return 'text-yellow-400 bg-yellow-950/40 ring-yellow-800/50';
     case 'INFO':  return 'text-green-400 bg-green-950/40 ring-green-800/50';
-    default:      return 'text-zinc-400 bg-zinc-800/40 ring-zinc-700/50';
+    default:      return 'text-[var(--text-dim)] bg-zinc-800/40 ring-zinc-700/50';
   }
 }
 
@@ -277,7 +277,7 @@ export function DeviceDetail() {
     return (
       <div className="flex flex-col min-h-full">
         <div className="flex items-center justify-center flex-1">
-          <p className="text-zinc-500 text-sm">{t('common.loading')}</p>
+          <p className="text-[var(--text-faint)] text-sm">{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -287,7 +287,7 @@ export function DeviceDetail() {
     return (
       <div className="flex flex-col min-h-full">
         <div className="p-8">
-          <p className="text-zinc-400 mb-2">{t('deviceDetail.notFound')}</p>
+          <p className="text-[var(--text-dim)] mb-2">{t('deviceDetail.notFound')}</p>
         </div>
       </div>
     );
@@ -301,8 +301,8 @@ export function DeviceDetail() {
       {/* ページヘッダー */}
       <div className="flex items-start justify-between gap-4 py-6 px-4 sm:px-6">
         <div className="flex flex-col gap-1">
-          <h1 className="text-white text-3xl font-semibold">{device.name}</h1>
-          <p className="text-[#999999] text-base font-mono">{device.ip}</p>
+          <h1 className="text-[var(--text)] text-3xl font-semibold">{device.name}</h1>
+          <p className="text-[var(--text-muted)] text-base font-mono">{device.ip}</p>
         </div>
         <div className="mt-7">
           <StatusBadge status={device.status} />
@@ -313,18 +313,18 @@ export function DeviceDetail() {
 
         {/* システム情報セクション */}
         <div>
-          <h2 className="text-white font-semibold text-base mb-3">{t('deviceDetail.systemInfo')}</h2>
-          <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-5">
+          <h2 className="text-[var(--text)] font-semibold text-base mb-3">{t('deviceDetail.systemInfo')}</h2>
+          <div className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl p-5">
             <div className="mb-1">
               <div className="flex items-center gap-1.5 mb-0.5">
-                <span className="text-sm text-zinc-300">{device.app}</span>
-                <span className="text-zinc-500 text-xs">v{device.appVersion}</span>
+                <span className="text-sm text-[var(--text-muted)]">{device.app}</span>
+                <span className="text-[var(--text-faint)] text-xs">v{device.appVersion}</span>
               </div>
-              <p className="text-xs text-zinc-500">{t('deviceDetail.lastSeen', { time: formatDate(device.lastSeen) })}</p>
+              <p className="text-xs text-[var(--text-faint)]">{t('deviceDetail.lastSeen', { time: formatDate(device.lastSeen) })}</p>
             </div>
-            <p className="text-xs text-zinc-500 mt-2 mb-4">
+            <p className="text-xs text-[var(--text-faint)] mt-2 mb-4">
               {t('deviceDetail.uptime')}:{' '}
-              <span className="text-sm font-semibold text-zinc-200">
+              <span className="text-sm font-semibold text-[var(--text)]">
                 <UptimeClock uptimeSecs={device.system.uptime} lastSeen={device.lastSeen} status={device.status} />
               </span>
             </p>
@@ -341,33 +341,33 @@ export function DeviceDetail() {
         {device.app !== 'Bridge-Ground' && (
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-white font-semibold text-base">{t('deviceDetail.screenshot')}</h2>
+              <h2 className="text-[var(--text)] font-semibold text-base">{t('deviceDetail.screenshot')}</h2>
               <button
                 onClick={handlePortalScreenshotRequest}
                 disabled={portalSsState === 'pending'}
-                className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {portalSsState === 'pending' ? t('deviceDetail.requesting') : t('deviceDetail.requestScreenshot')}
               </button>
             </div>
 
-            <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-5">
+            <div className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl p-5">
               {/* 画像なし・idle */}
               {!portalSsBlobUrl && portalSsState === 'idle' && (
-                <div className="flex items-center justify-center h-28 text-zinc-600 text-sm">
+                <div className="flex items-center justify-center h-28 text-[var(--text-faint)] text-sm">
                   {t('deviceDetail.ssIdle')}
                 </div>
               )}
               {/* 画像なし・pending */}
               {!portalSsBlobUrl && portalSsState === 'pending' && (
                 <div className="flex flex-col items-center justify-center h-28 gap-3">
-                  <p className="text-zinc-500 text-sm">{t('deviceDetail.requesting')}</p>
+                  <p className="text-[var(--text-faint)] text-sm">{t('deviceDetail.requesting')}</p>
                   <button
                     onClick={() => {
                       setPortalSsState('idle');
                       if (deviceId) cancelScreenshotRequest(deviceId).catch(() => {});
                     }}
-                    className="h-6 px-3 rounded-md text-xs text-zinc-500 bg-zinc-800 hover:bg-zinc-700 ring-1 ring-zinc-700 transition-colors cursor-pointer"
+                    className="h-6 px-3 rounded-md text-xs text-[var(--text-faint)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer"
                   >
                     {t('common.cancel')}
                   </button>
@@ -375,11 +375,11 @@ export function DeviceDetail() {
               )}
               {/* 画像なし・error */}
               {!portalSsBlobUrl && portalSsState === 'error' && (
-                <div className="flex flex-col items-center justify-center h-20 gap-2 rounded-lg bg-[#0a0a0a] ring-1 ring-red-900/30">
+                <div className="flex flex-col items-center justify-center h-20 gap-2 rounded-lg bg-[var(--bg-base)] ring-1 ring-red-900/30">
                   <p className="text-red-400 text-sm">{t('deviceDetail.ssError')}</p>
                   <button
                     onClick={handlePortalScreenshotRequest}
-                    className="h-6 px-3 rounded-md text-xs text-zinc-300 bg-zinc-800 hover:bg-zinc-700 ring-1 ring-zinc-700 transition-colors cursor-pointer"
+                    className="h-6 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer"
                   >
                     {t('common.retry')}
                   </button>
@@ -389,7 +389,7 @@ export function DeviceDetail() {
               {portalSsBlobUrl && (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <p className="text-xs text-zinc-500">
+                    <p className="text-xs text-[var(--text-faint)]">
                       {portalSsCapturedAt ? t('deviceDetail.lastCaptured', { time: portalSsCapturedAt }) : t('deviceDetail.lastCapturedNone')}
                     </p>
                     <div className="flex items-center gap-2">
@@ -410,7 +410,7 @@ export function DeviceDetail() {
                           a.click();
                           addSiteLog({ category: 'screenshot', action: 'downloaded', targetId: deviceId, targetName: device.name, projectName: projectNameRef.current, deviceName: device.name, performedBy: siteLogActor() }).catch(() => {});
                         }}
-                        className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
+                        className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer"
                       >
                         {t('common.download')}
                       </button>
@@ -420,18 +420,18 @@ export function DeviceDetail() {
                     <img
                       src={portalSsBlobUrl}
                       alt={t('deviceDetail.ssAlt', { name: device.name })}
-                      className="w-full rounded-lg ring-1 ring-[#3d3d3d] object-contain max-h-[600px]"
+                      className="w-full rounded-lg ring-1 ring-[var(--border)] object-contain max-h-[600px]"
                     />
                     {/* 取得中オーバーレイ */}
                     {portalSsState === 'pending' && (
                       <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-lg bg-black/60">
-                        <p className="text-zinc-300 text-sm">{t('deviceDetail.requesting')}</p>
+                        <p className="text-[var(--text-muted)] text-sm">{t('deviceDetail.requesting')}</p>
                         <button
                           onClick={() => {
                             setPortalSsState('ready');
                             if (deviceId) cancelScreenshotRequest(deviceId).catch(() => {});
                           }}
-                          className="h-6 px-3 rounded-md text-xs text-zinc-400 bg-zinc-800 hover:bg-zinc-700 ring-1 ring-zinc-700 transition-colors cursor-pointer"
+                          className="h-6 px-3 rounded-md text-xs text-[var(--text-dim)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer"
                         >
                           {t('common.cancel')}
                         </button>
@@ -448,7 +448,7 @@ export function DeviceDetail() {
         <div>
           {/* 外枠の外: タイトル + ログレベル + 日付 + 更新（PC: 1行、スマホ: 折り返し） */}
           <div className="flex items-start sm:items-center justify-between gap-3 mb-3">
-            <h2 className="text-white font-semibold text-base shrink-0">{t('deviceDetail.logs')}</h2>
+            <h2 className="text-[var(--text)] font-semibold text-base shrink-0">{t('deviceDetail.logs')}</h2>
             <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap justify-end">
               {LOG_LEVELS.map(level => (
                 <button
@@ -472,7 +472,7 @@ export function DeviceDetail() {
               <button
                 onClick={handleRefreshLogs}
                 disabled={logsRefreshing}
-                className="h-6 px-2.5 rounded-md text-xs font-medium ring-1 transition-colors cursor-pointer text-zinc-400 bg-zinc-800 ring-zinc-700 hover:bg-zinc-700 disabled:opacity-50"
+                className="h-6 px-2.5 rounded-md text-xs font-medium ring-1 transition-colors cursor-pointer text-[var(--text-dim)] bg-[var(--bg-subtle)] ring-[var(--border)] hover:bg-[var(--bg-hover)] disabled:opacity-50"
               >
                 {logsRefreshing ? t('deviceDetail.refreshingLogs') : t('deviceDetail.refreshLogs')}
               </button>
@@ -480,13 +480,13 @@ export function DeviceDetail() {
           </div>
 
           {/* 外枠 */}
-          <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-4">
+          <div className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl p-4">
             {/* 外枠と内枠の間: 件数・最終取得・ダウンロード */}
             <div className="flex items-start sm:items-center justify-between mb-3">
               {/* スマホ: 2行 / PC: 1行 */}
               <div className="flex flex-col sm:flex-row sm:items-center gap-0 sm:gap-3">
-                <span className="text-xs text-zinc-600">{t('deviceDetail.logCount', { count: filteredLogs.length })}</span>
-                <span className="text-xs text-zinc-600">
+                <span className="text-xs text-[var(--text-faint)]">{t('deviceDetail.logCount', { count: filteredLogs.length })}</span>
+                <span className="text-xs text-[var(--text-faint)]">
                   {logsLastFetched ? t('deviceDetail.lastFetched', { time: formatDate(logsLastFetched.toISOString()) }) : t('deviceDetail.lastFetchedNone')}
                 </span>
               </div>
@@ -502,7 +502,7 @@ export function DeviceDetail() {
                     setTimeout(() => setLogCopied(false), 2000);
                   }}
                   disabled={filteredLogs.length === 0}
-                  className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   {logCopied ? t('common.copied') : t('common.copy')}
                 </button>
@@ -522,7 +522,7 @@ export function DeviceDetail() {
                     addSiteLog({ category: 'log', action: 'downloaded', targetId: deviceId, targetName: device?.name ?? deviceId ?? '', projectName: projectNameRef.current, deviceName: device?.name ?? deviceId ?? '', performedBy: siteLogActor() }).catch(() => {});
                   }}
                   disabled={filteredLogs.length === 0}
-                  className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   {t('common.download')}
                 </button>
@@ -530,10 +530,10 @@ export function DeviceDetail() {
             </div>
 
             {/* 内枠: ログビューア */}
-            <div className="bg-[#0a0a0a] ring-1 ring-[#3d3d3d] rounded-xl overflow-hidden">
+            <div className="bg-[var(--bg-base)] ring-1 ring-[var(--border)] rounded-xl overflow-hidden">
               <div ref={logContainerRef} className="h-96 overflow-y-auto overflow-x-auto p-4 font-log text-xs leading-5 space-y-0.5 scrollbar-subtle">
                 {filteredLogs.length === 0 ? (
-                  <p className="text-zinc-600 text-center py-8 whitespace-nowrap">
+                  <p className="text-[var(--text-faint)] text-center py-8 whitespace-nowrap">
                     {logs.length === 0 ? t('deviceDetail.noLogs') : t('deviceDetail.noFilteredLogs')}
                   </p>
                 ) : (
@@ -542,10 +542,10 @@ export function DeviceDetail() {
                       <span className="shrink-0 select-none text-zinc-700 tabular-nums whitespace-pre pr-2">
                         {String(i + 1).padStart(String(filteredLogs.length).length)}
                       </span>
-                      <span className="shrink-0 text-zinc-600">{log.timestamp}</span>
+                      <span className="shrink-0 text-[var(--text-faint)]">{log.timestamp}</span>
                       <span className={`shrink-0 w-10 ${logLevelClass(log.level)}`}>{log.level || '----'}</span>
-                      {log.tag && <span className="shrink-0 text-zinc-500">[{log.tag}]</span>}
-                      <span className="text-zinc-300">{log.message}</span>
+                      {log.tag && <span className="shrink-0 text-[var(--text-faint)]">[{log.tag}]</span>}
+                      <span className="text-[var(--text-muted)]">{log.message}</span>
                     </div>
                   ))
                 )}

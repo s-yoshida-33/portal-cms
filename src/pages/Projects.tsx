@@ -47,16 +47,16 @@ function ProjectModal({ initial, onClose, onSave }: ModalProps) {
   }
 
   const inputClass =
-    'w-full bg-[#1a1a1a] ring-1 ring-[#3d3d3d] text-white rounded-lg px-3 h-9 text-sm outline-none focus:ring-[#4693ff] focus:ring-2 placeholder:text-zinc-600 transition-all';
+    'w-full bg-[var(--bg-raised)] ring-1 ring-[var(--border)] text-[var(--text)] rounded-lg px-3 h-9 text-sm outline-none focus:ring-[var(--accent)] focus:ring-2 placeholder:text-[var(--text-faint)] transition-all';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div
-        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md shadow-2xl flex flex-col max-h-[calc(100dvh-2rem)] overflow-hidden"
+        className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl w-full max-w-md shadow-2xl flex flex-col max-h-[calc(100dvh-2rem)] overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
         <div className="shrink-0 px-6 pt-6 pb-4">
-          <h2 className="text-white text-lg font-semibold mb-1">
+          <h2 className="text-[var(--text)] text-lg font-semibold mb-1">
             {initial ? t('projects.form.editTitle') : t('projects.form.addTitle')}
           </h2>
         </div>
@@ -64,29 +64,29 @@ function ProjectModal({ initial, onClose, onSave }: ModalProps) {
         <form onSubmit={handleSubmit} className="flex flex-col min-h-0 flex-1">
           <div className="flex-1 overflow-y-auto px-6 pb-4 space-y-4">
             <div>
-              <label className="block text-sm text-zinc-400 mb-1.5">{t('projects.form.nameLabel')}</label>
+              <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projects.form.nameLabel')}</label>
               <input value={name} onChange={e => setName(e.target.value)}
                 className={inputClass} />
             </div>
             <div>
-              <label className="block text-sm text-zinc-400 mb-1.5">{t('projects.form.prefectureLabel')}</label>
+              <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projects.form.prefectureLabel')}</label>
               <input value={prefecture} onChange={e => setPrefecture(e.target.value)}
                 className={inputClass} />
             </div>
             <div>
-              <label className="block text-sm text-zinc-400 mb-1.5">{t('projects.form.addressLabel')}</label>
+              <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projects.form.addressLabel')}</label>
               <input value={address} onChange={e => setAddress(e.target.value)}
                 className={inputClass} />
             </div>
             {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
           </div>
-          <div className="shrink-0 px-6 py-4 border-t border-[#2a2a2a] bg-[#111111] rounded-b-xl flex justify-end gap-2">
+          <div className="shrink-0 px-6 py-4 border-t border-[var(--bg-hover)] bg-[var(--bg-surface)] rounded-b-xl flex justify-end gap-2">
             <button type="button" onClick={onClose}
-              className="h-9 px-4 rounded-lg text-sm text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
+              className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer">
               {t('common.cancel')}
             </button>
             <button type="submit" disabled={saving}
-              className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#4693ff] hover:bg-[#3a7fe0] disabled:opacity-50 transition-colors cursor-pointer">
+              className="h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-50 transition-colors cursor-pointer">
               {saving ? t('common.saving') : t('common.save')}
             </button>
           </div>
@@ -121,21 +121,21 @@ function DeleteConfirm({ project, onClose, onConfirm }: DeleteConfirmProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div
-        className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl"
+        className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl w-full max-w-md p-6 shadow-2xl"
         onClick={e => e.stopPropagation()}
       >
-        <h2 className="text-white text-lg font-semibold mb-2">{t('projects.deleteRequest.title')}</h2>
-        <p className="text-zinc-400 text-sm mb-5">
+        <h2 className="text-[var(--text)] text-lg font-semibold mb-2">{t('projects.deleteRequest.title')}</h2>
+        <p className="text-[var(--text-dim)] text-sm mb-5">
           {t('projects.deleteRequest.bodyLine1', { name: project.name })}<br />
           {t('projects.deleteRequest.bodyLine2')}
         </p>
         <div className="flex justify-end gap-2">
           <button onClick={onClose}
-            className="h-9 px-4 rounded-lg text-sm text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer">
             {t('common.cancel')}
           </button>
           <button onClick={handleConfirm} disabled={sending}
-            className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#e81403] hover:bg-[#b20f03] disabled:opacity-50 transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--danger)] hover:bg-[var(--danger-hover)] disabled:opacity-50 transition-colors cursor-pointer">
             {sending ? t('projects.deleteRequest.sending') : t('projects.deleteRequest.send')}
           </button>
         </div>
@@ -223,14 +223,14 @@ export function Projects() {
         {/* Mobile: タイトル + 3点メニュー */}
         <div className="flex items-start gap-2 min-w-0 sm:hidden">
           <div className="flex-1 min-w-0 flex flex-col gap-1">
-            <h1 className="text-white text-3xl font-semibold leading-tight">{t('projects.title')}</h1>
-            <p className="text-[#999999] text-base">{t('projects.description')}</p>
+            <h1 className="text-[var(--text)] text-3xl font-semibold leading-tight">{t('projects.title')}</h1>
+            <p className="text-[var(--text-muted)] text-base">{t('projects.description')}</p>
           </div>
           {canEdit && (
             <div ref={headerMenuRef} className="relative shrink-0 mt-2">
               <button
                 onClick={() => setHeaderMenuOpen(o => !o)}
-                className="w-8 h-8 flex items-center justify-center rounded-md text-zinc-400 hover:text-zinc-200 hover:bg-[#2a2a2a] transition-colors cursor-pointer"
+                className="w-8 h-8 flex items-center justify-center rounded-md text-[var(--text-dim)] hover:text-[var(--text)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
                 aria-label={t('common.menu')}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -240,10 +240,10 @@ export function Projects() {
                 </svg>
               </button>
               {headerMenuOpen && (
-                <div className="absolute right-0 top-full mt-1 w-44 bg-[#1a1a1a] ring-1 ring-[#3d3d3d] rounded-lg shadow-xl overflow-hidden z-10">
+                <div className="absolute right-0 top-full mt-1 w-44 bg-[var(--bg-raised)] ring-1 ring-[var(--border)] rounded-lg shadow-xl overflow-hidden z-10">
                   <button
                     onClick={() => { setHeaderMenuOpen(false); setEditTarget(null); setModalOpen(true); }}
-                    className="w-full text-left px-4 py-2.5 text-sm text-white hover:bg-[#2a2a2a] transition-colors cursor-pointer flex items-center gap-2"
+                    className="w-full text-left px-4 py-2.5 text-sm text-[var(--text)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer flex items-center gap-2"
                   >
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
                       stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -260,13 +260,13 @@ export function Projects() {
         {/* Desktop: タイトル + CTAボタン */}
         <div className="hidden sm:flex items-start justify-between gap-4">
           <div className="flex flex-col gap-2">
-            <h1 className="text-white text-3xl font-semibold">{t('projects.title')}</h1>
-            <p className="text-[#999999] text-base">{t('projects.description')}</p>
+            <h1 className="text-[var(--text)] text-3xl font-semibold">{t('projects.title')}</h1>
+            <p className="text-[var(--text-muted)] text-base">{t('projects.description')}</p>
           </div>
           {canEdit && (
             <button
               onClick={() => { setEditTarget(null); setModalOpen(true); }}
-              className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#4693ff] hover:bg-[#3a7fe0] transition-colors cursor-pointer mt-1"
+              className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer mt-1"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -281,16 +281,16 @@ export function Projects() {
       {/* コンテンツ */}
       <div className="px-4 sm:px-6 pt-8 pb-8">
         {loading ? (
-          <div className="overflow-hidden rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-12 text-center">
-            <p className="text-zinc-500 text-sm">{t('common.loading')}</p>
+          <div className="overflow-hidden rounded-lg bg-[var(--bg-surface)] ring-1 ring-[var(--border)] p-12 text-center">
+            <p className="text-[var(--text-faint)] text-sm">{t('common.loading')}</p>
           </div>
         ) : projects.length === 0 ? (
-          <div className="overflow-hidden rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-12 text-center">
-            <p className="text-zinc-500 text-sm">{t('projects.noProjects')}</p>
+          <div className="overflow-hidden rounded-lg bg-[var(--bg-surface)] ring-1 ring-[var(--border)] p-12 text-center">
+            <p className="text-[var(--text-faint)] text-sm">{t('projects.noProjects')}</p>
             {canEdit && (
               <button
                 onClick={() => { setEditTarget(null); setModalOpen(true); }}
-                className="mt-4 text-[#4693ff] text-sm hover:underline cursor-pointer"
+                className="mt-4 text-[var(--accent)] text-sm hover:underline cursor-pointer"
               >
                 {t('projects.addFirst')}
               </button>
@@ -301,7 +301,7 @@ export function Projects() {
             {/* ── スマホ: カードレイアウト ── */}
             <div className="sm:hidden space-y-4">
               {projects.map((p) => (
-                <div key={p.id} className="relative bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl px-4 py-4">
+                <div key={p.id} className="relative bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl px-4 py-4">
                   {/* カード全体のタップ領域 */}
                   <Link
                     to={`/${uuid}/projects/${p.id}`}
@@ -309,21 +309,21 @@ export function Projects() {
                     aria-label={p.name}
                   />
                   <div className="flex items-start justify-between gap-3 mb-1.5">
-                    <span className="text-white text-sm font-semibold leading-snug">
+                    <span className="text-[var(--text)] text-sm font-semibold leading-snug">
                       {p.name}
                     </span>
-                    <span className="relative z-10 shrink-0 text-xs font-medium text-zinc-300 bg-zinc-800 ring-1 ring-zinc-700 rounded-md px-2 py-0.5 tabular-nums">
+                    <span className="relative z-10 shrink-0 text-xs font-medium text-[var(--text-muted)] bg-[var(--bg-subtle)] ring-1 ring-[var(--border)] rounded-md px-2 py-0.5 tabular-nums">
                       {deviceCount(p.id)}台
                     </span>
                   </div>
-                  <p className="text-zinc-500 text-xs mb-3">
+                  <p className="text-[var(--text-faint)] text-xs mb-3">
                     {p.prefecture}　{p.address}
                   </p>
                   {canEdit && (
                     <div className="relative z-10 flex gap-2">
                       <button
                         onClick={() => { setEditTarget(p); setModalOpen(true); }}
-                        className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
+                        className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer"
                       >
                         {t('common.edit')}
                       </button>
@@ -340,9 +340,9 @@ export function Projects() {
             </div>
 
             {/* ── PC: テーブルレイアウト ── */}
-            <div className="hidden sm:block overflow-hidden rounded-lg ring-1 ring-[#3d3d3d]">
+            <div className="hidden sm:block overflow-hidden rounded-lg ring-1 ring-[var(--border)]">
               {/* テーブルヘッダー */}
-              <div className="grid grid-cols-[1fr_110px_1.2fr_72px_160px] gap-4 px-4 py-3 bg-black border-b border-[#3d3d3d] text-xs font-medium text-zinc-500 uppercase tracking-wider">
+              <div className="grid grid-cols-[1fr_110px_1.2fr_72px_160px] gap-4 px-4 py-3 bg-[var(--bg-base)] border-b border-[var(--border)] text-xs font-medium text-[var(--text-faint)] uppercase tracking-wider">
                 <span>{t('projects.table.name')}</span>
                 <span>{t('projects.table.prefecture')}</span>
                 <span>{t('projects.table.address')}</span>
@@ -354,26 +354,26 @@ export function Projects() {
               {projects.map((p, i) => (
                 <div
                   key={p.id}
-                  className={`grid grid-cols-[1fr_110px_1.2fr_72px_160px] gap-4 px-4 py-4 items-center bg-[#111111] hover:bg-[#161616] transition-colors ${
-                    i < projects.length - 1 ? 'border-b border-[#3d3d3d]' : ''
+                  className={`grid grid-cols-[1fr_110px_1.2fr_72px_160px] gap-4 px-4 py-4 items-center bg-[var(--bg-surface)] hover:bg-[var(--bg-active)] transition-colors ${
+                    i < projects.length - 1 ? 'border-b border-[var(--border)]' : ''
                   }`}
                 >
                   <Link
                     to={`/${uuid}/projects/${p.id}`}
-                    className="text-white text-sm font-medium hover:text-[#4693ff] transition-colors truncate"
+                    className="text-[var(--text)] text-sm font-medium hover:text-[var(--accent)] transition-colors truncate"
                   >
                     {p.name}
                   </Link>
-                  <span className="text-zinc-400 text-sm">{p.prefecture}</span>
-                  <span className="text-zinc-400 text-sm truncate">{p.address}</span>
-                  <span className="text-zinc-300 text-sm font-medium tabular-nums">
+                  <span className="text-[var(--text-dim)] text-sm">{p.prefecture}</span>
+                  <span className="text-[var(--text-dim)] text-sm truncate">{p.address}</span>
+                  <span className="text-[var(--text-muted)] text-sm font-medium tabular-nums">
                     {deviceCount(p.id)}
                   </span>
                   {canEdit ? (
                     <div className="flex items-center gap-2 justify-end">
                       <button
                         onClick={() => { setEditTarget(p); setModalOpen(true); }}
-                        className="h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer"
+                        className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer"
                       >
                         {t('common.edit')}
                       </button>

@@ -76,33 +76,33 @@ export function Signup() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-        <p className="text-zinc-500 text-sm">{t('auth.authenticating')}</p>
+      <div className="min-h-screen bg-[var(--bg-base)] flex items-center justify-center">
+        <p className="text-[var(--text-faint)] text-sm">{t('auth.authenticating')}</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-[var(--bg-base)] flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-600 mb-4">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[var(--accent)] mb-4">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
               <path d="M3 3h8v8H3V3zm0 10h8v8H3v-8zm10-10h8v8h-8V3zm0 10h8v8h-8v-8z"/>
             </svg>
           </div>
-          <h1 className="text-xl font-semibold text-zinc-100">Portal CMS</h1>
+          <h1 className="text-xl font-semibold text-[var(--text)]">Portal CMS</h1>
         </div>
 
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
-          <h2 className="text-lg font-semibold text-zinc-100 mb-6">{t('auth.signupTitle')}</h2>
+        <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-8">
+          <h2 className="text-lg font-semibold text-[var(--text)] mb-6">{t('auth.signupTitle')}</h2>
 
           {/* Google */}
           <button
             onClick={handleGoogleSignup}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-3 px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-sm text-zinc-100 font-medium transition-colors disabled:opacity-50 mb-6"
+            className="w-full flex items-center justify-center gap-3 px-4 py-2.5 bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] font-medium transition-colors disabled:opacity-50 mb-6"
           >
             <GoogleIcon />
             {t('auth.signupWithGoogle')}
@@ -111,17 +111,17 @@ export function Signup() {
           {/* Divider */}
           <div className="relative mb-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-zinc-800" />
+              <div className="w-full border-t border-[var(--border)]" />
             </div>
             <div className="relative flex justify-center">
-              <span className="px-3 bg-zinc-900 text-xs text-zinc-500">{t('auth.or')}</span>
+              <span className="px-3 bg-[var(--bg-surface)] text-xs text-[var(--text-faint)]">{t('auth.or')}</span>
             </div>
           </div>
 
           {/* Email form */}
           <form onSubmit={handleEmailSignup} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-zinc-400 mb-1.5">
+              <label className="block text-xs font-medium text-[var(--text-dim)] mb-1.5">
                 {t('auth.emailLabel')}
               </label>
               <input
@@ -129,23 +129,23 @@ export function Signup() {
                 required
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                className="w-full px-3 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                className="w-full px-3 py-2.5 bg-[var(--bg-subtle)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] placeholder-zinc-500 focus:outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] transition-colors"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-zinc-400 mb-1.5">
-                {t('auth.passwordLabel')} <span className="text-zinc-600 font-normal">{t('auth.passwordNote')}</span>
+              <label className="block text-xs font-medium text-[var(--text-dim)] mb-1.5">
+                {t('auth.passwordLabel')} <span className="text-[var(--text-faint)] font-normal">{t('auth.passwordNote')}</span>
               </label>
               <input
                 type="password"
                 required
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                className="w-full px-3 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                className="w-full px-3 py-2.5 bg-[var(--bg-subtle)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] placeholder-zinc-500 focus:outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] transition-colors"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-zinc-400 mb-1.5">
+              <label className="block text-xs font-medium text-[var(--text-dim)] mb-1.5">
                 {t('auth.passwordConfirm')}
               </label>
               <input
@@ -153,7 +153,7 @@ export function Signup() {
                 required
                 value={confirm}
                 onChange={e => setConfirm(e.target.value)}
-                className="w-full px-3 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                className="w-full px-3 py-2.5 bg-[var(--bg-subtle)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] placeholder-zinc-500 focus:outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] transition-colors"
               />
             </div>
 
@@ -166,16 +166,16 @@ export function Signup() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+              className="w-full py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--text)] text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
             >
               {loading ? t('auth.creating') : t('auth.createAccount')}
             </button>
           </form>
         </div>
 
-        <p className="text-center text-xs text-zinc-500 mt-6">
+        <p className="text-center text-xs text-[var(--text-faint)] mt-6">
           {t('auth.alreadyHaveAccount')}{' '}
-          <Link to="/login" className="text-blue-400 hover:text-blue-300">
+          <Link to="/login" className="text-[var(--accent)] hover:text-[var(--accent-hover)]">
             {t('auth.login')}
           </Link>
         </p>
