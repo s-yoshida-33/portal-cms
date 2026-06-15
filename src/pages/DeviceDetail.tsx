@@ -542,7 +542,7 @@ export function DeviceDetail() {
                       <span className="shrink-0 select-none text-[var(--text-faint)] tabular-nums whitespace-pre pr-2">
                         {String(i + 1).padStart(String(filteredLogs.length).length)}
                       </span>
-                      <span className="shrink-0 text-[var(--text-faint)] bg-[var(--bg-subtle)] rounded px-1">{log.timestamp}</span>
+                      <span className="shrink-0 text-[var(--text-faint)]">{log.timestamp}</span>
                       <span className={`shrink-0 w-10 ${logLevelClass(log.level)}`}>{log.level || '----'}</span>
                       {log.tag && <span className="shrink-0 text-[var(--text-faint)]">[{log.tag}]</span>}
                       <span className="text-[var(--text-muted)]">{log.message}</span>
