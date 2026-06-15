@@ -55,10 +55,10 @@ input[type="date"].date-empty:focus::-webkit-datetime-edit {
   --danger-text:  #fc574a;
 }
 .light {
-  --bg-base:      #f4f4f5;
+  --bg-base:      #f9f9f9;
   --bg-surface:   #ffffff;
-  --bg-raised:    #f0f0f0;
-  --bg-subtle:    #e8e8e8;
+  --bg-raised:    #f3f3f4;
+  --bg-subtle:    #ebebec;
   --bg-hover:     #e0e0e0;
   --bg-active:    #d8d8d8;
   --border:       #d4d4d8;
