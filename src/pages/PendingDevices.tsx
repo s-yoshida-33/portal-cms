@@ -126,7 +126,7 @@ function ApproveModal({ pending, projects, onClose, onDone }: ApproveModalProps)
 
           <div className="flex justify-end pt-5">
             <button onClick={onClose}
-              className="h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[#1a6aff] hover:bg-[#1558d4] transition-colors cursor-pointer">
+              className="h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer">
               {t('common.close')}
             </button>
           </div>
@@ -197,7 +197,7 @@ function ApproveModal({ pending, projects, onClose, onDone }: ApproveModalProps)
               {t('common.cancel')}
             </button>
             <button type="submit" disabled={running || projects.length === 0}
-              className="h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[#1a6aff] hover:bg-[#1558d4] disabled:opacity-50 transition-colors cursor-pointer">
+              className="h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-50 transition-colors cursor-pointer">
               {running ? t('pendingDevices.approveModal.approving') : t('pendingDevices.approveModal.approveBtn')}
             </button>
           </div>
@@ -327,7 +327,7 @@ export function PendingDevices() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setApproveTarget(d)}
-                      className="h-7 px-3 rounded-md text-xs font-medium text-[var(--text)] bg-[#1a6aff] hover:bg-[#1558d4] transition-colors cursor-pointer"
+                      className="h-7 px-3 rounded-md text-xs font-medium text-[var(--text)] bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer"
                     >
                       {t('pendingDevices.approveBtn')}
                     </button>
@@ -367,7 +367,7 @@ export function PendingDevices() {
                   <div className="flex items-center gap-2 justify-end">
                     <button
                       onClick={() => setApproveTarget(d)}
-                      className="h-7 px-3 rounded-md text-xs font-medium text-[var(--text)] bg-[#1a6aff] hover:bg-[#1558d4] transition-colors cursor-pointer"
+                      className="h-7 px-3 rounded-md text-xs font-medium text-[var(--text)] bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer"
                     >
                       {t('pendingDevices.approveBtn')}
                     </button>
