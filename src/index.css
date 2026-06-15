@@ -30,6 +30,44 @@ input[type="date"].date-empty:focus::-webkit-datetime-edit {
   color: inherit;
 }
 
+/* ── Appearance tokens ─────────────────────────────────────────── */
+:root, .dark {
+  --bg-base:      #000000;
+  --bg-surface:   #111111;
+  --bg-raised:    #1a1a1a;
+  --bg-subtle:    #222222;
+  --bg-hover:     #2a2a2a;
+  --bg-active:    #161616;
+  --border:       #3d3d3d;
+  --text:         #ffffff;
+  --text-muted:   #999999;
+  --text-dim:     #666666;
+  --text-faint:   #555555;
+  --accent:       #4693ff;
+  --accent-hover: #3578e0;
+  --danger:       #e81403;
+  --danger-hover: #b20f03;
+  --danger-text:  #fc574a;
+}
+.light {
+  --bg-base:      #f4f4f5;
+  --bg-surface:   #ffffff;
+  --bg-raised:    #f0f0f0;
+  --bg-subtle:    #e8e8e8;
+  --bg-hover:     #e0e0e0;
+  --bg-active:    #d8d8d8;
+  --border:       #d4d4d8;
+  --text:         #111111;
+  --text-muted:   #52525b;
+  --text-dim:     #71717a;
+  --text-faint:   #a1a1aa;
+  --accent:       #2563eb;
+  --accent-hover: #1d4ed8;
+  --danger:       #dc2626;
+  --danger-hover: #b91c1c;
+  --danger-text:  #ef4444;
+}
+
 /* ── react-day-picker dark theme overrides ────────────────────── */
 .rdp-root {
   /* Colors */

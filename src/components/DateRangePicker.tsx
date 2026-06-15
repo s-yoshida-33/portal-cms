@@ -144,7 +144,7 @@ export function DateRangePicker({
 
   const btnBase = isSmall
     ? 'h-6 px-2 rounded-md text-xs bg-zinc-800 ring-1 ring-zinc-700 focus:outline-none focus:ring-zinc-500'
-    : 'h-9 px-3 rounded-lg text-sm bg-[#1a1a1a] ring-1 ring-[#3d3d3d] focus:ring-[#4693ff] focus:ring-[1.5px]';
+    : 'h-9 px-3 rounded-lg text-sm bg-[var(--bg-raised)] ring-1 ring-[var(--border)] focus:ring-[#4693ff] focus:ring-[1.5px]';
 
   return (
     <div ref={containerRef} className={`relative inline-block ${className}`}>
@@ -155,8 +155,8 @@ export function DateRangePicker({
         onClick={() => setOpen(o => !o)}
         className={`${btnBase} flex items-center gap-1.5 cursor-pointer select-none outline-none transition-all`}
       >
-        <span className="text-zinc-500"><CalIcon size={isSmall ? 12 : 14} /></span>
-        <span className={hasValue ? (isSmall ? 'text-zinc-300' : 'text-white') : 'text-zinc-500'}>
+        <span className="text-[var(--text-dim)]"><CalIcon size={isSmall ? 12 : 14} /></span>
+        <span className={hasValue ? (isSmall ? 'text-[var(--text-muted)]' : 'text-[var(--text)]') : 'text-[var(--text-dim)]'}>
           {buttonLabel}
         </span>
       </button>
@@ -166,14 +166,14 @@ export function DateRangePicker({
         <div
           ref={popupRef}
           className={[
-            'absolute z-50 bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl shadow-2xl overflow-hidden',
+            'absolute z-50 bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl shadow-2xl overflow-hidden',
             popupPos.up    ? 'bottom-full mb-1' : 'top-full mt-1',
             popupPos.right ? 'right-0'          : 'left-0',
           ].join(' ')}
         >
 
           {/* Calendar */}
-          <div className="p-3 border-b border-[#2a2a2a]">
+          <div className="p-3 border-b border-[var(--bg-hover)]">
             {mode === 'range' ? (
               <DayPicker
                 mode="range"
@@ -196,22 +196,22 @@ export function DateRangePicker({
           </div>
 
           {/* Start / End display */}
-          <div className="px-3 py-3 border-b border-[#2a2a2a] space-y-2">
+          <div className="px-3 py-3 border-b border-[var(--bg-hover)] space-y-2">
             <div>
-              <p className="text-zinc-500 text-xs mb-1">Start</p>
-              <div className="flex items-center gap-2 h-9 bg-[#1a1a1a] ring-1 ring-[#3d3d3d] rounded-lg px-3 text-sm">
-                <span className="text-zinc-500"><CalIcon size={13} /></span>
-                <span className={draftFrom ? 'text-white' : 'text-zinc-500'}>
+              <p className="text-[var(--text-dim)] text-xs mb-1">Start</p>
+              <div className="flex items-center gap-2 h-9 bg-[var(--bg-raised)] ring-1 ring-[var(--border)] rounded-lg px-3 text-sm">
+                <span className="text-[var(--text-dim)]"><CalIcon size={13} /></span>
+                <span className={draftFrom ? 'text-[var(--text)]' : 'text-[var(--text-dim)]'}>
                   {draftFrom || '—'}
                 </span>
               </div>
             </div>
             {mode === 'range' && (
               <div>
-                <p className="text-zinc-500 text-xs mb-1">End</p>
-                <div className="flex items-center gap-2 h-9 bg-[#1a1a1a] ring-1 ring-[#3d3d3d] rounded-lg px-3 text-sm">
-                  <span className="text-zinc-500"><CalIcon size={13} /></span>
-                  <span className={draftTo ? 'text-white' : 'text-zinc-500'}>
+                <p className="text-[var(--text-dim)] text-xs mb-1">End</p>
+                <div className="flex items-center gap-2 h-9 bg-[var(--bg-raised)] ring-1 ring-[var(--border)] rounded-lg px-3 text-sm">
+                  <span className="text-[var(--text-dim)]"><CalIcon size={13} /></span>
+                  <span className={draftTo ? 'text-[var(--text)]' : 'text-[var(--text-dim)]'}>
                     {draftTo || '—'}
                   </span>
                 </div>
@@ -226,7 +226,7 @@ export function DateRangePicker({
               <button
                 type="button"
                 onClick={handleClear}
-                className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer"
+                className="text-xs text-[var(--text-dim)] hover:text-[var(--text-muted)] transition-colors cursor-pointer"
               >
                 Clear
               </button>
@@ -234,7 +234,7 @@ export function DateRangePicker({
             <button
               type="button"
               onClick={handleApply}
-              className="h-8 px-5 rounded-lg text-sm font-semibold text-white bg-[#4693ff] hover:bg-[#3578e0] transition-colors cursor-pointer"
+              className="h-8 px-5 rounded-lg text-sm font-semibold text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer"
             >
               Apply
             </button>
