@@ -242,7 +242,7 @@ function RejectConfirm({ pending, onClose, onDone }: RejectConfirmProps) {
             {t('common.cancel')}
           </button>
           <button onClick={handle} disabled={running}
-            className="h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--danger)] hover:bg-[var(--danger-hover)] disabled:opacity-50 transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[var(--danger)] hover:bg-[var(--danger-hover)] disabled:opacity-50 transition-colors cursor-pointer">
             {running ? t('pendingDevices.rejectModal.rejecting') : t('pendingDevices.rejectModal.rejectBtn')}
           </button>
         </div>

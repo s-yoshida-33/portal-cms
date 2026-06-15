@@ -53,7 +53,7 @@ function ApproveConfirm({ request, onClose, onConfirm }: ApproveConfirmProps) {
             {t('common.cancel')}
           </button>
           <button onClick={handle} disabled={running}
-            className="h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--danger)] hover:bg-[var(--danger-hover)] disabled:opacity-50 transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[var(--danger)] hover:bg-[var(--danger-hover)] disabled:opacity-50 transition-colors cursor-pointer">
             {running ? t('deletionRequests.approveModal.deleting') : t('deletionRequests.approveModal.deleteBtn')}
           </button>
         </div>
@@ -105,7 +105,7 @@ function RejectModal({ request, onClose, onConfirm }: RejectModalProps) {
               {t('common.cancel')}
             </button>
             <button type="submit" disabled={running}
-              className="h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--danger)] hover:bg-[var(--danger-hover)] disabled:opacity-50 transition-colors cursor-pointer">
+              className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[var(--danger)] hover:bg-[var(--danger-hover)] disabled:opacity-50 transition-colors cursor-pointer">
               {running ? t('deletionRequests.rejectModal.processing') : t('deletionRequests.rejectModal.rejectBtn')}
             </button>
           </div>
@@ -200,7 +200,7 @@ export function DeletionRequests() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setApproveTarget(req)}
-                      className="h-7 px-3 rounded-md text-xs font-medium text-[var(--text)] bg-[var(--danger)] hover:bg-[var(--danger-hover)] transition-colors cursor-pointer"
+                      className="h-7 px-3 rounded-md text-xs font-medium text-white bg-[var(--danger)] hover:bg-[var(--danger-hover)] transition-colors cursor-pointer"
                     >
                       {t('deletionRequests.approveDeleteBtn')}
                     </button>
@@ -240,7 +240,7 @@ export function DeletionRequests() {
                   <div className="flex items-center gap-2 justify-end">
                     <button
                       onClick={() => setApproveTarget(req)}
-                      className="h-7 px-3 rounded-md text-xs font-medium text-[var(--text)] bg-[var(--danger)] hover:bg-[var(--danger-hover)] transition-colors cursor-pointer"
+                      className="h-7 px-3 rounded-md text-xs font-medium text-white bg-[var(--danger)] hover:bg-[var(--danger-hover)] transition-colors cursor-pointer"
                     >
                       {t('deletionRequests.approveDeleteBtn')}
                     </button>
