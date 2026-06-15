@@ -30,7 +30,8 @@
     "appearance": "Appearance",
     "language": "Language",
     "timezone": "Timezone",
-    "logout": "Log out"
+    "logout": "Log out",
+    "appearanceSystem": "System"
   },
   "auth": {
     "authenticating": "Authenticating...",

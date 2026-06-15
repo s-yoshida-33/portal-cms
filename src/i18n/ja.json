@@ -30,7 +30,8 @@
     "appearance": "外観",
     "language": "言語",
     "timezone": "タイムゾーン",
-    "logout": "ログアウト"
+    "logout": "ログアウト",
+    "appearanceSystem": "システム"
   },
   "auth": {
     "authenticating": "認証中...",

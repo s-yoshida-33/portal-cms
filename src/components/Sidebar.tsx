@@ -274,7 +274,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
   const appearanceOptions = [
     { value: 'light'  as Appearance, label: t('profile.appearance.light') },
     { value: 'dark'   as Appearance, label: t('profile.appearance.dark') },
-    { value: 'system' as Appearance, label: t('profile.appearance.system') },
+    { value: 'system' as Appearance, label: t('nav.appearanceSystem') },
   ];
   const timezoneOptions = [
     { value: 'local' as Timezone, label: t('profile.timezone.local') },
