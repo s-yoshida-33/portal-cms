@@ -13,8 +13,8 @@ import { useFormatDate } from '../hooks/useFormatDate';
 const PAGE_SIZE = 20;
 
 const typeBadge: Record<ApiTokenType, string> = {
-  registration: 'text-green-400 bg-green-950/40 ring-1 ring-green-900/50',
-  device:       'text-blue-400 bg-blue-950/40 ring-1 ring-blue-900/50',
+  registration: 'text-green-400 bg-green-500/10 ring-1 ring-green-500/20',
+  device:       'text-blue-400 bg-blue-500/10 ring-1 ring-blue-500/20',
 };
 
 // ── ページネーション ───────────────────────────────────────────────

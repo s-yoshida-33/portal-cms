@@ -16,11 +16,11 @@ import { useFormatDate } from '../hooks/useFormatDate';
 // ── helpers ──────────────────────────────────────────────────────
 
 const appBadge: Record<AppName, string> = {
-  'Gido':           'text-blue-400   bg-blue-950/40   ring-1 ring-blue-900/50',
-  'Gido-Touch':     'text-red-400    bg-red-950/40    ring-1 ring-red-900/50',
-  'Gido-Touch-Mini':'text-green-400  bg-green-950/40  ring-1 ring-green-900/50',
-  'Grain-Link':     'text-orange-400 bg-orange-950/40 ring-1 ring-orange-900/50',
-  'Bridge-Ground':  'text-purple-400 bg-purple-950/40 ring-1 ring-purple-900/50',
+  'Gido':           'text-blue-400   bg-blue-500/10   ring-1 ring-blue-500/20',
+  'Gido-Touch':     'text-red-400    bg-red-500/10    ring-1 ring-red-500/20',
+  'Gido-Touch-Mini':'text-green-400  bg-green-500/10  ring-1 ring-green-500/20',
+  'Grain-Link':     'text-orange-400 bg-orange-500/10 ring-1 ring-orange-500/20',
+  'Bridge-Ground':  'text-purple-400 bg-purple-500/10 ring-1 ring-purple-500/20',
 };
 
 // ── 承認モーダル ──────────────────────────────────────────────────

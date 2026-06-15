@@ -10,8 +10,8 @@ import { useFormatDate } from '../hooks/useFormatDate';
 // ── helpers ──────────────────────────────────────────────────────
 
 const roleBadge: Record<UserRole, string> = {
-  owner: 'text-yellow-400 bg-yellow-950/40 ring-1 ring-yellow-900/50',
-  admin: 'text-blue-400 bg-blue-950/40 ring-1 ring-blue-900/50',
+  owner: 'text-yellow-400 bg-yellow-500/10 ring-1 ring-yellow-500/20',
+  admin: 'text-blue-400 bg-blue-500/10 ring-1 ring-blue-500/20',
   user:  'text-[var(--text-dim)] bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)]/50',
 };
 

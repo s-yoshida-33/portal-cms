@@ -9,10 +9,10 @@ import { useFormatDate } from '../hooks/useFormatDate';
 // ── helpers ──────────────────────────────────────────────────────
 
 const typeBadge: Record<DeletionTargetType, string> = {
-  project:  'text-orange-400 bg-orange-950/40 ring-1 ring-orange-900/50',
-  device:   'text-blue-400 bg-blue-950/40 ring-1 ring-blue-900/50',
-  apiToken: 'text-purple-400 bg-purple-950/40 ring-1 ring-purple-900/50',
-  group:    'text-green-400 bg-green-950/40 ring-1 ring-green-900/50',
+  project:  'text-orange-400 bg-orange-500/10 ring-1 ring-orange-500/20',
+  device:   'text-blue-400 bg-blue-500/10 ring-1 ring-blue-500/20',
+  apiToken: 'text-purple-400 bg-purple-500/10 ring-1 ring-purple-500/20',
+  group:    'text-green-400 bg-green-500/10 ring-1 ring-green-500/20',
 };
 
 // ── 承認確認モーダル ──────────────────────────────────────────────

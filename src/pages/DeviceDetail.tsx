@@ -87,9 +87,9 @@ function logLevelBadgeClass(level: string, active: boolean) {
   if (!active) return 'text-[var(--text-faint)] bg-[var(--bg-subtle)] ring-[var(--border)]';
   switch (level) {
     case 'ERROR':
-    case 'FATAL': return 'text-red-400 bg-red-950/40 ring-red-800/50';
-    case 'WARN':  return 'text-yellow-400 bg-yellow-950/40 ring-yellow-800/50';
-    case 'INFO':  return 'text-green-400 bg-green-950/40 ring-green-800/50';
+    case 'FATAL': return 'text-red-400 bg-red-500/10 ring-red-500/20';
+    case 'WARN':  return 'text-yellow-400 bg-yellow-500/10 ring-yellow-500/20';
+    case 'INFO':  return 'text-green-400 bg-green-500/10 ring-green-500/20';
     default:      return 'text-[var(--text-dim)] bg-[var(--bg-subtle)]/40 ring-[var(--border)]/50';
   }
 }
