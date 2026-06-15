@@ -85,14 +85,12 @@ export function ProfileLayout() {
                     aria-label={t('profile.sidebar.back')}
                     role="img"
                     xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 16 16"
+                    viewBox="0 0 256 256"
                     width="20"
                     height="20"
                     fill="currentColor"
-                    stroke="currentColor"
-                    strokeWidth="0.5"
                   >
-                    <path d="M14 7.5H3.439l4.29-4.387-.714-.699L1.55 8l5.465 5.586.714-.7L3.44 8.5h10.56v-1z" />
+                    <path d="M232,200a8,8,0,0,1-16,0,88.1,88.1,0,0,0-88-88H51.31l34.35,34.34a8,8,0,0,1-11.32,11.32l-48-48a8,8,0,0,1,0-11.32l48-48A8,8,0,0,1,85.66,61.66L51.31,96H128A104.11,104.11,0,0,1,232,200Z" />
                   </svg>
                 </button>
               </div>
