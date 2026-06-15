@@ -80,7 +80,7 @@ function SidebarFlyout<T extends string>({
       <button
         ref={triggerRef}
         type="button"
-        onClick={() => isOpen ? onClose() : onOpen()}
+        onClick={() => { if (!isOpen) onOpen(); }}
         onMouseEnter={onOpen}
         className={`w-full flex items-center pl-11 pr-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
           isOpen
@@ -110,7 +110,7 @@ function SidebarFlyout<T extends string>({
                 role="option"
                 aria-selected={isSelected}
                 onClick={() => { onChange(opt.value); onClose(); }}
-                className={`flex w-full h-9 shrink-0 items-center justify-between gap-6 rounded-md pl-3 pr-4 text-base outline-none transition-colors hover:bg-[var(--bg-subtle)]/60 cursor-pointer ${
+                className={`flex w-full h-9 shrink-0 items-center justify-between gap-6 rounded-md pl-3 pr-4 text-sm outline-none transition-colors hover:bg-[var(--bg-subtle)]/60 cursor-pointer ${
                   isSelected ? 'text-[var(--text)]' : 'text-[var(--text)]'
                 }`}
               >
@@ -274,7 +274,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
   const appearanceOptions = [
     { value: 'light'  as Appearance, label: t('profile.appearance.light') },
     { value: 'dark'   as Appearance, label: t('profile.appearance.dark') },
-    { value: 'system' as Appearance, label: t('profile.appearance.system') },
+    { value: 'system' as Appearance, label: t('nav.appearanceSystem') },
   ];
   const timezoneOptions = [
     { value: 'local' as Timezone, label: t('profile.timezone.local') },
