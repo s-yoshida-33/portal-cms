@@ -82,10 +82,8 @@ export function Login() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[var(--accent)] mb-4">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-              <path d="M3 3h8v8H3V3zm0 10h8v8H3v-8zm10-10h8v8h-8V3zm0 10h8v8h-8v-8z"/>
-            </svg>
+          <div className="inline-flex items-center justify-center mb-4">
+            <img src="/logo.svg" alt="" className="w-12 h-12" />
           </div>
           <h1 className="text-xl font-semibold text-[var(--text)]">Portal CMS</h1>
         </div>
