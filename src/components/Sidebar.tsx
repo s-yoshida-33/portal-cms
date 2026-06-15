@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { NavLink, useNavigate, useParams } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../lib/firebase';
@@ -95,10 +96,10 @@ function SidebarFlyout<T extends string>({
         </svg>
       </button>
 
-      {isOpen && (
+      {isOpen && createPortal(
         <div
           ref={panelRef}
-          style={{ position: 'fixed', top: pos.top, left: pos.left, zIndex: 9999 }}
+          style={{ position: 'fixed', top: pos.top, left: pos.left, zIndex: 99999 }}
           className="bg-[#111111] text-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.5)] ring-1 ring-[#3d3d3d] py-1.5 px-2 min-w-[160px]"
         >
           {options.map(opt => {
@@ -124,7 +125,8 @@ function SidebarFlyout<T extends string>({
               </div>
             );
           })}
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
