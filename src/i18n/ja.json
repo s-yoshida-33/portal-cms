@@ -415,8 +415,8 @@
     "timezone": {
       "title": "タイムゾーン",
       "description": "日時の表示タイムゾーンを選択してください。",
-      "utc": "標準（UTC）",
-      "local": "ローカル（GMT+9）"
+      "utc": "標準 (UTC)",
+      "local": "ローカル (GMT+9)"
     },
     "appearance": {
       "title": "外観",
