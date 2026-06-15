@@ -31,7 +31,9 @@
     "language": "Language",
     "timezone": "Timezone",
     "logout": "Log out",
-    "appearanceSystem": "System"
+    "appearanceSystem": "System",
+    "timezoneLocal": "Local",
+    "timezoneUtc": "UTC"
   },
   "auth": {
     "authenticating": "Authenticating...",

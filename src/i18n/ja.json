@@ -31,7 +31,9 @@
     "language": "言語",
     "timezone": "タイムゾーン",
     "logout": "ログアウト",
-    "appearanceSystem": "システム"
+    "appearanceSystem": "システム",
+    "timezoneLocal": "ローカル",
+    "timezoneUtc": "UTC"
   },
   "auth": {
     "authenticating": "認証中...",
