@@ -80,7 +80,7 @@ function SidebarFlyout<T extends string>({
       <button
         ref={triggerRef}
         type="button"
-        onClick={() => isOpen ? onClose() : onOpen()}
+        onClick={() => { if (!isOpen) onOpen(); }}
         onMouseEnter={onOpen}
         className={`w-full flex items-center pl-11 pr-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
           isOpen
