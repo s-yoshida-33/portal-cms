@@ -54,7 +54,7 @@ export function ProfileLayout() {
       {/* Sidebar */}
       <aside
         className={[
-          'fixed inset-y-0 left-0 z-50 w-2/3',
+          'fixed inset-y-0 left-0 z-50 w-3/5',
           'transform transition-transform duration-300 ease-in-out',
           mobileOpen ? 'translate-x-0' : '-translate-x-full',
           'sm:static sm:inset-auto sm:z-auto sm:translate-x-0 sm:w-56 sm:shrink-0',
@@ -65,8 +65,8 @@ export function ProfileLayout() {
         <div className="shrink-0">
           {/* ロゴ */}
           <div className="px-5 py-3 border-b border-[var(--border)]">
-            <div className="flex items-center gap-2.5">
-              <img src="/logo.svg" alt="" className="w-7 h-7 shrink-0" />
+            <div className="h-7 flex items-center gap-2.5">
+              <img src="/logo.svg" alt="" className="w-6 h-6 shrink-0" />
               <span className="text-[var(--text)] font-semibold text-sm">Portal CMS</span>
             </div>
           </div>

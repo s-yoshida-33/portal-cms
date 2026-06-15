@@ -284,7 +284,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
   return (
     <aside
       className={[
-        'fixed inset-y-0 left-0 z-50 w-2/3',
+        'fixed inset-y-0 left-0 z-50 w-3/5',
         'transform transition-transform duration-300 ease-in-out',
         mobileOpen ? 'translate-x-0' : '-translate-x-full',
         'sm:static sm:inset-auto sm:z-auto sm:translate-x-0 sm:w-56 sm:shrink-0',
@@ -295,7 +295,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
       <div className="shrink-0">
         {/* ロゴ */}
         <div className="px-5 py-3 border-b border-[var(--border)]">
-          <div className="flex items-center gap-2.5">
+          <div className="h-7 flex items-center gap-2.5">
             <img src="/logo.svg" alt="" className="w-6 h-6 shrink-0" />
             <span className="text-[var(--text)] font-semibold text-sm">Portal CMS</span>
           </div>
@@ -330,6 +330,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
               <NavLink
                 to="/profile/settings"
                 onClick={onMobileClose}
+                onMouseEnter={closeFlyout}
                 className={({ isActive }) =>
                   `flex items-center pl-11 pr-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
                     isActive
@@ -377,6 +378,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
               {/* Logout */}
               <button
                 onClick={handleSignOut}
+                onMouseEnter={closeFlyout}
                 className="w-full flex items-center pl-11 pr-3 py-2 rounded-lg text-sm text-red-400 hover:bg-red-950/40 hover:text-red-300 transition-colors cursor-pointer"
               >
                 {t('nav.logout')}

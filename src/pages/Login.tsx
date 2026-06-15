@@ -82,10 +82,8 @@ export function Login() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[var(--accent)] mb-4">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-              <path d="M3 3h8v8H3V3zm0 10h8v8H3v-8zm10-10h8v8h-8V3zm0 10h8v8h-8v-8z"/>
-            </svg>
+          <div className="inline-flex items-center justify-center mb-4">
+            <img src="/logo.svg" alt="" className="w-12 h-12" />
           </div>
           <h1 className="text-xl font-semibold text-[var(--text)]">Portal CMS</h1>
         </div>
@@ -97,7 +95,7 @@ export function Login() {
           <button
             onClick={handleGoogleLogin}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-3 px-4 py-2.5 bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] font-medium transition-colors disabled:opacity-50 mb-6"
+            className="w-full flex items-center justify-center gap-3 px-4 py-2.5 bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] font-medium transition-colors disabled:opacity-50 mb-6 cursor-pointer"
           >
             <GoogleIcon />
             {t('auth.loginWithGoogle')}
@@ -154,7 +152,7 @@ export function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--text)] text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+              className="w-full py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--text)] text-sm font-medium rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
             >
               {loading ? t('auth.loggingIn') : t('auth.login')}
             </button>
