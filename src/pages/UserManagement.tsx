@@ -12,7 +12,7 @@ import { useFormatDate } from '../hooks/useFormatDate';
 const roleBadge: Record<UserRole, string> = {
   owner: 'text-yellow-400 bg-yellow-950/40 ring-1 ring-yellow-900/50',
   admin: 'text-blue-400 bg-blue-950/40 ring-1 ring-blue-900/50',
-  user:  'text-zinc-400 bg-zinc-800/60 ring-1 ring-zinc-700/50',
+  user:  'text-[var(--text-dim)] bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)]/50',
 };
 
 // ── 除名確認モーダル ──────────────────────────────────────────────
@@ -35,19 +35,19 @@ function RemoveConfirm({ target, onClose, onConfirm }: RemoveConfirmProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
-      <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl"
+      <div className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl w-full max-w-md p-6 shadow-2xl"
         onClick={e => e.stopPropagation()}>
-        <h2 className="text-white text-lg font-semibold mb-2">{t('users.removeModal.title')}</h2>
-        <p className="text-zinc-400 text-sm mb-5">
+        <h2 className="text-[var(--text)] text-lg font-semibold mb-2">{t('users.removeModal.title')}</h2>
+        <p className="text-[var(--text-dim)] text-sm mb-5">
           {t('users.removeModal.body', { name: target.displayName, email: target.email })}
         </p>
         <div className="flex justify-end gap-2">
           <button onClick={onClose}
-            className="h-9 px-4 rounded-lg text-sm text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer">
             {t('common.cancel')}
           </button>
           <button onClick={handle} disabled={running}
-            className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#e81403] hover:bg-[#b20f03] disabled:opacity-50 transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--danger)] hover:bg-[var(--danger-hover)] disabled:opacity-50 transition-colors cursor-pointer">
             {running ? t('common.processing') : t('users.removeModal.confirm')}
           </button>
         </div>
@@ -90,7 +90,7 @@ export function UserManagement() {
     return (
       <div className="flex flex-col min-h-full">
         <div className="p-8">
-          <p className="text-zinc-400 text-sm">{t('users.accessDenied')}</p>
+          <p className="text-[var(--text-dim)] text-sm">{t('users.accessDenied')}</p>
         </div>
       </div>
     );
@@ -117,23 +117,23 @@ export function UserManagement() {
       {/* ページヘッダー */}
       <div className="flex items-start justify-between gap-4 py-6 px-4 sm:px-6">
         <div className="flex flex-col gap-2">
-          <h1 className="text-white text-3xl font-semibold leading-tight">{t('users.title')}</h1>
-          <p className="text-[#999999] text-base">{t('users.description')}</p>
+          <h1 className="text-[var(--text)] text-3xl font-semibold leading-tight">{t('users.title')}</h1>
+          <p className="text-[var(--text-muted)] text-base">{t('users.description')}</p>
         </div>
         {!loading && (
-          <span className="text-sm text-zinc-500 mt-1">{t('users.count', { count: users.length })}</span>
+          <span className="text-sm text-[var(--text-faint)] mt-1">{t('users.count', { count: users.length })}</span>
         )}
       </div>
 
       {/* コンテンツ */}
       <div className="px-4 sm:px-6 pt-8 pb-8">
         {loading ? (
-          <div className="overflow-hidden rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-12 text-center">
-            <p className="text-zinc-500 text-sm">{t('common.loading')}</p>
+          <div className="overflow-hidden rounded-lg bg-[var(--bg-surface)] ring-1 ring-[var(--border)] p-12 text-center">
+            <p className="text-[var(--text-faint)] text-sm">{t('common.loading')}</p>
           </div>
         ) : users.length === 0 ? (
-          <div className="overflow-hidden rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-12 text-center">
-            <p className="text-zinc-500 text-sm">{t('users.noUsers')}</p>
+          <div className="overflow-hidden rounded-lg bg-[var(--bg-surface)] ring-1 ring-[var(--border)] p-12 text-center">
+            <p className="text-[var(--text-faint)] text-sm">{t('users.noUsers')}</p>
           </div>
         ) : (
           <>
@@ -143,19 +143,19 @@ export function UserManagement() {
                 const isSelf     = u.uid === user?.uid;
                 const isUpdating = updating === u.uid;
                 return (
-                  <div key={u.uid} className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl p-4">
+                  <div key={u.uid} className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl p-4">
                     {/* アバター + 表示名 + ロール */}
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shrink-0 text-white text-sm font-medium">
+                        <div className="w-8 h-8 rounded-full bg-[var(--accent)] flex items-center justify-center shrink-0 text-[var(--text)] text-sm font-medium">
                           {u.displayName[0]?.toUpperCase() ?? '?'}
                         </div>
                         <div className="min-w-0">
-                          <div className="text-white text-sm font-medium truncate">
+                          <div className="text-[var(--text)] text-sm font-medium truncate">
                             {u.displayName}
-                            {isSelf && <span className="ml-1.5 text-zinc-500 text-xs">{t('users.self')}</span>}
+                            {isSelf && <span className="ml-1.5 text-[var(--text-faint)] text-xs">{t('users.self')}</span>}
                           </div>
-                          <div className="text-zinc-500 text-xs truncate mt-0.5">{u.email}</div>
+                          <div className="text-[var(--text-faint)] text-xs truncate mt-0.5">{u.email}</div>
                         </div>
                       </div>
                       {isSelf ? (
@@ -178,7 +178,7 @@ export function UserManagement() {
                     </div>
                     {/* 登録日 + 除名ボタン */}
                     <div className="flex items-center justify-between">
-                      <span className="text-zinc-500 text-xs tabular-nums">{t('users.registered', { date: formatDate(u.assignedAt, true) })}</span>
+                      <span className="text-[var(--text-faint)] text-xs tabular-nums">{t('users.registered', { date: formatDate(u.assignedAt, true) })}</span>
                       {!isSelf && (
                         <button
                           onClick={() => setRemoveTarget(u)}
@@ -195,9 +195,9 @@ export function UserManagement() {
             </div>
 
             {/* ── PCテーブル ── */}
-            <div className="hidden sm:block rounded-lg ring-1 ring-[#3d3d3d]">
+            <div className="hidden sm:block rounded-lg ring-1 ring-[var(--border)]">
               {/* テーブルヘッダー */}
-              <div className="grid grid-cols-[1fr_1fr_160px_120px_120px] gap-4 px-4 py-3 bg-black rounded-t-lg border-b border-[#3d3d3d] text-xs font-medium text-zinc-500 uppercase tracking-wider">
+              <div className="grid grid-cols-[1fr_1fr_160px_120px_120px] gap-4 px-4 py-3 bg-[var(--bg-base)] rounded-t-lg border-b border-[var(--border)] text-xs font-medium text-[var(--text-faint)] uppercase tracking-wider">
                 <span>{t('users.table.displayName')}</span>
                 <span>{t('users.table.email')}</span>
                 <span>{t('users.table.role')}</span>
@@ -212,22 +212,22 @@ export function UserManagement() {
                 return (
                   <div
                     key={u.uid}
-                    className={`grid grid-cols-[1fr_1fr_160px_120px_120px] gap-4 px-4 py-3.5 items-center bg-[#111111] hover:bg-[#161616] transition-colors ${
-                      i < users.length - 1 ? 'border-b border-[#3d3d3d]' : 'rounded-b-lg'
+                    className={`grid grid-cols-[1fr_1fr_160px_120px_120px] gap-4 px-4 py-3.5 items-center bg-[var(--bg-surface)] hover:bg-[var(--bg-active)] transition-colors ${
+                      i < users.length - 1 ? 'border-b border-[var(--border)]' : 'rounded-b-lg'
                     }`}
                   >
                     {/* 表示名 */}
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center shrink-0 text-white text-xs font-medium">
+                      <div className="w-7 h-7 rounded-full bg-[var(--accent)] flex items-center justify-center shrink-0 text-[var(--text)] text-xs font-medium">
                         {u.displayName[0]?.toUpperCase() ?? '?'}
                       </div>
-                      <span className="text-white text-sm truncate">
+                      <span className="text-[var(--text)] text-sm truncate">
                         {u.displayName}
-                        {isSelf && <span className="ml-1.5 text-zinc-500 text-xs">{t('users.self')}</span>}
+                        {isSelf && <span className="ml-1.5 text-[var(--text-faint)] text-xs">{t('users.self')}</span>}
                       </span>
                     </div>
                     {/* メール */}
-                    <span className="text-zinc-400 text-sm truncate">{u.email}</span>
+                    <span className="text-[var(--text-dim)] text-sm truncate">{u.email}</span>
                     {/* ロール */}
                     {isSelf ? (
                       <span className={`inline-flex items-center justify-center h-5 px-2 rounded-full text-xs font-medium w-fit ${roleBadge[u.role]}`}>
@@ -247,7 +247,7 @@ export function UserManagement() {
                       />
                     )}
                     {/* 登録日 */}
-                    <span className="text-zinc-500 text-xs tabular-nums">{formatDate(u.assignedAt, true)}</span>
+                    <span className="text-[var(--text-faint)] text-xs tabular-nums">{formatDate(u.assignedAt, true)}</span>
                     {/* 操作 */}
                     <div className="flex justify-end">
                       {!isSelf && (

@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+body {
+  background-color: var(--bg-base);
+  color: var(--text);
+}
+
 /* スクロールバー非表示 */
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -28,6 +33,44 @@ input[type="date"].date-empty::-webkit-datetime-edit {
 }
 input[type="date"].date-empty:focus::-webkit-datetime-edit {
   color: inherit;
+}
+
+/* ── Appearance tokens ─────────────────────────────────────────── */
+:root, .dark {
+  --bg-base:      #000000;
+  --bg-surface:   #111111;
+  --bg-raised:    #1a1a1a;
+  --bg-subtle:    #222222;
+  --bg-hover:     #2a2a2a;
+  --bg-active:    #161616;
+  --border:       #3d3d3d;
+  --text:         #ffffff;
+  --text-muted:   #999999;
+  --text-dim:     #666666;
+  --text-faint:   #555555;
+  --accent:       #4693ff;
+  --accent-hover: #3578e0;
+  --danger:       #e81403;
+  --danger-hover: #b20f03;
+  --danger-text:  #fc574a;
+}
+.light {
+  --bg-base:      #f4f4f5;
+  --bg-surface:   #ffffff;
+  --bg-raised:    #f0f0f0;
+  --bg-subtle:    #e8e8e8;
+  --bg-hover:     #e0e0e0;
+  --bg-active:    #d8d8d8;
+  --border:       #d4d4d8;
+  --text:         #111111;
+  --text-muted:   #52525b;
+  --text-dim:     #71717a;
+  --text-faint:   #a1a1aa;
+  --accent:       #2563eb;
+  --accent-hover: #1d4ed8;
+  --danger:       #dc2626;
+  --danger-hover: #b91c1c;
+  --danger-text:  #ef4444;
 }
 
 /* ── react-day-picker dark theme overrides ────────────────────── */
@@ -186,6 +229,98 @@ input[type="date"].date-empty:focus::-webkit-datetime-edit {
 /* Hide the outline when the selected button is clicked or focused (for single selection) */
 .rdp-root .rdp-selected:not(.rdp-range_start):not(.rdp-range_middle):not(.rdp-range_end) .rdp-day_button:focus,
 .rdp-root .rdp-selected:not(.rdp-range_start):not(.rdp-range_middle):not(.rdp-range_end) .rdp-day_button:focus-visible {
+  outline: none !important;
+}
+
+/* ── react-day-picker light theme overrides ────────────────────── */
+.light .rdp-root {
+  --rdp-accent-color: #2563eb;
+  --rdp-accent-background-color: rgba(37, 99, 235, 0.12);
+  --rdp-today-color: #2563eb;
+  --rdp-range_middle-background-color: #2563eb;
+  --rdp-range_start-date-background-color: #2563eb;
+  --rdp-range_end-date-background-color: #2563eb;
+  --rdp-range_start-color: white;
+  --rdp-range_end-color: white;
+  --rdp-range_middle-color: white;
+  color: #111111;
+}
+
+.light .rdp-root .rdp-chevron {
+  fill: #374151;
+}
+.light .rdp-root .rdp-button_previous:hover,
+.light .rdp-root .rdp-button_next:hover {
+  background-color: #e5e7eb;
+}
+
+.light .rdp-root .rdp-day_button {
+  color: #374151;
+}
+.light .rdp-root .rdp-day_button:hover {
+  background-color: rgba(37, 99, 235, 0.12);
+  color: #111111;
+}
+.light .rdp-root .rdp-day_button:disabled {
+  color: #d1d5db;
+}
+.light .rdp-root .rdp-outside .rdp-day_button {
+  color: #9ca3af;
+}
+
+/* Non-range selected (single mode): accent bg, white text */
+.light .rdp-root .rdp-selected:not(.rdp-range_start):not(.rdp-range_middle):not(.rdp-range_end) .rdp-day_button {
+  background-color: #2563eb !important;
+  color: white !important;
+}
+/* Today unselected: blue */
+.light .rdp-root .rdp-today:not(.rdp-selected) .rdp-day_button {
+  color: #2563eb;
+  font-weight: 700;
+}
+/* Today selected: white text */
+.light .rdp-root .rdp-today.rdp-selected .rdp-day_button {
+  color: white;
+  font-weight: 700;
+}
+
+/* Month caption */
+.light .rdp-root .rdp-caption_label,
+.light .rdp-root .rdp-month_caption {
+  color: #111111;
+  font-weight: 600;
+}
+.light .rdp-root .rdp-weekday {
+  color: #6b7280;
+}
+
+/* Range: accent color bar */
+.light .rdp-root .rdp-range_start .rdp-day_button,
+.light .rdp-root .rdp-range_middle .rdp-day_button,
+.light .rdp-root .rdp-range_end .rdp-day_button {
+  background-color: #2563eb !important;
+  color: white !important;
+  border-color: #2563eb !important;
+}
+.light .rdp-root .rdp-range_start .rdp-day_button:focus,
+.light .rdp-root .rdp-range_middle .rdp-day_button:focus,
+.light .rdp-root .rdp-range_end .rdp-day_button:focus,
+.light .rdp-root .rdp-range_start .rdp-day_button:focus-visible,
+.light .rdp-root .rdp-range_middle .rdp-day_button:focus-visible,
+.light .rdp-root .rdp-range_end .rdp-day_button:focus-visible {
+  border-color: #2563eb !important;
+  outline: none !important;
+}
+
+/* Focus outline: accent color */
+.light .rdp-root .rdp-day_button:focus-visible,
+.light .rdp-root .rdp-day_button:focus {
+  outline: 2px solid #2563eb !important;
+  outline-offset: -2px;
+}
+/* Hide outline on selected single day */
+.light .rdp-root .rdp-selected:not(.rdp-range_start):not(.rdp-range_middle):not(.rdp-range_end) .rdp-day_button:focus,
+.light .rdp-root .rdp-selected:not(.rdp-range_start):not(.rdp-range_middle):not(.rdp-range_end) .rdp-day_button:focus-visible {
   outline: none !important;
 }
 

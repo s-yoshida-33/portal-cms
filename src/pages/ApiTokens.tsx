@@ -35,7 +35,7 @@ function CreateModal({ onClose, onCreated }: CreateModalProps) {
   const [error,   setError]   = useState('');
 
   const inputClass =
-    'w-full bg-[#1a1a1a] ring-1 ring-[#3d3d3d] text-white rounded-lg px-3 h-9 text-sm outline-none focus:ring-[#4693ff] focus:ring-2 placeholder:text-zinc-600 transition-all';
+    'w-full bg-[var(--bg-raised)] ring-1 ring-[var(--border)] text-[var(--text)] rounded-lg px-3 h-9 text-sm outline-none focus:ring-[var(--accent)] focus:ring-2 placeholder:text-[var(--text-faint)] transition-all';
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -52,17 +52,17 @@ function CreateModal({ onClose, onCreated }: CreateModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
-      <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl"
+      <div className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl w-full max-w-md p-6 shadow-2xl"
         onClick={e => e.stopPropagation()}>
-        <h2 className="text-white text-lg font-semibold mb-5">{t('apiTokens.createModal.title')}</h2>
+        <h2 className="text-[var(--text)] text-lg font-semibold mb-5">{t('apiTokens.createModal.title')}</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm text-zinc-400 mb-1.5">{t('apiTokens.createModal.nameLabel')}</label>
+            <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('apiTokens.createModal.nameLabel')}</label>
             <input value={name} onChange={e => setName(e.target.value)}
               className={inputClass} />
           </div>
           <div>
-            <label className="block text-sm text-zinc-400 mb-1.5">{t('apiTokens.createModal.typeLabel')}</label>
+            <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('apiTokens.createModal.typeLabel')}</label>
             <CustomSelect
               value={type}
               onChange={val => setType(val as ApiTokenType)}
@@ -76,11 +76,11 @@ function CreateModal({ onClose, onCreated }: CreateModalProps) {
           {error && <p className="text-red-400 text-sm">{error}</p>}
           <div className="flex justify-end gap-2 pt-2">
             <button type="button" onClick={onClose}
-              className="h-9 px-4 rounded-lg text-sm text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
+              className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer">
               {t('common.cancel')}
             </button>
             <button type="submit" disabled={saving}
-              className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#4693ff] hover:bg-[#3a7fe0] disabled:opacity-50 transition-colors cursor-pointer">
+              className="h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-50 transition-colors cursor-pointer">
               {saving ? t('apiTokens.createModal.issuing') : t('apiTokens.createModal.issueBtn')}
             </button>
           </div>
@@ -109,21 +109,21 @@ function TokenReveal({ token, onClose }: TokenRevealProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-lg p-6 shadow-2xl">
-        <h2 className="text-white text-lg font-semibold mb-2">{t('apiTokens.revealModal.title')}</h2>
-        <p className="text-zinc-400 text-sm mb-4">
+      <div className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl w-full max-w-lg p-6 shadow-2xl">
+        <h2 className="text-[var(--text)] text-lg font-semibold mb-2">{t('apiTokens.revealModal.title')}</h2>
+        <p className="text-[var(--text-dim)] text-sm mb-4">
           {t('apiTokens.revealModal.body')}
         </p>
-        <div className="flex items-center gap-2 bg-[#0d0d0d] ring-1 ring-[#3d3d3d] rounded-lg px-3 py-2.5 mb-5">
+        <div className="flex items-center gap-2 bg-[var(--bg-base)] ring-1 ring-[var(--border)] rounded-lg px-3 py-2.5 mb-5">
           <code className="flex-1 text-xs text-green-400 font-mono break-all">{token}</code>
           <button onClick={handleCopy}
-            className="shrink-0 h-7 px-3 rounded-md text-xs text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
+            className="shrink-0 h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer">
             {copied ? t('common.copied') : t('common.copy')}
           </button>
         </div>
         <div className="flex justify-end">
           <button onClick={onClose}
-            className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#4693ff] hover:bg-[#3a7fe0] transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer">
             {t('apiTokens.revealModal.saved')}
           </button>
         </div>
@@ -152,19 +152,19 @@ function RevokeConfirm({ token, onClose, onConfirm }: RevokeConfirmProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
-      <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl w-full max-w-md p-6 shadow-2xl"
+      <div className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl w-full max-w-md p-6 shadow-2xl"
         onClick={e => e.stopPropagation()}>
-        <h2 className="text-white text-lg font-semibold mb-2">{t('apiTokens.revokeModal.title')}</h2>
-        <p className="text-zinc-400 text-sm mb-5">
+        <h2 className="text-[var(--text)] text-lg font-semibold mb-2">{t('apiTokens.revokeModal.title')}</h2>
+        <p className="text-[var(--text-dim)] text-sm mb-5">
           {t('apiTokens.revokeModal.body', { name: token.name })}
         </p>
         <div className="flex justify-end gap-2">
           <button onClick={onClose}
-            className="h-9 px-4 rounded-lg text-sm text-zinc-300 bg-[#222222] hover:bg-[#2a2a2a] ring-1 ring-[#3d3d3d] transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer">
             {t('common.cancel')}
           </button>
           <button onClick={handle} disabled={running}
-            className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#e81403] hover:bg-[#b20f03] disabled:opacity-50 transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--danger)] hover:bg-[var(--danger-hover)] disabled:opacity-50 transition-colors cursor-pointer">
             {running ? t('common.processing') : t('apiTokens.revokeModal.revoke')}
           </button>
         </div>
@@ -227,7 +227,7 @@ export function ApiTokens() {
     return (
       <div className="flex flex-col min-h-full">
         <div className="p-8">
-          <p className="text-zinc-400 text-sm">{t('apiTokens.accessDenied')}</p>
+          <p className="text-[var(--text-dim)] text-sm">{t('apiTokens.accessDenied')}</p>
         </div>
       </div>
     );
@@ -247,9 +247,9 @@ export function ApiTokens() {
   function TokenCard({ t: tok }: { t: ApiToken }) {
     const isRevoked = !!tok.revokedAt;
     return (
-      <div className="bg-[#111111] ring-1 ring-[#3d3d3d] rounded-xl px-4 py-4">
+      <div className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl px-4 py-4">
         <div className="flex items-start justify-between gap-3 mb-2">
-          <span className={`text-sm font-semibold leading-snug truncate flex-1 ${isRevoked ? 'text-zinc-500 line-through' : 'text-white'}`}>
+          <span className={`text-sm font-semibold leading-snug truncate flex-1 ${isRevoked ? 'text-[var(--text-faint)] line-through' : 'text-[var(--text)]'}`}>
             {tok.name}
           </span>
           <span className={`shrink-0 inline-flex items-center h-5 px-2 rounded-full text-xs font-medium ${typeBadge[tok.type]}`}>
@@ -257,11 +257,11 @@ export function ApiTokens() {
           </span>
         </div>
         <div className="space-y-0.5 mb-3">
-          <p className="text-zinc-500 text-xs">{t('apiTokens.table.issued')}: {formatDate(tok.createdAt)}</p>
-          <p className="text-zinc-500 text-xs">{t('apiTokens.table.lastUsed')}: {formatDate(tok.lastUsedAt)}</p>
+          <p className="text-[var(--text-faint)] text-xs">{t('apiTokens.table.issued')}: {formatDate(tok.createdAt)}</p>
+          <p className="text-[var(--text-faint)] text-xs">{t('apiTokens.table.lastUsed')}: {formatDate(tok.lastUsedAt)}</p>
         </div>
         <div className="flex items-center justify-between">
-          <span className={`text-xs font-medium ${isRevoked ? 'text-zinc-600' : 'text-green-400'}`}>
+          <span className={`text-xs font-medium ${isRevoked ? 'text-[var(--text-faint)]' : 'text-green-400'}`}>
             {isRevoked ? t('apiTokens.statusLabel.revoked') : t('apiTokens.statusLabel.active')}
           </span>
           {!isRevoked && (
@@ -279,16 +279,16 @@ export function ApiTokens() {
   function TokenRow({ t: tok }: { t: ApiToken }) {
     const isRevoked = !!tok.revokedAt;
     return (
-      <div className="grid grid-cols-[1fr_90px_160px_160px_100px_80px] gap-4 px-4 py-3.5 items-center bg-[#111111] hover:bg-[#161616] transition-colors border-b border-[#3d3d3d] last:border-b-0">
-        <span className={`text-sm font-medium truncate ${isRevoked ? 'text-zinc-500 line-through' : 'text-white'}`}>
+      <div className="grid grid-cols-[1fr_90px_160px_160px_100px_80px] gap-4 px-4 py-3.5 items-center bg-[var(--bg-surface)] hover:bg-[var(--bg-active)] transition-colors border-b border-[var(--border)] last:border-b-0">
+        <span className={`text-sm font-medium truncate ${isRevoked ? 'text-[var(--text-faint)] line-through' : 'text-[var(--text)]'}`}>
           {tok.name}
         </span>
         <span className={`inline-flex items-center justify-center h-5 px-2 rounded-full text-xs font-medium w-fit ${typeBadge[tok.type]}`}>
           {t(`apiTokens.typeLabel.${tok.type}`)}
         </span>
-        <span className="text-zinc-400 text-xs tabular-nums">{formatDate(tok.createdAt)}</span>
-        <span className="text-zinc-400 text-xs tabular-nums">{formatDate(tok.lastUsedAt)}</span>
-        <span className={`text-xs font-medium ${isRevoked ? 'text-zinc-600' : 'text-green-400'}`}>
+        <span className="text-[var(--text-dim)] text-xs tabular-nums">{formatDate(tok.createdAt)}</span>
+        <span className="text-[var(--text-dim)] text-xs tabular-nums">{formatDate(tok.lastUsedAt)}</span>
+        <span className={`text-xs font-medium ${isRevoked ? 'text-[var(--text-faint)]' : 'text-green-400'}`}>
           {isRevoked ? t('apiTokens.statusLabel.revoked') : t('apiTokens.statusLabel.active')}
         </span>
         <div className="flex justify-end">
@@ -309,14 +309,14 @@ export function ApiTokens() {
       {/* Mobile header */}
       <div className="flex items-start gap-2 min-w-0 py-6 px-4 sm:hidden">
         <div className="flex-1 min-w-0 flex flex-col gap-1">
-          <h1 className="text-white text-3xl font-semibold leading-tight">{t('apiTokens.title')}</h1>
-          <p className="text-[#999999] text-base">{t('apiTokens.description')}</p>
+          <h1 className="text-[var(--text)] text-3xl font-semibold leading-tight">{t('apiTokens.title')}</h1>
+          <p className="text-[var(--text-muted)] text-base">{t('apiTokens.description')}</p>
         </div>
         {canEdit && (
           <div ref={headerMenuRef} className="relative shrink-0 mt-2">
             <button
               onClick={() => setHeaderMenuOpen(o => !o)}
-              className="w-8 h-8 flex items-center justify-center rounded-md text-zinc-400 hover:text-zinc-200 hover:bg-[#2a2a2a] transition-colors cursor-pointer"
+              className="w-8 h-8 flex items-center justify-center rounded-md text-[var(--text-dim)] hover:text-[var(--text)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
               aria-label={t('common.menu')}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -326,10 +326,10 @@ export function ApiTokens() {
               </svg>
             </button>
             {headerMenuOpen && (
-              <div className="absolute right-0 top-full mt-1 w-44 bg-[#1a1a1a] ring-1 ring-[#3d3d3d] rounded-lg shadow-xl overflow-hidden z-10">
+              <div className="absolute right-0 top-full mt-1 w-44 bg-[var(--bg-raised)] ring-1 ring-[var(--border)] rounded-lg shadow-xl overflow-hidden z-10">
                 <button
                   onClick={() => { setHeaderMenuOpen(false); setCreateOpen(true); }}
-                  className="w-full text-left px-4 py-2.5 text-sm text-white hover:bg-[#2a2a2a] transition-colors cursor-pointer flex items-center gap-2"
+                  className="w-full text-left px-4 py-2.5 text-sm text-[var(--text)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer flex items-center gap-2"
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
@@ -345,13 +345,13 @@ export function ApiTokens() {
       {/* Desktop header */}
       <div className="hidden sm:flex items-start justify-between gap-4 py-6 px-6">
         <div className="flex flex-col gap-2">
-          <h1 className="text-white text-3xl font-semibold">{t('apiTokens.title')}</h1>
-          <p className="text-[#999999] text-base">{t('apiTokens.description')}</p>
+          <h1 className="text-[var(--text)] text-3xl font-semibold">{t('apiTokens.title')}</h1>
+          <p className="text-[var(--text-muted)] text-base">{t('apiTokens.description')}</p>
         </div>
         {canEdit && (
           <button
             onClick={() => setCreateOpen(true)}
-            className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-white bg-[#4693ff] hover:bg-[#3a7fe0] transition-colors cursor-pointer"
+            className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-[var(--text)] bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -365,7 +365,7 @@ export function ApiTokens() {
       {/* フィルターバー */}
       <div className="px-4 sm:px-6 pb-2 flex flex-wrap items-end gap-2">
         <div className="flex flex-col gap-1">
-          <label className="text-zinc-500 text-xs">{t('apiTokens.filterType')}</label>
+          <label className="text-[var(--text-faint)] text-xs">{t('apiTokens.filterType')}</label>
           <CustomSelect
             value={filterType}
             onChange={v => setFilterType(v)}
@@ -378,7 +378,7 @@ export function ApiTokens() {
           />
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-zinc-500 text-xs">{t('apiTokens.filterStatus')}</label>
+          <label className="text-[var(--text-faint)] text-xs">{t('apiTokens.filterStatus')}</label>
           <CustomSelect
             value={filterStatus}
             onChange={v => setFilterStatus(v)}
@@ -394,17 +394,17 @@ export function ApiTokens() {
 
       <div className="px-4 sm:px-6 pt-4 pb-8 space-y-6">
         {loading ? (
-          <div className="rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-12 text-center">
-            <p className="text-zinc-500 text-sm">{t('common.loading')}</p>
+          <div className="rounded-lg bg-[var(--bg-surface)] ring-1 ring-[var(--border)] p-12 text-center">
+            <p className="text-[var(--text-faint)] text-sm">{t('common.loading')}</p>
           </div>
         ) : (
           <>
             {/* 有効なトークン */}
             <div>
-              <p className="text-sm font-medium text-zinc-400 mb-2">{t('apiTokens.active')} <span className="text-zinc-600">({active.length})</span></p>
+              <p className="text-sm font-medium text-[var(--text-dim)] mb-2">{t('apiTokens.active')} <span className="text-[var(--text-faint)]">({active.length})</span></p>
               {active.length === 0 ? (
-                <div className="rounded-lg bg-[#111111] ring-1 ring-[#3d3d3d] p-8 text-center">
-                  <p className="text-zinc-500 text-sm">{t('apiTokens.noActive')}</p>
+                <div className="rounded-lg bg-[var(--bg-surface)] ring-1 ring-[var(--border)] p-8 text-center">
+                  <p className="text-[var(--text-faint)] text-sm">{t('apiTokens.noActive')}</p>
                 </div>
               ) : (
                 <>
@@ -413,8 +413,8 @@ export function ApiTokens() {
                     {activeSlice.map(t => <TokenCard key={t.id} t={t} />)}
                   </div>
                   {/* Desktop table */}
-                  <div className="hidden sm:block overflow-hidden rounded-lg ring-1 ring-[#3d3d3d]">
-                    <div className="grid grid-cols-[1fr_90px_160px_160px_100px_80px] gap-4 px-4 py-3 bg-black border-b border-[#3d3d3d] text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                  <div className="hidden sm:block overflow-hidden rounded-lg ring-1 ring-[var(--border)]">
+                    <div className="grid grid-cols-[1fr_90px_160px_160px_100px_80px] gap-4 px-4 py-3 bg-[var(--bg-base)] border-b border-[var(--border)] text-xs font-medium text-[var(--text-faint)] uppercase tracking-wider">
                       <span>{t('apiTokens.table.name')}</span><span>{t('apiTokens.table.type')}</span><span>{t('apiTokens.table.issued')}</span><span>{t('apiTokens.table.lastUsed')}</span><span>{t('apiTokens.table.status')}</span><span />
                     </div>
                     {activeSlice.map(t => <TokenRow key={t.id} t={t} />)}
@@ -427,15 +427,15 @@ export function ApiTokens() {
             {/* 失効済みトークン */}
             {revoked.length > 0 && (
               <div>
-                <p className="text-sm font-medium text-zinc-400 mb-2">{t('apiTokens.revoked')} <span className="text-zinc-600">({revoked.length})</span></p>
+                <p className="text-sm font-medium text-[var(--text-dim)] mb-2">{t('apiTokens.revoked')} <span className="text-[var(--text-faint)]">({revoked.length})</span></p>
                 <>
                   {/* Mobile cards */}
                   <div className="sm:hidden space-y-4">
                     {revokedSlice.map(t => <TokenCard key={t.id} t={t} />)}
                   </div>
                   {/* Desktop table */}
-                  <div className="hidden sm:block overflow-hidden rounded-lg ring-1 ring-[#3d3d3d]">
-                    <div className="grid grid-cols-[1fr_90px_160px_160px_100px_80px] gap-4 px-4 py-3 bg-black border-b border-[#3d3d3d] text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                  <div className="hidden sm:block overflow-hidden rounded-lg ring-1 ring-[var(--border)]">
+                    <div className="grid grid-cols-[1fr_90px_160px_160px_100px_80px] gap-4 px-4 py-3 bg-[var(--bg-base)] border-b border-[var(--border)] text-xs font-medium text-[var(--text-faint)] uppercase tracking-wider">
                       <span>{t('apiTokens.table.name')}</span><span>{t('apiTokens.table.type')}</span><span>{t('apiTokens.table.issued')}</span><span>{t('apiTokens.table.lastUsed')}</span><span>{t('apiTokens.table.status')}</span><span />
                     </div>
                     {revokedSlice.map(t => <TokenRow key={t.id} t={t} />)}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { NavLink, useNavigate, useParams } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../lib/firebase';
@@ -83,23 +84,23 @@ function SidebarFlyout<T extends string>({
         onMouseEnter={onOpen}
         className={`w-full flex items-center pl-11 pr-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
           isOpen
-            ? 'bg-zinc-800 text-zinc-200'
-            : 'text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200'
+            ? 'bg-[var(--bg-subtle)] text-[var(--text)]'
+            : 'text-[var(--text-muted)] hover:bg-[var(--bg-subtle)]/60 hover:text-[var(--text)]'
         }`}
       >
         <span className="flex-1 text-left">{label}</span>
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
           strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-          className="text-zinc-600 shrink-0">
+          className="text-[var(--text-faint)] shrink-0">
           <polyline points="9 18 15 12 9 6" />
         </svg>
       </button>
 
-      {isOpen && (
+      {isOpen && createPortal(
         <div
           ref={panelRef}
-          style={{ position: 'fixed', top: pos.top, left: pos.left, zIndex: 9999 }}
-          className="bg-[#111111] text-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.5)] ring-1 ring-[#3d3d3d] py-1.5 px-2 min-w-[160px]"
+          style={{ position: 'fixed', top: pos.top, left: pos.left, zIndex: 99999 }}
+          className="bg-[var(--bg-surface)] text-[var(--text)] rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.5)] ring-1 ring-[var(--border)] py-1.5 px-2 min-w-[160px]"
         >
           {options.map(opt => {
             const isSelected = opt.value === value;
@@ -109,8 +110,8 @@ function SidebarFlyout<T extends string>({
                 role="option"
                 aria-selected={isSelected}
                 onClick={() => { onChange(opt.value); onClose(); }}
-                className={`flex w-full h-9 shrink-0 items-center justify-between gap-6 rounded-md pl-3 pr-4 text-base outline-none transition-colors hover:bg-[#222222]/60 hover:text-white cursor-pointer ${
-                  isSelected ? 'text-white' : 'text-[#d9d9d9]'
+                className={`flex w-full h-9 shrink-0 items-center justify-between gap-6 rounded-md pl-3 pr-4 text-base outline-none transition-colors hover:bg-[var(--bg-subtle)]/60 hover:text-[var(--text)] cursor-pointer ${
+                  isSelected ? 'text-[var(--text)]' : 'text-[var(--text-muted)]'
                 }`}
               >
                 <div className="whitespace-nowrap">{opt.label}</div>
@@ -124,7 +125,8 @@ function SidebarFlyout<T extends string>({
               </div>
             );
           })}
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
@@ -286,33 +288,33 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
         'transform transition-transform duration-300 ease-in-out',
         mobileOpen ? 'translate-x-0' : '-translate-x-full',
         'sm:static sm:inset-auto sm:z-auto sm:translate-x-0 sm:w-56 sm:shrink-0',
-        'bg-black border-r border-zinc-800 flex flex-col',
+        'bg-[var(--bg-base)] border-r border-[var(--border)] flex flex-col',
       ].join(' ')}
     >
       {/* ── Fixed top section (logo + user menu) ── */}
       <div className="shrink-0">
         {/* ロゴ */}
-        <div className="px-5 py-3 border-b border-zinc-800">
+        <div className="px-5 py-3 border-b border-[var(--border)]">
           <div className="flex items-center gap-2.5">
             <img src="/logo.svg" alt="" className="w-6 h-6 shrink-0" />
-            <span className="text-zinc-100 font-semibold text-sm">Portal CMS</span>
+            <span className="text-[var(--text)] font-semibold text-sm">Portal CMS</span>
           </div>
         </div>
 
         {/* ユーザーメニュー */}
-        <div className="px-2 py-3 border-b border-zinc-800">
+        <div className="px-2 py-3 border-b border-[var(--border)]">
           <button
             onClick={() => { setUserOpen(o => !o); setOpenFlyout(null); }}
-            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-zinc-800/60 transition-colors group cursor-pointer"
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-[var(--bg-subtle)]/60 transition-colors group cursor-pointer"
           >
             <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center shrink-0 text-white text-xs font-medium">
               {displayName[0].toUpperCase()}
             </div>
-            <span className="flex-1 text-left text-sm text-zinc-300 truncate">{displayName}</span>
+            <span className="flex-1 text-left text-sm text-[var(--text-muted)] truncate">{displayName}</span>
             <svg
               width="14" height="14" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-              className={`text-zinc-500 shrink-0 transition-transform duration-200 ${userOpen ? '' : '-rotate-90'}`}
+              className={`text-[var(--text-dim)] shrink-0 transition-transform duration-200 ${userOpen ? '' : '-rotate-90'}`}
             >
               <polyline points="6 9 12 15 18 9" />
             </svg>
@@ -331,8 +333,8 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
                 className={({ isActive }) =>
                   `flex items-center pl-11 pr-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
                     isActive
-                      ? 'bg-zinc-800 text-zinc-100'
-                      : 'text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200'
+                      ? 'bg-[var(--bg-subtle)] text-[var(--text)]'
+                      : 'text-[var(--text-muted)] hover:bg-[var(--bg-subtle)]/60 hover:text-[var(--text)]'
                   }`
                 }
               >
@@ -395,8 +397,8 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
             className={({ isActive }) =>
               `flex items-center gap-2 justify-between px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
                 isActive
-                  ? 'bg-zinc-800 text-zinc-100 font-medium'
-                  : 'text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200'
+                  ? 'bg-[var(--bg-subtle)] text-[var(--text)] font-medium'
+                  : 'text-[var(--text-muted)] hover:bg-[var(--bg-subtle)]/60 hover:text-[var(--text)]'
               }`
             }
           >

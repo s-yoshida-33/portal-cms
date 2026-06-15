@@ -42,7 +42,7 @@ export function ProfileLayout() {
   function closeMobile() { setMobileOpen(false); }
 
   return (
-    <div className="flex h-screen bg-black">
+    <div className="flex h-screen bg-[var(--bg-base)]">
       {/* Mobile backdrop */}
       <div
         className={`fixed inset-0 bg-black/50 z-40 sm:hidden transition-opacity duration-300 ${
@@ -58,27 +58,27 @@ export function ProfileLayout() {
           'transform transition-transform duration-300 ease-in-out',
           mobileOpen ? 'translate-x-0' : '-translate-x-full',
           'sm:static sm:inset-auto sm:z-auto sm:translate-x-0 sm:w-56 sm:shrink-0',
-          'bg-black border-r border-[#3d3d3d] flex flex-col',
+          'bg-[var(--bg-base)] border-r border-[var(--border)] flex flex-col',
         ].join(' ')}
       >
         {/* ── Fixed top section ── */}
         <div className="shrink-0">
           {/* ロゴ */}
-          <div className="px-5 py-3 border-b border-[#3d3d3d]">
+          <div className="px-5 py-3 border-b border-[var(--border)]">
             <div className="flex items-center gap-2.5">
               <img src="/logo.svg" alt="" className="w-7 h-7 shrink-0" />
-              <span className="text-white font-semibold text-sm">Portal CMS</span>
+              <span className="text-[var(--text)] font-semibold text-sm">Portal CMS</span>
             </div>
           </div>
 
           {/* ← マイ プロフィール */}
-          <header className="w-full h-[60px] flex items-center z-1 shrink-0 border-b border-[#3d3d3d]">
+          <header className="w-full h-[60px] flex items-center z-1 shrink-0 border-b border-[var(--border)]">
             <div className="flex items-center relative w-full h-[42px]">
               <div className="h-full flex items-center justify-center shrink-0" style={{ width: '55px' }}>
                 <button
                   onClick={() => { closeMobile(); navigate(`/${uuid}/home/overview`); }}
                   style={{ cursor: 'pointer' }}
-                  className="h-full flex items-center justify-center w-full text-[#4693ff] hover:text-[#3860be] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[#4693ff] rounded-sm"
+                  className="h-full flex items-center justify-center w-full text-[var(--accent)] hover:text-[#3860be] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] rounded-sm"
                   aria-label={t('profile.sidebar.back')}
                 >
                   <svg
@@ -97,7 +97,7 @@ export function ProfileLayout() {
                 </button>
               </div>
               <span className="flex-1 flex items-center justify-between relative">
-                <p className="w-full text-white max-w-[167px] whitespace-nowrap overflow-hidden text-ellipsis font-semibold text-sm cursor-default select-none m-0">
+                <p className="w-full text-[var(--text)] max-w-[167px] whitespace-nowrap overflow-hidden text-ellipsis font-semibold text-sm cursor-default select-none m-0">
                   <span>{t('profile.sidebar.myProfile')}</span>
                 </p>
               </span>
@@ -116,8 +116,8 @@ export function ProfileLayout() {
                 className={({ isActive }) =>
                   `flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
                     isActive
-                      ? 'bg-[#222222] text-white font-medium'
-                      : 'text-[#999999] hover:bg-[#222222]/60 hover:text-white'
+                      ? 'bg-[var(--bg-subtle)] text-[var(--text)] font-medium'
+                      : 'text-[var(--text-muted)] hover:bg-[var(--bg-subtle)]/60 hover:text-[var(--text)]'
                   }`
                 }
               >
@@ -127,13 +127,13 @@ export function ProfileLayout() {
             ) : (
               <div
                 key={label}
-                className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm text-[#555555] cursor-default select-none"
+                className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm text-[var(--text-faint)] cursor-default select-none"
               >
                 <span className="flex items-center gap-2">
                   {icon}
                   {label}
                 </span>
-                <span className="text-[10px] text-zinc-600 bg-zinc-800 ring-1 ring-zinc-700 px-1.5 py-0.5 rounded">{t('profile.sidebar.comingSoon')}</span>
+                <span className="text-[10px] text-[var(--text-faint)] bg-[var(--bg-subtle)] ring-1 ring-[var(--border)] px-1.5 py-0.5 rounded">{t('profile.sidebar.comingSoon')}</span>
               </div>
             )
           )}
@@ -143,11 +143,11 @@ export function ProfileLayout() {
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Mobile header with hamburger */}
-        <div className="shrink-0 border-b border-[#3d3d3d] bg-black py-3 px-4 sm:hidden">
+        <div className="shrink-0 border-b border-[var(--border)] bg-[var(--bg-base)] py-3 px-4 sm:hidden">
           <div className="h-7 flex items-center">
             <button
               onClick={() => setMobileOpen(true)}
-              className="p-1 -ml-1 rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60 transition-colors"
+              className="p-1 -ml-1 rounded-lg text-[var(--text-dim)] hover:text-[var(--text)] hover:bg-[var(--bg-subtle)]/60 transition-colors"
               aria-label={t('profile.sidebar.openMenu')}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
