@@ -120,6 +120,10 @@
     "addDevice": "Add device",
     "noDevices": "No devices have been registered.",
     "noFilteredDevices": "No matching devices found.",
+    "filter": {
+      "app": "App",
+      "tag": "Tag"
+    },
     "ungrouped": "Ungrouped",
     "deviceLastSeen": "Last seen: {{time}}",
     "deviceUptime": "Uptime",

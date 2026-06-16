@@ -358,32 +358,33 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
         </div>
       </div>
 
-      {/* Desktop layout: original */}
+      {/* Desktop layout */}
       <div className="hidden sm:block">
-        <div className="flex items-center justify-between mb-5">
-          <div className="flex items-center gap-3">
-            <div>
-              <p className="font-medium text-[var(--text)] text-sm">{device.name}</p>
-              <p className="text-xs text-[var(--text-faint)] font-mono mt-0.5">{device.ip}</p>
-            </div>
-            <StatusBadge status={device.status} />
+        {/* Row 1: name + IP (left)  |  status + menu (right) */}
+        <div className="flex items-start justify-between mb-3">
+          <div>
+            <p className="font-medium text-[var(--text)] text-sm">{device.name}</p>
+            <p className="text-xs text-[var(--text-faint)] font-mono mt-0.5">{device.ip}</p>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="text-right">
-              <div className="flex items-center justify-end gap-1.5">
-                <AppBadge app={device.app} />
-                <span className="text-[var(--text-faint)] text-xs">v{device.appVersion}</span>
-              </div>
-              {device.tags && device.tags.length > 0 && (
-                <div className="flex flex-wrap gap-1 justify-end mt-1">
-                  {device.tags.map(tag => <TagBadge key={tag} tag={tag} />)}
-                </div>
-              )}
-              <p className="text-xs text-[var(--text-faint)] mt-0.5">{t('projectDetail.deviceLastSeen', { time: formatDate(device.lastSeen) })}</p>
-            </div>
+          <div className="flex items-center gap-2 shrink-0 ml-3">
+            <StatusBadge status={device.status} />
             {menu}
           </div>
         </div>
+        {/* Row 2: app / tags / last seen */}
+        <div className="mb-4 space-y-1.5">
+          <div className="flex items-center gap-1.5">
+            <AppBadge app={device.app} />
+            <span className="text-[var(--text-faint)] text-xs">v{device.appVersion}</span>
+          </div>
+          {device.tags && device.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {device.tags.map(tag => <TagBadge key={tag} tag={tag} />)}
+            </div>
+          )}
+          <p className="text-xs text-[var(--text-faint)]">{t('projectDetail.deviceLastSeen', { time: formatDate(device.lastSeen) })}</p>
+        </div>
+        {/* Row 3: metrics */}
         <div className="grid grid-cols-4 gap-6">
           <div className="col-span-3 grid grid-cols-2 gap-x-8 gap-y-3">
             <MetricBar label="CPU"                          value={device.system.cpu}         unit="%" />
@@ -870,7 +871,8 @@ export function ProjectDetail() {
   const [deleteDevice,   setDeleteDevice]   = useState<Device | null>(null);
   const [deleteGroup,    setDeleteGroup]    = useState<DeviceGroup | null>(null);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
-  const [filterApps,     setFilterApps]     = useState<Set<AppName>>(new Set());
+  const [filterApp,      setFilterApp]      = useState<AppName | ''>('');
+  const [filterTag,      setFilterTag]      = useState('');
   const [headerMenuOpen, setHeaderMenuOpen] = useState(false);
   const headerMenuRef = useRef<HTMLDivElement>(null);
 
@@ -911,23 +913,20 @@ export function ProjectDetail() {
 
   const canEdit = role === 'admin' || role === 'owner';
 
-  const visibleApps   = Array.from(new Set(devices.map(d => d.app)))
+  const availableApps = Array.from(new Set(devices.map(d => d.app)))
     .sort((a, b) => (APP_SORT_ORDER[a] ?? 99) - (APP_SORT_ORDER[b] ?? 99)) as AppName[];
-  const filteredDevices = filterApps.size > 0
-    ? devices.filter(d => filterApps.has(d.app))
-    : devices;
+  const availableTags = Array.from(new Set(devices.flatMap(d => d.tags ?? []))).sort();
+
+  const hasActiveFilter = filterApp !== '' || filterTag !== '';
+  const filteredDevices = devices.filter(d => {
+    if (filterApp && d.app !== filterApp) return false;
+    if (filterTag && !(d.tags ?? []).includes(filterTag)) return false;
+    return true;
+  });
   const groupTree    = buildGroupTree(groups, filteredDevices);
   const ungrouped    = filteredDevices.filter(d => !d.groupId);
   const hasGroups    = groups.length > 0;
   const showDivider  = hasGroups && ungrouped.length > 0;
-
-  function toggleFilterApp(app: AppName) {
-    setFilterApps(prev => {
-      const next = new Set(prev);
-      if (next.has(app)) { next.delete(app); } else { next.add(app); }
-      return next;
-    });
-  }
 
   function toggleCollapse(groupId: string) {
     setCollapsedGroups(prev => {
@@ -1089,30 +1088,43 @@ export function ProjectDetail() {
         </div>
       </div>
 
-      {/* アプリフィルター */}
-      {visibleApps.length > 1 && (
-        <div className="px-4 sm:px-6 pb-2 flex flex-wrap items-center gap-2">
-          {visibleApps.map(app => {
-            const active      = filterApps.has(app) || filterApps.size === 0;
-            const activeStyle = APP_BADGE_STYLE[app] ?? 'bg-zinc-500/15 text-zinc-400 ring-zinc-500/30';
-            return (
-              <button
-                key={app}
-                onClick={() => toggleFilterApp(app)}
-                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ring-1 transition-colors cursor-pointer ${
-                  active ? activeStyle : 'text-[var(--text-faint)] bg-[var(--bg-subtle)] ring-[var(--border)]'
-                }`}
-              >
-                {app}
-              </button>
-            );
-          })}
-          {filterApps.size > 0 && (
+      {/* フィルター */}
+      {(availableApps.length > 1 || availableTags.length > 0) && (
+        <div className="px-4 sm:px-6 pb-2 flex flex-wrap items-end gap-2">
+          {availableApps.length > 1 && (
+            <div className="flex flex-col gap-1">
+              <label className="text-[var(--text-faint)] text-xs">{t('projectDetail.filter.app')}</label>
+              <CustomSelect
+                value={filterApp}
+                onChange={v => setFilterApp(v as AppName | '')}
+                options={[
+                  { value: '', label: t('common.all') },
+                  ...availableApps.map(a => ({ value: a, label: a })),
+                ]}
+                className="w-[160px]"
+              />
+            </div>
+          )}
+          {availableTags.length > 0 && (
+            <div className="flex flex-col gap-1">
+              <label className="text-[var(--text-faint)] text-xs">{t('projectDetail.filter.tag')}</label>
+              <CustomSelect
+                value={filterTag}
+                onChange={v => setFilterTag(v)}
+                options={[
+                  { value: '', label: t('common.all') },
+                  ...availableTags.map(tag => ({ value: tag, label: tag })),
+                ]}
+                className="w-[160px]"
+              />
+            </div>
+          )}
+          {hasActiveFilter && (
             <button
-              onClick={() => setFilterApps(new Set())}
-              className="text-xs text-[var(--text-faint)] hover:text-[var(--text-muted)] transition-colors cursor-pointer underline-offset-2 hover:underline"
+              onClick={() => { setFilterApp(''); setFilterTag(''); }}
+              className="h-9 px-3 rounded-lg text-xs text-[var(--text-dim)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer"
             >
-              {t('common.clear')}
+              {t('logs.filter.clear')}
             </button>
           )}
         </div>
@@ -1120,10 +1132,10 @@ export function ProjectDetail() {
 
       {/* デバイス・グループ一覧 */}
       <div className="px-4 sm:px-6 pt-4 pb-8 space-y-4 md:space-y-5">
-        {filteredDevices.length === 0 && (!hasGroups || filterApps.size > 0) ? (
+        {filteredDevices.length === 0 && (!hasGroups || hasActiveFilter) ? (
           <div className="overflow-hidden rounded-lg bg-[var(--bg-surface)] ring-1 ring-[var(--border)] p-12 text-center">
             <p className="text-[var(--text-faint)] text-sm">
-              {filterApps.size > 0 ? t('projectDetail.noFilteredDevices') : t('projectDetail.noDevices')}
+              {hasActiveFilter ? t('projectDetail.noFilteredDevices') : t('projectDetail.noDevices')}
             </p>
           </div>
         ) : (

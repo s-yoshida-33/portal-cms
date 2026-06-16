@@ -120,6 +120,10 @@
     "addDevice": "デバイスを追加",
     "noDevices": "デバイスが登録されていません。",
     "noFilteredDevices": "該当するデバイスがありません。",
+    "filter": {
+      "app": "アプリ",
+      "tag": "タグ"
+    },
     "ungrouped": "グループ未設定",
     "deviceLastSeen": "最終確認: {{time}}",
     "deviceUptime": "稼働時間",
