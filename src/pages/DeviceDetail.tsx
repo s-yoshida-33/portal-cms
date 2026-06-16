@@ -614,7 +614,9 @@ export function DeviceDetail() {
             ? (settingsTab === 'mall' ? mallFile! : 'settings.json')
             : (fileNames[0] ?? '');
           const activeContent  = activeFile ? (files[activeFile] ?? null) : null;
-          const jsonStr        = activeContent ?? '';
+          const jsonStr        = typeof activeContent === 'string'
+            ? activeContent
+            : activeContent != null ? JSON.stringify(activeContent, null, 2) : '';
           const jsonLines      = jsonStr.split('\n');
           const displayLines   = jsonLines.slice(0, 250);
           const truncated      = jsonLines.length > 250;
