@@ -142,6 +142,8 @@
       "appLabel": "アプリ",
       "versionLabel": "バージョン",
       "groupLabel": "グループを選択",
+      "tagsLabel": "タグ",
+      "tagsPlaceholder": "タグを入力して Enter",
       "requiredError": "名前とIPアドレスを入力してください。",
       "saveFailed": "保存に失敗しました。"
     },

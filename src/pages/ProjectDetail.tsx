@@ -138,6 +138,123 @@ function AppBadge({ app }: { app: string }) {
   );
 }
 
+function TagBadge({ tag }: { tag: string }) {
+  return (
+    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ring-1 bg-[var(--bg-subtle)] text-[var(--text-dim)] ring-[var(--border)]">
+      {tag}
+    </span>
+  );
+}
+
+interface TagInputProps {
+  tags: string[];
+  onChange: (tags: string[]) => void;
+  suggestions: string[];
+  placeholder: string;
+}
+
+function TagInput({ tags, onChange, suggestions, placeholder }: TagInputProps) {
+  const [input, setInput] = useState('');
+  const [focused, setFocused] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const filtered = suggestions.filter(
+    s => !tags.includes(s) && s.toLowerCase().includes(input.toLowerCase())
+  );
+  const showSuggestions = focused && (filtered.length > 0 || input.trim().length > 0);
+
+  function addTag(tag: string) {
+    const trimmed = tag.trim();
+    if (trimmed && !tags.includes(trimmed)) {
+      onChange([...tags, trimmed]);
+    }
+    setInput('');
+  }
+
+  function removeTag(tag: string) {
+    onChange(tags.filter(t => t !== tag));
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if ((e.key === 'Enter' || e.key === ',' || e.key === 'Tab') && input.trim()) {
+      e.preventDefault();
+      addTag(input);
+    } else if (e.key === 'Backspace' && !input && tags.length > 0) {
+      removeTag(tags[tags.length - 1]);
+    }
+  }
+
+  useEffect(() => {
+    if (!focused) return;
+    function handleClick(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setFocused(false);
+        if (input.trim()) addTag(input);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focused, input, tags]);
+
+  return (
+    <div ref={containerRef} className="relative">
+      <div
+        className="min-h-9 w-full bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-lg px-2 py-1.5 flex flex-wrap gap-1.5 items-center cursor-text focus-within:ring-2 focus-within:ring-[var(--accent)] transition-all"
+        onClick={() => inputRef.current?.focus()}
+      >
+        {tags.map(tag => (
+          <span key={tag} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ring-1 bg-[var(--bg-subtle)] text-[var(--text-dim)] ring-[var(--border)]">
+            {tag}
+            <button
+              type="button"
+              onClick={e => { e.stopPropagation(); removeTag(tag); }}
+              className="text-[var(--text-faint)] hover:text-[var(--text-muted)] transition-colors leading-none"
+            >
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
+                <path d="M2.5 2.5l5 5M7.5 2.5l-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </button>
+          </span>
+        ))}
+        <input
+          ref={inputRef}
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onFocus={() => setFocused(true)}
+          placeholder={tags.length === 0 ? placeholder : ''}
+          className="flex-1 min-w-20 bg-transparent text-sm text-[var(--text)] outline-none placeholder:text-[var(--text-faint)]"
+        />
+      </div>
+      {showSuggestions && (
+        <div className="absolute top-full left-0 right-0 mt-1 bg-[var(--bg-raised)] ring-1 ring-[var(--border)] rounded-lg shadow-xl z-10 overflow-hidden max-h-40 overflow-y-auto scrollbar-subtle">
+          {filtered.map(s => (
+            <button
+              key={s}
+              type="button"
+              onMouseDown={e => { e.preventDefault(); addTag(s); }}
+              className="w-full text-left px-3 py-2 text-sm text-[var(--text-muted)] hover:bg-[var(--bg-subtle)]/60 transition-colors cursor-pointer"
+            >
+              {s}
+            </button>
+          ))}
+          {input.trim() && !tags.includes(input.trim()) && (
+            <button
+              type="button"
+              onMouseDown={e => { e.preventDefault(); addTag(input); }}
+              className="w-full text-left px-3 py-2 text-sm text-[var(--accent)] hover:bg-[var(--bg-subtle)]/60 transition-colors cursor-pointer"
+            >
+              + "{input.trim()}" を追加
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 const inputClass =
   'w-full bg-[var(--bg-surface)] ring-1 ring-[var(--border)] text-[var(--text)] rounded-lg px-3 h-9 text-sm outline-none focus:ring-[var(--accent)] focus:ring-2 placeholder:text-[var(--text-faint)] transition-all';
 
@@ -229,6 +346,11 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
             <AppBadge app={device.app} />
             <span className="text-[var(--text-faint)] text-xs">v{device.appVersion}</span>
           </div>
+          {device.tags && device.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {device.tags.map(tag => <TagBadge key={tag} tag={tag} />)}
+            </div>
+          )}
           <p className="text-xs text-[var(--text-faint)]">{t('projectDetail.deviceLastSeen', { time: formatDate(device.lastSeen) })}</p>
           <p className="text-xs text-[var(--text-dim)]">
             {t('projectDetail.deviceUptime')}: <UptimeClock uptimeSecs={device.system.uptime} lastSeen={device.lastSeen} status={device.status} />
@@ -252,6 +374,11 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
                 <AppBadge app={device.app} />
                 <span className="text-[var(--text-faint)] text-xs">v{device.appVersion}</span>
               </div>
+              {device.tags && device.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1 justify-end mt-1">
+                  {device.tags.map(tag => <TagBadge key={tag} tag={tag} />)}
+                </div>
+              )}
               <p className="text-xs text-[var(--text-faint)] mt-0.5">{t('projectDetail.deviceLastSeen', { time: formatDate(device.lastSeen) })}</p>
             </div>
             {menu}
@@ -528,15 +655,16 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
 // ── デバイス追加・編集モーダル ────────────────────────────────────
 
 interface DeviceModalProps {
-  initial:   Device | null;
-  groups:    DeviceGroup[];
-  groupTree: GroupNode[];
-  projects:  ProjectDoc[];
-  onClose:   () => void;
-  onSave:    (data: Pick<Device, 'name' | 'ip' | 'port' | 'app' | 'appVersion'> & { groupId?: string | null; projectId?: string }) => Promise<void>;
+  initial:      Device | null;
+  groups:       DeviceGroup[];
+  groupTree:    GroupNode[];
+  projects:     ProjectDoc[];
+  allDevices:   Device[];
+  onClose:      () => void;
+  onSave:       (data: Pick<Device, 'name' | 'ip' | 'port' | 'app' | 'appVersion' | 'tags'> & { groupId?: string | null; projectId?: string }) => Promise<void>;
 }
 
-function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: DeviceModalProps) {
+function DeviceModal({ initial, groups, groupTree, projects, allDevices, onClose, onSave }: DeviceModalProps) {
   const { t } = useTranslation();
   const [name,       setName]       = useState(initial?.name       ?? '');
   const [ip,         setIp]         = useState(initial?.ip         ?? '');
@@ -545,8 +673,13 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
   const [appVersion, setAppVersion] = useState(initial?.appVersion ?? '');
   const [groupId,    setGroupId]    = useState<string | null>(initial?.groupId ?? null);
   const [projectId,  setProjectId]  = useState<string>(initial?.projectId ?? '');
+  const [tags,       setTags]       = useState<string[]>(initial?.tags ?? []);
   const [saving,     setSaving]     = useState(false);
   const [error,      setError]      = useState('');
+
+  const tagSuggestions = Array.from(
+    new Set(allDevices.flatMap(d => d.tags ?? []))
+  ).sort();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -557,7 +690,7 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
     setSaving(true);
     try {
       const data: Parameters<typeof onSave>[0] = {
-        name: name.trim(), ip: ip.trim(), port, app, appVersion: appVersion.trim(), groupId,
+        name: name.trim(), ip: ip.trim(), port, app, appVersion: appVersion.trim(), groupId, tags,
       };
       if (initial && projectId) data.projectId = projectId;
       await onSave(data);
@@ -597,6 +730,15 @@ function DeviceModal({ initial, groups, groupTree, projects, onClose, onSave }: 
             <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projectDetail.deviceModal.nameLabel')}</label>
             <input value={name} onChange={e => setName(e.target.value)}
               className={inputClass} />
+          </div>
+          <div>
+            <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projectDetail.deviceModal.tagsLabel')}</label>
+            <TagInput
+              tags={tags}
+              onChange={setTags}
+              suggestions={tagSuggestions}
+              placeholder={t('projectDetail.deviceModal.tagsPlaceholder')}
+            />
           </div>
           <div>
             <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projectDetail.deviceModal.ipLabel')}</label>
@@ -800,7 +942,7 @@ export function ProjectDetail() {
   }
 
   async function handleSaveDevice(
-    data: Pick<Device, 'name' | 'ip' | 'port' | 'app' | 'appVersion'> & { groupId?: string | null; projectId?: string }
+    data: Pick<Device, 'name' | 'ip' | 'port' | 'app' | 'appVersion' | 'tags'> & { groupId?: string | null; projectId?: string }
   ) {
     if (!id) return;
     if (editDevice) {
@@ -1040,6 +1182,7 @@ export function ProjectDetail() {
           groups={groups}
           groupTree={groupTree}
           projects={projects}
+          allDevices={devices}
           onClose={() => setDeviceModalOpen(false)}
           onSave={handleSaveDevice}
         />

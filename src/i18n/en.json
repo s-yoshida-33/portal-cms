@@ -142,6 +142,8 @@
       "appLabel": "App",
       "versionLabel": "Version",
       "groupLabel": "Select group",
+      "tagsLabel": "Tags",
+      "tagsPlaceholder": "Type a tag and press Enter",
       "requiredError": "Please enter a name and IP address.",
       "saveFailed": "Failed to save."
     },
