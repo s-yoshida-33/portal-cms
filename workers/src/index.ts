@@ -56,6 +56,9 @@ function toFsValue(val: unknown): FsVal {
   if (typeof val === 'number')  return { doubleValue: val };
   if (typeof val === 'boolean') return { booleanValue: val };
   if (val instanceof Date)      return { timestampValue: val.toISOString() };
+  if (Array.isArray(val)) {
+    return { arrayValue: { values: val.map(toFsValue) } };
+  }
   if (val !== null && typeof val === 'object') {
     return {
       mapValue: {
