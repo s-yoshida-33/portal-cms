@@ -634,7 +634,7 @@ export function subscribeScreenshotRequest(
 // ================================================================
 
 export interface DeviceSettingsData {
-  files:     Record<string, unknown>;
+  files:     Record<string, string>;
   fetchedAt: { toDate(): Date } | null;
 }
 
