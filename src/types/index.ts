@@ -99,7 +99,7 @@ export interface DeletionRequest {
 
 // Firestore /siteLogs/{logId}
 export type SiteLogCategory =
-  | 'screenshot' | 'log' | 'apiToken' | 'user' | 'deletionRequest' | 'project' | 'device';
+  | 'screenshot' | 'log' | 'settings' | 'apiToken' | 'user' | 'deletionRequest' | 'project' | 'device';
 
 export interface SiteLog {
   id:           string;

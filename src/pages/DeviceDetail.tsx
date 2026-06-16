@@ -215,6 +215,7 @@ export function DeviceDetail() {
     settingsRequestedAt.current = Date.now();
     try {
       await requestDeviceSettings(deviceId);
+      addSiteLog({ category: 'settings', action: 'fetched', targetId: deviceId, targetName: device?.name ?? deviceId, projectName: projectNameRef.current, deviceName: device?.name ?? deviceId, performedBy: siteLogActor() }).catch(() => {});
     } catch {
       setSettingsRefreshing(false);
     }
@@ -612,8 +613,8 @@ export function DeviceDetail() {
           const activeFile = hasTabs
             ? (settingsTab === 'mall' ? mallFile! : 'settings.json')
             : (fileNames[0] ?? '');
-          const activeContent  = activeFile ? files[activeFile] : null;
-          const jsonStr        = activeContent != null ? JSON.stringify(activeContent, null, 2) : '';
+          const activeContent  = activeFile ? (files[activeFile] ?? null) : null;
+          const jsonStr        = activeContent ?? '';
           const jsonLines      = jsonStr.split('\n');
           const displayLines   = jsonLines.slice(0, 250);
           const truncated      = jsonLines.length > 250;
@@ -679,6 +680,7 @@ export function DeviceDetail() {
                         a.download = `${device?.name ?? deviceId}-${activeFile}`;
                         a.click();
                         URL.revokeObjectURL(url);
+                        addSiteLog({ category: 'settings', action: 'downloaded', targetId: deviceId, targetName: device?.name ?? deviceId ?? '', projectName: projectNameRef.current, deviceName: device?.name ?? deviceId ?? '', performedBy: siteLogActor() }).catch(() => {});
                       }}
                       disabled={!jsonStr}
                       className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"

@@ -16,6 +16,7 @@ const PAGE_SIZE = 20;
 const categoryBadge: Record<SiteLogCategory, string> = {
   screenshot:      'text-cyan-400 bg-cyan-500/10 ring-1 ring-cyan-500/20',
   log:             'text-indigo-400 bg-indigo-500/10 ring-1 ring-indigo-500/20',
+  settings:        'text-teal-400 bg-teal-500/10 ring-1 ring-teal-500/20',
   apiToken:        'text-purple-400 bg-purple-500/10 ring-1 ring-purple-500/20',
   user:            'text-yellow-400 bg-yellow-500/10 ring-1 ring-yellow-500/20',
   deletionRequest: 'text-red-400 bg-red-500/10 ring-1 ring-red-500/20',
@@ -64,6 +65,7 @@ function FilterBar({ filter, projects, onChange, onClear }: FilterBarProps) {
     { value: '', label: t('common.all') },
     { value: 'screenshot', label: t('logs.category.screenshot') },
     { value: 'log', label: t('logs.category.log') },
+    { value: 'settings', label: t('logs.category.settings') },
     { value: 'apiToken', label: t('logs.category.apiToken') },
     { value: 'user', label: t('logs.category.user') },
     { value: 'deletionRequest', label: t('logs.category.deletionRequest') },
@@ -188,7 +190,9 @@ export function Logs() {
   const categoryLabel: Record<SiteLogCategory, string> = {
     screenshot:      t('logs.category.screenshot'),
     log:             t('logs.category.log'),
+    settings:        t('logs.category.settings'),
     apiToken:        t('logs.category.apiToken'),
+
     user:            t('logs.category.user'),
     deletionRequest: t('logs.category.deletionRequest'),
     project:         t('logs.category.project'),

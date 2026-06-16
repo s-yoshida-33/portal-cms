@@ -268,6 +268,7 @@
     "category": {
       "screenshot": "スクリーンショット",
       "log": "ログ",
+      "settings": "設定ファイル",
       "apiToken": "APIトークン",
       "user": "ユーザー",
       "deletionRequest": "削除依頼",
@@ -279,6 +280,8 @@
       "screenshot.downloaded": "スクリーンショットをダウンロード",
       "log.fetched": "ログを取得",
       "log.downloaded": "ログをダウンロード",
+      "settings.fetched": "設定ファイルを取得",
+      "settings.downloaded": "設定ファイルをダウンロード",
       "apiToken.issued": "APIトークンを発行",
       "apiToken.revoked": "APIトークンを失効",
       "user.added": "ユーザーを追加",
