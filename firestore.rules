@@ -38,6 +38,11 @@ service cloud.firestore {
         allow read:  if isAuth();
         allow write: if true;
       }
+
+      match /settings/{settingId} {
+        allow read:  if isAuth();
+        allow write: if true;
+      }
     }
 
     match /groups/{groupId} {
