@@ -630,6 +630,31 @@ export function subscribeScreenshotRequest(
 }
 
 // ================================================================
+// Device Settings
+// ================================================================
+
+export interface DeviceSettingsData {
+  files:     Record<string, unknown>;
+  fetchedAt: { toDate(): Date } | null;
+}
+
+export async function requestDeviceSettings(deviceId: string): Promise<void> {
+  await updateDoc(doc(col.devices(), deviceId), { settingsRequested: true });
+  await rtdbSet(rtdbRef(rtdb, `signals/${deviceId}`), { at: Date.now(), type: 'settings' }).catch(() => {});
+}
+
+export function subscribeDeviceSettings(
+  deviceId: string,
+  onUpdate: (data: DeviceSettingsData | null) => void,
+): Unsubscribe {
+  return onSnapshot(
+    doc(db, 'devices', deviceId, 'settings', 'latest'),
+    snap => onUpdate(snap.exists() ? (snap.data() as DeviceSettingsData) : null),
+    _err => onUpdate(null),
+  );
+}
+
+// ================================================================
 // Site Logs
 // ================================================================
 

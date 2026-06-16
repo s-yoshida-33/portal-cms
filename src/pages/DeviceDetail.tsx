@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { subscribeDevice, subscribeProject, requestScreenshot as requestPortalScreenshot, cancelScreenshotRequest, subscribeScreenshotRequest, requestLogs, addSiteLog } from '../lib/firestore';
+import { subscribeDevice, subscribeProject, requestScreenshot as requestPortalScreenshot, cancelScreenshotRequest, subscribeScreenshotRequest, requestLogs, addSiteLog, requestDeviceSettings, subscribeDeviceSettings } from '../lib/firestore';
+import type { DeviceSettingsData } from '../lib/firestore';
 import { auth, rtdb } from '../lib/firebase';
 import { ref as rtdbRef, onValue } from 'firebase/database';
 import { useAuth } from '../contexts/AuthContext';
@@ -124,6 +125,13 @@ export function DeviceDetail() {
   const logContainerRef = useRef<HTMLDivElement>(null);
   const logRequestedAt  = useRef<number>(0);
 
+  const [settingsData,        setSettingsData]        = useState<DeviceSettingsData | null>(null);
+  const [settingsLastFetched, setSettingsLastFetched] = useState<Date | null>(null);
+  const [settingsRefreshing,  setSettingsRefreshing]  = useState(false);
+  const [settingsTab,         setSettingsTab]         = useState<'global' | 'mall'>('global');
+  const [settingsCopied,      setSettingsCopied]      = useState(false);
+  const settingsRequestedAt = useRef<number>(0);
+
   // Subscribe to Firestore device document
   useEffect(() => {
     if (!deviceId) return;
@@ -180,6 +188,37 @@ export function DeviceDetail() {
       logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
     }
   }, [logs]);
+
+  // Subscribe to Firestore devices/{deviceId}/settings/latest — updated by Bridge-Ground on demand.
+  useEffect(() => {
+    if (!deviceId) return;
+    return subscribeDeviceSettings(deviceId, data => {
+      if (!data) return;
+      setSettingsData(data);
+      const fetchedAt = data.fetchedAt?.toDate() ?? new Date();
+      setSettingsLastFetched(fetchedAt);
+      if (fetchedAt.getTime() >= settingsRequestedAt.current) {
+        setSettingsRefreshing(false);
+      }
+    });
+  }, [deviceId]);
+
+  useEffect(() => {
+    if (!settingsRefreshing) return;
+    const id = window.setTimeout(() => setSettingsRefreshing(false), 30_000);
+    return () => window.clearTimeout(id);
+  }, [settingsRefreshing]);
+
+  const handleRefreshSettings = useCallback(async () => {
+    if (!deviceId || settingsRefreshing) return;
+    setSettingsRefreshing(true);
+    settingsRequestedAt.current = Date.now();
+    try {
+      await requestDeviceSettings(deviceId);
+    } catch {
+      setSettingsRefreshing(false);
+    }
+  }, [deviceId, settingsRefreshing]);
 
   const filteredLogs = useMemo(
     () => logs.filter(l => logLevels.has(l.level || 'INFO')).map((l, i) => ({ ...l, _key: i })),
@@ -562,6 +601,119 @@ export function DeviceDetail() {
             </div>
           </div>
         </div>
+
+        {/* 設定ファイルセクション */}
+        {(() => {
+          const files      = settingsData?.files ?? {};
+          const fileNames  = Object.keys(files);
+          const globalFile = fileNames.find(n => n === 'settings.json');
+          const mallFile   = fileNames.find(n => n !== 'settings.json' && n.endsWith('-settings.json'));
+          const hasTabs    = !!(globalFile && mallFile);
+          const activeFile = hasTabs
+            ? (settingsTab === 'mall' ? mallFile! : 'settings.json')
+            : (fileNames[0] ?? '');
+          const activeContent  = activeFile ? files[activeFile] : null;
+          const jsonStr        = activeContent != null ? JSON.stringify(activeContent, null, 2) : '';
+          const jsonLines      = jsonStr.split('\n');
+          const displayLines   = jsonLines.slice(0, 250);
+          const truncated      = jsonLines.length > 250;
+          return (
+            <div>
+              <div className="flex items-center justify-between gap-3 mb-3">
+                <h2 className="text-[var(--text)] font-semibold text-base shrink-0">{t('deviceDetail.settings')}</h2>
+                <button
+                  onClick={handleRefreshSettings}
+                  disabled={settingsRefreshing}
+                  className="h-6 px-2.5 rounded-md text-xs font-medium ring-1 transition-colors cursor-pointer text-[var(--text-dim)] bg-[var(--bg-subtle)] ring-[var(--border)] hover:bg-[var(--bg-hover)] disabled:opacity-50"
+                >
+                  {settingsRefreshing ? t('deviceDetail.refreshingSettings') : t('deviceDetail.refreshSettings')}
+                </button>
+              </div>
+              <div className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl p-4">
+                {hasTabs && (
+                  <div className="flex gap-1 mb-3">
+                    {(['global', 'mall'] as const).map(tab => (
+                      <button
+                        key={tab}
+                        onClick={() => setSettingsTab(tab)}
+                        className={`h-7 px-3 rounded-md text-xs font-medium ring-1 transition-colors cursor-pointer ${settingsTab === tab ? 'text-[var(--text)] bg-[var(--bg-subtle)] ring-[var(--border)]' : 'text-[var(--text-dim)] bg-transparent ring-transparent hover:bg-[var(--bg-subtle)]/60'}`}
+                      >
+                        {tab === 'global' ? t('deviceDetail.settingsTabGlobal') : t('deviceDetail.settingsTabMall')}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <div className="flex items-start sm:items-center justify-between mb-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-0 sm:gap-3">
+                    {activeContent != null && (
+                      <span className="text-xs text-[var(--text-faint)]">
+                        {t('deviceDetail.settingsLineCount', { count: Math.min(jsonLines.length, 250) })}
+                      </span>
+                    )}
+                    <span className="text-xs text-[var(--text-faint)]">
+                      {settingsLastFetched
+                        ? t('deviceDetail.settingsLastFetched', { time: formatDate(settingsLastFetched.toISOString()) })
+                        : t('deviceDetail.settingsLastFetchedNone')}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={async () => {
+                        if (!jsonStr) return;
+                        await navigator.clipboard.writeText(jsonStr);
+                        setSettingsCopied(true);
+                        setTimeout(() => setSettingsCopied(false), 2000);
+                      }}
+                      disabled={!jsonStr}
+                      className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      {settingsCopied ? t('common.copied') : t('common.copy')}
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (!jsonStr) return;
+                        const blob = new Blob([jsonStr], { type: 'application/json' });
+                        const url  = URL.createObjectURL(blob);
+                        const a    = document.createElement('a');
+                        a.href     = url;
+                        a.download = `${device?.name ?? deviceId}-${activeFile}`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                      }}
+                      disabled={!jsonStr}
+                      className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] ring-1 ring-[var(--border)] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      {t('common.download')}
+                    </button>
+                  </div>
+                </div>
+                <div className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl overflow-hidden">
+                  <div className="h-96 overflow-y-auto overflow-x-auto p-4 font-log text-xs leading-5 scrollbar-subtle">
+                    {!settingsData && !settingsRefreshing ? (
+                      <p className="text-[var(--text-faint)] text-center py-8">{t('deviceDetail.settingsIdle')}</p>
+                    ) : settingsData && !activeContent && !settingsRefreshing ? (
+                      <p className="text-[var(--text-faint)] text-center py-8">{t('deviceDetail.settingsError')}</p>
+                    ) : activeContent != null ? (
+                      <>
+                        {displayLines.map((line, i) => (
+                          <div key={i} className="flex gap-2 whitespace-pre">
+                            <span className="shrink-0 select-none text-[var(--text-faint)] tabular-nums pr-2 text-right" style={{ minWidth: '2.5rem' }}>
+                              {i + 1}
+                            </span>
+                            <span className="text-[var(--text-muted)]">{line}</span>
+                          </div>
+                        ))}
+                        {truncated && (
+                          <p className="text-[var(--text-faint)] text-xs pl-12 mt-1">… ({jsonLines.length - 250} 行省略)</p>
+                        )}
+                      </>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
       </div>
     </div>

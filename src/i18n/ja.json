@@ -188,7 +188,17 @@
     "noLogs": "ログがありません。「更新」ボタンを押してログを取得してください。",
     "noFilteredLogs": "表示対象のログがありません。",
     "refreshLogs": "更新",
-    "refreshingLogs": "更新中..."
+    "refreshingLogs": "更新中...",
+    "settings": "設定ファイル",
+    "settingsTabGlobal": "グローバル",
+    "settingsTabMall": "モール",
+    "refreshSettings": "更新",
+    "refreshingSettings": "更新中...",
+    "settingsIdle": "「更新」ボタンを押して設定ファイルを取得してください。",
+    "settingsError": "取得に失敗しました（タイムアウトまたはエラー）。",
+    "settingsLastFetched": "最終取得: {{time}}",
+    "settingsLastFetchedNone": "最終取得: —",
+    "settingsLineCount": "{{count}} 行表示（最大 250 行）"
   },
   "apiTokens": {
     "title": "API トークン",
