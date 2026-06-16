@@ -146,6 +146,25 @@ class Firestore {
     }));
     return results;
   }
+
+  async patchDevicesAndCheckCommands(
+    updates: Array<{ deviceId: string; fields: Record<string, unknown> }>
+  ): Promise<Record<string, { screenshot: boolean; settings: boolean }>> {
+    const results: Record<string, { screenshot: boolean; settings: boolean }> = {};
+    await Promise.all(updates.map(async ({ deviceId, fields }) => {
+      const [doc] = await Promise.all([
+        this.get('devices', deviceId),
+        this.patch('devices', deviceId, fields),
+      ]);
+      if (doc?.fields) {
+        results[deviceId] = {
+          screenshot: fsBool(doc.fields, 'screenshotRequested'),
+          settings:   fsBool(doc.fields, 'settingsRequested'),
+        };
+      }
+    }));
+    return results;
+  }
 }
 
 // ── Token verification ────────────────────────────────────────────────────────
@@ -432,11 +451,14 @@ export default {
           return { deviceId: d.deviceId, fields };
         });
 
-      const screenshotFlags = await fs.patchDevicesAndCheckScreenshots(updates);
+      const commandFlags = await fs.patchDevicesAndCheckCommands(updates);
 
-      const commands: Record<string, { screenshot: true }> = {};
-      for (const [id, requested] of Object.entries(screenshotFlags)) {
-        if (requested) commands[id] = { screenshot: true };
+      const commands: Record<string, { screenshot?: true; settings?: true }> = {};
+      for (const [id, flags] of Object.entries(commandFlags)) {
+        const cmd: { screenshot?: true; settings?: true } = {};
+        if (flags.screenshot) cmd.screenshot = true;
+        if (flags.settings)   cmd.settings   = true;
+        if (Object.keys(cmd).length > 0) commands[id] = cmd;
       }
 
       return jsonRes({ success: true, ...(Object.keys(commands).length > 0 ? { commands } : {}) });
@@ -589,6 +611,31 @@ export default {
           status:      'completed',
           completedAt: new Date(),
         }),
+      ]);
+
+      return jsonRes({ success: true });
+    }
+
+    // ── POST /v1/settings ────────────────────────────────────────
+    // Bridge-Ground uploads settings files; stored in Firestore subcollection.
+    if (req.method === 'POST' && url.pathname === '/v1/settings') {
+      const tokenData = await verifyToken(fs, rawToken, 'device');
+      if (!tokenData) return jsonRes({ error: 'Invalid or revoked token' }, 401);
+
+      const deviceIdParam = url.searchParams.get('deviceId');
+      if (!deviceIdParam) return jsonRes({ error: 'Missing deviceId' }, 400);
+
+      const body = await req.json() as { files?: Record<string, unknown> };
+      if (!body.files || typeof body.files !== 'object') {
+        return jsonRes({ error: 'files object required' }, 400);
+      }
+
+      await Promise.allSettled([
+        fs.patch(`devices/${deviceIdParam}/settings`, 'latest', {
+          files:     body.files,
+          fetchedAt: new Date(),
+        }),
+        fs.patch('devices', deviceIdParam, { settingsRequested: false }),
       ]);
 
       return jsonRes({ success: true });
