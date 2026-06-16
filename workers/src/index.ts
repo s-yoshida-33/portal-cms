@@ -622,10 +622,10 @@ export default {
       const tokenData = await verifyToken(fs, rawToken, 'device');
       if (!tokenData) return jsonRes({ error: 'Invalid or revoked token' }, 401);
 
-      const deviceIdParam = url.searchParams.get('deviceId');
+      const body = await req.json() as { deviceId?: string; files?: Record<string, unknown> };
+      const deviceIdParam = url.searchParams.get('deviceId') ?? body.deviceId;
       if (!deviceIdParam) return jsonRes({ error: 'Missing deviceId' }, 400);
 
-      const body = await req.json() as { files?: Record<string, unknown> };
       if (!body.files || typeof body.files !== 'object') {
         return jsonRes({ error: 'files object required' }, 400);
       }
