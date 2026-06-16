@@ -333,21 +333,21 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
       {/* Mobile layout */}
       <div className="sm:hidden">
         {/* Row 1: name (truncated) + status + menu */}
-        <div className="flex items-center gap-2 min-w-0 mb-0.5">
+        <div className="flex items-center gap-2 min-w-0 mb-1">
           <p className="font-medium text-[var(--text)] text-sm truncate flex-1 min-w-0">{device.name}</p>
           <StatusBadge status={device.status} />
           {menu}
         </div>
         {/* Row 2: IP */}
-        <p className="text-xs text-[var(--text-faint)] font-mono mb-4">{device.ip}</p>
+        <p className="text-xs text-[var(--text-faint)] font-mono mb-5">{device.ip}</p>
         {/* Info section: app / last seen / uptime */}
-        <div className="space-y-1.5">
+        <div className="space-y-2.5">
           <div className="flex items-center gap-1.5">
             <AppBadge app={device.app} />
             <span className="text-[var(--text-faint)] text-xs">v{device.appVersion}</span>
           </div>
           {device.tags && device.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1">
+            <div className="flex flex-wrap gap-1.5">
               {device.tags.map(tag => <TagBadge key={tag} tag={tag} />)}
             </div>
           )}
@@ -361,10 +361,10 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
       {/* Desktop layout */}
       <div className="hidden sm:block">
         {/* Row 1: name + IP (left)  |  status + menu (right) */}
-        <div className="flex items-start justify-between mb-3">
+        <div className="flex items-start justify-between mb-4">
           <div>
             <p className="font-medium text-[var(--text)] text-sm">{device.name}</p>
-            <p className="text-xs text-[var(--text-faint)] font-mono mt-0.5">{device.ip}</p>
+            <p className="text-xs text-[var(--text-faint)] font-mono mt-1">{device.ip}</p>
           </div>
           <div className="flex items-center gap-2 shrink-0 ml-3">
             <StatusBadge status={device.status} />
@@ -372,13 +372,13 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
           </div>
         </div>
         {/* Row 2: app / tags / last seen */}
-        <div className="mb-4 space-y-1.5">
+        <div className="mb-5 space-y-2">
           <div className="flex items-center gap-1.5">
             <AppBadge app={device.app} />
             <span className="text-[var(--text-faint)] text-xs">v{device.appVersion}</span>
           </div>
           {device.tags && device.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1">
+            <div className="flex flex-wrap gap-1.5">
               {device.tags.map(tag => <TagBadge key={tag} tag={tag} />)}
             </div>
           )}
@@ -386,7 +386,7 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
         </div>
         {/* Row 3: metrics */}
         <div className="grid grid-cols-4 gap-6">
-          <div className="col-span-3 grid grid-cols-2 gap-x-8 gap-y-3">
+          <div className="col-span-3 grid grid-cols-2 gap-x-8 gap-y-4">
             <MetricBar label="CPU"                          value={device.system.cpu}         unit="%" />
             <MetricBar label={t('deviceDetail.memory')}      value={device.system.memory}      unit="%" />
             <MetricBar label={t('deviceDetail.temperature')} value={device.system.temperature} unit="°C" warn={65} danger={80} />
