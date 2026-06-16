@@ -101,7 +101,7 @@ export function DeviceDetail() {
   const { t } = useTranslation();
   const formatDate = useFormatDate();
   const { deviceId } = useParams<{ deviceId: string }>();
-  const { user }     = useAuth();
+  const { user, role } = useAuth();
 
   const [device,        setDevice]        = useState<Device | null>(null);
   usePageTitle(device?.name ?? t('deviceDetail.defaultTitle'));
@@ -602,8 +602,8 @@ export function DeviceDetail() {
           </div>
         </div>
 
-        {/* 設定ファイルセクション */}
-        {(() => {
+        {/* 設定ファイルセクション — オーナーのみ */}
+        {role === 'owner' && (() => {
           const files      = settingsData?.files ?? {};
           const fileNames  = Object.keys(files);
           const globalFile = fileNames.find(n => n === 'settings.json');
