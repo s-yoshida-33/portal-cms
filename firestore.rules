@@ -40,7 +40,7 @@ service cloud.firestore {
       }
 
       match /settings/{settingId} {
-        allow read:  if isAuth();
+        allow read:  if isOwner();
         allow write: if true;
       }
     }
