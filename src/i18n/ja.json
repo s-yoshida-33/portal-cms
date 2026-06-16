@@ -182,7 +182,7 @@
     "lastCapturedNone": "最終取得時刻: —",
     "ssAlt": "{{name}} のスクリーンショット",
     "logs": "ログ",
-    "logCount": "{{count}} 件表示（最大 200 件）",
+    "logCount": "{{count}} 件表示",
     "lastFetched": "最終取得: {{time}}",
     "lastFetchedNone": "最終取得: —",
     "noLogs": "ログがありません。「更新」ボタンを押してログを取得してください。",

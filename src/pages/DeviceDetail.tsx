@@ -23,6 +23,52 @@ interface RtdbLogEntry {
 
 type PortalSsState = 'idle' | 'pending' | 'ready' | 'error';
 
+type LogEntryWithKey = RtdbLogEntry & { _key: number };
+
+/** Virtual-scrolling log viewer — only renders ~60 DOM rows regardless of entry count. */
+function VirtualLogViewer({
+  entries,
+  containerRef,
+}: {
+  entries:      LogEntryWithKey[];
+  containerRef: React.RefObject<HTMLDivElement | null>;
+}) {
+  const [scrollTop, setScrollTop] = useState(0);
+  const LINE_H   = 20;
+  const PAD      = 16;
+  const VIEWPORT = 384;
+  const BUFFER   = 30;
+  const first = Math.max(0, Math.floor(scrollTop / LINE_H) - BUFFER);
+  const last  = Math.min(entries.length, Math.ceil((scrollTop + VIEWPORT) / LINE_H) + BUFFER);
+  const numW  = `${String(entries.length).length + 1}ch`;
+  return (
+    <div
+      ref={containerRef}
+      className="h-96 overflow-y-auto overflow-x-auto scrollbar-subtle"
+      onScroll={e => setScrollTop(e.currentTarget.scrollTop)}
+    >
+      <div style={{ height: entries.length * LINE_H + PAD * 2 }} className="relative">
+        <div
+          className="absolute inset-x-0 px-4 font-log text-xs leading-5"
+          style={{ top: first * LINE_H + PAD }}
+        >
+          {entries.slice(first, last).map((log, i) => (
+            <div key={log._key} className="flex gap-2 whitespace-nowrap">
+              <span className="shrink-0 select-none text-[var(--text-faint)] tabular-nums whitespace-pre pr-2 text-right" style={{ minWidth: numW }}>
+                {first + i + 1}
+              </span>
+              <span className="shrink-0 text-[var(--text-faint)]">{log.timestamp}</span>
+              <span className={`shrink-0 w-10 ${logLevelClass(log.level)}`}>{log.level || '----'}</span>
+              {log.tag && <span className="shrink-0 text-[var(--text-faint)]">[{log.tag}]</span>}
+              <span className="text-[var(--text-muted)]">{log.message}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /** Virtual-scrolling code viewer — only renders ~60 DOM rows regardless of total line count. */
 function VirtualCodeViewer({ lines }: { lines: string[] }) {
   const [scrollTop, setScrollTop] = useState(0);
@@ -614,25 +660,15 @@ export function DeviceDetail() {
 
             {/* 内枠: ログビューア */}
             <div className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl overflow-hidden">
-              <div ref={logContainerRef} className="h-96 overflow-y-auto overflow-x-auto p-4 font-log text-xs leading-5 space-y-0.5 scrollbar-subtle">
-                {filteredLogs.length === 0 ? (
-                  <p className="text-[var(--text-faint)] text-center py-8 whitespace-nowrap">
+              {filteredLogs.length === 0 ? (
+                <div className="h-96 flex items-center justify-center">
+                  <p className="text-[var(--text-faint)] whitespace-nowrap">
                     {logs.length === 0 ? t('deviceDetail.noLogs') : t('deviceDetail.noFilteredLogs')}
                   </p>
-                ) : (
-                  filteredLogs.map((log, i) => (
-                    <div key={log._key} className="flex gap-2 whitespace-nowrap">
-                      <span className="shrink-0 select-none text-[var(--text-faint)] tabular-nums whitespace-pre pr-2">
-                        {String(i + 1).padStart(String(filteredLogs.length).length)}
-                      </span>
-                      <span className="shrink-0 text-[var(--text-faint)]">{log.timestamp}</span>
-                      <span className={`shrink-0 w-10 ${logLevelClass(log.level)}`}>{log.level || '----'}</span>
-                      {log.tag && <span className="shrink-0 text-[var(--text-faint)]">[{log.tag}]</span>}
-                      <span className="text-[var(--text-muted)]">{log.message}</span>
-                    </div>
-                  ))
-                )}
-              </div>
+                </div>
+              ) : (
+                <VirtualLogViewer entries={filteredLogs} containerRef={logContainerRef} />
+              )}
             </div>
           </div>
         </div>

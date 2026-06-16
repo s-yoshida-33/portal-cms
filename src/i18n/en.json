@@ -182,7 +182,7 @@
     "lastCapturedNone": "Captured at: —",
     "ssAlt": "Screenshot of {{name}}",
     "logs": "Logs",
-    "logCount": "{{count}} entries shown (max 200)",
+    "logCount": "{{count}} entries shown",
     "lastFetched": "Last fetched: {{time}}",
     "lastFetchedNone": "Last fetched: —",
     "noLogs": "No logs. Press the \"Refresh\" button to fetch logs.",
