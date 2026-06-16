@@ -303,6 +303,15 @@ export function DeviceDetail() {
         <div className="flex flex-col gap-1">
           <h1 className="text-[var(--text)] text-3xl font-semibold">{device.name}</h1>
           <p className="text-[var(--text-muted)] text-base font-mono">{device.ip}</p>
+          {device.tags && device.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-1">
+              {device.tags.map(tag => (
+                <span key={tag} className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ring-1 bg-[var(--bg-subtle)] text-[var(--text-dim)] ring-[var(--border)]">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
         <div className="mt-7">
           <StatusBadge status={device.status} />

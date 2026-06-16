@@ -30,6 +30,7 @@ export interface Device {
   updatedAt:        string;
   groupId?:         string | null;
   pendingDeviceId?: string;
+  tags?:            string[];
 }
 
 // Firestore /groups/{groupId}
