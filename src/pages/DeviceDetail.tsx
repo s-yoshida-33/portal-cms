@@ -23,6 +23,40 @@ interface RtdbLogEntry {
 
 type PortalSsState = 'idle' | 'pending' | 'ready' | 'error';
 
+/** Virtual-scrolling code viewer — only renders ~60 DOM rows regardless of total line count. */
+function VirtualCodeViewer({ lines }: { lines: string[] }) {
+  const [scrollTop, setScrollTop] = useState(0);
+  const LINE_H   = 20;   // leading-5 = 1.25rem × 16px root font
+  const PAD      = 16;   // p-4 = 1rem
+  const VIEWPORT = 384;  // h-96 = 24rem
+  const BUFFER   = 30;
+  const first = Math.max(0, Math.floor(scrollTop / LINE_H) - BUFFER);
+  const last  = Math.min(lines.length, Math.ceil((scrollTop + VIEWPORT) / LINE_H) + BUFFER);
+  const numW  = `${String(lines.length).length + 1}ch`;
+  return (
+    <div
+      className="h-96 overflow-y-auto overflow-x-auto scrollbar-subtle"
+      onScroll={e => setScrollTop(e.currentTarget.scrollTop)}
+    >
+      <div style={{ height: lines.length * LINE_H + PAD * 2 }} className="relative">
+        <div
+          className="absolute inset-x-0 px-4 font-log text-xs leading-5"
+          style={{ top: first * LINE_H + PAD }}
+        >
+          {lines.slice(first, last).map((line, i) => (
+            <div key={first + i} className="flex gap-2 whitespace-pre">
+              <span className="shrink-0 select-none text-[var(--text-faint)] tabular-nums pr-2 text-right" style={{ minWidth: numW }}>
+                {first + i + 1}
+              </span>
+              <span className="text-[var(--text-muted)]">{line}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Helpers ───────────────────────────────────────────────────────
 
 function MetricBar({ label, value, unit, warn = 70, danger = 90 }: {
@@ -614,12 +648,10 @@ export function DeviceDetail() {
             ? (settingsTab === 'mall' ? mallFile! : 'settings.json')
             : (fileNames[0] ?? '');
           const activeContent  = activeFile ? (files[activeFile] ?? null) : null;
-          const jsonStr        = typeof activeContent === 'string'
+          const jsonStr   = typeof activeContent === 'string'
             ? activeContent
             : activeContent != null ? JSON.stringify(activeContent, null, 2) : '';
-          const jsonLines      = jsonStr.split('\n');
-          const displayLines   = jsonLines.slice(0, 250);
-          const truncated      = jsonLines.length > 250;
+          const jsonLines = jsonStr.split('\n');
           return (
             <div>
               <div className="flex items-center justify-between gap-3 mb-3">
@@ -650,7 +682,7 @@ export function DeviceDetail() {
                   <div className="flex flex-col sm:flex-row sm:items-center gap-0 sm:gap-3">
                     {activeContent != null && (
                       <span className="text-xs text-[var(--text-faint)]">
-                        {t('deviceDetail.settingsLineCount', { count: Math.min(jsonLines.length, 250) })}
+                        {t('deviceDetail.settingsLineCount', { count: jsonLines.length })}
                       </span>
                     )}
                     <span className="text-xs text-[var(--text-faint)]">
@@ -692,27 +724,17 @@ export function DeviceDetail() {
                   </div>
                 </div>
                 <div className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl overflow-hidden">
-                  <div className="h-96 overflow-y-auto overflow-x-auto p-4 font-log text-xs leading-5 scrollbar-subtle">
-                    {!settingsData && !settingsRefreshing ? (
-                      <p className="text-[var(--text-faint)] text-center py-8">{t('deviceDetail.settingsIdle')}</p>
-                    ) : settingsData && !activeContent && !settingsRefreshing ? (
-                      <p className="text-[var(--text-faint)] text-center py-8">{t('deviceDetail.settingsError')}</p>
-                    ) : activeContent != null ? (
-                      <>
-                        {displayLines.map((line, i) => (
-                          <div key={i} className="flex gap-2 whitespace-pre">
-                            <span className="shrink-0 select-none text-[var(--text-faint)] tabular-nums pr-2 text-right" style={{ minWidth: '2.5rem' }}>
-                              {i + 1}
-                            </span>
-                            <span className="text-[var(--text-muted)]">{line}</span>
-                          </div>
-                        ))}
-                        {truncated && (
-                          <p className="text-[var(--text-faint)] text-xs pl-12 mt-1">… ({jsonLines.length - 250} 行省略)</p>
-                        )}
-                      </>
-                    ) : null}
-                  </div>
+                  {!settingsData && !settingsRefreshing ? (
+                    <div className="h-96 flex items-center justify-center">
+                      <p className="text-[var(--text-faint)]">{t('deviceDetail.settingsIdle')}</p>
+                    </div>
+                  ) : settingsData && !activeContent && !settingsRefreshing ? (
+                    <div className="h-96 flex items-center justify-center">
+                      <p className="text-[var(--text-faint)]">{t('deviceDetail.settingsError')}</p>
+                    </div>
+                  ) : activeContent != null ? (
+                    <VirtualCodeViewer lines={jsonLines} />
+                  ) : null}
                 </div>
               </div>
             </div>

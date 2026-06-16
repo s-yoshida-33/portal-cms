@@ -198,7 +198,7 @@
     "settingsError": "取得に失敗しました（タイムアウトまたはエラー）。",
     "settingsLastFetched": "最終取得: {{time}}",
     "settingsLastFetchedNone": "最終取得: —",
-    "settingsLineCount": "{{count}} 行表示（最大 250 行）"
+    "settingsLineCount": "{{count}} 行"
   },
   "apiTokens": {
     "title": "API トークン",
