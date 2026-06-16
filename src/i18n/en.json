@@ -198,7 +198,7 @@
     "settingsError": "Failed to fetch (timeout or error).",
     "settingsLastFetched": "Last fetched: {{time}}",
     "settingsLastFetchedNone": "Last fetched: —",
-    "settingsLineCount": "{{count}} lines shown (max 250)"
+    "settingsLineCount": "{{count}} lines"
   },
   "apiTokens": {
     "title": "API Tokens",
