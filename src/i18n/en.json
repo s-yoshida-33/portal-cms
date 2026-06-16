@@ -268,6 +268,7 @@
     "category": {
       "screenshot": "Screenshot",
       "log": "Log",
+      "settings": "Settings",
       "apiToken": "API Token",
       "user": "User",
       "deletionRequest": "Deletion Request",
@@ -279,6 +280,8 @@
       "screenshot.downloaded": "Downloaded screenshot",
       "log.fetched": "Fetched logs",
       "log.downloaded": "Downloaded logs",
+      "settings.fetched": "Fetched settings",
+      "settings.downloaded": "Downloaded settings",
       "apiToken.issued": "Issued API token",
       "apiToken.revoked": "Revoked API token",
       "user.added": "Added user",
