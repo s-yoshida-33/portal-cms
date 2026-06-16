@@ -219,7 +219,7 @@ export function DeviceDetail() {
     } catch {
       setSettingsRefreshing(false);
     }
-  }, [deviceId, settingsRefreshing]);
+  }, [deviceId, settingsRefreshing, device]);
 
   const filteredLogs = useMemo(
     () => logs.filter(l => logLevels.has(l.level || 'INFO')).map((l, i) => ({ ...l, _key: i })),
