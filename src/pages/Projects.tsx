@@ -12,6 +12,7 @@ import {
 } from '../lib/firestore';
 import type { ProjectDoc, Device } from '../types';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { CustomSelect } from '../components/CustomSelect';
 
 // ── プロジェクト追加・編集モーダル ────────────────────────────────
 
@@ -65,8 +66,6 @@ function ProjectModal({ initial, onClose, onSave }: ModalProps) {
 
   const inputClass =
     'w-full bg-[var(--bg-surface)] ring-1 ring-[var(--border)] text-[var(--text)] rounded-lg px-3 h-9 text-sm outline-none focus:ring-[var(--accent)] focus:ring-2 placeholder:text-[var(--text-faint)] transition-all';
-  const selectClass =
-    'w-full bg-[var(--bg-surface)] ring-1 ring-[var(--border)] text-[var(--text)] rounded-lg px-3 pr-8 h-9 text-sm outline-none focus:ring-[var(--accent)] focus:ring-2 transition-all cursor-pointer appearance-none';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
@@ -89,19 +88,12 @@ function ProjectModal({ initial, onClose, onSave }: ModalProps) {
             </div>
             <div>
               <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projects.form.countryLabel')}</label>
-              <div className="relative">
-                <select value={country} onChange={e => setCountry(e.target.value)}
-                  className={selectClass}>
-                  {COUNTRIES.map(c => (
-                    <option key={c.value} value={c.value}>{getCountryLabel(c.value, t)}</option>
-                  ))}
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-2.5 flex items-center">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--text-dim)]">
-                    <polyline points="6 9 12 15 18 9" />
-                  </svg>
-                </div>
-              </div>
+              <CustomSelect
+                value={country}
+                onChange={setCountry}
+                options={COUNTRIES.map(c => ({ value: c.value, label: getCountryLabel(c.value, t) }))}
+                className="w-full"
+              />
             </div>
             <div>
               <label className="block text-sm text-[var(--text-dim)] mb-1.5">
