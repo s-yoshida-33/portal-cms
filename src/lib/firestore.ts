@@ -703,3 +703,10 @@ export async function addExternalLink(
 export async function deleteExternalLink(id: string): Promise<void> {
   await deleteDoc(doc(db, 'externalLinks', id));
 }
+
+export async function updateExternalLink(
+  id: string,
+  data: Pick<ExternalLink, 'name' | 'url'>
+): Promise<void> {
+  await updateDoc(doc(db, 'externalLinks', id), data);
+}

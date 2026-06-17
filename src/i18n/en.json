@@ -433,12 +433,17 @@
         "urlRequired": "Please enter a URL.",
         "urlInvalid": "Please enter a valid URL (https://...).",
         "saveFailed": "Failed to add.",
+        "updateFailed": "Failed to update.",
         "noLinks": "No external links registered.",
         "table": {
           "name": "Site name",
           "url": "URL",
           "addedAt": "Added"
-        }
+        },
+        "editTitle": "Edit Link",
+        "deleteTitle": "Delete Link",
+        "deleteBody": "Delete \"{{name}}\". This cannot be undone.",
+        "deleteConfirm": "Delete"
       }
     }
   },

@@ -433,12 +433,17 @@
         "urlRequired": "URLを入力してください。",
         "urlInvalid": "正しいURLを入力してください（https://... の形式）。",
         "saveFailed": "追加に失敗しました。",
+        "updateFailed": "更新に失敗しました。",
         "noLinks": "外部リンクは登録されていません。",
         "table": {
           "name": "サイト名",
           "url": "URL",
           "addedAt": "追加日時"
-        }
+        },
+        "editTitle": "外部リンクを編集",
+        "deleteTitle": "外部リンクを削除",
+        "deleteBody": "「{{name}}」を削除します。この操作は取り消せません。",
+        "deleteConfirm": "削除する"
       }
     }
   },
