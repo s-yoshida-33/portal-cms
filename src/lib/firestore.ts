@@ -33,6 +33,7 @@ import type {
   DeletionTargetType,
   PortalNotification,
   SiteLog,
+  ExternalLink,
 } from '../types';
 
 // ---------- helpers ----------
@@ -64,6 +65,7 @@ const col = {
   notifications:    () => collection(db, 'notifications'),
   groups:           () => collection(db, 'groups'),
   siteLogs:         () => collection(db, 'siteLogs'),
+  externalLinks:    () => collection(db, 'externalLinks'),
 };
 
 // ================================================================
@@ -676,4 +678,28 @@ export function subscribeSiteLogs(
     snap => onUpdate(snap.docs.map(d => fromDoc<SiteLog>(d))),
     onError,
   );
+}
+
+// ================================================================
+// External Links
+// ================================================================
+
+export async function fetchExternalLinks(): Promise<ExternalLink[]> {
+  const snap = await getDocs(query(col.externalLinks(), orderBy('createdAt', 'asc')));
+  return snap.docs.map(d => fromDoc<ExternalLink>(d));
+}
+
+export async function addExternalLink(
+  data: Pick<ExternalLink, 'name' | 'url'>
+): Promise<ExternalLink> {
+  const ref = await addDoc(col.externalLinks(), {
+    ...data,
+    createdAt: serverTimestamp(),
+  });
+  const snap = await getDoc(ref);
+  return fromDoc<ExternalLink>(snap);
+}
+
+export async function deleteExternalLink(id: string): Promise<void> {
+  await deleteDoc(doc(db, 'externalLinks', id));
 }

@@ -114,6 +114,14 @@ export interface SiteLog {
   performedAt:  string; // ISO
 }
 
+// Firestore /externalLinks/{linkId}
+export interface ExternalLink {
+  id:        string;
+  name:      string;
+  url:       string;
+  createdAt: string;
+}
+
 // Firestore /notifications/{notificationId}
 export interface PortalNotification {
   id:        string;
