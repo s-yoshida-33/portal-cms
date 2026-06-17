@@ -72,15 +72,15 @@ export function Settings() {
         {/* Mobile */}
         <div className="flex items-start gap-2 min-w-0 sm:hidden">
           <div className="flex-1 min-w-0 flex flex-col gap-1">
-            <h1 className="text-[var(--text)] text-3xl font-semibold leading-tight">{t('settings.title')}</h1>
-            <p className="text-[var(--text-muted)] text-base">{t('settings.description')}</p>
+            <h1 className="text-(--text) text-3xl font-semibold leading-tight">{t('settings.title')}</h1>
+            <p className="text-(--text-muted) text-base">{t('settings.description')}</p>
           </div>
         </div>
         {/* Desktop */}
         <div className="hidden sm:flex items-start justify-between gap-4">
           <div className="flex flex-col gap-2">
-            <h1 className="text-[var(--text)] text-3xl font-semibold">{t('settings.title')}</h1>
-            <p className="text-[var(--text-muted)] text-base">{t('settings.description')}</p>
+            <h1 className="text-(--text) text-3xl font-semibold">{t('settings.title')}</h1>
+            <p className="text-(--text-muted) text-base">{t('settings.description')}</p>
           </div>
         </div>
       </div>
@@ -90,10 +90,10 @@ export function Settings() {
 
         {/* 外部リンクセクション */}
         <div>
-          <h2 className="text-[var(--text)] text-base font-semibold mb-0.5">
+          <h2 className="text-(--text) text-base font-semibold mb-0.5">
             {t('settings.integrations.externalLinks.sectionTitle')}
           </h2>
-          <p className="text-[var(--text-muted)] text-sm mb-5">
+          <p className="text-(--text-muted) text-sm mb-5">
             {t('settings.integrations.externalLinks.sectionDescription')}
           </p>
 
@@ -118,7 +118,7 @@ export function Settings() {
                 <button
                   type="submit"
                   disabled={adding}
-                  className="h-9 px-5 rounded-lg text-sm font-semibold text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-50 transition-colors cursor-pointer shrink-0"
+                  className="h-9 px-5 rounded-lg text-sm font-semibold text-white bg-(--accent) hover:bg-(--accent-hover) disabled:opacity-50 transition-colors cursor-pointer shrink-0"
                 >
                   +
                 </button>
@@ -129,10 +129,10 @@ export function Settings() {
 
           {/* テーブル */}
           {loading ? (
-            <p className="text-[var(--text-faint)] text-sm">{t('common.loading')}</p>
+            <p className="text-(--text-faint) text-sm">{t('common.loading')}</p>
           ) : links.length === 0 ? (
-            <div className="overflow-hidden rounded-lg bg-[var(--bg-surface)] ring-1 ring-[var(--border)] p-10 text-center">
-              <p className="text-[var(--text-faint)] text-sm">
+            <div className="overflow-hidden rounded-lg bg-(--bg-surface) ring-1 ring-(--border) p-10 text-center">
+              <p className="text-(--text-faint) text-sm">
                 {t('settings.integrations.externalLinks.noLinks')}
               </p>
             </div>
@@ -141,26 +141,26 @@ export function Settings() {
               {/* スマホ: カード */}
               <div className="sm:hidden space-y-3">
                 {links.map(link => (
-                  <div key={link.id} className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl px-4 py-3">
+                  <div key={link.id} className="bg-(--bg-surface) ring-1 ring-(--border) rounded-xl px-4 py-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex flex-col gap-0.5 min-w-0">
-                        <span className="text-[var(--text)] text-sm font-semibold truncate">{link.name}</span>
+                        <span className="text-(--text) text-sm font-semibold truncate">{link.name}</span>
                         <a
                           href={link.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-[var(--accent)] text-xs truncate hover:underline"
+                          className="text-(--accent) text-xs truncate hover:underline"
                         >
                           {link.url}
                         </a>
-                        <span className="text-[var(--text-faint)] text-xs tabular-nums mt-1">
+                        <span className="text-(--text-faint) text-xs tabular-nums mt-1">
                           {formatDate(link.createdAt)}
                         </span>
                       </div>
                       {canEdit && (
                         <button
                           onClick={() => handleDelete(link.id)}
-                          className="shrink-0 h-7 px-3 rounded-md text-xs text-[var(--danger-text)] bg-[var(--danger-text)]/5 hover:bg-[var(--danger-text)]/10 ring-1 ring-[var(--danger-text)]/20 transition-colors cursor-pointer"
+                          className="shrink-0 h-7 px-3 rounded-md text-xs text-(--danger-text) bg-(--danger-text)/5 hover:bg-(--danger-text)/10 ring-1 ring-(--danger-text)/20 transition-colors cursor-pointer"
                         >
                           {t('common.delete')}
                         </button>
@@ -171,8 +171,8 @@ export function Settings() {
               </div>
 
               {/* PC: テーブル */}
-              <div className="hidden sm:block overflow-hidden rounded-lg ring-1 ring-[var(--border)]">
-                <div className={`grid gap-4 px-4 py-3 bg-[var(--bg-base)] border-b border-[var(--border)] text-xs font-medium text-[var(--text-faint)] uppercase tracking-wider ${canEdit ? 'grid-cols-[1fr_2fr_160px_72px]' : 'grid-cols-[1fr_2fr_160px]'}`}>
+              <div className="hidden sm:block overflow-hidden rounded-lg ring-1 ring-(--border)">
+                <div className={`grid gap-4 px-4 py-3 bg-(--bg-base) border-b border-(--border) text-xs font-medium text-(--text-faint) uppercase tracking-wider ${canEdit ? 'grid-cols-[1fr_2fr_160px_72px]' : 'grid-cols-[1fr_2fr_160px]'}`}>
                   <span>{t('settings.integrations.externalLinks.table.name')}</span>
                   <span>{t('settings.integrations.externalLinks.table.url')}</span>
                   <span>{t('settings.integrations.externalLinks.table.addedAt')}</span>
@@ -181,25 +181,25 @@ export function Settings() {
                 {links.map((link, i) => (
                   <div
                     key={link.id}
-                    className={`grid gap-4 px-4 py-3 items-center bg-[var(--bg-surface)] transition-colors ${canEdit ? 'grid-cols-[1fr_2fr_160px_72px]' : 'grid-cols-[1fr_2fr_160px]'} ${i < links.length - 1 ? 'border-b border-[var(--border)]' : ''}`}
+                    className={`grid gap-4 px-4 py-3 items-center bg-(--bg-surface) transition-colors ${canEdit ? 'grid-cols-[1fr_2fr_160px_72px]' : 'grid-cols-[1fr_2fr_160px]'} ${i < links.length - 1 ? 'border-b border-(--border)' : ''}`}
                   >
-                    <span className="text-[var(--text)] text-sm font-medium truncate">{link.name}</span>
+                    <span className="text-(--text) text-sm font-medium truncate">{link.name}</span>
                     <a
                       href={link.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[var(--accent)] text-sm truncate hover:underline"
+                      className="text-(--accent) text-sm truncate hover:underline"
                     >
                       {link.url}
                     </a>
-                    <span className="text-[var(--text-dim)] text-sm tabular-nums">
+                    <span className="text-(--text-dim) text-sm tabular-nums">
                       {formatDate(link.createdAt)}
                     </span>
                     {canEdit && (
                       <div className="flex justify-end">
                         <button
                           onClick={() => handleDelete(link.id)}
-                          className="h-7 px-3 rounded-md text-xs text-[var(--danger-text)] bg-[var(--danger-text)]/5 hover:bg-[var(--danger-text)]/10 ring-1 ring-[var(--danger-text)]/20 transition-colors cursor-pointer"
+                          className="h-7 px-3 rounded-md text-xs text-(--danger-text) bg-(--danger-text)/5 hover:bg-(--danger-text)/10 ring-1 ring-(--danger-text)/20 transition-colors cursor-pointer"
                         >
                           {t('common.delete')}
                         </button>
