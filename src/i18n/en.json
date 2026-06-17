@@ -93,6 +93,7 @@
     "table": {
       "name": "Project name",
       "prefecture": "Prefecture",
+      "region": "Region",
       "address": "Address",
       "count": "Devices"
     },
@@ -100,9 +101,12 @@
       "addTitle": "Add project",
       "editTitle": "Edit project",
       "nameLabel": "Project name",
+      "countryLabel": "Country",
       "prefectureLabel": "Prefecture",
+      "regionLabel": "State / Province (optional)",
       "addressLabel": "Address",
       "requiredAll": "Please fill in all fields.",
+      "requiredNameAddress": "Please enter a project name and address.",
       "saveFailed": "Failed to save: {{msg}}"
     },
     "deleteRequest": {

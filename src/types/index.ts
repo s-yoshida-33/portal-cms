@@ -45,12 +45,13 @@ export interface DeviceGroup {
 
 // Firestore /projects/{projectId}
 export interface ProjectDoc {
-  id:         string;
-  name:       string;
-  prefecture: string;
-  address:    string;
-  createdAt:  string;
-  updatedAt:  string;
+  id:          string;
+  name:        string;
+  country:     string;
+  prefecture:  string;
+  address:     string;
+  createdAt:   string;
+  updatedAt:   string;
 }
 
 // Firestore /userRoles/{uid}

@@ -93,6 +93,7 @@
     "table": {
       "name": "プロジェクト名",
       "prefecture": "都道府県",
+      "region": "地域",
       "address": "住所",
       "count": "台数"
     },
@@ -100,9 +101,12 @@
       "addTitle": "プロジェクトを追加",
       "editTitle": "プロジェクトを編集",
       "nameLabel": "プロジェクト名",
+      "countryLabel": "国",
       "prefectureLabel": "都道府県",
+      "regionLabel": "州・省（任意）",
       "addressLabel": "住所",
       "requiredAll": "すべての項目を入力してください。",
+      "requiredNameAddress": "プロジェクト名と住所を入力してください。",
       "saveFailed": "保存に失敗しました: {{msg}}"
     },
     "deleteRequest": {
