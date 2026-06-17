@@ -98,19 +98,19 @@ export function ProfileSettings() {
   ];
 
   return (
-    <div className="flex flex-col min-w-0 bg-[var(--bg-base)] text-[var(--text)] font-sans min-h-screen">
+    <div className="flex flex-col min-w-0 bg-(--bg-base) text-(--text) font-sans min-h-screen">
 
       {/* ロゴエリアと高さを揃えるスペーサー（モバイルは非表示） */}
-      <div className="hidden sm:block py-3 border-b border-[var(--border)] bg-[var(--bg-base)]">
+      <div className="hidden sm:block py-3 border-b border-(--border) bg-(--bg-base)">
         <div className="h-7" />
       </div>
 
       {/* Header */}
-      <div className="flex items-center justify-between gap-4 py-6 px-4 sm:px-6 border-b border-[var(--border)] bg-[var(--bg-base)]">
+      <div className="flex items-center justify-between gap-4 py-6 px-4 sm:px-6 border-b border-(--border) bg-(--bg-base)">
         <div className="flex flex-col gap-2">
-          <h1 className="text-[var(--text)] text-3xl font-semibold">{t('profile.title')}</h1>
+          <h1 className="text-(--text) text-3xl font-semibold">{t('profile.title')}</h1>
           <div className="hidden md:block">
-            <p className="text-[var(--text-muted)] text-base">
+            <p className="text-(--text-muted) text-base">
               {email} {memberSince && `· ${t('profile.memberSince', { date: memberSince })}`}
             </p>
           </div>
@@ -118,17 +118,17 @@ export function ProfileSettings() {
       </div>
 
       {/* Tabs */}
-      <header className="flex items-center justify-between h-[58px] gap-3 px-4 sm:px-6 border-b border-[var(--border)] sticky z-20 bg-[var(--bg-base)] top-0">
+      <header className="flex items-center justify-between h-[58px] gap-3 px-4 sm:px-6 border-b border-(--border) sticky z-20 bg-(--bg-base) top-0">
         <div className="relative isolate min-w-0 font-medium">
-          <div className="absolute inset-x-0 top-1/2 z-0 -translate-y-1/2 rounded-lg bg-[var(--bg-subtle)] h-9"></div>
-          <div role="tablist" className="relative flex min-w-0 shrink items-stretch overflow-x-auto rounded-lg bg-[var(--bg-subtle)] px-0.5 ring-1 ring-[var(--border)] h-9">
+          <div className="absolute inset-x-0 top-1/2 z-0 -translate-y-1/2 rounded-lg bg-(--bg-subtle) h-9"></div>
+          <div role="tablist" className="relative flex min-w-0 shrink items-stretch overflow-x-auto rounded-lg bg-(--bg-subtle) px-0.5 ring-1 ring-(--border) h-9">
             <button
               onClick={() => setTab('settings')}
               style={{ cursor: 'pointer' }}
-              className={`no-underline relative z-2 flex items-center whitespace-nowrap focus:outline-none focus:ring-[var(--accent)]/50 focus-visible:ring-2 focus-visible:ring-[var(--accent)] text-base my-0.5 rounded-md px-2.5 transition-colors ${
+              className={`no-underline relative z-2 flex items-center whitespace-nowrap focus:outline-none focus:ring-(--accent)/50 focus-visible:ring-2 focus-visible:ring-(--accent) text-base my-0.5 rounded-md px-2.5 transition-colors ${
                 tab === 'settings'
-                  ? 'bg-[var(--bg-surface)] text-[var(--text)] shadow-sm ring-1 ring-[var(--border)]'
-                  : 'bg-transparent text-[var(--text-muted)] hover:text-[var(--text)]'
+                  ? 'bg-(--bg-surface) text-(--text) shadow-sm ring-1 ring-(--border)'
+                  : 'bg-transparent text-(--text-muted) hover:text-(--text)'
               }`}
             >
               {t('profile.tabs.settings')}
@@ -136,10 +136,10 @@ export function ProfileSettings() {
             <button
               onClick={() => setTab('notifications')}
               style={{ cursor: 'pointer' }}
-              className={`no-underline relative z-2 flex items-center whitespace-nowrap focus:outline-none focus:ring-[var(--accent)]/50 focus-visible:ring-2 focus-visible:ring-[var(--accent)] text-base my-0.5 rounded-md px-2.5 transition-colors ${
+              className={`no-underline relative z-2 flex items-center whitespace-nowrap focus:outline-none focus:ring-(--accent)/50 focus-visible:ring-2 focus-visible:ring-(--accent) text-base my-0.5 rounded-md px-2.5 transition-colors ${
                 tab === 'notifications'
-                  ? 'bg-[var(--bg-surface)] text-[var(--text)] shadow-sm ring-1 ring-[var(--border)]'
-                  : 'bg-transparent text-[var(--text-muted)] hover:text-[var(--text)]'
+                  ? 'bg-(--bg-surface) text-(--text) shadow-sm ring-1 ring-(--border)'
+                  : 'bg-transparent text-(--text-muted) hover:text-(--text)'
               }`}
             >
               {t('profile.tabs.notifications')}
@@ -157,11 +157,11 @@ export function ProfileSettings() {
               <div className="flex flex-col gap-y-5">
                 
                 {/* Email Section */}
-                <div className="bg-[var(--bg-surface)] shadow-xs ring-1 ring-[var(--border)] overflow-visible rounded-lg p-6">
+                <div className="bg-(--bg-surface) shadow-xs ring-1 ring-(--border) overflow-visible rounded-lg p-6">
                   <div className="flex flex-col gap-4">
                     <div className="flex flex-col gap-2">
                       <div className="flex flex-wrap items-start justify-between gap-2">
-                        <h3 className="text-[var(--text)] text-lg font-semibold flex items-center gap-2">
+                        <h3 className="text-(--text) text-lg font-semibold flex items-center gap-2">
                           <span>{t('profile.email.title')}</span>
                           {!isGoogleUser && (
                             <span className="inline-flex w-fit flex-none shrink-0 items-center justify-self-start rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap bg-white text-black">
@@ -171,7 +171,7 @@ export function ProfileSettings() {
                         </h3>
                       </div>
                       {isGoogleUser && (
-                        <span className="text-[var(--text-muted)] text-base">{t('profile.email.googleNote')}</span>
+                        <span className="text-(--text-muted) text-base">{t('profile.email.googleNote')}</span>
                       )}
                     </div>
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-3">
@@ -179,7 +179,7 @@ export function ProfileSettings() {
                         <input
                           readOnly
                           value={email}
-                          className="border-0 bg-[var(--bg-raised)] text-[var(--text)] ring-1 ring-[var(--border)] outline-none focus:outline-none placeholder:text-[#767676] disabled:text-[#797979] h-9 gap-1.5 rounded-lg px-3 text-base focus:ring-[var(--accent)]/50 focus:ring-[1.5px] pointer-events-none w-full"
+                          className="border-0 bg-(--bg-raised) text-(--text) ring-1 ring-(--border) outline-none focus:outline-none placeholder:text-[#767676] disabled:text-[#797979] h-9 gap-1.5 rounded-lg px-3 text-base focus:ring-(--accent)/50 focus:ring-[1.5px] pointer-events-none w-full"
                         />
                       </div>
                       {!isGoogleUser && (
@@ -197,14 +197,14 @@ export function ProfileSettings() {
                 </div>
 
                 {/* Language Section */}
-                <div className="bg-[var(--bg-surface)] shadow-xs ring-1 ring-[var(--border)] overflow-visible rounded-lg p-6">
+                <div className="bg-(--bg-surface) shadow-xs ring-1 ring-(--border) overflow-visible rounded-lg p-6">
                   <div className="flex flex-col gap-4">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                       <div className="flex flex-col gap-2">
                         <div className="flex flex-wrap items-start justify-between gap-2">
-                          <h3 className="text-[var(--text)] text-lg font-semibold">{t('profile.language.title')}</h3>
+                          <h3 className="text-(--text) text-lg font-semibold">{t('profile.language.title')}</h3>
                         </div>
-                        <span className="text-[var(--text-muted)] text-base">{t('profile.language.description')}</span>
+                        <span className="text-(--text-muted) text-base">{t('profile.language.description')}</span>
                       </div>
                       <div className="shrink-0">
                         <CustomSelect
@@ -218,14 +218,14 @@ export function ProfileSettings() {
                 </div>
 
                 {/* Timezone Section */}
-                <div className="bg-[var(--bg-surface)] shadow-xs ring-1 ring-[var(--border)] overflow-visible rounded-lg p-6">
+                <div className="bg-(--bg-surface) shadow-xs ring-1 ring-(--border) overflow-visible rounded-lg p-6">
                   <div className="flex flex-col gap-4">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                       <div className="flex flex-col gap-2">
                         <div className="flex flex-wrap items-start justify-between gap-2">
-                          <h3 className="text-[var(--text)] text-lg font-semibold">{t('profile.timezone.title')}</h3>
+                          <h3 className="text-(--text) text-lg font-semibold">{t('profile.timezone.title')}</h3>
                         </div>
-                        <span className="text-[var(--text-muted)] text-base">{t('profile.timezone.description')}</span>
+                        <span className="text-(--text-muted) text-base">{t('profile.timezone.description')}</span>
                       </div>
                       <div className="shrink-0">
                         <CustomSelect
@@ -239,14 +239,14 @@ export function ProfileSettings() {
                 </div>
 
                 {/* Appearance Section */}
-                <div className="bg-[var(--bg-surface)] shadow-xs ring-1 ring-[var(--border)] overflow-visible rounded-lg p-6">
+                <div className="bg-(--bg-surface) shadow-xs ring-1 ring-(--border) overflow-visible rounded-lg p-6">
                   <div className="flex flex-col gap-4">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                       <div className="flex flex-col gap-2">
                         <div className="flex flex-wrap items-start justify-between gap-2">
-                          <h3 className="text-[var(--text)] text-lg font-semibold">{t('profile.appearance.title')}</h3>
+                          <h3 className="text-(--text) text-lg font-semibold">{t('profile.appearance.title')}</h3>
                         </div>
-                        <span className="text-[var(--text-muted)] text-base">{t('profile.appearance.description')}</span>
+                        <span className="text-(--text-muted) text-base">{t('profile.appearance.description')}</span>
                       </div>
                       <div className="shrink-0">
                         <CustomSelect
@@ -260,35 +260,35 @@ export function ProfileSettings() {
                 </div>
 
                 {/* Delete Profile Section */}
-                <div className="bg-[var(--bg-surface)] shadow-xs ring-1 ring-[var(--border)] overflow-visible rounded-lg p-6">
+                <div className="bg-(--bg-surface) shadow-xs ring-1 ring-(--border) overflow-visible rounded-lg p-6">
                   <div className="flex flex-col gap-4">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                       <div className="flex flex-col gap-2">
                         <div className="flex flex-wrap items-start justify-between gap-2">
-                          <h3 className="text-[var(--text)] text-lg font-semibold">{t('profile.deleteProfile.title')}</h3>
+                          <h3 className="text-(--text) text-lg font-semibold">{t('profile.deleteProfile.title')}</h3>
                         </div>
-                        <span className="text-[var(--text-muted)] text-base">{t('profile.deleteProfile.description', { email })}</span>
+                        <span className="text-(--text-muted) text-base">{t('profile.deleteProfile.description', { email })}</span>
                       </div>
                       <div className="shrink-0">
                         {!showDeleteConfirm ? (
                           <button
                             onClick={() => setShowDeleteConfirm(true)}
                             style={{ cursor: 'pointer' }}
-                            className="group flex w-max shrink-0 items-center font-medium select-none border-0 shadow-xs focus:outline-none focus:ring-[var(--danger-text)]/50 focus-visible:ring-2 focus-visible:ring-[var(--danger-text)] cursor-pointer disabled:cursor-not-allowed bg-[var(--bg-surface)] text-[var(--danger-text)] ring-1 ring-[var(--danger-text)] hover:bg-[var(--danger-text)]/10 h-9 gap-1.5 rounded-lg px-3 text-base transition-colors"
+                            className="group flex w-max shrink-0 items-center font-medium select-none border-0 shadow-xs focus:outline-none focus:ring-(--danger-text)/50 focus-visible:ring-2 focus-visible:ring-(--danger-text) cursor-pointer disabled:cursor-not-allowed bg-(--bg-surface) text-(--danger-text) ring-1 ring-(--danger-text) hover:bg-(--danger-text)/10 h-9 gap-1.5 rounded-lg px-3 text-base transition-colors"
                           >
                             <span>{t('profile.deleteProfile.deleteBtn')}</span>
                           </button>
                         ) : (
                           <div className="p-4 border rounded-lg bg-[#3c0501]/50 border-[#970d02]/50 space-y-3 mt-4 sm:mt-0">
-                            <p className="text-sm text-[var(--danger-text)] font-semibold">{t('profile.deleteProfile.confirmTitle')}</p>
-                            <p className="text-sm text-[var(--danger-text)]/80">
+                            <p className="text-sm text-(--danger-text) font-semibold">{t('profile.deleteProfile.confirmTitle')}</p>
+                            <p className="text-sm text-(--danger-text)/80">
                               {t('profile.deleteProfile.confirmBody')}
                             </p>
                             <div className="flex gap-2 mt-4">
                               <button
                                 onClick={() => setShowDeleteConfirm(false)}
                                 style={{ cursor: 'pointer' }}
-                                className="group flex w-max shrink-0 items-center font-medium select-none border-0 shadow-xs focus:outline-none focus:ring-[var(--accent)]/50 focus-visible:ring-2 focus-visible:ring-[var(--accent)] bg-[var(--bg-surface)] text-[var(--text)] ring-1 hover:bg-[var(--bg-subtle)] ring-[var(--border)] h-9 gap-1.5 rounded-lg px-3 text-base transition-colors"
+                                className="group flex w-max shrink-0 items-center font-medium select-none border-0 shadow-xs focus:outline-none focus:ring-(--accent)/50 focus-visible:ring-2 focus-visible:ring-(--accent) bg-(--bg-surface) text-(--text) ring-1 hover:bg-(--bg-subtle) ring-(--border) h-9 gap-1.5 rounded-lg px-3 text-base transition-colors"
                               >
                                 {t('common.cancel')}
                               </button>
@@ -308,7 +308,7 @@ export function ProfileSettings() {
 
               </div>
             ) : (
-              <div className="py-16 text-center text-[var(--text-muted)] text-base">
+              <div className="py-16 text-center text-(--text-muted) text-base">
                 {t('profile.notificationsWip')}
               </div>
             )}
@@ -322,8 +322,8 @@ export function ProfileSettings() {
         <div
           className={`fixed bottom-6 right-6 flex items-center gap-2.5 px-4 py-3 rounded-lg shadow-lg text-sm font-medium border transition-all animate-fade-slide-in z-50 ${
             toast.ok
-              ? 'bg-[var(--bg-surface)] border-[var(--border)] text-[var(--text)]'
-              : 'bg-[#3c0501] border-[#970d02] text-[var(--danger-text)]'
+              ? 'bg-(--bg-surface) border-(--border) text-(--text)'
+              : 'bg-[#3c0501] border-[#970d02] text-(--danger-text)'
           }`}
         >
           {toast.ok ? (
@@ -335,7 +335,7 @@ export function ProfileSettings() {
           ) : (
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-              className="text-[var(--danger-text)] shrink-0">
+              className="text-(--danger-text) shrink-0">
               <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           )}

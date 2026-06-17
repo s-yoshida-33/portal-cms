@@ -422,7 +422,7 @@
   },
   "settings": {
     "title": "Settings",
-    "description": "Manage global portal settings.",
+    "description": "Manage global site settings.",
     "integrations": {
       "externalLinks": {
         "sectionTitle": "External Links",

@@ -41,19 +41,19 @@ function ApproveConfirm({ request, onClose, onConfirm }: ApproveConfirmProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
-      <div className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl w-full max-w-md p-6 shadow-2xl"
+      <div className="bg-(--bg-surface) ring-1 ring-(--border) rounded-xl w-full max-w-md p-6 shadow-2xl"
         onClick={e => e.stopPropagation()}>
-        <h2 className="text-[var(--text)] text-lg font-semibold mb-2">{t('deletionRequests.approveModal.title')}</h2>
-        <p className="text-[var(--text-dim)] text-sm mb-5">
+        <h2 className="text-(--text) text-lg font-semibold mb-2">{t('deletionRequests.approveModal.title')}</h2>
+        <p className="text-(--text-dim) text-sm mb-5">
           {t('deletionRequests.approveModal.body', { name: request.targetName, type: typeLabel[request.type] })}
         </p>
         <div className="flex justify-end gap-2">
           <button onClick={onClose}
-            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm text-(--text-muted) bg-(--bg-surface) hover:bg-(--bg-subtle)/60 ring-1 ring-(--border) transition-colors cursor-pointer">
             {t('common.cancel')}
           </button>
           <button onClick={handle} disabled={running}
-            className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[var(--danger)] hover:bg-[var(--danger-hover)] disabled:opacity-50 transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-(--danger) hover:bg-(--danger-hover) disabled:opacity-50 transition-colors cursor-pointer">
             {running ? t('deletionRequests.approveModal.deleting') : t('deletionRequests.approveModal.deleteBtn')}
           </button>
         </div>
@@ -89,10 +89,10 @@ function RejectModal({ request, onClose, onConfirm }: RejectModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
-      <div className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl w-full max-w-md p-6 shadow-2xl"
+      <div className="bg-(--bg-surface) ring-1 ring-(--border) rounded-xl w-full max-w-md p-6 shadow-2xl"
         onClick={e => e.stopPropagation()}>
-        <h2 className="text-[var(--text)] text-lg font-semibold mb-2">{t('deletionRequests.rejectModal.title')}</h2>
-        <p className="text-[var(--text-dim)] text-sm mb-4">
+        <h2 className="text-(--text) text-lg font-semibold mb-2">{t('deletionRequests.rejectModal.title')}</h2>
+        <p className="text-(--text-dim) text-sm mb-4">
           {t('deletionRequests.rejectModal.body', { name: request.targetName })}
         </p>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -101,11 +101,11 @@ function RejectModal({ request, onClose, onConfirm }: RejectModalProps) {
           {error && <p className="text-red-400 text-sm">{error}</p>}
           <div className="flex justify-end gap-2">
             <button type="button" onClick={onClose}
-              className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer">
+              className="h-9 px-4 rounded-lg text-sm text-(--text-muted) bg-(--bg-surface) hover:bg-(--bg-subtle)/60 ring-1 ring-(--border) transition-colors cursor-pointer">
               {t('common.cancel')}
             </button>
             <button type="submit" disabled={running}
-              className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[var(--danger)] hover:bg-[var(--danger-hover)] disabled:opacity-50 transition-colors cursor-pointer">
+              className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-(--danger) hover:bg-(--danger-hover) disabled:opacity-50 transition-colors cursor-pointer">
               {running ? t('deletionRequests.rejectModal.processing') : t('deletionRequests.rejectModal.rejectBtn')}
             </button>
           </div>
@@ -149,7 +149,7 @@ export function DeletionRequests() {
     return (
       <div className="flex flex-col min-h-full">
         <div className="p-8">
-          <p className="text-[var(--text-dim)] text-sm">{t('deletionRequests.accessDenied')}</p>
+          <p className="text-(--text-dim) text-sm">{t('deletionRequests.accessDenied')}</p>
         </div>
       </div>
     );
@@ -161,11 +161,11 @@ export function DeletionRequests() {
       {/* ページヘッダー */}
       <div className="flex items-start justify-between gap-4 py-6 px-4 sm:px-6">
         <div className="flex flex-col gap-2">
-          <h1 className="text-[var(--text)] text-3xl font-semibold leading-tight">{t('deletionRequests.title')}</h1>
-          <p className="text-[var(--text-muted)] text-base">{t('deletionRequests.description')}</p>
+          <h1 className="text-(--text) text-3xl font-semibold leading-tight">{t('deletionRequests.title')}</h1>
+          <p className="text-(--text-muted) text-base">{t('deletionRequests.description')}</p>
         </div>
         {!loading && requests.length > 0 && (
-          <span className="flex items-center justify-center h-6 min-w-6 px-2 rounded-full bg-red-600 text-[var(--text)] text-xs font-semibold mt-1">
+          <span className="flex items-center justify-center h-6 min-w-6 px-2 rounded-full bg-red-600 text-(--text) text-xs font-semibold mt-1">
             {requests.length}
           </span>
         )}
@@ -174,39 +174,39 @@ export function DeletionRequests() {
       {/* コンテンツ */}
       <div className="px-4 sm:px-6 pt-8 pb-8">
         {loading ? (
-          <div className="overflow-hidden rounded-lg bg-[var(--bg-surface)] ring-1 ring-[var(--border)] p-12 text-center">
-            <p className="text-[var(--text-faint)] text-sm">{t('common.loading')}</p>
+          <div className="overflow-hidden rounded-lg bg-(--bg-surface) ring-1 ring-(--border) p-12 text-center">
+            <p className="text-(--text-faint) text-sm">{t('common.loading')}</p>
           </div>
         ) : requests.length === 0 ? (
-          <div className="overflow-hidden rounded-lg bg-[var(--bg-surface)] ring-1 ring-[var(--border)] p-12 text-center">
-            <p className="text-[var(--text-faint)] text-sm">{t('deletionRequests.noRequests')}</p>
+          <div className="overflow-hidden rounded-lg bg-(--bg-surface) ring-1 ring-(--border) p-12 text-center">
+            <p className="text-(--text-faint) text-sm">{t('deletionRequests.noRequests')}</p>
           </div>
         ) : (
           <>
             {/* モバイルカード */}
             <div className="sm:hidden space-y-4">
               {requests.map(req => (
-                <div key={req.id} className="rounded-lg bg-[var(--bg-surface)] ring-1 ring-[var(--border)] p-4 space-y-3">
+                <div key={req.id} className="rounded-lg bg-(--bg-surface) ring-1 ring-(--border) p-4 space-y-3">
                   <div className="flex items-center justify-between gap-2">
                     <span className={`inline-flex items-center h-5 px-2 rounded-full text-xs font-medium ${typeBadge[req.type]}`}>
                       {typeLabel[req.type]}
                     </span>
-                    <span className="text-[var(--text-faint)] text-xs tabular-nums">{formatDate(req.requestedAt)}</span>
+                    <span className="text-(--text-faint) text-xs tabular-nums">{formatDate(req.requestedAt)}</span>
                   </div>
                   <div>
-                    <p className="text-[var(--text)] text-sm font-medium truncate">{req.targetName}</p>
-                    <p className="text-[var(--text-faint)] text-xs truncate mt-0.5">{req.requestedByEmail}</p>
+                    <p className="text-(--text) text-sm font-medium truncate">{req.targetName}</p>
+                    <p className="text-(--text-faint) text-xs truncate mt-0.5">{req.requestedByEmail}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setApproveTarget(req)}
-                      className="h-7 px-3 rounded-md text-xs font-medium text-white bg-[var(--danger)] hover:bg-[var(--danger-hover)] transition-colors cursor-pointer"
+                      className="h-7 px-3 rounded-md text-xs font-medium text-white bg-(--danger) hover:bg-(--danger-hover) transition-colors cursor-pointer"
                     >
                       {t('deletionRequests.approveDeleteBtn')}
                     </button>
                     <button
                       onClick={() => setRejectTarget(req)}
-                      className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer"
+                      className="h-7 px-3 rounded-md text-xs text-(--text-muted) bg-(--bg-surface) hover:bg-(--bg-subtle)/60 ring-1 ring-(--border) transition-colors cursor-pointer"
                     >
                       {t('deletionRequests.rejectBtn')}
                     </button>
@@ -216,8 +216,8 @@ export function DeletionRequests() {
             </div>
 
             {/* デスクトップテーブル */}
-            <div className="hidden sm:block overflow-hidden rounded-lg ring-1 ring-[var(--border)]">
-              <div className="grid grid-cols-[88px_1fr_1fr_160px_176px] gap-4 px-4 py-3 bg-[var(--bg-base)] border-b border-[var(--border)] text-xs font-medium text-[var(--text-faint)] uppercase tracking-wider">
+            <div className="hidden sm:block overflow-hidden rounded-lg ring-1 ring-(--border)">
+              <div className="grid grid-cols-[88px_1fr_1fr_160px_176px] gap-4 px-4 py-3 bg-(--bg-base) border-b border-(--border) text-xs font-medium text-(--text-faint) uppercase tracking-wider">
                 <span>{t('deletionRequests.table.type')}</span>
                 <span>{t('deletionRequests.table.target')}</span>
                 <span>{t('deletionRequests.table.requester')}</span>
@@ -227,26 +227,26 @@ export function DeletionRequests() {
               {requests.map((req, i) => (
                 <div
                   key={req.id}
-                  className={`grid grid-cols-[88px_1fr_1fr_160px_176px] gap-4 px-4 py-4 items-center bg-[var(--bg-surface)] transition-colors ${
-                    i < requests.length - 1 ? 'border-b border-[var(--border)]' : ''
+                  className={`grid grid-cols-[88px_1fr_1fr_160px_176px] gap-4 px-4 py-4 items-center bg-(--bg-surface) transition-colors ${
+                    i < requests.length - 1 ? 'border-b border-(--border)' : ''
                   }`}
                 >
                   <span className={`inline-flex items-center justify-center h-5 px-2 rounded-full text-xs font-medium ${typeBadge[req.type]}`}>
                     {typeLabel[req.type]}
                   </span>
-                  <span className="text-[var(--text)] text-sm font-medium truncate">{req.targetName}</span>
-                  <span className="text-[var(--text-dim)] text-sm truncate">{req.requestedByEmail}</span>
-                  <span className="text-[var(--text-dim)] text-sm tabular-nums">{formatDate(req.requestedAt)}</span>
+                  <span className="text-(--text) text-sm font-medium truncate">{req.targetName}</span>
+                  <span className="text-(--text-dim) text-sm truncate">{req.requestedByEmail}</span>
+                  <span className="text-(--text-dim) text-sm tabular-nums">{formatDate(req.requestedAt)}</span>
                   <div className="flex items-center gap-2 justify-end">
                     <button
                       onClick={() => setApproveTarget(req)}
-                      className="h-7 px-3 rounded-md text-xs font-medium text-white bg-[var(--danger)] hover:bg-[var(--danger-hover)] transition-colors cursor-pointer"
+                      className="h-7 px-3 rounded-md text-xs font-medium text-white bg-(--danger) hover:bg-(--danger-hover) transition-colors cursor-pointer"
                     >
                       {t('deletionRequests.approveDeleteBtn')}
                     </button>
                     <button
                       onClick={() => setRejectTarget(req)}
-                      className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer"
+                      className="h-7 px-3 rounded-md text-xs text-(--text-muted) bg-(--bg-surface) hover:bg-(--bg-subtle)/60 ring-1 ring-(--border) transition-colors cursor-pointer"
                     >
                       {t('deletionRequests.rejectBtn')}
                     </button>

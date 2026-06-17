@@ -422,7 +422,7 @@
   },
   "settings": {
     "title": "設定",
-    "description": "ポータルのグローバル設定を管理します。",
+    "description": "サイトのグローバル設定を管理します。",
     "integrations": {
       "externalLinks": {
         "sectionTitle": "外部リンク",

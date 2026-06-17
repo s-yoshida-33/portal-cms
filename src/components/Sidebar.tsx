@@ -84,14 +84,14 @@ function SidebarFlyout<T extends string>({
         onMouseEnter={onOpen}
         className={`w-full flex items-center pl-11 pr-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
           isOpen
-            ? 'bg-[var(--bg-subtle)] text-[var(--text)]'
-            : 'text-[var(--text)] hover:bg-[var(--bg-subtle)]/60'
+            ? 'bg-(--bg-subtle) text-(--text)'
+            : 'text-(--text) hover:bg-(--bg-subtle)/60'
         }`}
       >
         <span className="flex-1 text-left">{label}</span>
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
           strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-          className="text-[var(--text-faint)] shrink-0">
+          className="text-(--text-faint) shrink-0">
           <polyline points="9 18 15 12 9 6" />
         </svg>
       </button>
@@ -100,7 +100,7 @@ function SidebarFlyout<T extends string>({
         <div
           ref={panelRef}
           style={{ position: 'fixed', top: pos.top, left: pos.left, zIndex: 99999 }}
-          className="bg-[var(--bg-surface)] text-[var(--text)] rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.5)] ring-1 ring-[var(--border)] py-1.5 px-2 min-w-[160px]"
+          className="bg-(--bg-surface) text-(--text) rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.5)] ring-1 ring-(--border) py-1.5 px-2 min-w-[160px]"
         >
           {options.map(opt => {
             const isSelected = opt.value === value;
@@ -110,8 +110,8 @@ function SidebarFlyout<T extends string>({
                 role="option"
                 aria-selected={isSelected}
                 onClick={() => { onChange(opt.value); onClose(); }}
-                className={`flex w-full h-9 shrink-0 items-center justify-between gap-3 rounded-md pl-3 pr-3 text-sm outline-none transition-colors hover:bg-[var(--bg-subtle)]/60 cursor-pointer ${
-                  isSelected ? 'text-[var(--text)]' : 'text-[var(--text)]'
+                className={`flex w-full h-9 shrink-0 items-center justify-between gap-3 rounded-md pl-3 pr-3 text-sm outline-none transition-colors hover:bg-(--bg-subtle)/60 cursor-pointer ${
+                  isSelected ? 'text-(--text)' : 'text-(--text)'
                 }`}
               >
                 <div className="whitespace-nowrap">{opt.label}</div>
@@ -288,33 +288,33 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
         'transform transition-transform duration-300 ease-in-out',
         mobileOpen ? 'translate-x-0' : '-translate-x-full',
         'sm:static sm:inset-auto sm:z-auto sm:translate-x-0 sm:w-56 sm:shrink-0',
-        'bg-[var(--bg-base)] border-r border-[var(--border)] flex flex-col',
+        'bg-(--bg-base) border-r border-(--border) flex flex-col',
       ].join(' ')}
     >
       {/* ── Fixed top section (logo + user menu) ── */}
       <div className="shrink-0">
         {/* ロゴ */}
-        <div className="px-5 py-3 border-b border-[var(--border)]">
+        <div className="px-5 py-3 border-b border-(--border)">
           <div className="h-7 flex items-center gap-2.5">
             <img src="/logo.svg" alt="" className="w-6 h-6 shrink-0" />
-            <span className="text-[var(--text)] font-semibold text-sm">Portal CMS</span>
+            <span className="text-(--text) font-semibold text-sm">Portal CMS</span>
           </div>
         </div>
 
         {/* ユーザーメニュー */}
-        <div className="px-2 py-3 border-b border-[var(--border)]">
+        <div className="px-2 py-3 border-b border-(--border)">
           <button
             onClick={() => { setUserOpen(o => !o); setOpenFlyout(null); }}
-            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-[var(--bg-subtle)]/60 transition-colors group cursor-pointer"
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-(--bg-subtle)/60 transition-colors group cursor-pointer"
           >
             <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center shrink-0 text-white text-xs font-medium">
               {displayName[0].toUpperCase()}
             </div>
-            <span className="flex-1 text-left text-sm text-[var(--text)] truncate">{displayName}</span>
+            <span className="flex-1 text-left text-sm text-(--text) truncate">{displayName}</span>
             <svg
               width="14" height="14" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-              className={`text-[var(--text-dim)] shrink-0 transition-transform duration-200 ${userOpen ? '' : '-rotate-90'}`}
+              className={`text-(--text-dim) shrink-0 transition-transform duration-200 ${userOpen ? '' : '-rotate-90'}`}
             >
               <polyline points="6 9 12 15 18 9" />
             </svg>
@@ -334,8 +334,8 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
                 className={({ isActive }) =>
                   `flex items-center pl-11 pr-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
                     isActive
-                      ? 'bg-[var(--bg-subtle)] text-[var(--text)]'
-                      : 'text-[var(--text)] hover:bg-[var(--bg-subtle)]/60'
+                      ? 'bg-(--bg-subtle) text-(--text)'
+                      : 'text-(--text) hover:bg-(--bg-subtle)/60'
                   }`
                 }
               >
@@ -379,7 +379,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
               <button
                 onClick={handleSignOut}
                 onMouseEnter={closeFlyout}
-                className="w-full flex items-center pl-11 pr-3 py-2 rounded-lg text-sm text-[var(--danger-text)] hover:bg-[var(--danger-text)]/10 transition-colors cursor-pointer"
+                className="w-full flex items-center pl-11 pr-3 py-2 rounded-lg text-sm text-(--danger-text) hover:bg-(--danger-text)/10 transition-colors cursor-pointer"
               >
                 {t('nav.logout')}
               </button>
@@ -399,8 +399,8 @@ export function Sidebar({ mobileOpen, onMobileClose }: Props) {
             className={({ isActive }) =>
               `flex items-center gap-2 justify-between px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
                 isActive
-                  ? 'bg-[var(--bg-subtle)] text-[var(--text)] font-medium'
-                  : 'text-[var(--text)] hover:bg-[var(--bg-subtle)]/60'
+                  ? 'bg-(--bg-subtle) text-(--text) font-medium'
+                  : 'text-(--text) hover:bg-(--bg-subtle)/60'
               }`
             }
           >

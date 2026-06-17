@@ -48,17 +48,17 @@ function CopyField({ label, value }: { label: string; value: string }) {
   }
   return (
     <div className="space-y-1.5">
-      <label className="text-[var(--text-dim)] text-xs font-medium">{label}</label>
+      <label className="text-(--text-dim) text-xs font-medium">{label}</label>
       <div className="flex gap-2">
         <input
           type="text"
           value={value}
           readOnly
-          className="flex-1 h-9 bg-[var(--bg-surface)] ring-1 ring-[var(--border)] text-[var(--text)] rounded-lg px-3 text-sm font-mono outline-none"
+          className="flex-1 h-9 bg-(--bg-surface) ring-1 ring-(--border) text-(--text) rounded-lg px-3 text-sm font-mono outline-none"
         />
         <button
           onClick={copy}
-          className="h-9 px-3 rounded-lg text-xs font-medium text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer shrink-0"
+          className="h-9 px-3 rounded-lg text-xs font-medium text-(--text-muted) bg-(--bg-surface) hover:bg-(--bg-subtle)/60 ring-1 ring-(--border) transition-colors cursor-pointer shrink-0"
         >
           {copied ? t('common.copied') : t('common.copy')}
         </button>
@@ -98,15 +98,15 @@ function ApproveModal({ pending, projects, onClose, onDone }: ApproveModalProps)
   if (approvalResult) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-        <div className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl w-full max-w-md p-6 shadow-2xl">
+        <div className="bg-(--bg-surface) ring-1 ring-(--border) rounded-xl w-full max-w-md p-6 shadow-2xl">
           <div className="flex items-center gap-2 mb-1">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
               stroke="#2db35e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="20 6 9 17 4 12" />
             </svg>
-            <h2 className="text-[var(--text)] text-lg font-semibold">{t('pendingDevices.approveModal.doneTitle')}</h2>
+            <h2 className="text-(--text) text-lg font-semibold">{t('pendingDevices.approveModal.doneTitle')}</h2>
           </div>
-          <p className="text-[var(--text-dim)] text-sm mb-5">
+          <p className="text-(--text-dim) text-sm mb-5">
             {t('pendingDevices.approveModal.doneBody')}
           </p>
 
@@ -126,7 +126,7 @@ function ApproveModal({ pending, projects, onClose, onDone }: ApproveModalProps)
 
           <div className="flex justify-end pt-5">
             <button onClick={onClose}
-              className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer">
+              className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-(--accent) hover:bg-(--accent-hover) transition-colors cursor-pointer">
               {t('common.close')}
             </button>
           </div>
@@ -137,35 +137,35 @@ function ApproveModal({ pending, projects, onClose, onDone }: ApproveModalProps)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
-      <div className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl w-full max-w-md p-6 shadow-2xl"
+      <div className="bg-(--bg-surface) ring-1 ring-(--border) rounded-xl w-full max-w-md p-6 shadow-2xl"
         onClick={e => e.stopPropagation()}>
-        <h2 className="text-[var(--text)] text-lg font-semibold mb-1">{t('pendingDevices.approveModal.title')}</h2>
-        <p className="text-[var(--text-dim)] text-sm mb-5">
+        <h2 className="text-(--text) text-lg font-semibold mb-1">{t('pendingDevices.approveModal.title')}</h2>
+        <p className="text-(--text-dim) text-sm mb-5">
           {t('pendingDevices.approveModal.description')}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* 申請情報 */}
-          <div className="bg-[var(--bg-raised)] ring-1 ring-[var(--border)] rounded-lg px-4 py-3 space-y-1.5 text-sm">
+          <div className="bg-(--bg-raised) ring-1 ring-(--border) rounded-lg px-4 py-3 space-y-1.5 text-sm">
             <div className="flex gap-2">
-              <span className="text-[var(--text-faint)] w-20 shrink-0">{t('pendingDevices.approveModal.appLabel')}</span>
+              <span className="text-(--text-faint) w-20 shrink-0">{t('pendingDevices.approveModal.appLabel')}</span>
               <span className={`inline-flex items-center h-5 px-2 rounded-full text-xs font-medium ${appBadge[pending.appName]}`}>
                 {pending.appName}
               </span>
             </div>
             <div className="flex gap-2">
-              <span className="text-[var(--text-faint)] w-20 shrink-0">{t('pendingDevices.approveModal.hostnameLabel')}</span>
-              <span className="text-[var(--text-muted)] font-mono">{pending.hostname}</span>
+              <span className="text-(--text-faint) w-20 shrink-0">{t('pendingDevices.approveModal.hostnameLabel')}</span>
+              <span className="text-(--text-muted) font-mono">{pending.hostname}</span>
             </div>
             <div className="flex gap-2">
-              <span className="text-[var(--text-faint)] w-20 shrink-0">{t('pendingDevices.approveModal.ipLabel')}</span>
-              <span className="text-[var(--text-muted)] font-mono">{pending.ip}</span>
+              <span className="text-(--text-faint) w-20 shrink-0">{t('pendingDevices.approveModal.ipLabel')}</span>
+              <span className="text-(--text-muted) font-mono">{pending.ip}</span>
             </div>
           </div>
 
           {/* デバイス名 */}
           <div className="space-y-1.5">
-            <label className="text-[var(--text-dim)] text-xs font-medium">{t('pendingDevices.approveModal.nameLabel')}</label>
+            <label className="text-(--text-dim) text-xs font-medium">{t('pendingDevices.approveModal.nameLabel')}</label>
             <input
               type="text"
               value={deviceName}
@@ -176,9 +176,9 @@ function ApproveModal({ pending, projects, onClose, onDone }: ApproveModalProps)
 
           {/* プロジェクト選択 */}
           <div className="space-y-1.5">
-            <label className="text-[var(--text-dim)] text-xs font-medium">{t('pendingDevices.approveModal.projectLabel')}</label>
+            <label className="text-(--text-dim) text-xs font-medium">{t('pendingDevices.approveModal.projectLabel')}</label>
             {projects.length === 0 ? (
-              <p className="text-[var(--text-faint)] text-sm">{t('pendingDevices.approveModal.noProjects')}</p>
+              <p className="text-(--text-faint) text-sm">{t('pendingDevices.approveModal.noProjects')}</p>
             ) : (
               <CustomSelect
                 value={projectId}
@@ -193,11 +193,11 @@ function ApproveModal({ pending, projects, onClose, onDone }: ApproveModalProps)
 
           <div className="flex justify-end gap-2 pt-1">
             <button type="button" onClick={onClose}
-              className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer">
+              className="h-9 px-4 rounded-lg text-sm text-(--text-muted) bg-(--bg-surface) hover:bg-(--bg-subtle)/60 ring-1 ring-(--border) transition-colors cursor-pointer">
               {t('common.cancel')}
             </button>
             <button type="submit" disabled={running || projects.length === 0}
-              className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-50 transition-colors cursor-pointer">
+              className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-(--accent) hover:bg-(--accent-hover) disabled:opacity-50 transition-colors cursor-pointer">
               {running ? t('pendingDevices.approveModal.approving') : t('pendingDevices.approveModal.approveBtn')}
             </button>
           </div>
@@ -230,19 +230,19 @@ function RejectConfirm({ pending, onClose, onDone }: RejectConfirmProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
-      <div className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl w-full max-w-md p-6 shadow-2xl"
+      <div className="bg-(--bg-surface) ring-1 ring-(--border) rounded-xl w-full max-w-md p-6 shadow-2xl"
         onClick={e => e.stopPropagation()}>
-        <h2 className="text-[var(--text)] text-lg font-semibold mb-2">{t('pendingDevices.rejectModal.title')}</h2>
-        <p className="text-[var(--text-dim)] text-sm mb-5">
+        <h2 className="text-(--text) text-lg font-semibold mb-2">{t('pendingDevices.rejectModal.title')}</h2>
+        <p className="text-(--text-dim) text-sm mb-5">
           {t('pendingDevices.rejectModal.body', { hostname: pending.hostname, ip: pending.ip })}
         </p>
         <div className="flex justify-end gap-2">
           <button onClick={onClose}
-            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm text-(--text-muted) bg-(--bg-surface) hover:bg-(--bg-subtle)/60 ring-1 ring-(--border) transition-colors cursor-pointer">
             {t('common.cancel')}
           </button>
           <button onClick={handle} disabled={running}
-            className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[var(--danger)] hover:bg-[var(--danger-hover)] disabled:opacity-50 transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-(--danger) hover:bg-(--danger-hover) disabled:opacity-50 transition-colors cursor-pointer">
             {running ? t('pendingDevices.rejectModal.rejecting') : t('pendingDevices.rejectModal.rejectBtn')}
           </button>
         </div>
@@ -278,7 +278,7 @@ export function PendingDevices() {
     return (
       <div className="flex flex-col min-h-full">
         <div className="p-8">
-          <p className="text-[var(--text-dim)] text-sm">{t('pendingDevices.accessDenied')}</p>
+          <p className="text-(--text-dim) text-sm">{t('pendingDevices.accessDenied')}</p>
         </div>
       </div>
     );
@@ -289,11 +289,11 @@ export function PendingDevices() {
 
       <div className="flex items-start justify-between gap-4 py-6 px-4 sm:px-6">
         <div className="flex flex-col gap-2">
-          <h1 className="text-[var(--text)] text-3xl font-semibold leading-tight">{t('pendingDevices.title')}</h1>
-          <p className="text-[var(--text-muted)] text-base">{t('pendingDevices.description')}</p>
+          <h1 className="text-(--text) text-3xl font-semibold leading-tight">{t('pendingDevices.title')}</h1>
+          <p className="text-(--text-muted) text-base">{t('pendingDevices.description')}</p>
         </div>
         {!loading && devices.length > 0 && (
-          <span className="flex items-center justify-center h-6 min-w-6 px-2 rounded-full bg-[var(--accent)] text-white text-xs font-semibold mt-1">
+          <span className="flex items-center justify-center h-6 min-w-6 px-2 rounded-full bg-(--accent) text-white text-xs font-semibold mt-1">
             {devices.length}
           </span>
         )}
@@ -301,39 +301,39 @@ export function PendingDevices() {
 
       <div className="px-4 sm:px-6 pt-8 pb-8">
         {loading ? (
-          <div className="overflow-hidden rounded-lg bg-[var(--bg-surface)] ring-1 ring-[var(--border)] p-12 text-center">
-            <p className="text-[var(--text-faint)] text-sm">{t('common.loading')}</p>
+          <div className="overflow-hidden rounded-lg bg-(--bg-surface) ring-1 ring-(--border) p-12 text-center">
+            <p className="text-(--text-faint) text-sm">{t('common.loading')}</p>
           </div>
         ) : devices.length === 0 ? (
-          <div className="overflow-hidden rounded-lg bg-[var(--bg-surface)] ring-1 ring-[var(--border)] p-12 text-center">
-            <p className="text-[var(--text-faint)] text-sm">{t('pendingDevices.noDevices')}</p>
+          <div className="overflow-hidden rounded-lg bg-(--bg-surface) ring-1 ring-(--border) p-12 text-center">
+            <p className="text-(--text-faint) text-sm">{t('pendingDevices.noDevices')}</p>
           </div>
         ) : (
           <>
             {/* モバイルカード */}
             <div className="sm:hidden space-y-4">
               {devices.map(d => (
-                <div key={d.id} className="rounded-lg bg-[var(--bg-surface)] ring-1 ring-[var(--border)] p-4 space-y-3">
+                <div key={d.id} className="rounded-lg bg-(--bg-surface) ring-1 ring-(--border) p-4 space-y-3">
                   <div className="flex items-center justify-between gap-2">
                     <span className={`inline-flex items-center h-5 px-2 rounded-full text-xs font-medium ${appBadge[d.appName]}`}>
                       {d.appName}
                     </span>
-                    <span className="text-[var(--text-faint)] text-xs tabular-nums">{formatDate(d.requestedAt)}</span>
+                    <span className="text-(--text-faint) text-xs tabular-nums">{formatDate(d.requestedAt)}</span>
                   </div>
                   <div>
-                    <p className="text-[var(--text)] text-sm font-mono truncate">{d.hostname}</p>
-                    <p className="text-[var(--text-faint)] text-xs font-mono mt-0.5">{d.ip}</p>
+                    <p className="text-(--text) text-sm font-mono truncate">{d.hostname}</p>
+                    <p className="text-(--text-faint) text-xs font-mono mt-0.5">{d.ip}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setApproveTarget(d)}
-                      className="h-7 px-3 rounded-md text-xs font-medium text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer"
+                      className="h-7 px-3 rounded-md text-xs font-medium text-white bg-(--accent) hover:bg-(--accent-hover) transition-colors cursor-pointer"
                     >
                       {t('pendingDevices.approveBtn')}
                     </button>
                     <button
                       onClick={() => setRejectTarget(d)}
-                      className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer"
+                      className="h-7 px-3 rounded-md text-xs text-(--text-muted) bg-(--bg-surface) hover:bg-(--bg-subtle)/60 ring-1 ring-(--border) transition-colors cursor-pointer"
                     >
                       {t('pendingDevices.rejectBtn')}
                     </button>
@@ -343,8 +343,8 @@ export function PendingDevices() {
             </div>
 
             {/* デスクトップテーブル */}
-            <div className="hidden sm:block overflow-hidden rounded-lg ring-1 ring-[var(--border)]">
-              <div className="grid grid-cols-[120px_1fr_140px_160px_160px] gap-4 px-4 py-3 bg-[var(--bg-base)] border-b border-[var(--border)] text-xs font-medium text-[var(--text-faint)] uppercase tracking-wider">
+            <div className="hidden sm:block overflow-hidden rounded-lg ring-1 ring-(--border)]">
+              <div className="grid grid-cols-[120px_1fr_140px_160px_160px] gap-4 px-4 py-3 bg-(--bg-base)] border-b border-(--border)] text-xs font-medium text-(--text-faint)] uppercase tracking-wider">
                 <span>{t('pendingDevices.table.app')}</span>
                 <span>{t('pendingDevices.table.hostname')}</span>
                 <span>{t('pendingDevices.table.ip')}</span>
@@ -354,26 +354,26 @@ export function PendingDevices() {
               {devices.map((d, i) => (
                 <div
                   key={d.id}
-                  className={`grid grid-cols-[120px_1fr_140px_160px_160px] gap-4 px-4 py-4 items-center bg-[var(--bg-surface)] transition-colors ${
-                    i < devices.length - 1 ? 'border-b border-[var(--border)]' : ''
+                  className={`grid grid-cols-[120px_1fr_140px_160px_160px] gap-4 px-4 py-4 items-center bg-(--bg-surface) transition-colors ${
+                    i < devices.length - 1 ? 'border-b border-(--border)' : ''
                   }`}
                 >
                   <span className={`inline-flex items-center justify-center h-5 px-2 rounded-full text-xs font-medium ${appBadge[d.appName]}`}>
                     {d.appName}
                   </span>
-                  <span className="text-[var(--text)] text-sm font-mono truncate">{d.hostname}</span>
-                  <span className="text-[var(--text-dim)] text-sm font-mono">{d.ip}</span>
-                  <span className="text-[var(--text-dim)] text-sm tabular-nums">{formatDate(d.requestedAt)}</span>
+                  <span className="text-(--text) text-sm font-mono truncate">{d.hostname}</span>
+                  <span className="text-(--text-dim) text-sm font-mono">{d.ip}</span>
+                  <span className="text-(--text-dim) text-sm tabular-nums">{formatDate(d.requestedAt)}</span>
                   <div className="flex items-center gap-2 justify-end">
                     <button
                       onClick={() => setApproveTarget(d)}
-                      className="h-7 px-3 rounded-md text-xs font-medium text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer"
+                      className="h-7 px-3 rounded-md text-xs font-medium text-white bg-(--accent) hover:bg-(--accent-hover) transition-colors cursor-pointer"
                     >
                       {t('pendingDevices.approveBtn')}
                     </button>
                     <button
                       onClick={() => setRejectTarget(d)}
-                      className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer"
+                      className="h-7 px-3 rounded-md text-xs text-(--text-muted) bg-(--bg-surface) hover:bg-(--bg-subtle)/60 ring-1 ring-(--border) transition-colors cursor-pointer"
                     >
                       {t('pendingDevices.rejectBtn')}
                     </button>
