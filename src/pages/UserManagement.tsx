@@ -35,19 +35,19 @@ function RemoveConfirm({ target, onClose, onConfirm }: RemoveConfirmProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
-      <div className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl w-full max-w-md p-6 shadow-2xl"
+      <div className="bg-(--bg-surface) ring-1 ring-(--border) rounded-xl w-full max-w-md p-6 shadow-2xl"
         onClick={e => e.stopPropagation()}>
-        <h2 className="text-[var(--text)] text-lg font-semibold mb-2">{t('users.removeModal.title')}</h2>
-        <p className="text-[var(--text-dim)] text-sm mb-5">
+        <h2 className="text-(--text) text-lg font-semibold mb-2">{t('users.removeModal.title')}</h2>
+        <p className="text-(--text-dim) text-sm mb-5">
           {t('users.removeModal.body', { name: target.displayName, email: target.email })}
         </p>
         <div className="flex justify-end gap-2">
           <button onClick={onClose}
-            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm text-(--text-muted) bg-(--bg-surface) hover:bg-(--bg-subtle)/60 ring-1 ring-(--border) transition-colors cursor-pointer">
             {t('common.cancel')}
           </button>
           <button onClick={handle} disabled={running}
-            className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[var(--danger)] hover:bg-[var(--danger-hover)] disabled:opacity-50 transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-(--danger) hover:bg-(--danger-hover) disabled:opacity-50 transition-colors cursor-pointer">
             {running ? t('common.processing') : t('users.removeModal.confirm')}
           </button>
         </div>
@@ -90,7 +90,7 @@ export function UserManagement() {
     return (
       <div className="flex flex-col min-h-full">
         <div className="p-8">
-          <p className="text-[var(--text-dim)] text-sm">{t('users.accessDenied')}</p>
+          <p className="text-(--text-dim) text-sm">{t('users.accessDenied')}</p>
         </div>
       </div>
     );
@@ -117,43 +117,43 @@ export function UserManagement() {
       {/* ページヘッダー */}
       <div className="flex items-start justify-between gap-4 py-6 px-4 sm:px-6">
         <div className="flex flex-col gap-2">
-          <h1 className="text-[var(--text)] text-3xl font-semibold leading-tight">{t('users.title')}</h1>
-          <p className="text-[var(--text-muted)] text-base">{t('users.description')}</p>
+          <h1 className="text-(--text) text-3xl font-semibold leading-tight">{t('users.title')}</h1>
+          <p className="text-(--text-muted) text-base">{t('users.description')}</p>
         </div>
       </div>
 
       {/* コンテンツ */}
       <div className="px-4 sm:px-6 pt-8 pb-8">
         {loading ? (
-          <div className="overflow-hidden rounded-lg bg-[var(--bg-surface)] ring-1 ring-[var(--border)] p-12 text-center">
-            <p className="text-[var(--text-faint)] text-sm">{t('common.loading')}</p>
+          <div className="overflow-hidden rounded-lg bg-(--bg-surface) ring-1 ring-(--border) p-12 text-center">
+            <p className="text-(--text-faint) text-sm">{t('common.loading')}</p>
           </div>
         ) : users.length === 0 ? (
-          <div className="overflow-hidden rounded-lg bg-[var(--bg-surface)] ring-1 ring-[var(--border)] p-12 text-center">
-            <p className="text-[var(--text-faint)] text-sm">{t('users.noUsers')}</p>
+          <div className="overflow-hidden rounded-lg bg-(--bg-surface) ring-1 ring-(--border) p-12 text-center">
+            <p className="text-(--text-faint) text-sm">{t('users.noUsers')}</p>
           </div>
         ) : (
           <>
-            <p className="text-sm font-medium text-[var(--text-dim)] mb-4">{t('common.all')} <span className="text-[var(--text-faint)]">({users.length})</span></p>
+            <p className="text-sm font-medium text-(--text-dim) mb-4">{t('common.all')} <span className="text-(--text-faint)">({users.length})</span></p>
             {/* ── モバイルカード ── */}
             <div className="sm:hidden space-y-4">
               {users.map(u => {
                 const isSelf     = u.uid === user?.uid;
                 const isUpdating = updating === u.uid;
                 return (
-                  <div key={u.uid} className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl p-4">
+                  <div key={u.uid} className="bg-(--bg-surface) ring-1 ring-(--border) rounded-xl p-4">
                     {/* アバター + 表示名 + ロール */}
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-8 h-8 rounded-full bg-[var(--accent)] flex items-center justify-center shrink-0 text-white text-sm font-medium">
+                        <div className="w-8 h-8 rounded-full bg-(--accent) flex items-center justify-center shrink-0 text-white text-sm font-medium">
                           {u.displayName[0]?.toUpperCase() ?? '?'}
                         </div>
                         <div className="min-w-0">
-                          <div className="text-[var(--text)] text-sm font-medium truncate">
+                          <div className="text-(--text) text-sm font-medium truncate">
                             {u.displayName}
-                            {isSelf && <span className="ml-1.5 text-[var(--text-faint)] text-xs">{t('users.self')}</span>}
+                            {isSelf && <span className="ml-1.5 text-(--text-faint) text-xs">{t('users.self')}</span>}
                           </div>
-                          <div className="text-[var(--text-faint)] text-xs truncate mt-0.5">{u.email}</div>
+                          <div className="text-(--text-faint) text-xs truncate mt-0.5">{u.email}</div>
                         </div>
                       </div>
                       {isSelf ? (
@@ -176,12 +176,12 @@ export function UserManagement() {
                     </div>
                     {/* 登録日 + 除名ボタン */}
                     <div className="flex items-center justify-between">
-                      <span className="text-[var(--text-faint)] text-xs tabular-nums">{t('users.registered', { date: formatDate(u.assignedAt, true) })}</span>
+                      <span className="text-(--text-faint) text-xs tabular-nums">{t('users.registered', { date: formatDate(u.assignedAt, true) })}</span>
                       {!isSelf && (
                         <button
                           onClick={() => setRemoveTarget(u)}
                           disabled={isUpdating}
-                          className="h-7 px-3 rounded-md text-xs text-[var(--danger-text)] bg-[var(--danger-text)]/5 hover:bg-[var(--danger-text)]/10 ring-1 ring-[var(--danger-text)]/20 transition-colors cursor-pointer disabled:opacity-50"
+                          className="h-7 px-3 rounded-md text-xs text-(--danger-text) bg-(--danger-text)/5 hover:bg-(--danger-text)/10 ring-1 ring-(--danger-text)/20 transition-colors cursor-pointer disabled:opacity-50"
                         >
                           {t('users.removeBtn')}
                         </button>
@@ -193,9 +193,9 @@ export function UserManagement() {
             </div>
 
             {/* ── PCテーブル ── */}
-            <div className="hidden sm:block rounded-lg ring-1 ring-[var(--border)]">
+            <div className="hidden sm:block rounded-lg ring-1 ring-(--border)">
               {/* テーブルヘッダー */}
-              <div className="grid grid-cols-[1fr_1fr_160px_120px_120px] gap-4 px-4 py-3 bg-[var(--bg-base)] rounded-t-lg border-b border-[var(--border)] text-xs font-medium text-[var(--text-faint)] uppercase tracking-wider">
+              <div className="grid grid-cols-[1fr_1fr_160px_120px_120px] gap-4 px-4 py-3 bg-(--bg-base) rounded-t-lg border-b border-(--border) text-xs font-medium text-(--text-faint) uppercase tracking-wider">
                 <span>{t('users.table.displayName')}</span>
                 <span>{t('users.table.email')}</span>
                 <span>{t('users.table.role')}</span>
@@ -210,22 +210,22 @@ export function UserManagement() {
                 return (
                   <div
                     key={u.uid}
-                    className={`grid grid-cols-[1fr_1fr_160px_120px_120px] gap-4 px-4 py-3.5 items-center bg-[var(--bg-surface)] transition-colors ${
-                      i < users.length - 1 ? 'border-b border-[var(--border)]' : 'rounded-b-lg'
+                    className={`grid grid-cols-[1fr_1fr_160px_120px_120px] gap-4 px-4 py-3.5 items-center bg-(--bg-surface) transition-colors ${
+                      i < users.length - 1 ? 'border-b border-(--border)' : 'rounded-b-lg'
                     }`}
                   >
                     {/* 表示名 */}
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-7 h-7 rounded-full bg-[var(--accent)] flex items-center justify-center shrink-0 text-white text-xs font-medium">
+                      <div className="w-7 h-7 rounded-full bg-(--accent) flex items-center justify-center shrink-0 text-white text-xs font-medium">
                         {u.displayName[0]?.toUpperCase() ?? '?'}
                       </div>
-                      <span className="text-[var(--text)] text-sm truncate">
+                      <span className="text-(--text) text-sm truncate">
                         {u.displayName}
-                        {isSelf && <span className="ml-1.5 text-[var(--text-faint)] text-xs">{t('users.self')}</span>}
+                        {isSelf && <span className="ml-1.5 text-(--text-faint) text-xs">{t('users.self')}</span>}
                       </span>
                     </div>
                     {/* メール */}
-                    <span className="text-[var(--text-dim)] text-sm truncate">{u.email}</span>
+                    <span className="text-(--text-dim) text-sm truncate">{u.email}</span>
                     {/* ロール */}
                     {isSelf ? (
                       <span className={`inline-flex items-center justify-center h-5 px-2 rounded-full text-xs font-medium w-fit ${roleBadge[u.role]}`}>
@@ -245,14 +245,14 @@ export function UserManagement() {
                       />
                     )}
                     {/* 登録日 */}
-                    <span className="text-[var(--text-faint)] text-xs tabular-nums">{formatDate(u.assignedAt, true)}</span>
+                    <span className="text-(--text-faint) text-xs tabular-nums">{formatDate(u.assignedAt, true)}</span>
                     {/* 操作 */}
                     <div className="flex justify-end">
                       {!isSelf && (
                         <button
                           onClick={() => setRemoveTarget(u)}
                           disabled={isUpdating}
-                          className="h-7 px-3 rounded-md text-xs text-[var(--danger-text)] bg-[var(--danger-text)]/5 hover:bg-[var(--danger-text)]/10 ring-1 ring-[var(--danger-text)]/20 transition-colors cursor-pointer disabled:opacity-50"
+                          className="h-7 px-3 rounded-md text-xs text-(--danger-text) bg-(--danger-text)/5 hover:bg-(--danger-text)/10 ring-1 ring-(--danger-text)/20 transition-colors cursor-pointer disabled:opacity-50"
                         >
                           {t('users.removeBtn')}
                         </button>

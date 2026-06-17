@@ -108,5 +108,10 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    match /externalLinks/{linkId} {
+      allow read:                    if isAuth();
+      allow create, update, delete:  if isAdmin();
+    }
+
   }
 }

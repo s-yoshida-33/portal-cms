@@ -15,7 +15,7 @@ import { UserManagement } from './pages/UserManagement';
 import { ApiTokens } from './pages/ApiTokens';
 import { PendingDevices } from './pages/PendingDevices';
 import { Logs } from './pages/Logs';
-import { Placeholder } from './pages/Placeholder';
+import { Settings } from './pages/Settings';
 import { ProfileSettings } from './pages/profile/Settings';
 
 function IndexRedirect() {
@@ -53,7 +53,7 @@ export default function App() {
               <Route path="api-tokens"        element={<ApiTokens />} />
               <Route path="pending-devices"  element={<PendingDevices />} />
               <Route path="logs"     element={<Logs />} />
-              <Route path="settings" element={<Placeholder title="設定" />} />
+              <Route path="settings" element={<Settings />} />
             </Route>
           </Route>
 

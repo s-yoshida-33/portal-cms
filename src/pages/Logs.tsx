@@ -83,7 +83,7 @@ function FilterBar({ filter, projects, onChange, onClear }: FilterBarProps) {
 
       {/* 種別 */}
       <div className="flex flex-col gap-1">
-        <label className="text-[var(--text-faint)] text-xs">{t('logs.filter.type')}</label>
+        <label className="text-(--text-faint) text-xs">{t('logs.filter.type')}</label>
         <CustomSelect
           value={filter.category}
           onChange={v => set('category', v)}
@@ -94,7 +94,7 @@ function FilterBar({ filter, projects, onChange, onClear }: FilterBarProps) {
 
       {/* プロジェクト */}
       <div className="flex flex-col gap-1">
-        <label className="text-[var(--text-faint)] text-xs">{t('logs.filter.project')}</label>
+        <label className="text-(--text-faint) text-xs">{t('logs.filter.project')}</label>
         <CustomSelect
           value={filter.projectId}
           onChange={v => set('projectId', v)}
@@ -105,7 +105,7 @@ function FilterBar({ filter, projects, onChange, onClear }: FilterBarProps) {
 
       {/* 日付範囲 */}
       <div className="flex flex-col gap-1">
-        <label className="text-[var(--text-faint)] text-xs">{t('logs.filter.date')}</label>
+        <label className="text-(--text-faint) text-xs">{t('logs.filter.date')}</label>
         <DateRangePicker
           mode="range"
           from={filter.dateFrom}
@@ -118,7 +118,7 @@ function FilterBar({ filter, projects, onChange, onClear }: FilterBarProps) {
       {hasActiveFilter(filter) && (
         <button
           onClick={onClear}
-          className="h-9 px-3 rounded-lg text-xs text-[var(--text-dim)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer"
+          className="h-9 px-3 rounded-lg text-xs text-(--text-dim) bg-(--bg-surface) hover:bg-(--bg-subtle)/60 ring-1 ring-(--border) transition-colors cursor-pointer"
         >
           {t('logs.filter.clear')}
         </button>
@@ -209,24 +209,24 @@ export function Logs() {
     <div className="flex flex-col min-h-full">
 
       {/* ページヘッダー */}
-      <div className="flex items-start justify-between gap-4 py-6 px-4 sm:px-6 border-b border-[var(--border)]">
+      <div className="flex items-start justify-between gap-4 py-6 px-4 sm:px-6 border-b border-(--border)]">
         <div className="flex flex-col gap-2">
-          <h1 className="text-[var(--text)] text-3xl font-semibold leading-tight">{t('logs.title')}</h1>
-          <p className="text-[var(--text-muted)] text-base">{t('logs.description')}</p>
+          <h1 className="text-(--text) text-3xl font-semibold leading-tight">{t('logs.title')}</h1>
+          <p className="text-(--text-muted) text-base">{t('logs.description')}</p>
         </div>
       </div>
 
       {/* タブ */}
-      <header className="flex items-center h-[58px] gap-3 px-4 sm:px-6 border-b border-[var(--border)] bg-[var(--bg-base)]">
+      <header className="flex items-center h-[58px] gap-3 px-4 sm:px-6 border-b border-(--border) bg-(--bg-base)]">
         <div className="relative isolate min-w-0 font-medium">
-          <div role="tablist" className="relative flex min-w-0 shrink items-stretch overflow-x-auto rounded-lg bg-[var(--bg-subtle)] px-0.5 ring-1 ring-[var(--border)] h-9">
+          <div role="tablist" className="relative flex min-w-0 shrink items-stretch overflow-x-auto rounded-lg bg-(--bg-subtle) px-0.5 ring-1 ring-(--border) h-9">
             <button
               onClick={() => setTab('site')}
               style={{ cursor: 'pointer' }}
-              className={`no-underline relative z-2 flex items-center whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] text-base my-0.5 rounded-md px-2.5 transition-colors ${
+              className={`no-underline relative z-2 flex items-center whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-(--accent) text-base my-0.5 rounded-md px-2.5 transition-colors ${
                 tab === 'site'
-                  ? 'bg-[var(--bg-surface)] text-[var(--text)] shadow-sm ring-1 ring-[var(--border)]'
-                  : 'bg-transparent text-[var(--text-muted)] hover:text-[var(--text)]'
+                  ? 'bg-(--bg-surface) text-(--text) shadow-sm ring-1 ring-(--border)'
+                  : 'bg-transparent text-(--text-muted) hover:text-(--text)'
               }`}
             >
               {t('logs.operationLogs')}
@@ -234,10 +234,10 @@ export function Logs() {
             <button
               onClick={() => setTab('device')}
               style={{ cursor: 'pointer' }}
-              className={`no-underline relative z-2 flex items-center whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] text-base my-0.5 rounded-md px-2.5 transition-colors ${
+              className={`no-underline relative z-2 flex items-center whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-(--accent) text-base my-0.5 rounded-md px-2.5 transition-colors ${
                 tab === 'device'
-                  ? 'bg-[var(--bg-surface)] text-[var(--text)] shadow-sm ring-1 ring-[var(--border)]'
-                  : 'bg-transparent text-[var(--text-muted)] hover:text-[var(--text)]'
+                  ? 'bg-(--bg-surface) text-(--text) shadow-sm ring-1 ring-(--border)'
+                  : 'bg-transparent text-(--text-muted) hover:text-(--text)'
               }`}
             >
               {t('logs.deviceLogs')}
@@ -251,8 +251,8 @@ export function Logs() {
 
         {tab === 'site' && (
           loading ? (
-            <div className="overflow-hidden rounded-lg bg-[var(--bg-surface)] ring-1 ring-[var(--border)] p-12 text-center">
-              <p className="text-[var(--text-faint)] text-sm">{t('common.loading')}</p>
+            <div className="overflow-hidden rounded-lg bg-(--bg-surface) ring-1 ring-(--border) p-12 text-center">
+              <p className="text-(--text-faint) text-sm">{t('common.loading')}</p>
             </div>
           ) : (
             <>
@@ -264,8 +264,8 @@ export function Logs() {
               />
 
               {filtered.length === 0 ? (
-                <div className="overflow-hidden rounded-lg bg-[var(--bg-surface)] ring-1 ring-[var(--border)] p-12 text-center">
-                  <p className="text-[var(--text-faint)] text-sm">
+                <div className="overflow-hidden rounded-lg bg-(--bg-surface) ring-1 ring-(--border) p-12 text-center">
+                  <p className="text-(--text-faint) text-sm">
                     {hasActiveFilter(filter) ? t('logs.filter.noMatch') : t('logs.filter.noLogs')}
                   </p>
                 </div>
@@ -273,7 +273,7 @@ export function Logs() {
                 <>
                   {/* 件数 */}
                   {hasActiveFilter(filter) && (
-                    <p className="text-[var(--text-faint)] text-xs mb-3">
+                    <p className="text-(--text-faint) text-xs mb-3">
                       {t('logs.filter.resultCount', { filtered: filtered.length, total: logs.length })}
                     </p>
                   )}
@@ -283,29 +283,29 @@ export function Logs() {
                     {paged.map(log => {
                       const { projectCol, deviceCol } = resolveColumns(log);
                       return (
-                        <div key={log.id} className="rounded-lg bg-[var(--bg-surface)] ring-1 ring-[var(--border)] p-4 space-y-2.5">
+                        <div key={log.id} className="rounded-lg bg-(--bg-surface) ring-1 ring-(--border) p-4 space-y-2.5">
                           <div className="flex items-center justify-between gap-2">
                             <span className={`inline-flex items-center h-5 px-2 rounded-full text-xs font-medium ${categoryBadge[log.category]}`}>
                               {categoryLabel[log.category]}
                             </span>
-                            <span className="text-[var(--text-faint)] text-xs tabular-nums">{formatDate(log.performedAt)}</span>
+                            <span className="text-(--text-faint) text-xs tabular-nums">{formatDate(log.performedAt)}</span>
                           </div>
-                          <p className="text-[var(--text)] text-sm">{tAction(log.category, log.action)}</p>
+                          <p className="text-(--text) text-sm">{tAction(log.category, log.action)}</p>
                           <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                             <div>
-                              <span className="text-[var(--text-faint)]">{t('logs.table.project')}</span>
-                              <p className="text-[var(--text-muted)] truncate mt-0.5">{projectCol}</p>
+                              <span className="text-(--text-faint)">{t('logs.table.project')}</span>
+                              <p className="text-(--text-muted) truncate mt-0.5">{projectCol}</p>
                             </div>
                             <div>
-                              <span className="text-[var(--text-faint)]">{t('logs.table.device')}</span>
-                              <p className="text-[var(--text-muted)] truncate mt-0.5">{deviceCol}</p>
+                              <span className="text-(--text-faint)">{t('logs.table.device')}</span>
+                              <p className="text-(--text-muted) truncate mt-0.5">{deviceCol}</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <div className="w-5 h-5 rounded-full bg-[var(--accent)] flex items-center justify-center shrink-0 text-white text-[10px] font-medium">
+                            <div className="w-5 h-5 rounded-full bg-(--accent) flex items-center justify-center shrink-0 text-white text-[10px] font-medium">
                               {log.performedBy.displayName[0]?.toUpperCase() ?? '?'}
                             </div>
-                            <span className="text-[var(--text-dim)] text-xs truncate">{log.performedBy.displayName}</span>
+                            <span className="text-(--text-dim) text-xs truncate">{log.performedBy.displayName}</span>
                           </div>
                         </div>
                       );
@@ -313,8 +313,8 @@ export function Logs() {
                   </div>
 
                   {/* デスクトップテーブル */}
-                  <div className="hidden sm:block overflow-hidden rounded-lg ring-1 ring-[var(--border)]">
-                    <div className="grid grid-cols-[120px_1fr_1fr_1fr_1fr_160px] gap-4 px-4 py-3 bg-[var(--bg-base)] border-b border-[var(--border)] text-xs font-medium text-[var(--text-faint)] uppercase tracking-wider">
+                  <div className="hidden sm:block overflow-hidden rounded-lg ring-1 ring-(--border)]">
+                    <div className="grid grid-cols-[120px_1fr_1fr_1fr_1fr_160px] gap-4 px-4 py-3 bg-(--bg-base) border-b border-(--border) text-xs font-medium text-(--text-faint) uppercase tracking-wider">
                       <span>{t('logs.table.type')}</span>
                       <span>{t('logs.table.action')}</span>
                       <span>{t('logs.table.project')}</span>
@@ -327,20 +327,20 @@ export function Logs() {
                       return (
                         <div
                           key={log.id}
-                          className={`grid grid-cols-[120px_1fr_1fr_1fr_1fr_160px] gap-4 px-4 py-3.5 items-center bg-[var(--bg-surface)] transition-colors ${
-                            i < paged.length - 1 ? 'border-b border-[var(--border)]' : ''
+                          className={`grid grid-cols-[120px_1fr_1fr_1fr_1fr_160px] gap-4 px-4 py-3.5 items-center bg-(--bg-surface) transition-colors ${
+                            i < paged.length - 1 ? 'border-b border-(--border)' : ''
                           }`}
                         >
                           <span className={`inline-flex items-center justify-center h-5 px-2 rounded-full text-xs font-medium w-fit ${categoryBadge[log.category]}`}>
                             {categoryLabel[log.category]}
                           </span>
-                          <span className="text-[var(--text)] text-sm">
+                          <span className="text-(--text) text-sm">
                             {tAction(log.category, log.action)}
                           </span>
-                          <span className="text-[var(--text-dim)] text-sm truncate">{projectCol}</span>
-                          <span className="text-[var(--text-dim)] text-sm truncate">{deviceCol}</span>
-                          <span className="text-[var(--text-dim)] text-sm truncate">{log.performedBy.displayName}</span>
-                          <span className="text-[var(--text-faint)] text-xs tabular-nums">{formatDate(log.performedAt)}</span>
+                          <span className="text-(--text-dim) text-sm truncate">{projectCol}</span>
+                          <span className="text-(--text-dim) text-sm truncate">{deviceCol}</span>
+                          <span className="text-(--text-dim) text-sm truncate">{log.performedBy.displayName}</span>
+                          <span className="text-(--text-faint) text-xs tabular-nums">{formatDate(log.performedAt)}</span>
                         </div>
                       );
                     })}
@@ -353,8 +353,8 @@ export function Logs() {
         )}
 
         {tab === 'device' && (
-          <div className="overflow-hidden rounded-lg bg-[var(--bg-surface)] ring-1 ring-[var(--border)] p-12 text-center">
-            <p className="text-[var(--text-faint)] text-sm">{t('logs.deviceLogsWip')}</p>
+          <div className="overflow-hidden rounded-lg bg-(--bg-surface) ring-1 ring-(--border) p-12 text-center">
+            <p className="text-(--text-faint) text-sm">{t('logs.deviceLogsWip')}</p>
           </div>
         )}
       </div>

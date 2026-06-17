@@ -8,7 +8,7 @@ export function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="flex h-screen bg-[var(--bg-base)]">
+    <div className="flex h-screen bg-(--bg-base)">
       {/* Mobile backdrop */}
       <div
         className={`fixed inset-0 bg-black/50 z-40 sm:hidden transition-opacity duration-300 ${

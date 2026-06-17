@@ -12,6 +12,7 @@
     "retry": "Retry",
     "all": "All",
     "edit": "Edit",
+    "delete": "Delete",
     "clear": "Clear",
     "menu": "Menu",
     "send": "Sending...",
@@ -417,6 +418,33 @@
       "failed": "Failed to process.",
       "processing": "Processing...",
       "rejectBtn": "Reject"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "Manage global site settings.",
+    "integrations": {
+      "externalLinks": {
+        "sectionTitle": "External Links",
+        "sectionDescription": "Register links to external CMS or related tools.",
+        "namePlaceholder": "Site name",
+        "urlPlaceholder": "https://...",
+        "nameRequired": "Please enter a site name.",
+        "urlRequired": "Please enter a URL.",
+        "urlInvalid": "Please enter a valid URL (https://...).",
+        "saveFailed": "Failed to add.",
+        "updateFailed": "Failed to update.",
+        "noLinks": "No external links registered.",
+        "table": {
+          "name": "Site name",
+          "url": "URL",
+          "addedAt": "Added"
+        },
+        "editTitle": "Edit Link",
+        "deleteTitle": "Delete Link",
+        "deleteBody": "Delete \"{{name}}\". This cannot be undone.",
+        "deleteConfirm": "Delete"
+      }
     }
   },
   "profile": {

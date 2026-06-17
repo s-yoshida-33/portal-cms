@@ -85,10 +85,10 @@ function MetricBar({ label, value, unit, warn = 70, danger = 90 }: {
   return (
     <div>
       <div className="flex justify-between text-xs mb-1">
-        <span className="text-[var(--text-faint)]">{label}</span>
-        <span className="text-[var(--text-muted)] font-medium tabular-nums">{value}{unit}</span>
+        <span className="text-(--text-faint)">{label}</span>
+        <span className="text-(--text-muted) font-medium tabular-nums">{value}{unit}</span>
       </div>
-      <div className="h-1 bg-[var(--bg-subtle)] rounded-full overflow-hidden">
+      <div className="h-1 bg-(--bg-subtle) rounded-full overflow-hidden">
         <div className={`h-full rounded-full ${color}`} style={{ width: `${Math.min(value, 100)}%` }} />
       </div>
     </div>
@@ -140,7 +140,7 @@ function AppBadge({ app }: { app: string }) {
 
 function TagBadge({ tag }: { tag: string }) {
   return (
-    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ring-1 bg-[var(--bg-subtle)] text-[var(--text-dim)] ring-[var(--border)]">
+    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ring-1 bg-(--bg-subtle) text-(--text-dim) ring-(--border)">
       {tag}
     </span>
   );
@@ -201,16 +201,16 @@ function TagInput({ tags, onChange, suggestions, placeholder }: TagInputProps) {
   return (
     <div ref={containerRef} className="relative">
       <div
-        className="min-h-9 w-full bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-lg px-2 py-1.5 flex flex-wrap gap-1.5 items-center cursor-text focus-within:ring-2 focus-within:ring-[var(--accent)] transition-all"
+        className="min-h-9 w-full bg-(--bg-surface) ring-1 ring-(--border) rounded-lg px-2 py-1.5 flex flex-wrap gap-1.5 items-center cursor-text focus-within:ring-2 focus-within:ring-(--accent)] transition-all"
         onClick={() => inputRef.current?.focus()}
       >
         {tags.map(tag => (
-          <span key={tag} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ring-1 bg-[var(--bg-subtle)] text-[var(--text-dim)] ring-[var(--border)]">
+          <span key={tag} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ring-1 bg-(--bg-subtle) text-(--text-dim) ring-(--border)">
             {tag}
             <button
               type="button"
               onClick={e => { e.stopPropagation(); removeTag(tag); }}
-              className="text-[var(--text-faint)] hover:text-[var(--text-muted)] transition-colors leading-none"
+              className="text-(--text-faint) hover:text-(--text-muted) transition-colors leading-none"
             >
               <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
                 <path d="M2.5 2.5l5 5M7.5 2.5l-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -225,17 +225,17 @@ function TagInput({ tags, onChange, suggestions, placeholder }: TagInputProps) {
           onKeyDown={handleKeyDown}
           onFocus={() => setFocused(true)}
           placeholder={tags.length === 0 ? placeholder : ''}
-          className="flex-1 min-w-20 bg-transparent text-sm text-[var(--text)] outline-none placeholder:text-[var(--text-faint)]"
+          className="flex-1 min-w-20 bg-transparent text-sm text-(--text) outline-none placeholder:text-(--text-faint)"
         />
       </div>
       {showSuggestions && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-[var(--bg-raised)] ring-1 ring-[var(--border)] rounded-lg shadow-xl z-10 overflow-hidden max-h-40 overflow-y-auto scrollbar-subtle">
+        <div className="absolute top-full left-0 right-0 mt-1 bg-(--bg-raised) ring-1 ring-(--border) rounded-lg shadow-xl z-10 overflow-hidden max-h-40 overflow-y-auto scrollbar-subtle">
           {filtered.map(s => (
             <button
               key={s}
               type="button"
               onMouseDown={e => { e.preventDefault(); addTag(s); }}
-              className="w-full text-left px-3 py-2 text-sm text-[var(--text-muted)] hover:bg-[var(--bg-subtle)]/60 transition-colors cursor-pointer"
+              className="w-full text-left px-3 py-2 text-sm text-(--text-muted) hover:bg-(--bg-subtle)/60 transition-colors cursor-pointer"
             >
               {s}
             </button>
@@ -244,7 +244,7 @@ function TagInput({ tags, onChange, suggestions, placeholder }: TagInputProps) {
             <button
               type="button"
               onMouseDown={e => { e.preventDefault(); addTag(input); }}
-              className="w-full text-left px-3 py-2 text-sm text-[var(--accent)] hover:bg-[var(--bg-subtle)]/60 transition-colors cursor-pointer"
+              className="w-full text-left px-3 py-2 text-sm text-(--accent) hover:bg-(--bg-subtle)/60 transition-colors cursor-pointer"
             >
               + "{input.trim()}" を追加
             </button>
@@ -292,7 +292,7 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
       <button
         onTouchEnd={e => { e.preventDefault(); e.stopPropagation(); setMenuOpen(o => !o); }}
         onClick={e => { e.stopPropagation(); setMenuOpen(o => !o); }}
-        className="w-7 h-7 flex items-center justify-center rounded-md text-[var(--text-dim)] hover:text-[var(--text)] hover:bg-[var(--bg-subtle)]/60 transition-colors cursor-pointer"
+        className="w-7 h-7 flex items-center justify-center rounded-md text-(--text-dim) hover:text-(--text) hover:bg-(--bg-subtle)/60 transition-colors cursor-pointer"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
           <circle cx="12" cy="5"  r="2" />
@@ -301,18 +301,18 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
         </svg>
       </button>
       {menuOpen && (
-        <div className="absolute right-0 top-full mt-1 w-32 bg-[var(--bg-raised)] ring-1 ring-[var(--border)] rounded-lg shadow-xl overflow-hidden">
+        <div className="absolute right-0 top-full mt-1 w-32 bg-(--bg-raised) ring-1 ring-(--border) rounded-lg shadow-xl overflow-hidden">
           <button
             onTouchEnd={e => { e.preventDefault(); e.stopPropagation(); setMenuOpen(false); onEdit(device); }}
             onClick={e => { e.stopPropagation(); setMenuOpen(false); onEdit(device); }}
-            className="w-full text-left px-3 py-2 text-sm text-[var(--text-muted)] hover:bg-[var(--bg-subtle)]/60 transition-colors cursor-pointer"
+            className="w-full text-left px-3 py-2 text-sm text-(--text-muted) hover:bg-(--bg-subtle)/60 transition-colors cursor-pointer"
           >
             {t('projectDetail.deviceEdit')}
           </button>
           <button
             onTouchEnd={e => { e.preventDefault(); e.stopPropagation(); setMenuOpen(false); onDelete(device); }}
             onClick={e => { e.stopPropagation(); setMenuOpen(false); onDelete(device); }}
-            className="w-full text-left px-3 py-2 text-sm text-[var(--danger-text)] hover:bg-[var(--danger-text)]/10 transition-colors cursor-pointer"
+            className="w-full text-left px-3 py-2 text-sm text-(--danger-text) hover:bg-(--danger-text)/10 transition-colors cursor-pointer"
           >
             {t('projectDetail.deviceDeleteRequest')}
           </button>
@@ -323,7 +323,7 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
 
   return (
     <div
-      className="relative bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl p-5 hover:ring-[var(--accent)] transition-colors cursor-pointer"
+      className="relative bg-(--bg-surface) ring-1 ring-(--border) rounded-xl p-5 hover:ring-(--accent)] transition-colors cursor-pointer"
       onClick={(e) => {
         if (menuRef.current?.contains(e.target as Node)) return;
         navigate(`/${uuid}/projects/${projectId}/devices/${device.id}`);
@@ -334,25 +334,25 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
       <div className="sm:hidden">
         {/* Row 1: name (truncated) + status + menu */}
         <div className="flex items-center gap-2 min-w-0 mb-1">
-          <p className="font-medium text-[var(--text)] text-sm truncate flex-1 min-w-0">{device.name}</p>
+          <p className="font-medium text-(--text) text-sm truncate flex-1 min-w-0">{device.name}</p>
           <StatusBadge status={device.status} />
           {menu}
         </div>
         {/* Row 2: IP */}
-        <p className="text-xs text-[var(--text-faint)] font-mono mb-5">{device.ip}</p>
+        <p className="text-xs text-(--text-faint) font-mono mb-5">{device.ip}</p>
         {/* Info section: app / last seen / uptime */}
         <div className="space-y-2.5">
           <div className="flex items-center gap-1.5">
             <AppBadge app={device.app} />
-            <span className="text-[var(--text-faint)] text-xs">v{device.appVersion}</span>
+            <span className="text-(--text-faint) text-xs">v{device.appVersion}</span>
           </div>
           {device.tags && device.tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {device.tags.map(tag => <TagBadge key={tag} tag={tag} />)}
             </div>
           )}
-          <p className="text-xs text-[var(--text-faint)]">{t('projectDetail.deviceLastSeen', { time: formatDate(device.lastSeen) })}</p>
-          <p className="text-xs text-[var(--text-dim)]">
+          <p className="text-xs text-(--text-faint)">{t('projectDetail.deviceLastSeen', { time: formatDate(device.lastSeen) })}</p>
+          <p className="text-xs text-(--text-dim)">
             {t('projectDetail.deviceUptime')}: <UptimeClock uptimeSecs={device.system.uptime} lastSeen={device.lastSeen} status={device.status} />
           </p>
         </div>
@@ -363,8 +363,8 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
         {/* Row 1: name + IP (left)  |  status + menu (right) */}
         <div className="flex items-start justify-between mb-4">
           <div>
-            <p className="font-medium text-[var(--text)] text-sm">{device.name}</p>
-            <p className="text-xs text-[var(--text-faint)] font-mono mt-1">{device.ip}</p>
+            <p className="font-medium text-(--text) text-sm">{device.name}</p>
+            <p className="text-xs text-(--text-faint) font-mono mt-1">{device.ip}</p>
           </div>
           <div className="flex items-center gap-2 shrink-0 ml-3">
             <StatusBadge status={device.status} />
@@ -375,14 +375,14 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
         <div className="mb-5 space-y-2">
           <div className="flex items-center gap-1.5">
             <AppBadge app={device.app} />
-            <span className="text-[var(--text-faint)] text-xs">v{device.appVersion}</span>
+            <span className="text-(--text-faint) text-xs">v{device.appVersion}</span>
           </div>
           {device.tags && device.tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {device.tags.map(tag => <TagBadge key={tag} tag={tag} />)}
             </div>
           )}
-          <p className="text-xs text-[var(--text-faint)]">{t('projectDetail.deviceLastSeen', { time: formatDate(device.lastSeen) })}</p>
+          <p className="text-xs text-(--text-faint)">{t('projectDetail.deviceLastSeen', { time: formatDate(device.lastSeen) })}</p>
         </div>
         {/* Row 3: metrics */}
         <div className="grid grid-cols-4 gap-6">
@@ -392,9 +392,9 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
             <MetricBar label={t('deviceDetail.temperature')} value={device.system.temperature} unit="°C" warn={65} danger={80} />
             <MetricBar label={t('deviceDetail.storage')}     value={device.system.storage}     unit="%" warn={80} danger={90} />
           </div>
-          <div className="flex flex-col justify-center pl-5 border-l border-[var(--border)]">
-            <p className="text-xs text-[var(--text-faint)] mb-1">{t('projectDetail.deviceUptime')}</p>
-            <p className="text-lg font-semibold text-[var(--text)]">
+          <div className="flex flex-col justify-center pl-5 border-l border-(--border)">
+            <p className="text-xs text-(--text-faint) mb-1">{t('projectDetail.deviceUptime')}</p>
+            <p className="text-lg font-semibold text-(--text)">
               <UptimeClock uptimeSecs={device.system.uptime} lastSeen={device.lastSeen} status={device.status} />
             </p>
           </div>
@@ -432,22 +432,22 @@ function GroupCard({
   const canDelete      = totalCount === 0 && !hasChildGroups;
 
   return (
-    <div className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl overflow-hidden">
+    <div className="bg-(--bg-surface) ring-1 ring-(--border) rounded-xl overflow-hidden">
       {/* Group header */}
       <div
-        className="flex items-center justify-between px-5 py-3 cursor-pointer select-none hover:bg-[var(--bg-active)] transition-colors"
+        className="flex items-center justify-between px-5 py-3 cursor-pointer select-none hover:bg-(--bg-active) transition-colors"
         onClick={() => onToggle(node.group.id)}
       >
         <div className="flex items-center gap-3">
           <svg
             width="12" height="12" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-            className={`text-[var(--text-faint)] transition-transform ${isCollapsed ? '-rotate-90' : ''}`}
+            className={`text-(--text-faint) transition-transform ${isCollapsed ? '-rotate-90' : ''}`}
           >
             <polyline points="6 9 12 15 18 9" />
           </svg>
-          <span className="text-[var(--text)] font-medium text-sm">{node.group.name}</span>
-          <span className="inline-flex items-center justify-center h-5 min-w-5 px-1.5 rounded-full bg-[var(--bg-subtle)] text-[var(--text-dim)] text-xs font-medium">
+          <span className="text-(--text) font-medium text-sm">{node.group.name}</span>
+          <span className="inline-flex items-center justify-center h-5 min-w-5 px-1.5 rounded-full bg-(--bg-subtle) text-(--text-dim) text-xs font-medium">
             {totalCount}
           </span>
         </div>
@@ -455,7 +455,7 @@ function GroupCard({
           <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
             <button
               onClick={() => onEditGroup(node.group)}
-              className="h-7 px-3 rounded-md text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer"
+              className="h-7 px-3 rounded-md text-xs text-(--text-muted) bg-(--bg-surface) hover:bg-(--bg-subtle)/60 ring-1 ring-(--border) transition-colors cursor-pointer"
             >
               {t('projectDetail.deviceEdit')}
             </button>
@@ -465,7 +465,7 @@ function GroupCard({
               className={`h-7 px-3 rounded-md text-xs ring-1 transition-colors ${
                 canDelete
                   ? 'text-red-400 bg-red-950/30 hover:bg-red-950/50 ring-red-900/50 cursor-pointer'
-                  : 'text-[var(--text-faint)] bg-[var(--bg-surface)]/30 ring-[var(--border)] cursor-not-allowed'
+                  : 'text-(--text-faint) bg-(--bg-surface)/30 ring-(--border) cursor-not-allowed'
               }`}
               title={!canDelete ? t('projectDetail.cantDelete') : undefined}
             >
@@ -576,18 +576,18 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <form
         onSubmit={handleSubmit}
-        className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl w-full max-w-sm shadow-2xl flex flex-col h-fit max-h-full sm:max-h-none overflow-hidden"
+        className="bg-(--bg-surface) ring-1 ring-(--border) rounded-xl w-full max-w-sm shadow-2xl flex flex-col h-fit max-h-full sm:max-h-none overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
         <div className="shrink-0 px-6 pt-6 pb-4">
-          <h2 className="text-[var(--text)] text-lg font-semibold">
+          <h2 className="text-(--text) text-lg font-semibold">
             {initial ? t('projectDetail.groupModal.editTitle') : t('projectDetail.groupModal.addTitle')}
           </h2>
         </div>
 
         <div className="shrink overflow-y-auto sm:overflow-visible scrollbar-subtle px-6 pb-4 space-y-4">
           <div>
-            <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projectDetail.groupModal.nameLabel')}</label>
+            <label className="block text-sm text-(--text-dim) mb-1.5">{t('projectDetail.groupModal.nameLabel')}</label>
             <input
               value={name}
               onChange={e => setName(e.target.value)}
@@ -595,7 +595,7 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
             />
           </div>
           <div>
-            <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projectDetail.groupModal.parentLabel')}</label>
+            <label className="block text-sm text-(--text-dim) mb-1.5">{t('projectDetail.groupModal.parentLabel')}</label>
             <CustomSelect
               value={parentGroupId ?? ''}
               onChange={v => setParentGroupId(v || null)}
@@ -610,23 +610,23 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
             />
           </div>
           <div>
-            <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projectDetail.groupModal.devicesLabel')}</label>
-            <div className="bg-[var(--bg-raised)] ring-1 ring-[var(--border)] rounded-lg divide-y divide-[var(--bg-hover)] max-h-64 overflow-y-auto scrollbar-subtle">
+            <label className="block text-sm text-(--text-dim) mb-1.5">{t('projectDetail.groupModal.devicesLabel')}</label>
+            <div className="bg-(--bg-raised) ring-1 ring-(--border) rounded-lg divide-y divide-(--bg-hover) max-h-64 overflow-y-auto scrollbar-subtle">
               {devices.length === 0 ? (
-                <p className="px-3 py-2 text-sm text-[var(--text-faint)]">{t('projectDetail.groupModal.noDevices')}</p>
+                <p className="px-3 py-2 text-sm text-(--text-faint)">{t('projectDetail.groupModal.noDevices')}</p>
               ) : devices.map(device => {
                 const isSelected = selectedIds.includes(device.id);
                 const otherGroupId = device.groupId && device.groupId !== initial?.id ? device.groupId : null;
                 const otherGroupName = otherGroupId ? (groupNameMap.get(otherGroupId) ?? otherGroupId) : null;
                 return (
-                  <label key={device.id} className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-[var(--bg-subtle)] transition-colors">
+                  <label key={device.id} className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-(--bg-subtle) transition-colors">
                     <input
                       type="checkbox"
                       checked={isSelected}
                       onChange={() => toggleDevice(device.id)}
-                      className="w-4 h-4 accent-[var(--accent)]"
+                      className="w-4 h-4 accent-(--accent)"
                     />
-                    <span className="text-sm text-[var(--text)] flex-1">{device.name}</span>
+                    <span className="text-sm text-(--text) flex-1">{device.name}</span>
                     {otherGroupName && (
                       <span className="text-xs text-yellow-400">{t('projectDetail.groupModal.currentGroup')}: {otherGroupName}</span>
                     )}
@@ -638,13 +638,13 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
           {error && <p className="text-red-400 text-sm">{error}</p>}
         </div>
 
-        <div className="shrink-0 px-6 py-4 border-t border-[var(--bg-hover)] bg-[var(--bg-surface)] flex justify-end gap-2">
+        <div className="shrink-0 px-6 py-4 border-t border-(--bg-hover) bg-(--bg-surface) flex justify-end gap-2">
           <button type="button" onClick={onClose}
-            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm text-(--text-muted) bg-(--bg-surface) hover:bg-(--bg-subtle)/60 ring-1 ring-(--border) transition-colors cursor-pointer">
             {t('common.cancel')}
           </button>
           <button type="submit" disabled={saving}
-            className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-50 transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-(--accent) hover:bg-(--accent-hover) disabled:opacity-50 transition-colors cursor-pointer">
             {saving ? t('common.saving') : t('common.save')}
           </button>
         </div>
@@ -706,11 +706,11 @@ function DeviceModal({ initial, groups, groupTree, projects, allDevices, onClose
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <form
         onSubmit={handleSubmit}
-        className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl w-full max-w-sm shadow-2xl flex flex-col h-fit max-h-full sm:max-h-none overflow-hidden"
+        className="bg-(--bg-surface) ring-1 ring-(--border) rounded-xl w-full max-w-sm shadow-2xl flex flex-col h-fit max-h-full sm:max-h-none overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
         <div className="shrink-0 px-6 pt-6 pb-4">
-          <h2 className="text-[var(--text)] text-lg font-semibold">
+          <h2 className="text-(--text) text-lg font-semibold">
             {initial ? t('projectDetail.deviceModal.editTitle') : t('projectDetail.deviceModal.addTitle')}
           </h2>
         </div>
@@ -718,7 +718,7 @@ function DeviceModal({ initial, groups, groupTree, projects, allDevices, onClose
         <div className="shrink overflow-y-auto sm:overflow-visible scrollbar-subtle px-6 pb-4 space-y-4">
           {initial && projects.length > 1 && (
             <div>
-              <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projectDetail.deviceModal.projectLabel')}</label>
+              <label className="block text-sm text-(--text-dim) mb-1.5">{t('projectDetail.deviceModal.projectLabel')}</label>
               <CustomSelect
                 value={projectId}
                 onChange={val => setProjectId(val)}
@@ -728,12 +728,12 @@ function DeviceModal({ initial, groups, groupTree, projects, allDevices, onClose
             </div>
           )}
           <div>
-            <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projectDetail.deviceModal.nameLabel')}</label>
+            <label className="block text-sm text-(--text-dim) mb-1.5">{t('projectDetail.deviceModal.nameLabel')}</label>
             <input value={name} onChange={e => setName(e.target.value)}
               className={inputClass} />
           </div>
           <div>
-            <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projectDetail.deviceModal.tagsLabel')}</label>
+            <label className="block text-sm text-(--text-dim) mb-1.5">{t('projectDetail.deviceModal.tagsLabel')}</label>
             <TagInput
               tags={tags}
               onChange={setTags}
@@ -742,12 +742,12 @@ function DeviceModal({ initial, groups, groupTree, projects, allDevices, onClose
             />
           </div>
           <div>
-            <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projectDetail.deviceModal.ipLabel')}</label>
+            <label className="block text-sm text-(--text-dim) mb-1.5">{t('projectDetail.deviceModal.ipLabel')}</label>
             <input value={ip} onChange={e => setIp(e.target.value)}
               className={inputClass} />
           </div>
           <div>
-            <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projectDetail.deviceModal.portLabel')}</label>
+            <label className="block text-sm text-(--text-dim) mb-1.5">{t('projectDetail.deviceModal.portLabel')}</label>
             <input
               type="number"
               value={port}
@@ -756,7 +756,7 @@ function DeviceModal({ initial, groups, groupTree, projects, allDevices, onClose
             />
           </div>
           <div>
-            <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projectDetail.deviceModal.appLabel')}</label>
+            <label className="block text-sm text-(--text-dim) mb-1.5">{t('projectDetail.deviceModal.appLabel')}</label>
             <CustomSelect
               value={app}
               onChange={val => setApp(val as AppName)}
@@ -765,13 +765,13 @@ function DeviceModal({ initial, groups, groupTree, projects, allDevices, onClose
             />
           </div>
           <div>
-            <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projectDetail.deviceModal.versionLabel')}</label>
+            <label className="block text-sm text-(--text-dim) mb-1.5">{t('projectDetail.deviceModal.versionLabel')}</label>
             <input value={appVersion} onChange={e => setAppVersion(e.target.value)}
               className={inputClass} />
           </div>
           {groups.length > 0 && (
             <div>
-              <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projectDetail.deviceModal.groupLabel')}</label>
+              <label className="block text-sm text-(--text-dim) mb-1.5">{t('projectDetail.deviceModal.groupLabel')}</label>
               <CustomSelect
                 value={groupId ?? ''}
                 onChange={val => setGroupId(val || null)}
@@ -789,13 +789,13 @@ function DeviceModal({ initial, groups, groupTree, projects, allDevices, onClose
           {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
         </div>
 
-        <div className="shrink-0 px-6 py-4 border-t border-[var(--bg-hover)] bg-[var(--bg-surface)] flex justify-end gap-2">
+        <div className="shrink-0 px-6 py-4 border-t border-(--bg-hover) bg-(--bg-surface) flex justify-end gap-2">
           <button type="button" onClick={onClose}
-            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm text-(--text-muted) bg-(--bg-surface) hover:bg-(--bg-subtle)/60 ring-1 ring-(--border) transition-colors cursor-pointer">
             {t('common.cancel')}
           </button>
           <button type="submit" disabled={saving}
-            className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-50 transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-(--accent) hover:bg-(--accent-hover) disabled:opacity-50 transition-colors cursor-pointer">
             {saving ? t('common.saving') : t('common.save')}
           </button>
         </div>
@@ -829,20 +829,20 @@ function DeleteConfirm({ name, onClose, onConfirm }: DeleteConfirmProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div
-        className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl w-full max-w-md p-6 shadow-2xl h-fit max-h-[calc(100dvh-2rem)] sm:max-h-none overflow-y-auto sm:overflow-visible"
+        className="bg-(--bg-surface) ring-1 ring-(--border) rounded-xl w-full max-w-md p-6 shadow-2xl h-fit max-h-[calc(100dvh-2rem)] sm:max-h-none overflow-y-auto sm:overflow-visible"
         onClick={e => e.stopPropagation()}
       >
-        <h2 className="text-[var(--text)] text-lg font-semibold mb-2">{t('projectDetail.deleteRequest.title')}</h2>
-        <p className="text-[var(--text-dim)] text-sm mb-5">
+        <h2 className="text-(--text) text-lg font-semibold mb-2">{t('projectDetail.deleteRequest.title')}</h2>
+        <p className="text-(--text-dim) text-sm mb-5">
           {t('projectDetail.deleteRequest.body', { name })}
         </p>
         <div className="flex justify-end gap-2">
           <button onClick={onClose}
-            className="h-9 px-4 rounded-lg text-sm text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm text-(--text-muted) bg-(--bg-surface) hover:bg-(--bg-subtle)/60 ring-1 ring-(--border) transition-colors cursor-pointer">
             {t('common.cancel')}
           </button>
           <button onClick={handleConfirm} disabled={sending}
-            className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-[var(--danger)] hover:bg-[var(--danger-hover)] disabled:opacity-50 transition-colors cursor-pointer">
+            className="h-9 px-4 rounded-lg text-sm font-medium text-white bg-(--danger) hover:bg-(--danger-hover) disabled:opacity-50 transition-colors cursor-pointer">
             {sending ? t('projectDetail.deleteRequest.sending') : t('projectDetail.deleteRequest.send')}
           </button>
         </div>
@@ -987,7 +987,7 @@ export function ProjectDetail() {
     return (
       <div className="flex flex-col min-h-full">
         <div className="flex items-center justify-center flex-1">
-          <p className="text-[var(--text-faint)] text-sm">{t('common.loading')}</p>
+          <p className="text-(--text-faint) text-sm">{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -997,7 +997,7 @@ export function ProjectDetail() {
     return (
       <div className="flex flex-col min-h-full">
         <div className="p-8">
-          <p className="text-[var(--text-dim)] mb-2">{t('projectDetail.notFound')}</p>
+          <p className="text-(--text-dim) mb-2">{t('projectDetail.notFound')}</p>
         </div>
       </div>
     );
@@ -1011,14 +1011,14 @@ export function ProjectDetail() {
         {/* Mobile: truncated text + 3-dot menu */}
         <div className="flex items-start gap-2 min-w-0 sm:hidden">
           <div className="flex-1 min-w-0 flex flex-col gap-1">
-            <h1 className="text-[var(--text)] text-3xl font-semibold truncate leading-tight">{project.name}</h1>
-            <p className="text-[var(--text-muted)] text-base truncate">{project.address}</p>
+            <h1 className="text-(--text) text-3xl font-semibold truncate leading-tight">{project.name}</h1>
+            <p className="text-(--text-muted) text-base truncate">{project.address}</p>
           </div>
           {canEdit && (
             <div ref={headerMenuRef} className="relative shrink-0 mt-2">
               <button
                 onClick={() => setHeaderMenuOpen(o => !o)}
-                className="w-8 h-8 flex items-center justify-center rounded-md text-[var(--text-dim)] hover:text-[var(--text)] hover:bg-[var(--bg-subtle)]/60 transition-colors cursor-pointer"
+                className="w-8 h-8 flex items-center justify-center rounded-md text-(--text-dim) hover:text-(--text) hover:bg-(--bg-subtle)/60 transition-colors cursor-pointer"
                 aria-label={t('common.menu')}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -1028,10 +1028,10 @@ export function ProjectDetail() {
                 </svg>
               </button>
               {headerMenuOpen && (
-                <div className="absolute right-0 top-full mt-1 w-40 bg-[var(--bg-raised)] ring-1 ring-[var(--border)] rounded-lg shadow-xl overflow-hidden z-10">
+                <div className="absolute right-0 top-full mt-1 w-40 bg-(--bg-raised) ring-1 ring-(--border) rounded-lg shadow-xl overflow-hidden z-10">
                   <button
                     onClick={() => { setHeaderMenuOpen(false); setEditGroup(null); setGroupModalOpen(true); }}
-                    className="w-full text-left px-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--bg-subtle)]/60 transition-colors cursor-pointer flex items-center gap-2"
+                    className="w-full text-left px-4 py-2.5 text-sm text-(--text-muted) hover:bg-(--bg-subtle)/60 transition-colors cursor-pointer flex items-center gap-2"
                   >
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
                       stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -1041,7 +1041,7 @@ export function ProjectDetail() {
                   </button>
                   <button
                     onClick={() => { setHeaderMenuOpen(false); setEditDevice(null); setDeviceModalOpen(true); }}
-                    className="w-full text-left px-4 py-2.5 text-sm text-[var(--text)] hover:bg-[var(--bg-subtle)]/60 transition-colors cursor-pointer flex items-center gap-2"
+                    className="w-full text-left px-4 py-2.5 text-sm text-(--text) hover:bg-(--bg-subtle)/60 transition-colors cursor-pointer flex items-center gap-2"
                   >
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
                       stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -1058,14 +1058,14 @@ export function ProjectDetail() {
         {/* Desktop: original layout */}
         <div className="hidden sm:flex items-start justify-between gap-4">
           <div className="flex flex-col gap-1">
-            <h1 className="text-[var(--text)] text-3xl font-semibold">{project.name}</h1>
-            <p className="text-[var(--text-muted)] text-base">{project.address}</p>
+            <h1 className="text-(--text) text-3xl font-semibold">{project.name}</h1>
+            <p className="text-(--text-muted) text-base">{project.address}</p>
           </div>
           {canEdit && (
             <div className="flex items-center gap-2 mt-7">
               <button
                 onClick={() => { setEditGroup(null); setGroupModalOpen(true); }}
-                className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-[var(--text-muted)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer"
+                className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-(--text-muted) bg-(--bg-surface) hover:bg-(--bg-subtle)/60 ring-1 ring-(--border) transition-colors cursor-pointer"
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -1075,7 +1075,7 @@ export function ProjectDetail() {
               </button>
               <button
                 onClick={() => { setEditDevice(null); setDeviceModalOpen(true); }}
-                className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors cursor-pointer"
+                className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-white bg-(--accent) hover:bg-(--accent-hover) transition-colors cursor-pointer"
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -1093,7 +1093,7 @@ export function ProjectDetail() {
         <div className="px-4 sm:px-6 pb-2 flex flex-wrap items-end gap-2">
           {availableApps.length > 1 && (
             <div className="flex flex-col gap-1">
-              <label className="text-[var(--text-faint)] text-xs">{t('projectDetail.filter.app')}</label>
+              <label className="text-(--text-faint) text-xs">{t('projectDetail.filter.app')}</label>
               <CustomSelect
                 value={filterApp}
                 onChange={v => setFilterApp(v as AppName | '')}
@@ -1107,7 +1107,7 @@ export function ProjectDetail() {
           )}
           {availableTags.length > 0 && (
             <div className="flex flex-col gap-1">
-              <label className="text-[var(--text-faint)] text-xs">{t('projectDetail.filter.tag')}</label>
+              <label className="text-(--text-faint) text-xs">{t('projectDetail.filter.tag')}</label>
               <CustomSelect
                 value={filterTag}
                 onChange={v => setFilterTag(v)}
@@ -1122,7 +1122,7 @@ export function ProjectDetail() {
           {hasActiveFilter && (
             <button
               onClick={() => { setFilterApp(''); setFilterTag(''); }}
-              className="h-9 px-3 rounded-lg text-xs text-[var(--text-dim)] bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)]/60 ring-1 ring-[var(--border)] transition-colors cursor-pointer"
+              className="h-9 px-3 rounded-lg text-xs text-(--text-dim) bg-(--bg-surface) hover:bg-(--bg-subtle)/60 ring-1 ring-(--border) transition-colors cursor-pointer"
             >
               {t('logs.filter.clear')}
             </button>
@@ -1133,8 +1133,8 @@ export function ProjectDetail() {
       {/* デバイス・グループ一覧 */}
       <div className="px-4 sm:px-6 pt-4 pb-8 space-y-4 md:space-y-5">
         {filteredDevices.length === 0 && (!hasGroups || hasActiveFilter) ? (
-          <div className="overflow-hidden rounded-lg bg-[var(--bg-surface)] ring-1 ring-[var(--border)] p-12 text-center">
-            <p className="text-[var(--text-faint)] text-sm">
+          <div className="overflow-hidden rounded-lg bg-(--bg-surface) ring-1 ring-(--border) p-12 text-center">
+            <p className="text-(--text-faint) text-sm">
               {hasActiveFilter ? t('projectDetail.noFilteredDevices') : t('projectDetail.noDevices')}
             </p>
           </div>
@@ -1161,9 +1161,9 @@ export function ProjectDetail() {
             {/* グループ未設定の区切り */}
             {showDivider && (
               <div className="flex items-center gap-3 py-2">
-                <div className="flex-1 h-px bg-[var(--bg-subtle)]" />
-                <span className="text-xs text-[var(--text-faint)] whitespace-nowrap">{t('projectDetail.ungrouped')}</span>
-                <div className="flex-1 h-px bg-[var(--bg-subtle)]" />
+                <div className="flex-1 h-px bg-(--bg-subtle)" />
+                <span className="text-xs text-(--text-faint) whitespace-nowrap">{t('projectDetail.ungrouped')}</span>
+                <div className="flex-1 h-px bg-(--bg-subtle)" />
               </div>
             )}
 

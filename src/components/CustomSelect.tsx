@@ -101,10 +101,10 @@ export function CustomSelect<T extends string>({
         disabled={disabled}
         onClick={handleToggle}
         style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
-        className="group flex w-full items-center select-none border-0 shadow-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4693ff] bg-[var(--bg-surface)] text-[var(--text)] ring-1 hover:bg-[var(--bg-subtle)] ring-[var(--border)] h-9 rounded-lg pl-3 pr-10 text-base font-normal justify-between text-left transition-colors disabled:opacity-50"
+        className="group flex w-full items-center select-none border-0 shadow-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4693ff] bg-(--bg-surface) text-(--text) ring-1 hover:bg-(--bg-subtle) ring-(--border) h-9 rounded-lg pl-3 pr-10 text-base font-normal justify-between text-left transition-colors disabled:opacity-50"
       >
         <span className="truncate">{currentLabel}</span>
-        <span className="absolute right-3 flex shrink-0 items-center text-[var(--text-dim)] pointer-events-none">
+        <span className="absolute right-3 flex shrink-0 items-center text-(--text-dim) pointer-events-none">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
             <path d="M181.66,170.34a8,8,0,0,1,0,11.32l-48,48a8,8,0,0,1-11.32,0l-48-48a8,8,0,0,1,11.32-11.32L128,212.69l42.34-42.35A8,8,0,0,1,181.66,170.34Zm-96-84.68L128,43.31l42.34,42.35a8,8,0,0,0,11.32-11.32l-48-48a8,8,0,0,0-11.32,0l-48,48A8,8,0,0,0,85.66,85.66Z" />
           </svg>
@@ -114,7 +114,7 @@ export function CustomSelect<T extends string>({
       {isOpen && createPortal(
         <div
           style={menuStyle}
-          className="flex flex-col bg-[var(--bg-surface)] text-[var(--text)] rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.5)] ring-1 ring-[var(--border)] py-1.5 px-2"
+          className="flex flex-col bg-(--bg-surface) text-(--text) rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.5)] ring-1 ring-(--border) py-1.5 px-2"
         >
           <div role="listbox" className="overflow-y-auto overscroll-none max-h-[300px] flex flex-col no-scrollbar">
             {options.map(opt => {
@@ -126,8 +126,8 @@ export function CustomSelect<T extends string>({
                   aria-selected={isSelected}
                   onClick={() => { onChange(opt.value as T); setIsOpen(false); }}
                   style={{ cursor: 'pointer' }}
-                  className={`group flex w-full h-9 shrink-0 items-center justify-between gap-6 rounded-md pl-3 pr-4 text-base outline-none transition-colors hover:bg-[var(--bg-subtle)]/60 hover:text-[var(--text)] ${
-                    isSelected ? 'text-[var(--text)]' : 'text-[var(--text-muted)]'
+                  className={`group flex w-full h-9 shrink-0 items-center justify-between gap-6 rounded-md pl-3 pr-4 text-base outline-none transition-colors hover:bg-(--bg-subtle)/60 hover:text-(--text) ${
+                    isSelected ? 'text-(--text)' : 'text-(--text-muted)'
                   }`}
                 >
                   <div className="whitespace-nowrap">{opt.label}</div>
