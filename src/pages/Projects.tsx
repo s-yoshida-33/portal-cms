@@ -70,7 +70,7 @@ function ProjectModal({ initial, onClose, onSave }: ModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div
-        className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl w-full max-w-md shadow-2xl flex flex-col max-h-[calc(100dvh-2rem)] overflow-hidden"
+        className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl w-full max-w-md shadow-2xl flex flex-col max-h-[calc(100dvh-2rem)] sm:max-h-none overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
         <div className="shrink-0 px-6 pt-6 pb-4">
@@ -80,7 +80,7 @@ function ProjectModal({ initial, onClose, onSave }: ModalProps) {
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col min-h-0 flex-1">
-          <div className="flex-1 overflow-y-auto px-6 pb-4 space-y-4">
+          <div className="flex-1 overflow-y-auto sm:overflow-visible px-6 pb-4 space-y-4">
             <div>
               <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projects.form.nameLabel')}</label>
               <input value={name} onChange={e => setName(e.target.value)}

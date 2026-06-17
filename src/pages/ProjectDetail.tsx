@@ -576,7 +576,7 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <form
         onSubmit={handleSubmit}
-        className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl w-full max-w-sm shadow-2xl flex flex-col h-fit max-h-full overflow-hidden"
+        className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl w-full max-w-sm shadow-2xl flex flex-col h-fit max-h-full sm:max-h-none overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
         <div className="shrink-0 px-6 pt-6 pb-4">
@@ -585,7 +585,7 @@ function GroupModal({ initial, projectId: _projectId, groups, devices, onClose, 
           </h2>
         </div>
 
-        <div className="shrink overflow-y-auto scrollbar-subtle px-6 pb-4 space-y-4">
+        <div className="shrink overflow-y-auto sm:overflow-visible scrollbar-subtle px-6 pb-4 space-y-4">
           <div>
             <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projectDetail.groupModal.nameLabel')}</label>
             <input
@@ -706,7 +706,7 @@ function DeviceModal({ initial, groups, groupTree, projects, allDevices, onClose
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <form
         onSubmit={handleSubmit}
-        className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl w-full max-w-sm shadow-2xl flex flex-col h-fit max-h-full overflow-hidden"
+        className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl w-full max-w-sm shadow-2xl flex flex-col h-fit max-h-full sm:max-h-none overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
         <div className="shrink-0 px-6 pt-6 pb-4">
@@ -715,7 +715,7 @@ function DeviceModal({ initial, groups, groupTree, projects, allDevices, onClose
           </h2>
         </div>
 
-        <div className="shrink overflow-y-auto scrollbar-subtle px-6 pb-4 space-y-4">
+        <div className="shrink overflow-y-auto sm:overflow-visible scrollbar-subtle px-6 pb-4 space-y-4">
           {initial && projects.length > 1 && (
             <div>
               <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projectDetail.deviceModal.projectLabel')}</label>
@@ -829,7 +829,7 @@ function DeleteConfirm({ name, onClose, onConfirm }: DeleteConfirmProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div
-        className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl w-full max-w-md p-6 shadow-2xl h-fit max-h-[calc(100dvh-2rem)] overflow-y-auto"
+        className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl w-full max-w-md p-6 shadow-2xl h-fit max-h-[calc(100dvh-2rem)] sm:max-h-none overflow-y-auto sm:overflow-visible"
         onClick={e => e.stopPropagation()}
       >
         <h2 className="text-[var(--text)] text-lg font-semibold mb-2">{t('projectDetail.deleteRequest.title')}</h2>
