@@ -92,17 +92,30 @@
     "addFirst": "最初のプロジェクトを追加する",
     "table": {
       "name": "プロジェクト名",
+      "country": "国",
       "prefecture": "都道府県",
+      "region": "都道府県/地域",
       "address": "住所",
       "count": "台数"
+    },
+    "countryOptions": {
+      "japan": "日本",
+      "china": "中国",
+      "indonesia": "インドネシア",
+      "cambodia": "カンボジア",
+      "vietnam": "ベトナム",
+      "other": "その他"
     },
     "form": {
       "addTitle": "プロジェクトを追加",
       "editTitle": "プロジェクトを編集",
       "nameLabel": "プロジェクト名",
+      "countryLabel": "国",
       "prefectureLabel": "都道府県",
+      "regionLabel": "州・省（任意）",
       "addressLabel": "住所",
       "requiredAll": "すべての項目を入力してください。",
+      "requiredNameAddress": "プロジェクト名と住所を入力してください。",
       "saveFailed": "保存に失敗しました: {{msg}}"
     },
     "deleteRequest": {

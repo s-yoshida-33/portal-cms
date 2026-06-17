@@ -100,7 +100,7 @@ export async function fetchProject(id: string): Promise<ProjectDoc | null> {
 }
 
 export async function addProject(
-  data: Pick<ProjectDoc, 'name' | 'prefecture' | 'address'>
+  data: Pick<ProjectDoc, 'name' | 'country' | 'prefecture' | 'address'>
 ): Promise<string> {
   const ref = await addDoc(col.projects(), {
     ...data,
@@ -112,7 +112,7 @@ export async function addProject(
 
 export async function updateProject(
   id: string,
-  data: Partial<Pick<ProjectDoc, 'name' | 'prefecture' | 'address'>>
+  data: Partial<Pick<ProjectDoc, 'name' | 'country' | 'prefecture' | 'address'>>
 ): Promise<void> {
   await updateDoc(doc(col.projects(), id), {
     ...data,

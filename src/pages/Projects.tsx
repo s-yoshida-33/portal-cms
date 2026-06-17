@@ -12,32 +12,50 @@ import {
 } from '../lib/firestore';
 import type { ProjectDoc, Device } from '../types';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { CustomSelect } from '../components/CustomSelect';
 
 // ── プロジェクト追加・編集モーダル ────────────────────────────────
+
+const COUNTRIES = [
+  { value: '日本',         key: 'japan' },
+  { value: '中国',         key: 'china' },
+  { value: 'インドネシア', key: 'indonesia' },
+  { value: 'カンボジア',   key: 'cambodia' },
+  { value: 'ベトナム',     key: 'vietnam' },
+  { value: 'その他',       key: 'other' },
+] as const;
+
+function getCountryLabel(value: string, t: (key: string) => string): string {
+  const entry = COUNTRIES.find(c => c.value === value);
+  return entry ? t(`projects.countryOptions.${entry.key}`) : value;
+}
 
 interface ModalProps {
   initial: ProjectDoc | null;
   onClose: () => void;
-  onSave:  (data: Pick<ProjectDoc, 'name' | 'prefecture' | 'address'>) => Promise<void>;
+  onSave:  (data: Pick<ProjectDoc, 'name' | 'country' | 'prefecture' | 'address'>) => Promise<void>;
 }
 
 function ProjectModal({ initial, onClose, onSave }: ModalProps) {
   const { t } = useTranslation();
   const [name,       setName]       = useState(initial?.name       ?? '');
+  const [country,    setCountry]    = useState(initial?.country    ?? '日本');
   const [prefecture, setPrefecture] = useState(initial?.prefecture ?? '');
   const [address,    setAddress]    = useState(initial?.address    ?? '');
   const [saving,     setSaving]     = useState(false);
   const [error,      setError]      = useState('');
 
+  const isJapan = country === '日本';
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim() || !prefecture.trim() || !address.trim()) {
-      setError(t('projects.form.requiredAll'));
+    if (!name.trim() || !address.trim() || (isJapan && !prefecture.trim())) {
+      setError(t(isJapan ? 'projects.form.requiredAll' : 'projects.form.requiredNameAddress'));
       return;
     }
     setSaving(true);
     try {
-      await onSave({ name: name.trim(), prefecture: prefecture.trim(), address: address.trim() });
+      await onSave({ name: name.trim(), country, prefecture: prefecture.trim(), address: address.trim() });
       onClose();
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
@@ -52,7 +70,7 @@ function ProjectModal({ initial, onClose, onSave }: ModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div
-        className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl w-full max-w-md shadow-2xl flex flex-col max-h-[calc(100dvh-2rem)] overflow-hidden"
+        className="bg-[var(--bg-surface)] ring-1 ring-[var(--border)] rounded-xl w-full max-w-md shadow-2xl flex flex-col max-h-[calc(100dvh-2rem)] sm:max-h-none overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
         <div className="shrink-0 px-6 pt-6 pb-4">
@@ -62,14 +80,25 @@ function ProjectModal({ initial, onClose, onSave }: ModalProps) {
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col min-h-0 flex-1">
-          <div className="flex-1 overflow-y-auto px-6 pb-4 space-y-4">
+          <div className="flex-1 overflow-y-auto sm:overflow-visible px-6 pb-4 space-y-4">
             <div>
               <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projects.form.nameLabel')}</label>
               <input value={name} onChange={e => setName(e.target.value)}
                 className={inputClass} />
             </div>
             <div>
-              <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projects.form.prefectureLabel')}</label>
+              <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projects.form.countryLabel')}</label>
+              <CustomSelect
+                value={country}
+                onChange={setCountry}
+                options={COUNTRIES.map(c => ({ value: c.value, label: getCountryLabel(c.value, t) }))}
+                className="w-full"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-[var(--text-dim)] mb-1.5">
+                {isJapan ? t('projects.form.prefectureLabel') : t('projects.form.regionLabel')}
+              </label>
               <input value={prefecture} onChange={e => setPrefecture(e.target.value)}
                 className={inputClass} />
             </div>
@@ -199,7 +228,7 @@ export function Projects() {
   const deviceCount = (projectId: string) =>
     devices.filter(d => d.projectId === projectId && d.app === 'Bridge-Ground').length;
 
-  async function handleSave(data: Pick<ProjectDoc, 'name' | 'prefecture' | 'address'>) {
+  async function handleSave(data: Pick<ProjectDoc, 'name' | 'country' | 'prefecture' | 'address'>) {
     if (editTarget) {
       await updateProject(editTarget.id, data);
       addSiteLog({ category: 'project', action: 'updated', targetId: editTarget.id, targetName: data.name, projectName: data.name, performedBy: siteLogActor() }).catch(() => {});
@@ -317,7 +346,12 @@ export function Projects() {
                     </span>
                   </div>
                   <p className="text-[var(--text-faint)] text-xs mb-3">
-                    {p.prefecture}　{p.address}
+                    {p.country && p.country !== '日本' && (
+                      <span className="inline-block mr-1.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-[var(--bg-subtle)] ring-1 ring-[var(--border)] text-[var(--text-muted)]">
+                        {getCountryLabel(p.country, t)}
+                      </span>
+                    )}
+                    {p.prefecture && <>{p.prefecture}　</>}{p.address}
                   </p>
                   {canEdit && (
                     <div className="relative z-10 flex gap-2">
@@ -342,9 +376,10 @@ export function Projects() {
             {/* ── PC: テーブルレイアウト ── */}
             <div className="hidden sm:block overflow-hidden rounded-lg ring-1 ring-[var(--border)]">
               {/* テーブルヘッダー */}
-              <div className="grid grid-cols-[1fr_110px_1.2fr_72px_160px] gap-4 px-4 py-3 bg-[var(--bg-base)] border-b border-[var(--border)] text-xs font-medium text-[var(--text-faint)] uppercase tracking-wider">
+              <div className="grid grid-cols-[1fr_100px_130px_1.2fr_72px_160px] gap-4 px-4 py-3 bg-[var(--bg-base)] border-b border-[var(--border)] text-xs font-medium text-[var(--text-faint)] uppercase tracking-wider">
                 <span>{t('projects.table.name')}</span>
-                <span>{t('projects.table.prefecture')}</span>
+                <span>{t('projects.table.country')}</span>
+                <span>{t('projects.table.region')}</span>
                 <span>{t('projects.table.address')}</span>
                 <span>{t('projects.table.count')}</span>
                 <span />
@@ -354,7 +389,7 @@ export function Projects() {
               {projects.map((p, i) => (
                 <div
                   key={p.id}
-                  className={`grid grid-cols-[1fr_110px_1.2fr_72px_160px] gap-4 px-4 py-4 items-center bg-[var(--bg-surface)] transition-colors ${
+                  className={`grid grid-cols-[1fr_100px_130px_1.2fr_72px_160px] gap-4 px-4 py-4 items-center bg-[var(--bg-surface)] transition-colors ${
                     i < projects.length - 1 ? 'border-b border-[var(--border)]' : ''
                   }`}
                 >
@@ -364,7 +399,12 @@ export function Projects() {
                   >
                     {p.name}
                   </Link>
-                  <span className="text-[var(--text-dim)] text-sm">{p.prefecture}</span>
+                  <span className="text-[var(--text-dim)] text-sm truncate">
+                    {getCountryLabel(p.country ?? '日本', t)}
+                  </span>
+                  <span className="text-[var(--text-dim)] text-sm truncate">
+                    {p.prefecture}
+                  </span>
                   <span className="text-[var(--text-dim)] text-sm truncate">{p.address}</span>
                   <span className="text-[var(--text-muted)] text-sm font-medium tabular-nums">
                     {deviceCount(p.id)}

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 
 export interface SelectOption<T> {
   value: T;
@@ -17,13 +18,14 @@ export function CustomSelect<T extends string>({
   value, onChange, options, disabled = false, className,
 }: CustomSelectProps<T>) {
   const [isOpen,    setIsOpen]    = useState(false);
-  const [direction, setDirection] = useState<'down' | 'up'>('down');
+  const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
   const containerRef = useRef<HTMLDivElement>(null);
 
   const selectedIndex = options.findIndex(opt => opt.value === value);
   const currentLabel  = options[selectedIndex]?.label ?? '';
 
   useEffect(() => {
+    if (!isOpen) return;
     function handleClickOutside(e: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setIsOpen(false);
@@ -31,21 +33,66 @@ export function CustomSelect<T extends string>({
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [isOpen]);
+
+  // Scroll anywhere → close (capture phase catches scrolls inside modals too)
+  useEffect(() => {
+    if (!isOpen) return;
+    function handleScroll() { setIsOpen(false); }
+    window.addEventListener('scroll', handleScroll, true);
+    return () => window.removeEventListener('scroll', handleScroll, true);
+  }, [isOpen]);
 
   function handleToggle() {
+    if (disabled) return;
     if (!isOpen && containerRef.current) {
       const rect       = containerRef.current.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - rect.bottom;
       const menuHeight = Math.min(options.length * 36 + 12, 312);
-      setDirection(spaceBelow >= menuHeight + 8 ? 'down' : 'up');
+
+      // Walk up the DOM to find the nearest overflow:hidden ancestor (modal boundary).
+      // Fall back to the full viewport when no clipping ancestor is found.
+      let boundaryTop    = 0;
+      let boundaryBottom = window.innerHeight;
+      let el: HTMLElement | null = containerRef.current.parentElement;
+      while (el && el !== document.body) {
+        const s = window.getComputedStyle(el);
+        if (s.overflow === 'hidden' || s.overflowY === 'hidden' ||
+            s.overflow === 'clip'   || s.overflowY === 'clip') {
+          const r     = el.getBoundingClientRect();
+          boundaryTop    = r.top;
+          boundaryBottom = r.bottom;
+          break;
+        }
+        el = el.parentElement;
+      }
+
+      const spaceBelow = boundaryBottom - rect.bottom;
+      const spaceAbove = rect.top - boundaryTop;
+      const goDown     = spaceBelow >= menuHeight + 8 || spaceBelow >= spaceAbove;
+
+      setMenuStyle(goDown
+        ? {
+            position: 'fixed',
+            top:      rect.bottom + 6,
+            left:     rect.left - 8,
+            minWidth: rect.width + 16,
+            width:    'max-content',
+            transformOrigin: 'top center',
+            zIndex:   9999,
+          }
+        : {
+            position: 'fixed',
+            bottom:   window.innerHeight - rect.top + 6,
+            left:     rect.left - 8,
+            minWidth: rect.width + 16,
+            width:    'max-content',
+            transformOrigin: 'bottom center',
+            zIndex:   9999,
+          }
+      );
     }
     setIsOpen(o => !o);
   }
-
-  const dropdownStyle: React.CSSProperties = direction === 'down'
-    ? { top: 'calc(100% + 6px)', bottom: 'auto',           left: '-8px', minWidth: 'calc(100% + 16px)', width: 'max-content', transformOrigin: 'top center' }
-    : { bottom: 'calc(100% + 6px)', top: 'auto',           left: '-8px', minWidth: 'calc(100% + 16px)', width: 'max-content', transformOrigin: 'bottom center' };
 
   return (
     <div ref={containerRef} className={`relative ${className ?? 'min-w-[200px] w-full sm:w-max'}`}>
@@ -64,12 +111,10 @@ export function CustomSelect<T extends string>({
         </span>
       </button>
 
-      {isOpen && (
+      {isOpen && createPortal(
         <div
-          style={dropdownStyle}
-          className={`absolute z-50 flex flex-col bg-[var(--bg-surface)] text-[var(--text)] rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.5)] ring-1 ring-[var(--border)] py-1.5 px-2 ${
-            isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-[0.96] pointer-events-none'
-          }`}
+          style={menuStyle}
+          className="flex flex-col bg-[var(--bg-surface)] text-[var(--text)] rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.5)] ring-1 ring-[var(--border)] py-1.5 px-2"
         >
           <div role="listbox" className="overflow-y-auto overscroll-none max-h-[300px] flex flex-col no-scrollbar">
             {options.map(opt => {
@@ -79,7 +124,7 @@ export function CustomSelect<T extends string>({
                   key={opt.value}
                   role="option"
                   aria-selected={isSelected}
-                  onClick={() => { onChange(opt.value); setIsOpen(false); }}
+                  onClick={() => { onChange(opt.value as T); setIsOpen(false); }}
                   style={{ cursor: 'pointer' }}
                   className={`group flex w-full h-9 shrink-0 items-center justify-between gap-6 rounded-md pl-3 pr-4 text-base outline-none transition-colors hover:bg-[var(--bg-subtle)]/60 hover:text-[var(--text)] ${
                     isSelected ? 'text-[var(--text)]' : 'text-[var(--text-muted)]'
@@ -97,7 +142,8 @@ export function CustomSelect<T extends string>({
               );
             })}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

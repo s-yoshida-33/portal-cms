@@ -92,17 +92,30 @@
     "addFirst": "Add your first project",
     "table": {
       "name": "Project name",
+      "country": "Country",
       "prefecture": "Prefecture",
+      "region": "Prefecture / Region",
       "address": "Address",
       "count": "Devices"
+    },
+    "countryOptions": {
+      "japan": "Japan",
+      "china": "China",
+      "indonesia": "Indonesia",
+      "cambodia": "Cambodia",
+      "vietnam": "Vietnam",
+      "other": "Other"
     },
     "form": {
       "addTitle": "Add project",
       "editTitle": "Edit project",
       "nameLabel": "Project name",
+      "countryLabel": "Country",
       "prefectureLabel": "Prefecture",
+      "regionLabel": "State / Province (optional)",
       "addressLabel": "Address",
       "requiredAll": "Please fill in all fields.",
+      "requiredNameAddress": "Please enter a project name and address.",
       "saveFailed": "Failed to save: {{msg}}"
     },
     "deleteRequest": {
