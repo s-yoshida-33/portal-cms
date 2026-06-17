@@ -92,10 +92,19 @@
     "addFirst": "Add your first project",
     "table": {
       "name": "Project name",
+      "country": "Country",
       "prefecture": "Prefecture",
-      "region": "Region",
+      "region": "Prefecture / Region",
       "address": "Address",
       "count": "Devices"
+    },
+    "countryOptions": {
+      "japan": "Japan",
+      "china": "China",
+      "indonesia": "Indonesia",
+      "cambodia": "Cambodia",
+      "vietnam": "Vietnam",
+      "other": "Other"
     },
     "form": {
       "addTitle": "Add project",

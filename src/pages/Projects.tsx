@@ -15,7 +15,19 @@ import { usePageTitle } from '../hooks/usePageTitle';
 
 // ── プロジェクト追加・編集モーダル ────────────────────────────────
 
-const COUNTRIES = ['日本', 'ベトナム', 'その他'] as const;
+const COUNTRIES = [
+  { value: '日本',         key: 'japan' },
+  { value: '中国',         key: 'china' },
+  { value: 'インドネシア', key: 'indonesia' },
+  { value: 'カンボジア',   key: 'cambodia' },
+  { value: 'ベトナム',     key: 'vietnam' },
+  { value: 'その他',       key: 'other' },
+] as const;
+
+function getCountryLabel(value: string, t: (key: string) => string): string {
+  const entry = COUNTRIES.find(c => c.value === value);
+  return entry ? t(`projects.countryOptions.${entry.key}`) : value;
+}
 
 interface ModalProps {
   initial: ProjectDoc | null;
@@ -54,7 +66,7 @@ function ProjectModal({ initial, onClose, onSave }: ModalProps) {
   const inputClass =
     'w-full bg-[var(--bg-surface)] ring-1 ring-[var(--border)] text-[var(--text)] rounded-lg px-3 h-9 text-sm outline-none focus:ring-[var(--accent)] focus:ring-2 placeholder:text-[var(--text-faint)] transition-all';
   const selectClass =
-    'w-full bg-[var(--bg-surface)] ring-1 ring-[var(--border)] text-[var(--text)] rounded-lg px-3 h-9 text-sm outline-none focus:ring-[var(--accent)] focus:ring-2 transition-all cursor-pointer';
+    'w-full bg-[var(--bg-surface)] ring-1 ring-[var(--border)] text-[var(--text)] rounded-lg px-3 pr-8 h-9 text-sm outline-none focus:ring-[var(--accent)] focus:ring-2 transition-all cursor-pointer appearance-none';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
@@ -77,12 +89,19 @@ function ProjectModal({ initial, onClose, onSave }: ModalProps) {
             </div>
             <div>
               <label className="block text-sm text-[var(--text-dim)] mb-1.5">{t('projects.form.countryLabel')}</label>
-              <select value={country} onChange={e => setCountry(e.target.value)}
-                className={selectClass}>
-                {COUNTRIES.map(c => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
+              <div className="relative">
+                <select value={country} onChange={e => setCountry(e.target.value)}
+                  className={selectClass}>
+                  {COUNTRIES.map(c => (
+                    <option key={c.value} value={c.value}>{getCountryLabel(c.value, t)}</option>
+                  ))}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-2.5 flex items-center">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--text-dim)]">
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </div>
+              </div>
             </div>
             <div>
               <label className="block text-sm text-[var(--text-dim)] mb-1.5">
@@ -337,7 +356,7 @@ export function Projects() {
                   <p className="text-[var(--text-faint)] text-xs mb-3">
                     {p.country && p.country !== '日本' && (
                       <span className="inline-block mr-1.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-[var(--bg-subtle)] ring-1 ring-[var(--border)] text-[var(--text-muted)]">
-                        {p.country}
+                        {getCountryLabel(p.country, t)}
                       </span>
                     )}
                     {p.prefecture && <>{p.prefecture}　</>}{p.address}
@@ -365,8 +384,9 @@ export function Projects() {
             {/* ── PC: テーブルレイアウト ── */}
             <div className="hidden sm:block overflow-hidden rounded-lg ring-1 ring-[var(--border)]">
               {/* テーブルヘッダー */}
-              <div className="grid grid-cols-[1fr_140px_1.2fr_72px_160px] gap-4 px-4 py-3 bg-[var(--bg-base)] border-b border-[var(--border)] text-xs font-medium text-[var(--text-faint)] uppercase tracking-wider">
+              <div className="grid grid-cols-[1fr_100px_130px_1.2fr_72px_160px] gap-4 px-4 py-3 bg-[var(--bg-base)] border-b border-[var(--border)] text-xs font-medium text-[var(--text-faint)] uppercase tracking-wider">
                 <span>{t('projects.table.name')}</span>
+                <span>{t('projects.table.country')}</span>
                 <span>{t('projects.table.region')}</span>
                 <span>{t('projects.table.address')}</span>
                 <span>{t('projects.table.count')}</span>
@@ -377,7 +397,7 @@ export function Projects() {
               {projects.map((p, i) => (
                 <div
                   key={p.id}
-                  className={`grid grid-cols-[1fr_140px_1.2fr_72px_160px] gap-4 px-4 py-4 items-center bg-[var(--bg-surface)] transition-colors ${
+                  className={`grid grid-cols-[1fr_100px_130px_1.2fr_72px_160px] gap-4 px-4 py-4 items-center bg-[var(--bg-surface)] transition-colors ${
                     i < projects.length - 1 ? 'border-b border-[var(--border)]' : ''
                   }`}
                 >
@@ -388,9 +408,10 @@ export function Projects() {
                     {p.name}
                   </Link>
                   <span className="text-[var(--text-dim)] text-sm truncate">
-                    {p.country && p.country !== '日本'
-                      ? <>{p.country}{p.prefecture ? ` / ${p.prefecture}` : ''}</>
-                      : p.prefecture}
+                    {getCountryLabel(p.country ?? '日本', t)}
+                  </span>
+                  <span className="text-[var(--text-dim)] text-sm truncate">
+                    {p.prefecture}
                   </span>
                   <span className="text-[var(--text-dim)] text-sm truncate">{p.address}</span>
                   <span className="text-[var(--text-muted)] text-sm font-medium tabular-nums">

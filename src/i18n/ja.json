@@ -92,10 +92,19 @@
     "addFirst": "最初のプロジェクトを追加する",
     "table": {
       "name": "プロジェクト名",
+      "country": "国",
       "prefecture": "都道府県",
-      "region": "地域",
+      "region": "都道府県/地域",
       "address": "住所",
       "count": "台数"
+    },
+    "countryOptions": {
+      "japan": "日本",
+      "china": "中国",
+      "indonesia": "インドネシア",
+      "cambodia": "カンボジア",
+      "vietnam": "ベトナム",
+      "other": "その他"
     },
     "form": {
       "addTitle": "プロジェクトを追加",
