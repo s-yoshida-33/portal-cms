@@ -343,8 +343,8 @@ export function PendingDevices() {
             </div>
 
             {/* デスクトップテーブル */}
-            <div className="hidden sm:block overflow-hidden rounded-lg ring-1 ring-(--border)]">
-              <div className="grid grid-cols-[120px_1fr_140px_160px_160px] gap-4 px-4 py-3 bg-(--bg-base)] border-b border-(--border)] text-xs font-medium text-(--text-faint)] uppercase tracking-wider">
+            <div className="hidden sm:block overflow-hidden rounded-lg ring-1 ring-(--border)">
+              <div className="grid grid-cols-[120px_1fr_140px_160px_160px] gap-4 px-4 py-3 bg-(--bg-base) border-b border-(--border) text-xs font-medium text-(--text-faint) uppercase tracking-wider">
                 <span>{t('pendingDevices.table.app')}</span>
                 <span>{t('pendingDevices.table.hostname')}</span>
                 <span>{t('pendingDevices.table.ip')}</span>

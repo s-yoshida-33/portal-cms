@@ -201,7 +201,7 @@ function TagInput({ tags, onChange, suggestions, placeholder }: TagInputProps) {
   return (
     <div ref={containerRef} className="relative">
       <div
-        className="min-h-9 w-full bg-(--bg-surface) ring-1 ring-(--border) rounded-lg px-2 py-1.5 flex flex-wrap gap-1.5 items-center cursor-text focus-within:ring-2 focus-within:ring-(--accent)] transition-all"
+        className="min-h-9 w-full bg-(--bg-surface) ring-1 ring-(--border) rounded-lg px-2 py-1.5 flex flex-wrap gap-1.5 items-center cursor-text focus-within:ring-2 focus-within:ring-(--accent) transition-all"
         onClick={() => inputRef.current?.focus()}
       >
         {tags.map(tag => (
@@ -323,7 +323,7 @@ function DeviceCard({ device, uuid, projectId, canEdit, onEdit, onDelete }: Devi
 
   return (
     <div
-      className="relative bg-(--bg-surface) ring-1 ring-(--border) rounded-xl p-5 hover:ring-(--accent)] transition-colors cursor-pointer"
+      className="relative bg-(--bg-surface) ring-1 ring-(--border) rounded-xl p-5 hover:ring-(--accent) transition-colors cursor-pointer"
       onClick={(e) => {
         if (menuRef.current?.contains(e.target as Node)) return;
         navigate(`/${uuid}/projects/${projectId}/devices/${device.id}`);
