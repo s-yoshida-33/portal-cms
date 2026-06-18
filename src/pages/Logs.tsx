@@ -209,7 +209,7 @@ export function Logs() {
     <div className="flex flex-col min-h-full">
 
       {/* ページヘッダー */}
-      <div className="flex items-start justify-between gap-4 py-6 px-4 sm:px-6 border-b border-(--border)]">
+      <div className="flex items-start justify-between gap-4 py-6 px-4 sm:px-6 border-b border-(--border)">
         <div className="flex flex-col gap-2">
           <h1 className="text-(--text) text-3xl font-semibold leading-tight">{t('logs.title')}</h1>
           <p className="text-(--text-muted) text-base">{t('logs.description')}</p>
@@ -217,7 +217,7 @@ export function Logs() {
       </div>
 
       {/* タブ */}
-      <header className="flex items-center h-[58px] gap-3 px-4 sm:px-6 border-b border-(--border) bg-(--bg-base)]">
+      <header className="flex items-center h-[58px] gap-3 px-4 sm:px-6 border-b border-(--border) bg-(--bg-base)">
         <div className="relative isolate min-w-0 font-medium">
           <div role="tablist" className="relative flex min-w-0 shrink items-stretch overflow-x-auto rounded-lg bg-(--bg-subtle) px-0.5 ring-1 ring-(--border) h-9">
             <button
@@ -313,7 +313,7 @@ export function Logs() {
                   </div>
 
                   {/* デスクトップテーブル */}
-                  <div className="hidden sm:block overflow-hidden rounded-lg ring-1 ring-(--border)]">
+                  <div className="hidden sm:block overflow-hidden rounded-lg ring-1 ring-(--border)">
                     <div className="grid grid-cols-[120px_1fr_1fr_1fr_1fr_160px] gap-4 px-4 py-3 bg-(--bg-base) border-b border-(--border) text-xs font-medium text-(--text-faint) uppercase tracking-wider">
                       <span>{t('logs.table.type')}</span>
                       <span>{t('logs.table.action')}</span>

@@ -20,6 +20,7 @@ export function CustomSelect<T extends string>({
   const [isOpen,    setIsOpen]    = useState(false);
   const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
   const containerRef = useRef<HTMLDivElement>(null);
+  const menuRef      = useRef<HTMLDivElement>(null);
 
   const selectedIndex = options.findIndex(opt => opt.value === value);
   const currentLabel  = options[selectedIndex]?.label ?? '';
@@ -27,7 +28,11 @@ export function CustomSelect<T extends string>({
   useEffect(() => {
     if (!isOpen) return;
     function handleClickOutside(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      if (
+        containerRef.current && !containerRef.current.contains(target) &&
+        menuRef.current      && !menuRef.current.contains(target)
+      ) {
         setIsOpen(false);
       }
     }
@@ -113,6 +118,7 @@ export function CustomSelect<T extends string>({
 
       {isOpen && createPortal(
         <div
+          ref={menuRef}
           style={menuStyle}
           className="flex flex-col bg-(--bg-surface) text-(--text) rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.5)] ring-1 ring-(--border) py-1.5 px-2"
         >

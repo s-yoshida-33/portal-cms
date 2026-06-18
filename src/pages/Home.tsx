@@ -152,9 +152,9 @@ export function Home() {
                   const warning = countByStatus(allDevs, 'warning');
 
                   return (
-                    <Link key={project.id} to={`/${uuid}/projects/${project.id}`} className="overflow-hidden rounded-lg bg-(--bg-surface) shadow-xs ring-1 ring-(--border) w-full h-full flex flex-col transition-colors hover:ring-(--accent)] no-underline text-inherit group outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-(--accent)] cursor-pointer">
+                    <Link key={project.id} to={`/${uuid}/projects/${project.id}`} className="overflow-hidden rounded-lg bg-(--bg-surface) shadow-xs ring-1 ring-(--border) w-full h-full flex flex-col transition-colors hover:ring-(--accent) no-underline text-inherit group outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-(--accent) cursor-pointer">
 
-                        <header className="justify-between py-0 flex items-center gap-2 bg-(--bg-base) group-hover:bg-(--bg-surface) transition-colors border-b border-(--border) h-14 px-4 text-base font-medium text-(--text-muted)]">
+                        <header className="justify-between py-0 flex items-center gap-2 bg-(--bg-base) group-hover:bg-(--bg-surface) transition-colors border-b border-(--border) h-14 px-4 text-base font-medium text-(--text-muted)">
                           <div role="heading" aria-level={2} className="flex min-w-0 items-center gap-2">
                             <span className="truncate flex items-center gap-2">
                               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 256 256">
