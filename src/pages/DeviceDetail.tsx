@@ -233,10 +233,10 @@ export function DeviceDetail() {
     return onValue(logRef, snap => {
       const data = snap.val() as { entries?: RtdbLogEntry[]; at?: number } | null;
       if (!data) return;
+      setLogs(Array.isArray(data.entries) ? data.entries : []);
       const fetchedAt = data.at ? new Date(data.at) : new Date();
       setLogsLastFetched(fetchedAt);
-      if (!data.at || data.at >= logRequestedAt.current) {
-        setLogs(Array.isArray(data.entries) ? data.entries : []);
+      if (data.at && data.at >= logRequestedAt.current) {
         setLogsRefreshing(false);
       }
     });
@@ -274,10 +274,10 @@ export function DeviceDetail() {
     if (!deviceId) return;
     return subscribeDeviceSettings(deviceId, data => {
       if (!data) return;
+      setSettingsData(data);
       const fetchedAt = data.fetchedAt?.toDate() ?? new Date();
       setSettingsLastFetched(fetchedAt);
       if (fetchedAt.getTime() >= settingsRequestedAt.current) {
-        setSettingsData(data);
         setSettingsRefreshing(false);
       }
     });
