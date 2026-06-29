@@ -203,7 +203,7 @@ export function DeviceDetail() {
   const [selectedLogDate,  setSelectedLogDate]  = useState(todayStr);
   const [logCopied,        setLogCopied]        = useState(false);
   const logContainerRef = useRef<HTMLDivElement>(null);
-  const logRequestedAt  = useRef<number>(0);
+  const logRequestSeq   = useRef<number>(0);
 
   const [settingsData,        setSettingsData]        = useState<DeviceSettingsData | null>(null);
   const [settingsLastFetched, setSettingsLastFetched] = useState<Date | null>(null);
@@ -231,12 +231,15 @@ export function DeviceDetail() {
     if (!deviceId) return;
     const logRef = rtdbRef(rtdb, `logs/${deviceId}`);
     return onValue(logRef, snap => {
-      const data = snap.val() as { entries?: RtdbLogEntry[]; at?: number } | null;
+      const data = snap.val() as { entries?: RtdbLogEntry[]; at?: number; seq?: number } | null;
       if (!data) return;
       setLogs(Array.isArray(data.entries) ? data.entries : []);
       const fetchedAt = data.at ? new Date(data.at) : new Date();
       setLogsLastFetched(fetchedAt);
-      if (data.at && data.at >= logRequestedAt.current) {
+      if (data.seq != null && data.seq === logRequestSeq.current) {
+        setLogsRefreshing(false);
+      } else if (data.seq == null && data.at && data.at >= logRequestSeq.current) {
+        // fallback for BG versions that don't echo seq
         setLogsRefreshing(false);
       }
     });
@@ -252,9 +255,9 @@ export function DeviceDetail() {
   const handleRefreshLogs = useCallback(async () => {
     if (!deviceId || logsRefreshing) return;
     setLogsRefreshing(true);
-    logRequestedAt.current = Date.now();
     try {
-      await requestLogs(deviceId, selectedLogDate);
+      const seq = await requestLogs(deviceId, selectedLogDate);
+      logRequestSeq.current = seq;
       addSiteLog({ category: 'log', action: 'fetched', targetId: deviceId, targetName: device?.name ?? deviceId, projectName: projectNameRef.current, deviceName: device?.name ?? deviceId, performedBy: siteLogActor() }).catch(() => {});
     } catch {
       setLogsRefreshing(false);
