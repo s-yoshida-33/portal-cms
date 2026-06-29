@@ -612,8 +612,12 @@ export async function requestScreenshot(deviceId: string): Promise<void> {
   await rtdbSet(rtdbRef(rtdb, `signals/${deviceId}`), { at: Date.now(), type: 'screenshot' }).catch(() => {});
 }
 
-export async function requestLogs(deviceId: string, date: string): Promise<void> {
-  await rtdbSet(rtdbRef(rtdb, `signals/${deviceId}`), { at: Date.now(), type: 'log', date }).catch(() => {});
+let _logSeq = 0;
+
+export async function requestLogs(deviceId: string, date: string): Promise<number> {
+  const seq = ++_logSeq;
+  await rtdbSet(rtdbRef(rtdb, `signals/${deviceId}`), { at: Date.now(), type: 'log', date, seq }).catch(() => {});
+  return seq;
 }
 
 export async function cancelScreenshotRequest(deviceId: string): Promise<void> {
