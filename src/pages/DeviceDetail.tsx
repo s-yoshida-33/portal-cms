@@ -25,6 +25,33 @@ type PortalSsState = 'idle' | 'pending' | 'ready' | 'error';
 
 type LogEntryWithKey = RtdbLogEntry & { _key: number };
 
+// ── Metric history ────────────────────────────────────────────────
+
+interface MetricSnapshot {
+  cpu:         number;
+  memory:      number;
+  temperature: number;
+  storage:     number;
+  at:          number;
+}
+
+const METRIC_HISTORY_MAX = 20;
+
+function loadMetricHistory(deviceId: string): MetricSnapshot[] {
+  try {
+    const raw = localStorage.getItem(`portal_metrics_${deviceId}`);
+    return raw ? (JSON.parse(raw) as MetricSnapshot[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveMetricHistory(deviceId: string, history: MetricSnapshot[]) {
+  try {
+    localStorage.setItem(`portal_metrics_${deviceId}`, JSON.stringify(history));
+  } catch { /* ignore quota errors */ }
+}
+
 /** Virtual-scrolling log viewer — only renders ~60 DOM rows regardless of entry count. */
 function VirtualLogViewer({
   entries,
@@ -125,6 +152,57 @@ function MetricBar({ label, value, unit, warn = 70, danger = 90 }: {
   );
 }
 
+function Sparkline({ values, warn = 70, danger = 90 }: {
+  values: number[]; warn?: number; danger?: number;
+}) {
+  if (values.length < 2) return <div className="h-8" />;
+  const W = 200, H = 32;
+  const maxV = Math.max(...values, 100);
+  const points = values.map((v, i) => ({
+    x: (i / (values.length - 1)) * W,
+    y: H - (v / maxV) * (H - 2) - 1,
+  }));
+  const polyPts = points.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+  const areaPts = [`0,${H}`, ...points.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`), `${W},${H}`].join(' ');
+  const last   = values[values.length - 1];
+  const stroke = last >= danger ? '#ef4444' : last >= warn ? '#facc15' : '#22c55e';
+  const fill   = last >= danger ? 'rgba(239,68,68,0.12)' : last >= warn ? 'rgba(250,204,21,0.12)' : 'rgba(34,197,94,0.12)';
+  return (
+    <svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+      <polygon points={areaPts} fill={fill} />
+      <polyline points={polyPts} fill="none" stroke={stroke} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function MetricSparkCard({ label, value, unit, history, warn = 70, danger = 90 }: {
+  label: string; value: number; unit: string; history: number[]; warn?: number; danger?: number;
+}) {
+  const prev  = history.length >= 2 ? history[history.length - 2] : null;
+  const delta = prev !== null ? value - prev : null;
+  const valueColor = value >= danger ? 'text-red-400'
+    : value >= warn ? 'text-yellow-400'
+    : 'text-(--text)';
+  return (
+    <div>
+      <div className="flex items-baseline justify-between mb-0.5">
+        <span className="text-xs text-(--text-faint)">{label}</span>
+        <div className="flex items-baseline gap-1">
+          <span className={`text-lg font-semibold tabular-nums leading-none ${valueColor}`}>
+            {value}{unit}
+          </span>
+          {delta !== null && Math.abs(delta) >= 0.5 && (
+            <span className={`text-xs font-medium ${delta > 0 ? 'text-red-400' : 'text-green-400'}`}>
+              {delta > 0 ? '↑' : '↓'}{Math.abs(delta).toFixed(1)}
+            </span>
+          )}
+        </div>
+      </div>
+      <Sparkline values={history} warn={warn} danger={danger} />
+    </div>
+  );
+}
+
 function UptimeClock({ uptimeSecs, lastSeen, status }: { uptimeSecs: number; lastSeen: string; status: string }) {
   const calc = () => Math.max(0, uptimeSecs + Math.floor((Date.now() - new Date(lastSeen).getTime()) / 1000));
   const [secs, setSecs] = useState(calc);
@@ -186,6 +264,9 @@ export function DeviceDetail() {
   const [device,        setDevice]        = useState<Device | null>(null);
   usePageTitle(device?.name ?? t('deviceDetail.defaultTitle'));
   const [deviceLoading, setDeviceLoading] = useState(true);
+  const [metricHistory, setMetricHistory] = useState<MetricSnapshot[]>(() =>
+    deviceId ? loadMetricHistory(deviceId) : []
+  );
   const projectNameRef = useRef('');
 
   const [portalSsState,      setPortalSsState]      = useState<PortalSsState>('idle');
@@ -218,6 +299,25 @@ export function DeviceDetail() {
     return subscribeDevice(deviceId, d => {
       setDevice(d);
       setDeviceLoading(false);
+      if (d) {
+        setMetricHistory(prev => {
+          const snap: MetricSnapshot = {
+            cpu:         d.system.cpu,
+            memory:      d.system.memory,
+            temperature: d.system.temperature,
+            storage:     d.system.storage,
+            at:          Date.now(),
+          };
+          // Skip duplicate snapshots (Firestore may fire multiple times with identical data)
+          const last = prev[prev.length - 1];
+          if (last && last.cpu === snap.cpu && last.memory === snap.memory && last.storage === snap.storage) {
+            return prev;
+          }
+          const next = [...prev, snap].slice(-METRIC_HISTORY_MAX);
+          saveMetricHistory(deviceId, next);
+          return next;
+        });
+      }
     });
   }, [deviceId]);
 
@@ -460,11 +560,11 @@ export function DeviceDetail() {
                 <UptimeClock uptimeSecs={device.system.uptime} lastSeen={device.lastSeen} status={device.status} />
               </span>
             </p>
-            <div className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-4 sm:gap-x-8">
-              <MetricBar label="CPU"        value={device.system.cpu}         unit="%" />
-              <MetricBar label={t('deviceDetail.memory')}      value={device.system.memory}      unit="%" />
-              <MetricBar label={t('deviceDetail.temperature')} value={device.system.temperature} unit="°C" warn={65} danger={80} />
-              <MetricBar label={t('deviceDetail.storage')}     value={device.system.storage}     unit="%" warn={80} danger={90} />
+            <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4 sm:gap-x-8">
+              <MetricSparkCard label="CPU"                          value={device.system.cpu}         unit="%" history={metricHistory.map(h => h.cpu)} />
+              <MetricSparkCard label={t('deviceDetail.memory')}      value={device.system.memory}      unit="%" history={metricHistory.map(h => h.memory)} />
+              <MetricSparkCard label={t('deviceDetail.temperature')} value={device.system.temperature} unit="°C" history={metricHistory.map(h => h.temperature)} warn={65} danger={80} />
+              <MetricSparkCard label={t('deviceDetail.storage')}     value={device.system.storage}     unit="%" history={metricHistory.map(h => h.storage)} warn={80} danger={90} />
             </div>
           </div>
         </div>
