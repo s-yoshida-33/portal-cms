@@ -132,26 +132,6 @@ function VirtualCodeViewer({ lines }: { lines: string[] }) {
 
 // ── Helpers ───────────────────────────────────────────────────────
 
-function MetricBar({ label, value, unit, warn = 70, danger = 90 }: {
-  label: string; value: number; unit: string; warn?: number; danger?: number;
-}) {
-  const color = value === 0 ? 'bg-[var(--bg-subtle)]'
-    : value >= danger ? 'bg-red-500'
-    : value >= warn   ? 'bg-yellow-400'
-    : 'bg-green-500';
-  return (
-    <div>
-      <div className="flex justify-between text-xs mb-1">
-        <span className="text-(--text-faint)">{label}</span>
-        <span className="text-(--text-muted) font-medium tabular-nums">{value}{unit}</span>
-      </div>
-      <div className="h-1 bg-(--bg-subtle) rounded-full overflow-hidden">
-        <div className={`h-full rounded-full ${color}`} style={{ width: `${Math.min(value, 100)}%` }} />
-      </div>
-    </div>
-  );
-}
-
 function Sparkline({ values, warn = 70, danger = 90 }: {
   values: number[]; warn?: number; danger?: number;
 }) {
