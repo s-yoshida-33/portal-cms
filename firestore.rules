@@ -36,12 +36,12 @@ service cloud.firestore {
 
       match /logs/{logId} {
         allow read:  if isAuth();
-        allow write: if true;
+        allow write: if false; // Worker はサービスアカウント認証でルールをバイパスするため、client からの書き込みは不要
       }
 
       match /settings/{settingId} {
         allow read:  if isOwner();
-        allow write: if true;
+        allow write: if false; // 同上
       }
     }
 
@@ -53,7 +53,7 @@ service cloud.firestore {
 
     match /pendingDevices/{deviceId} {
       allow read:           if isAdmin();
-      allow create:         if true;
+      allow create:         if false; // register Cloud Function / Worker はサービスアカウント認証でルールをバイパスするため不要
       allow update, delete: if isAdmin();
     }
 
@@ -88,17 +88,17 @@ service cloud.firestore {
     }
 
     match /screenshotRequests/{requestId} {
-      allow read, write: if true;
+      allow read, write: if isAuth(); // 管理画面の requestScreenshot/cancelScreenshotRequest は認証済みユーザーのみ
     }
 
     match /deviceApprovals/{approvalId} {
-      allow get:           if true;
+      allow get:           if false; // Worker はサービスアカウント認証でルールをバイパスするため不要
       allow create, update: if isAdmin();
       allow delete:        if false;
     }
 
     match /pendingDeviceApprovals/{id} {
-      allow read, delete:   if true;
+      allow read, delete:   if false; // 同上
       allow create, update: if isAdmin();
     }
 
