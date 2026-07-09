@@ -273,6 +273,22 @@ export function DeviceDetail() {
   const [settingsCopied,      setSettingsCopied]      = useState(false);
   const settingsRequestedAt = useRef<number>(0);
 
+  // deviceIdが変わったら、前の端末の表示を同じレンダー内で即座にクリアする
+  // (購読コールバック側は「データなし」の場合stateを更新しないため、ここでリセットしないと
+  //  直前に見ていた端末の表示が残ってしまう。useEffectではなくレンダー中に直接リセットすることで、
+  //  一瞬でも前の端末の表示がちらつくのを防ぐ)
+  const prevDeviceIdRef = useRef(deviceId);
+  if (prevDeviceIdRef.current !== deviceId) {
+    prevDeviceIdRef.current = deviceId;
+    setLogs([]);
+    setLogsLastFetched(null);
+    setSettingsData(null);
+    setSettingsLastFetched(null);
+    setPortalSsState('idle');
+    setPortalSsBlobUrl(null);
+    setPortalSsCapturedAt(null);
+  }
+
   // Subscribe to Firestore device document
   useEffect(() => {
     if (!deviceId) return;
