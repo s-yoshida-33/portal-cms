@@ -1,4 +1,5 @@
 import { onRequest } from 'firebase-functions/v2/https';
+import { onSchedule } from 'firebase-functions/v2/scheduler';
 import * as admin from 'firebase-admin';
 import { createHash } from 'crypto';
 
@@ -183,5 +184,30 @@ export const status = onRequest(
     await deviceRef.update(updatePayload);
 
     res.status(200).json({ success: true });
+  }
+);
+
+// ── 心拍途絶デバイスのoffline化（定期実行） ──────────────────────────
+//
+// 全端末のハートビート間隔は3600秒（1時間）。閾値は心拍2回分の余裕を
+// 持たせて2時間とし、1回分の遅延・取りこぼしでは誤ってofflineにしない。
+
+const STALE_THRESHOLD_MS = 2 * 60 * 60 * 1000; // 2時間
+
+export const markStaleDevicesOffline = onSchedule(
+  { schedule: 'every 15 minutes', region: 'asia-northeast1' },
+  async () => {
+    const threshold = new Date(Date.now() - STALE_THRESHOLD_MS).toISOString();
+
+    const staleSnap = await db.collection('devices')
+      .where('status',   '==', 'online')
+      .where('lastSeen', '<',  threshold)
+      .get();
+
+    if (staleSnap.empty) return;
+
+    const batch = db.batch();
+    staleSnap.forEach(doc => batch.update(doc.ref, { status: 'offline' }));
+    await batch.commit();
   }
 );
