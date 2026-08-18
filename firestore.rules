@@ -43,6 +43,11 @@ service cloud.firestore {
         allow read:  if isOwner();
         allow write: if false; // 同上
       }
+
+      match /scriptResults/{resultId} {
+        allow read:  if isOwner();
+        allow write: if false; // Worker はサービスアカウント認証でバイパスするため不要（logs/settingsと同じ）
+      }
     }
 
     match /groups/{groupId} {
@@ -89,6 +94,10 @@ service cloud.firestore {
 
     match /screenshotRequests/{requestId} {
       allow read, write: if isAuth(); // 管理画面の requestScreenshot/cancelScreenshotRequest は認証済みユーザーのみ
+    }
+
+    match /scriptRequests/{deviceId} {
+      allow read, write: if isOwner(); // 任意スクリプト実行はownerのみ（screenshotRequestsより厳しい）
     }
 
     match /deviceApprovals/{approvalId} {
