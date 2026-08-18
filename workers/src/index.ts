@@ -31,7 +31,9 @@ async function sha256Hex(input: string): Promise<string> {
 
 // ── Firebase ID token verification ───────────────────────────────────────────
 
-async function verifyFirebaseIdToken(apiKey: string, idToken: string): Promise<boolean> {
+// lookupFirebaseIdToken verifies idToken and returns the account's uid (localId),
+// or null if the token is invalid/expired.
+async function lookupFirebaseIdToken(apiKey: string, idToken: string): Promise<{ uid: string } | null> {
   try {
     const resp = await fetch(
       `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${apiKey}`,
@@ -41,10 +43,17 @@ async function verifyFirebaseIdToken(apiKey: string, idToken: string): Promise<b
         body:    JSON.stringify({ idToken }),
       }
     );
-    return resp.ok;
+    if (!resp.ok) return null;
+    const data = await resp.json() as { users?: Array<{ localId: string }> };
+    const uid = data.users?.[0]?.localId;
+    return uid ? { uid } : null;
   } catch {
-    return false;
+    return null;
   }
+}
+
+async function verifyFirebaseIdToken(apiKey: string, idToken: string): Promise<boolean> {
+  return (await lookupFirebaseIdToken(apiKey, idToken)) !== null;
 }
 
 // ── Firestore REST helper ─────────────────────────────────────────────────────
@@ -264,6 +273,25 @@ async function getGoogleAccessToken(saEmail: string, saPrivateKey: string, scope
   return access_token;
 }
 
+// Uploads bytes to Cloud Storage at objectPath using a service account JWT.
+async function uploadBytesToStorage(
+  bucket: string, objectPath: string, data: ArrayBuffer, contentType: string,
+  saEmail: string, saPrivateKey: string,
+): Promise<void> {
+  const access_token = await getGoogleAccessToken(saEmail, saPrivateKey, GCS_SCOPE);
+
+  const uploadResp = await fetch(
+    `https://storage.googleapis.com/upload/storage/v1/b/${encodeURIComponent(bucket)}/o` +
+    `?uploadType=media&name=${encodeURIComponent(objectPath)}`,
+    {
+      method:  'POST',
+      headers: { 'Authorization': `Bearer ${access_token}`, 'Content-Type': contentType },
+      body:    data,
+    },
+  );
+  if (!uploadResp.ok) throw new Error(`GCS upload failed: ${uploadResp.status}`);
+}
+
 // Uploads a JPEG to Cloud Storage using a service account JWT.
 // The Firestore screenshotRequests patch must happen AFTER this resolves
 // so Portal always reads a fresh image on the first attempt.
@@ -271,18 +299,14 @@ async function uploadScreenshotToStorage(
   bucket: string, deviceId: string, data: ArrayBuffer,
   saEmail: string, saPrivateKey: string,
 ): Promise<void> {
-  const access_token = await getGoogleAccessToken(saEmail, saPrivateKey, GCS_SCOPE);
+  await uploadBytesToStorage(bucket, `screenshots/${deviceId}`, data, 'image/jpeg', saEmail, saPrivateKey);
+}
 
-  const uploadResp = await fetch(
-    `https://storage.googleapis.com/upload/storage/v1/b/${encodeURIComponent(bucket)}/o` +
-    `?uploadType=media&name=${encodeURIComponent(`screenshots/${deviceId}`)}`,
-    {
-      method:  'POST',
-      headers: { 'Authorization': `Bearer ${access_token}`, 'Content-Type': 'image/jpeg' },
-      body:    data,
-    },
-  );
-  if (!uploadResp.ok) throw new Error(`GCS upload failed: ${uploadResp.status}`);
+// isOwnerRole reads userRoles/{uid} and reports whether the account's role is 'owner'.
+async function isOwnerRole(fs: Firestore, uid: string): Promise<boolean> {
+  const doc = await fs.get('userRoles', uid);
+  if (!doc?.fields) return false;
+  return fsStr(doc.fields, 'role') === 'owner';
 }
 
 // ── Worker entry point ────────────────────────────────────────────────────────
@@ -368,6 +392,44 @@ export default {
           ...CORS_HEADERS,
           'Content-Type':  'image/jpeg',
           'Cache-Control': 'no-store',
+        },
+      });
+    }
+
+    // ── GET /v1/script/artifact?deviceId=xxx&seq=xxx&name=xxx ─────
+    // Portal downloads a script output artifact via Workers proxy. Script
+    // execution is an owner-only feature, so — unlike GET /v1/screenshot —
+    // this checks the caller's app role (userRoles/{uid}) in addition to
+    // verifying the Firebase ID token is valid.
+    if (req.method === 'GET' && url.pathname === '/v1/script/artifact') {
+      const idResult = await lookupFirebaseIdToken(env.FIREBASE_API_KEY, rawToken);
+      if (!idResult) return jsonRes({ error: 'Invalid Firebase token' }, 401);
+      if (!(await isOwnerRole(fs, idResult.uid))) return jsonRes({ error: 'Forbidden' }, 403);
+
+      const deviceId = url.searchParams.get('deviceId');
+      const seq      = url.searchParams.get('seq');
+      const name     = url.searchParams.get('name');
+      if (!deviceId || !seq || !name) {
+        return jsonRes({ error: 'Missing deviceId, seq, or name parameter' }, 400);
+      }
+
+      const accessToken = await getGoogleAccessToken(env.FIREBASE_SA_EMAIL, env.FIREBASE_SA_PRIVATE_KEY, GCS_SCOPE);
+      const objectPath  = `script-artifacts/${deviceId}/${seq}/${name}`;
+      const fileResp = await fetch(
+        `https://storage.googleapis.com/storage/v1/b/${encodeURIComponent(env.FIREBASE_STORAGE_BUCKET)}/o` +
+        `/${encodeURIComponent(objectPath)}?alt=media`,
+        { headers: { Authorization: `Bearer ${accessToken}` } },
+      );
+      if (!fileResp.ok) {
+        return new Response('Artifact not found', { status: 404, headers: CORS_HEADERS });
+      }
+
+      return new Response(fileResp.body, {
+        headers: {
+          ...CORS_HEADERS,
+          'Content-Type':        'application/octet-stream',
+          'Content-Disposition': `attachment; filename="${name.replace(/[^\x20-\x7E]/g, '').replace(/"/g, '')}"`,
+          'Cache-Control':       'no-store',
         },
       });
     }
@@ -692,6 +754,7 @@ export default {
         stdout?:     string;
         stderr?:     string;
         durationMs?: number;
+        artifacts?:  Array<{ name: string; size: number }>;
       };
       const deviceIdParam = url.searchParams.get('deviceId') ?? body.deviceId;
       if (!deviceIdParam) return jsonRes({ error: 'Missing deviceId' }, 400);
@@ -705,6 +768,7 @@ export default {
           stdout:     (body.stdout ?? '').slice(0, MAX_OUTPUT_CHARS),
           stderr:     (body.stderr ?? '').slice(0, MAX_OUTPUT_CHARS),
           durationMs: body.durationMs ?? 0,
+          artifacts:  Array.isArray(body.artifacts) ? body.artifacts : [],
           completedAt: new Date(),
         }),
         fs.patch('scriptRequests', deviceIdParam, {
@@ -712,6 +776,37 @@ export default {
           completedAt: new Date(),
         }),
       ]);
+
+      return jsonRes({ success: true });
+    }
+
+    // ── POST /v1/script/artifact?deviceId=xxx&seq=xxx&name=xxx ────
+    // Bridge-Ground uploads a file the script wrote to its fixed output
+    // directory. Stored alongside screenshots in the same bucket.
+    if (req.method === 'POST' && url.pathname === '/v1/script/artifact') {
+      const tokenData = await verifyToken(fs, rawToken, 'device');
+      if (!tokenData) return jsonRes({ error: 'Invalid or revoked token' }, 401);
+
+      const deviceId = url.searchParams.get('deviceId');
+      const seq      = url.searchParams.get('seq');
+      const name     = url.searchParams.get('name');
+      if (!deviceId || !seq || !name) {
+        return jsonRes({ error: 'Missing deviceId, seq, or name parameter' }, 400);
+      }
+
+      const data = await req.arrayBuffer();
+      if (data.byteLength === 0) return jsonRes({ error: 'Empty body' }, 400);
+      if (data.byteLength > 25 * 1024 * 1024) {
+        return jsonRes({ error: 'Artifact too large (max 25 MB)' }, 400);
+      }
+
+      await uploadBytesToStorage(
+        env.FIREBASE_STORAGE_BUCKET,
+        `script-artifacts/${deviceId}/${seq}/${name}`,
+        data,
+        'application/octet-stream',
+        env.FIREBASE_SA_EMAIL, env.FIREBASE_SA_PRIVATE_KEY,
+      );
 
       return jsonRes({ success: true });
     }
