@@ -661,6 +661,59 @@ export function subscribeDeviceSettings(
 }
 
 // ================================================================
+// Script Requests（オーナー限定・任意スクリプト実行）
+// ================================================================
+
+export interface ScriptResultData {
+  seq:        number;
+  exitCode:   number;
+  stdout:     string;
+  stderr:     string;
+  durationMs: number;
+}
+
+let _scriptSeq = 0;
+
+export async function requestScript(deviceId: string, script: string): Promise<number> {
+  const seq = ++_scriptSeq;
+  await setDoc(doc(db, 'scriptRequests', deviceId), {
+    script,
+    status:      'pending',
+    requestedAt: serverTimestamp(),
+    seq,
+    completedAt: null,
+  });
+  await rtdbSet(rtdbRef(rtdb, `signals/${deviceId}`), { at: Date.now(), type: 'script', seq }).catch(() => {});
+  return seq;
+}
+
+export async function cancelScriptRequest(deviceId: string): Promise<void> {
+  await setDoc(doc(db, 'scriptRequests', deviceId), { status: 'cancelled' }, { merge: true });
+}
+
+export function subscribeScriptRequest(
+  deviceId: string,
+  onUpdate: (data: { status: string; seq?: number; completedAt?: { toDate(): Date } | null } | null) => void,
+): Unsubscribe {
+  return onSnapshot(
+    doc(db, 'scriptRequests', deviceId),
+    snap => onUpdate(snap.exists() ? (snap.data() as { status: string; seq?: number; completedAt?: { toDate(): Date } | null }) : null),
+    _err => onUpdate(null),
+  );
+}
+
+export function subscribeScriptResult(
+  deviceId: string,
+  onUpdate: (data: ScriptResultData | null) => void,
+): Unsubscribe {
+  return onSnapshot(
+    doc(db, 'devices', deviceId, 'scriptResults', 'latest'),
+    snap => onUpdate(snap.exists() ? (snap.data() as ScriptResultData) : null),
+    _err => onUpdate(null),
+  );
+}
+
+// ================================================================
 // Site Logs
 // ================================================================
 
