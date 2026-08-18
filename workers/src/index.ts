@@ -79,6 +79,13 @@ function fsBool(fields: Record<string, FsVal>, key: string): boolean {
   return (fields[key] as { booleanValue?: boolean } | undefined)?.booleanValue ?? false;
 }
 
+function fsNum(fields: Record<string, FsVal>, key: string): number | null {
+  const v = fields[key] as { doubleValue?: number; integerValue?: string } | undefined;
+  if (v?.doubleValue !== undefined) return v.doubleValue;
+  if (v?.integerValue !== undefined) return Number(v.integerValue);
+  return null;
+}
+
 class Firestore {
   private base:  string;
   private token: string;
@@ -313,6 +320,27 @@ export default {
 
       const status = (ssDoc.fields.status as { stringValue?: string } | undefined)?.stringValue;
       return jsonRes({ pending: status === 'pending' });
+    }
+
+    // ── GET /v1/script/pending?deviceId=xxx ───────────────────────
+    // Bridge-Ground polls this after receiving a "script" RTDB signal to
+    // fetch the actual script body (kept out of the RTDB signal itself).
+    if (req.method === 'GET' && url.pathname === '/v1/script/pending') {
+      const tokenData = await verifyToken(fs, rawToken, 'device');
+      if (!tokenData) return jsonRes({ error: 'Invalid or revoked token' }, 401);
+
+      const deviceId = url.searchParams.get('deviceId');
+      if (!deviceId) return jsonRes({ error: 'Missing deviceId parameter' }, 400);
+
+      const reqDoc = await fs.get('scriptRequests', deviceId);
+      if (!reqDoc?.fields) return jsonRes({ pending: false });
+
+      const status = fsStr(reqDoc.fields, 'status');
+      if (status !== 'pending') return jsonRes({ pending: false });
+
+      const script = fsStr(reqDoc.fields, 'script') ?? '';
+      const seq     = fsNum(reqDoc.fields, 'seq') ?? 0;
+      return jsonRes({ pending: true, script, seq });
     }
 
     // ── GET /v1/screenshot?deviceId=xxx ──────────────────────────
@@ -646,6 +674,43 @@ export default {
           fetchedAt: new Date(),
         }),
         fs.patch('devices', deviceIdParam, { settingsRequested: false }),
+      ]);
+
+      return jsonRes({ success: true });
+    }
+
+    // ── POST /v1/script/result ────────────────────────────────────
+    // Bridge-Ground uploads the outcome of a script it executed.
+    if (req.method === 'POST' && url.pathname === '/v1/script/result') {
+      const tokenData = await verifyToken(fs, rawToken, 'device');
+      if (!tokenData) return jsonRes({ error: 'Invalid or revoked token' }, 401);
+
+      const body = await req.json() as {
+        deviceId?:   string;
+        seq?:        number;
+        exitCode?:   number;
+        stdout?:     string;
+        stderr?:     string;
+        durationMs?: number;
+      };
+      const deviceIdParam = url.searchParams.get('deviceId') ?? body.deviceId;
+      if (!deviceIdParam) return jsonRes({ error: 'Missing deviceId' }, 400);
+
+      const MAX_OUTPUT_CHARS = 200_000;
+
+      await Promise.allSettled([
+        fs.patch(`devices/${deviceIdParam}/scriptResults`, 'latest', {
+          seq:        body.seq        ?? 0,
+          exitCode:   body.exitCode   ?? 0,
+          stdout:     (body.stdout ?? '').slice(0, MAX_OUTPUT_CHARS),
+          stderr:     (body.stderr ?? '').slice(0, MAX_OUTPUT_CHARS),
+          durationMs: body.durationMs ?? 0,
+          completedAt: new Date(),
+        }),
+        fs.patch('scriptRequests', deviceIdParam, {
+          status:      'completed',
+          completedAt: new Date(),
+        }),
       ]);
 
       return jsonRes({ success: true });
