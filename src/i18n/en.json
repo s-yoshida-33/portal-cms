@@ -212,7 +212,18 @@
     "settingsError": "Failed to fetch (timeout or error).",
     "settingsLastFetched": "Last fetched: {{time}}",
     "settingsLastFetchedNone": "Last fetched: —",
-    "settingsLineCount": "{{count}} lines"
+    "settingsLineCount": "{{count}} lines",
+    "script": "Script Execution",
+    "scriptWarning": "This will run on the target device. Review the script carefully before executing.",
+    "scriptPlaceholder": "Enter a PowerShell script...",
+    "runScript": "Run",
+    "running": "Running...",
+    "scriptIdle": "Enter a script and press \"Run\".",
+    "scriptError": "Execution failed (timed out or error).",
+    "scriptExitCode": "Exit code: {{code}}",
+    "scriptStdout": "Stdout",
+    "scriptStderr": "Stderr",
+    "scriptNoOutput": "(no output)"
   },
   "apiTokens": {
     "title": "API Tokens",

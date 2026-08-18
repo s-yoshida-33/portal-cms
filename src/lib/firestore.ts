@@ -691,17 +691,6 @@ export async function cancelScriptRequest(deviceId: string): Promise<void> {
   await setDoc(doc(db, 'scriptRequests', deviceId), { status: 'cancelled' }, { merge: true });
 }
 
-export function subscribeScriptRequest(
-  deviceId: string,
-  onUpdate: (data: { status: string; seq?: number; completedAt?: { toDate(): Date } | null } | null) => void,
-): Unsubscribe {
-  return onSnapshot(
-    doc(db, 'scriptRequests', deviceId),
-    snap => onUpdate(snap.exists() ? (snap.data() as { status: string; seq?: number; completedAt?: { toDate(): Date } | null }) : null),
-    _err => onUpdate(null),
-  );
-}
-
 export function subscribeScriptResult(
   deviceId: string,
   onUpdate: (data: ScriptResultData | null) => void,
