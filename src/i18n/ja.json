@@ -223,7 +223,10 @@
     "scriptExitCode": "終了コード: {{code}}",
     "scriptStdout": "標準出力",
     "scriptStderr": "標準エラー出力",
-    "scriptNoOutput": "（出力なし）"
+    "scriptNoOutput": "（出力なし）",
+    "scriptLoadFile": "ファイルから読み込み",
+    "scriptOutputHint": "「{{dir}}」（環境変数 {{envVar}}）に書き出したファイルは、実行後に自動でアップロードされここからダウンロードできます。",
+    "scriptArtifacts": "成果物ファイル"
   },
   "apiTokens": {
     "title": "API トークン",
@@ -309,6 +312,7 @@
       "settings.fetched": "設定ファイルを取得",
       "settings.downloaded": "設定ファイルをダウンロード",
       "script.executed": "スクリプトを実行",
+      "script.artifactDownloaded": "スクリプト成果物をダウンロード",
       "apiToken.issued": "APIトークンを発行",
       "apiToken.revoked": "APIトークンを失効",
       "user.added": "ユーザーを追加",

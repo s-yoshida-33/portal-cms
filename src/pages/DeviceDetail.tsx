@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { subscribeDevice, subscribeProject, requestScreenshot as requestPortalScreenshot, cancelScreenshotRequest, subscribeScreenshotRequest, requestLogs, addSiteLog, requestDeviceSettings, subscribeDeviceSettings, requestScript, cancelScriptRequest, subscribeScriptResult } from '../lib/firestore';
-import type { DeviceSettingsData, ScriptResultData } from '../lib/firestore';
+import type { DeviceSettingsData, ScriptResultData, ScriptArtifact } from '../lib/firestore';
 import { auth, rtdb } from '../lib/firebase';
 import { ref as rtdbRef, onValue } from 'firebase/database';
 import { useAuth } from '../contexts/AuthContext';
@@ -13,6 +13,11 @@ import { useFormatDate } from '../hooks/useFormatDate';
 import { DateRangePicker } from '../components/DateRangePicker';
 
 const WORKERS_BASE_URL = 'https://portal-cms-api.tti-ninja.workers.dev';
+
+// Bridge-Ground's fixed script output directory (internal/portal/manager.go) — files
+// written here by a running script are uploaded as downloadable artifacts afterward.
+const SCRIPT_OUTPUT_DIR     = String.raw`%APPDATA%\TTI\BridgeGround\script-output`;
+const SCRIPT_OUTPUT_ENV_VAR = 'BG_SCRIPT_OUTPUT_DIR';
 
 interface RtdbLogEntry {
   timestamp: string;
@@ -277,7 +282,10 @@ export function DeviceDetail() {
   const [scriptText,   setScriptText]   = useState('');
   const [scriptState,  setScriptState]  = useState<ScriptRunState>('idle');
   const [scriptResult, setScriptResult] = useState<ScriptResultData | null>(null);
+  const [scriptStdoutCopied, setScriptStdoutCopied] = useState(false);
+  const [scriptStderrCopied, setScriptStderrCopied] = useState(false);
   const scriptSeqRef = useRef<number>(0);
+  const scriptFileInputRef = useRef<HTMLInputElement>(null);
 
   // deviceIdが変わったら、前の端末の表示を同じレンダー内で即座にクリアする
   // (購読コールバック側は「データなし」の場合stateを更新しないため、ここでリセットしないと
@@ -451,6 +459,45 @@ export function DeviceDetail() {
   function handleCancelScript() {
     setScriptState('idle');
     if (deviceId) cancelScriptRequest(deviceId).catch(() => {});
+  }
+
+  async function handleScriptFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // allow re-selecting the same file later
+    if (!file) return;
+    setScriptText(await file.text());
+  }
+
+  async function handleDownloadArtifact(artifact: ScriptArtifact) {
+    if (!deviceId || scriptResult == null) return;
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      if (!idToken) return;
+      const res = await fetch(
+        `${WORKERS_BASE_URL}/v1/script/artifact?deviceId=${encodeURIComponent(deviceId)}&seq=${scriptResult.seq}&name=${encodeURIComponent(artifact.name)}`,
+        { headers: { Authorization: `Bearer ${idToken}` } },
+      );
+      if (!res.ok) return;
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = artifact.name;
+      a.click();
+      URL.revokeObjectURL(url);
+      addSiteLog({
+        category:    'script',
+        action:      'artifactDownloaded',
+        targetId:    deviceId,
+        targetName:  device?.name ?? deviceId,
+        projectName: projectNameRef.current,
+        deviceName:  device?.name ?? deviceId,
+        detail:      artifact.name,
+        performedBy: siteLogActor(),
+      }).catch(() => {});
+    } catch {
+      // best-effort download; no dedicated error UI for this action
+    }
   }
 
   const filteredLogs = useMemo(
@@ -929,8 +976,10 @@ export function DeviceDetail() {
           );
         })()}
 
-        {/* スクリプト実行セクション — オーナーのみ */}
-        {role === 'owner' && (
+        {/* スクリプト実行セクション — オーナー・Bridge-Groundの詳細ページのみ
+            （スクリプトは物理的に1台のマシン上でしか実行されないため、スクリーンショットとは
+            逆にBridge-Ground以外では表示しない） */}
+        {role === 'owner' && device.app === 'Bridge-Ground' && (
           <div>
             <h2 className="text-(--text) font-semibold text-base mb-3">{t('deviceDetail.script')}</h2>
             <div className="bg-(--bg-surface) ring-1 ring-(--border) rounded-xl p-4 space-y-3">
@@ -960,7 +1009,24 @@ export function DeviceDetail() {
                     {t('common.cancel')}
                   </button>
                 )}
+                <input
+                  ref={scriptFileInputRef}
+                  type="file"
+                  accept=".ps1,.txt"
+                  onChange={handleScriptFileSelect}
+                  className="hidden"
+                />
+                <button
+                  onClick={() => scriptFileInputRef.current?.click()}
+                  disabled={scriptState === 'pending'}
+                  className="h-7 px-3 rounded-md text-xs text-(--text-muted) bg-(--bg-subtle) hover:bg-(--bg-hover) ring-1 ring-(--border) transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {t('deviceDetail.scriptLoadFile')}
+                </button>
               </div>
+              <p className="text-xs text-(--text-faint)">
+                {t('deviceDetail.scriptOutputHint', { dir: SCRIPT_OUTPUT_DIR, envVar: SCRIPT_OUTPUT_ENV_VAR })}
+              </p>
 
               {scriptState === 'idle' && !scriptResult && (
                 <p className="text-(--text-faint) text-sm">{t('deviceDetail.scriptIdle')}</p>
@@ -974,17 +1040,102 @@ export function DeviceDetail() {
                     {t('deviceDetail.scriptExitCode', { code: scriptResult.exitCode })}
                   </p>
                   <div>
-                    <p className="text-xs text-(--text-faint) mb-1">{t('deviceDetail.scriptStdout')}</p>
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-xs text-(--text-faint)">{t('deviceDetail.scriptStdout')}</p>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={async () => {
+                            if (!scriptResult.stdout) return;
+                            await navigator.clipboard.writeText(scriptResult.stdout);
+                            setScriptStdoutCopied(true);
+                            setTimeout(() => setScriptStdoutCopied(false), 2000);
+                          }}
+                          disabled={!scriptResult.stdout}
+                          className="h-6 px-2.5 rounded-md text-xs text-(--text-muted) bg-(--bg-subtle) hover:bg-(--bg-hover) ring-1 ring-(--border) transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                        >
+                          {scriptStdoutCopied ? t('common.copied') : t('common.copy')}
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (!scriptResult.stdout) return;
+                            const blob = new Blob([scriptResult.stdout], { type: 'text/plain' });
+                            const url  = URL.createObjectURL(blob);
+                            const a    = document.createElement('a');
+                            a.href     = url;
+                            a.download = `${device.name}-script-stdout.txt`;
+                            a.click();
+                            URL.revokeObjectURL(url);
+                          }}
+                          disabled={!scriptResult.stdout}
+                          className="h-6 px-2.5 rounded-md text-xs text-(--text-muted) bg-(--bg-subtle) hover:bg-(--bg-hover) ring-1 ring-(--border) transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                        >
+                          {t('common.download')}
+                        </button>
+                      </div>
+                    </div>
                     <pre className="max-h-64 overflow-auto rounded-lg bg-(--bg-base) ring-1 ring-(--border) p-3 font-log text-xs text-(--text-muted) whitespace-pre-wrap break-all">
                       {scriptResult.stdout || t('deviceDetail.scriptNoOutput')}
                     </pre>
                   </div>
                   <div>
-                    <p className="text-xs text-(--text-faint) mb-1">{t('deviceDetail.scriptStderr')}</p>
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-xs text-(--text-faint)">{t('deviceDetail.scriptStderr')}</p>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={async () => {
+                            if (!scriptResult.stderr) return;
+                            await navigator.clipboard.writeText(scriptResult.stderr);
+                            setScriptStderrCopied(true);
+                            setTimeout(() => setScriptStderrCopied(false), 2000);
+                          }}
+                          disabled={!scriptResult.stderr}
+                          className="h-6 px-2.5 rounded-md text-xs text-(--text-muted) bg-(--bg-subtle) hover:bg-(--bg-hover) ring-1 ring-(--border) transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                        >
+                          {scriptStderrCopied ? t('common.copied') : t('common.copy')}
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (!scriptResult.stderr) return;
+                            const blob = new Blob([scriptResult.stderr], { type: 'text/plain' });
+                            const url  = URL.createObjectURL(blob);
+                            const a    = document.createElement('a');
+                            a.href     = url;
+                            a.download = `${device.name}-script-stderr.txt`;
+                            a.click();
+                            URL.revokeObjectURL(url);
+                          }}
+                          disabled={!scriptResult.stderr}
+                          className="h-6 px-2.5 rounded-md text-xs text-(--text-muted) bg-(--bg-subtle) hover:bg-(--bg-hover) ring-1 ring-(--border) transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                        >
+                          {t('common.download')}
+                        </button>
+                      </div>
+                    </div>
                     <pre className="max-h-64 overflow-auto rounded-lg bg-(--bg-base) ring-1 ring-(--border) p-3 font-log text-xs text-(--text-muted) whitespace-pre-wrap break-all">
                       {scriptResult.stderr || t('deviceDetail.scriptNoOutput')}
                     </pre>
                   </div>
+                  {scriptResult.artifacts != null && scriptResult.artifacts.length > 0 && (
+                    <div>
+                      <p className="text-xs text-(--text-faint) mb-1">{t('deviceDetail.scriptArtifacts')}</p>
+                      <ul className="space-y-1">
+                        {scriptResult.artifacts.map(artifact => (
+                          <li
+                            key={artifact.name}
+                            className="flex items-center justify-between gap-2 rounded-lg bg-(--bg-base) ring-1 ring-(--border) px-3 py-1.5"
+                          >
+                            <span className="text-xs text-(--text-muted) truncate font-mono">{artifact.name}</span>
+                            <button
+                              onClick={() => handleDownloadArtifact(artifact)}
+                              className="h-6 px-2.5 shrink-0 rounded-md text-xs text-(--text-muted) bg-(--bg-subtle) hover:bg-(--bg-hover) ring-1 ring-(--border) transition-colors cursor-pointer"
+                            >
+                              {t('common.download')}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
