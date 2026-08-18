@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { subscribeDevice, subscribeProject, requestScreenshot as requestPortalScreenshot, cancelScreenshotRequest, subscribeScreenshotRequest, requestLogs, addSiteLog, requestDeviceSettings, subscribeDeviceSettings } from '../lib/firestore';
-import type { DeviceSettingsData } from '../lib/firestore';
+import { subscribeDevice, subscribeProject, requestScreenshot as requestPortalScreenshot, cancelScreenshotRequest, subscribeScreenshotRequest, requestLogs, addSiteLog, requestDeviceSettings, subscribeDeviceSettings, requestScript, cancelScriptRequest, subscribeScriptResult } from '../lib/firestore';
+import type { DeviceSettingsData, ScriptResultData } from '../lib/firestore';
 import { auth, rtdb } from '../lib/firebase';
 import { ref as rtdbRef, onValue } from 'firebase/database';
 import { useAuth } from '../contexts/AuthContext';
@@ -22,6 +22,7 @@ interface RtdbLogEntry {
 }
 
 type PortalSsState = 'idle' | 'pending' | 'ready' | 'error';
+type ScriptRunState = 'idle' | 'pending' | 'completed' | 'error';
 
 type LogEntryWithKey = RtdbLogEntry & { _key: number };
 
@@ -273,6 +274,11 @@ export function DeviceDetail() {
   const [settingsCopied,      setSettingsCopied]      = useState(false);
   const settingsRequestedAt = useRef<number>(0);
 
+  const [scriptText,   setScriptText]   = useState('');
+  const [scriptState,  setScriptState]  = useState<ScriptRunState>('idle');
+  const [scriptResult, setScriptResult] = useState<ScriptResultData | null>(null);
+  const scriptSeqRef = useRef<number>(0);
+
   // deviceIdが変わったら、前の端末の表示を同じレンダー内で即座にクリアする
   // (購読コールバック側は「データなし」の場合stateを更新しないため、ここでリセットしないと
   //  直前に見ていた端末の表示が残ってしまう。useEffectではなくレンダー中に直接リセットすることで、
@@ -287,6 +293,8 @@ export function DeviceDetail() {
     setPortalSsState('idle');
     setPortalSsBlobUrl(null);
     setPortalSsCapturedAt(null);
+    setScriptState('idle');
+    setScriptResult(null);
   }
 
   // Subscribe to Firestore device document
@@ -399,6 +407,51 @@ export function DeviceDetail() {
       setSettingsRefreshing(false);
     }
   }, [deviceId, settingsRefreshing, device]);
+
+  // Subscribe to devices/{deviceId}/scriptResults/latest — updated by Bridge-Ground after running a script.
+  useEffect(() => {
+    if (!deviceId) return;
+    return subscribeScriptResult(deviceId, data => {
+      if (!data || data.seq !== scriptSeqRef.current) return;
+      setScriptResult(data);
+      setScriptState('completed');
+    });
+  }, [deviceId]);
+
+  // 5分（Bridge-Ground側のタイムアウト）+ 余裕を見て、応答が無ければエラー表示に切り替える。
+  useEffect(() => {
+    if (scriptState !== 'pending') return;
+    const id = window.setTimeout(() => setScriptState('error'), 6 * 60 * 1000);
+    return () => window.clearTimeout(id);
+  }, [scriptState]);
+
+  const handleRunScript = useCallback(async () => {
+    if (!deviceId || !scriptText.trim() || scriptState === 'pending') return;
+    setScriptState('pending');
+    setScriptResult(null);
+    try {
+      const seq = await requestScript(deviceId, scriptText);
+      scriptSeqRef.current = seq;
+      addSiteLog({
+        category:    'script',
+        action:      'executed',
+        targetId:    deviceId,
+        targetName:  device?.name ?? deviceId,
+        projectName: projectNameRef.current,
+        deviceName:  device?.name ?? deviceId,
+        detail:      scriptText.slice(0, 500),
+        performedBy: siteLogActor(),
+      }).catch(() => {});
+    } catch {
+      setScriptState('error');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deviceId, scriptText, scriptState, device?.name, user]);
+
+  function handleCancelScript() {
+    setScriptState('idle');
+    if (deviceId) cancelScriptRequest(deviceId).catch(() => {});
+  }
 
   const filteredLogs = useMemo(
     () => logs.filter(l => logLevels.has(l.level || 'INFO')).map((l, i) => ({ ...l, _key: i })),
@@ -875,6 +928,68 @@ export function DeviceDetail() {
             </div>
           );
         })()}
+
+        {/* スクリプト実行セクション — オーナーのみ */}
+        {role === 'owner' && (
+          <div>
+            <h2 className="text-(--text) font-semibold text-base mb-3">{t('deviceDetail.script')}</h2>
+            <div className="bg-(--bg-surface) ring-1 ring-(--border) rounded-xl p-4 space-y-3">
+              <p className="text-xs text-(--danger-text)">{t('deviceDetail.scriptWarning')}</p>
+              <textarea
+                value={scriptText}
+                onChange={e => setScriptText(e.target.value)}
+                placeholder={t('deviceDetail.scriptPlaceholder')}
+                disabled={scriptState === 'pending'}
+                rows={8}
+                spellCheck={false}
+                className="w-full rounded-lg bg-(--bg-base) ring-1 ring-(--border) p-3 font-log text-xs text-(--text) placeholder:text-(--text-faint) disabled:opacity-60"
+              />
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleRunScript}
+                  disabled={scriptState === 'pending' || !scriptText.trim()}
+                  className="h-7 px-3 rounded-md text-xs text-(--text-muted) bg-(--bg-subtle) hover:bg-(--bg-hover) ring-1 ring-(--border) transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {scriptState === 'pending' ? t('deviceDetail.running') : t('deviceDetail.runScript')}
+                </button>
+                {scriptState === 'pending' && (
+                  <button
+                    onClick={handleCancelScript}
+                    className="h-7 px-3 rounded-md text-xs text-(--text-faint) bg-(--bg-subtle) hover:bg-(--bg-hover) ring-1 ring-(--border) transition-colors cursor-pointer"
+                  >
+                    {t('common.cancel')}
+                  </button>
+                )}
+              </div>
+
+              {scriptState === 'idle' && !scriptResult && (
+                <p className="text-(--text-faint) text-sm">{t('deviceDetail.scriptIdle')}</p>
+              )}
+              {scriptState === 'error' && (
+                <p className="text-red-400 text-sm">{t('deviceDetail.scriptError')}</p>
+              )}
+              {scriptResult && (
+                <div className="space-y-3">
+                  <p className={`text-xs font-mono ${scriptResult.exitCode === 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    {t('deviceDetail.scriptExitCode', { code: scriptResult.exitCode })}
+                  </p>
+                  <div>
+                    <p className="text-xs text-(--text-faint) mb-1">{t('deviceDetail.scriptStdout')}</p>
+                    <pre className="max-h-64 overflow-auto rounded-lg bg-(--bg-base) ring-1 ring-(--border) p-3 font-log text-xs text-(--text-muted) whitespace-pre-wrap break-all">
+                      {scriptResult.stdout || t('deviceDetail.scriptNoOutput')}
+                    </pre>
+                  </div>
+                  <div>
+                    <p className="text-xs text-(--text-faint) mb-1">{t('deviceDetail.scriptStderr')}</p>
+                    <pre className="max-h-64 overflow-auto rounded-lg bg-(--bg-base) ring-1 ring-(--border) p-3 font-log text-xs text-(--text-muted) whitespace-pre-wrap break-all">
+                      {scriptResult.stderr || t('deviceDetail.scriptNoOutput')}
+                    </pre>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
       </div>
     </div>
