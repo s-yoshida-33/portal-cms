@@ -664,12 +664,18 @@ export function subscribeDeviceSettings(
 // Script Requests（オーナー限定・任意スクリプト実行）
 // ================================================================
 
+export interface ScriptArtifact {
+  name: string;
+  size: number;
+}
+
 export interface ScriptResultData {
   seq:        number;
   exitCode:   number;
   stdout:     string;
   stderr:     string;
   durationMs: number;
+  artifacts?: ScriptArtifact[];
 }
 
 let _scriptSeq = 0;

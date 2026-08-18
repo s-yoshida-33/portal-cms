@@ -223,7 +223,10 @@
     "scriptExitCode": "Exit code: {{code}}",
     "scriptStdout": "Stdout",
     "scriptStderr": "Stderr",
-    "scriptNoOutput": "(no output)"
+    "scriptNoOutput": "(no output)",
+    "scriptLoadFile": "Load from file",
+    "scriptOutputHint": "Files written to \"{{dir}}\" (env var {{envVar}}) are uploaded automatically after the run and can be downloaded here.",
+    "scriptArtifacts": "Output files"
   },
   "apiTokens": {
     "title": "API Tokens",
@@ -309,6 +312,7 @@
       "settings.fetched": "Fetched settings",
       "settings.downloaded": "Downloaded settings",
       "script.executed": "Executed script",
+      "script.artifactDownloaded": "Downloaded script artifact",
       "apiToken.issued": "Issued API token",
       "apiToken.revoked": "Revoked API token",
       "user.added": "Added user",
