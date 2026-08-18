@@ -100,7 +100,7 @@ export interface DeletionRequest {
 
 // Firestore /siteLogs/{logId}
 export type SiteLogCategory =
-  | 'screenshot' | 'log' | 'settings' | 'apiToken' | 'user' | 'deletionRequest' | 'project' | 'device';
+  | 'screenshot' | 'log' | 'settings' | 'script' | 'apiToken' | 'user' | 'deletionRequest' | 'project' | 'device';
 
 export interface SiteLog {
   id:           string;
@@ -110,6 +110,7 @@ export interface SiteLog {
   targetName:   string;
   projectName?: string;
   deviceName?:  string;
+  detail?:      string; // 実行内容の抜粋（例: scriptカテゴリのスクリプト本文）
   performedBy:  { uid: string; email: string; displayName: string };
   performedAt:  string; // ISO
 }
